@@ -11,7 +11,7 @@ const cookieParser = require('cookie-parser');
 const port = process.env.port || 8000;
 const app = express();
 
-const YOUR_DOMAIN = 'http://localhost:8000';
+const YOUR_DOMAIN = 'https://plant-selling-website-backend.vercel.app/';
 
 
 app.use(express.json());
