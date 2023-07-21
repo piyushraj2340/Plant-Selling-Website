@@ -4,7 +4,8 @@ const validator = require('validator');
 
 const nurserySchema = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.ObjectId,
+        ref: "user",
         required: true,
     },
     name: {

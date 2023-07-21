@@ -2,11 +2,13 @@ const mongoose = require('mongoose');
 
 const plantsSchema = new mongoose.Schema({
     userId: {
-        type: String,
+        type: mongoose.Schema.ObjectId,
+        ref: "user",
         required: true,
     },
     nurseryId: {
-        type: String,
+        type: mongoose.Schema.ObjectId,
+        ref: "nursery",
         required: true,
     },
     plantsName: {

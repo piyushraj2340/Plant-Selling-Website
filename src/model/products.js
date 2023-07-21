@@ -35,6 +35,7 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     image: {
+        // change to obj like image1: {} , image2: {}
         images: [
             {
                 type: String,
