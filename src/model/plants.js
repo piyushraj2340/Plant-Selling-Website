@@ -4,16 +4,16 @@ const plantsSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.ObjectId,
         ref: "user",
-        required: true,
+        required: true
     },
     nurseryId: {
         type: mongoose.Schema.ObjectId,
         ref: "nursery",
-        required: true,
+        required: true
     },
     plantsName: {
         type: String,
-        required: true,
+        required: true
     },
     price: {
         type: Number,
@@ -25,18 +25,24 @@ const plantsSchema = new mongoose.Schema({
     },
     category: {
         type: String,
-        required: true,
+        required: true
     },
     description: {
         type: String,
-        required: true,
+        required: true
     },
     rating: {
         type: Number,
+        required: true
     },
     noOfRatings: {
         type: Number,
+        required: true
     },
+    noOfVisit: {
+        type: Number,
+        required: true
+    } 
 });
 
 const plant = new mongoose.model('plant', plantsSchema);

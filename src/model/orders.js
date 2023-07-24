@@ -25,7 +25,8 @@ const orderSchema = new mongoose.Schema({
         require: true
     },
     orderDateTime: {
-        type: String,
+        type: Date,
+        default: Date.now,
         require: true,
     },
     orderId: {
