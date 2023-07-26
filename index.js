@@ -22,20 +22,18 @@ app.use(express.urlencoded({extended: false}));
 
 
 // route 
-
-const userRoute = require("./src/router/user");
-const authRoute = require("./src/router/authRoute");
+const authRoute = require("./src/router/auth");
 const nurseryRoute = require("./src/router/nursery");
-const plantsRoute = require("./src/router/plants");
+const products = require("./src/router/products");
 const orderRoute = require("./src/router/orders");
+const user = require("./src/router/user");
 
 
-
-app.use('/user',userRoute);
-app.use("",authRoute);
+app.use('/auth',authRoute);
+app.use('/user',user);
 app.use("/nursery",nurseryRoute);
-app.use("/plants",plantsRoute);
 app.use("/orders",orderRoute);
+app.use("/products",products);
 
 app.post("/payments", async (req,res) => {
     try {

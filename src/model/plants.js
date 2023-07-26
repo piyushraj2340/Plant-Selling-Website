@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 const plantsSchema = new mongoose.Schema({
     userId: {
@@ -31,19 +32,52 @@ const plantsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
-    rating: {
-        type: Number,
-        required: true
-    },
-    noOfRatings: {
-        type: Number,
-        required: true
-    },
+    reviews: [{
+        userId: {
+            type: mongoose.Schema.ObjectId,
+            ref: "user",
+            required: true
+        },
+        rating: {
+            type: Number,
+            required: true,
+        },
+        review: {
+            type: String,
+        },
+        upVote:{
+            type: Number,
+            default: 0
+        }
+    }],
     noOfVisit: {
         type: Number,
+        required: true,
+        default: 0
+    },
+    postedAt: {
+        type: Date,
+        default: Date.now,
         required: true
-    } 
+    }
 });
+
+plantsSchema.methods.writeReview = async function (review) {
+    try {
+        
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+plantsSchema.methods.increaseVisit = async function () {
+    try {
+        this.noOfVisit++;
+        await this.save();
+    } catch (error) {
+        console.log(error);
+    }
+}
 
 const plant = new mongoose.model('plant', plantsSchema);
 

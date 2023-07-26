@@ -5,8 +5,7 @@ const ordersModel = require('../model/orders');
 const router = express.Router();
 
 
-router.route('/add')
-    .post(async (req, res) => {
+router.post('/add', async (req, res) => {
         try {
             const placeOrder = new ordersModel(req.body);
 
@@ -30,8 +29,7 @@ router.route('/add')
         }
     });
 
-router.route('/get')
-    .post(async (req, res) => {
+router.post('/get', async (req, res) => {
         try {
             const result = await ordersModel.find();
 
@@ -54,8 +52,7 @@ router.route('/get')
             console.log(err);
         }
     });
-router.route('/get/:id')
-    .post(async (req, res) => {
+router.post('/get/:id', async (req, res) => {
         try {
             const _id = req.params.id;
             const result = await ordersModel.findOne({_id});

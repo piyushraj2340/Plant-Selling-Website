@@ -14,21 +14,22 @@ const auth = async (req, res, next) => {
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY);
 
         // find the right user from the database 
-        const user = await userModel.findOne({ _id: verifyUser._id });
+        const user = await userModel.findOne({ _id: verifyUser._id }).select({ _id: 1 });
 
         // verify the user and call the next() method to validate the authentication
         if (user) {
             req.token = token;
-            req.user = user;
+            req._id = user._id;
             next();
-
-        } else {
-            next();
-            console.log(token);
         }
+
     } catch (err) {
-        next();
+        const info = {
+            status: false,
+            message: "Something Went Wrong!...",
+        }
         console.log(err);
+        res.status(400).send(info);
     }
 
 }

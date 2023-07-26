@@ -12,6 +12,11 @@ const cartSchema = new mongoose.Schema({
             ref: "plant",
             required: true
         },
+        quantity: {
+            type: Number,
+            default: 1,
+            require: true
+        },
         addedAtPrice: {
             type: Number,
             required: true
