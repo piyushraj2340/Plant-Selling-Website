@@ -11,15 +11,15 @@ router.route("/profile")
     .post(async (req, res) => {
         try {
             if (req._id) {
-                const result = await userModel.findOne({_id: req._id});
+                const result = await userModel.findOne({ _id: req._id });
 
-                if(result) {
+                if (result) {
                     const info = {
                         status: true,
                         message: "Showing Profile Data!...",
                         result
                     }
-    
+
                     res.status(200).send(info);
                 } else {
                     const info = {

@@ -5,6 +5,7 @@ const router = express.Router();
 
 const auth = require('../middleware/auth');
 const userModel = require('../model/user');
+const cartModel = require('../model/cart');
 
 router.post('/sign-up', async (req, res) => {
     try {
@@ -17,6 +18,9 @@ router.post('/sign-up', async (req, res) => {
             expires: new Date(Date.now() + 500000),
             httpOnly: true
         });
+
+        const cart = new cartModel({ userId: result._id });
+        await cart.save();
 
         const info = {
             status: true,
@@ -127,10 +131,10 @@ router.post('/logout', auth, async (req, res) => {
     try {
         if (req._id) {
 
-            const result = await userModel.findOne({_id: req._id});
+            const result = await userModel.findOne({ _id: req._id });
 
             result.tokens = result.tokens.filter((elem) => {
-                return elem.token!== req.token;
+                return elem.token !== req.token;
             })
 
             await result.save();

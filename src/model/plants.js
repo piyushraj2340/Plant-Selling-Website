@@ -12,7 +12,7 @@ const plantsSchema = new mongoose.Schema({
         ref: "nursery",
         required: true
     },
-    plantsName: {
+    plantName: {
         type: String,
         required: true
     },
@@ -21,6 +21,10 @@ const plantsSchema = new mongoose.Schema({
         required: true
     },
     discount: {
+        type: Number,
+        required: true
+    },
+    stock: {
         type: Number,
         required: true
     },
@@ -45,7 +49,7 @@ const plantsSchema = new mongoose.Schema({
         review: {
             type: String,
         },
-        upVote:{
+        upVote: {
             type: Number,
             default: 0
         }
@@ -61,14 +65,6 @@ const plantsSchema = new mongoose.Schema({
         required: true
     }
 });
-
-plantsSchema.methods.writeReview = async function (review) {
-    try {
-        
-    } catch (error) {
-        console.log(error);
-    }
-}
 
 plantsSchema.methods.increaseVisit = async function () {
     try {

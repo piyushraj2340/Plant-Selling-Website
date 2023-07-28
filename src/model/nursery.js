@@ -7,6 +7,7 @@ const nurserySchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "user",
         required: true,
+        unique: true
     },
     name: {
         type: String,
@@ -23,7 +24,7 @@ const nurserySchema = new mongoose.Schema({
         required: true,
         unique: [true, "This email is already in used."],
         validate(email) {
-            if(!validator.isEmail(email)) {
+            if (!validator.isEmail(email)) {
                 throw new Error("Invalid Email");
             }
         }
@@ -33,7 +34,7 @@ const nurserySchema = new mongoose.Schema({
         required: true,
         unique: [true, "This phone is already in used."],
         validate(value) {
-            if(value.toString().length != 10) {
+            if (value.toString().length != 10) {
                 throw new Error("Invalid Phone!...");
             }
         }

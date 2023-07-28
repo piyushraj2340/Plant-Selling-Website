@@ -4,10 +4,11 @@ const cartSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.ObjectId,
         ref: "user",
-        required: true
+        required: true,
+        unique: true,
     },
     cartList: [{
-        plantsId: {
+        plantId: {
             type: mongoose.Schema.ObjectId,
             ref: "plant",
             required: true

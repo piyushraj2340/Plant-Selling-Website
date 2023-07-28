@@ -1,6 +1,7 @@
 const express = require('express');
 
 const plantsModel = require('../model/plants');
+const nurseryModel = require('../model/nursery');
 
 const router = express.Router();
 
@@ -26,16 +27,20 @@ router.post('/plants', async (req, res) => {
 router.post('/plant/:id', async (req, res) => {
     try {
         const _id = req.params.id;
-        const result = await plantsModel.findOne({ _id });
+        const data = await plantsModel.findOne({ _id });
 
-        await result.increaseVisit();
+        await data.increaseVisit();
+
+        const nursery = await nurseryModel.findOne({ _id: data.nurseryId }).select({ nurseryName: 1 });
 
         const info = {
             status: true,
             message: "Data of Product",
-            result
+            result: {
+                data,
+                nurseryName: nursery.nurseryName
+            },
         }
-        console.log(info);
         res.status(200).send(info);
 
     } catch (err) {

@@ -18,7 +18,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: [true, "This email is already in used."],
         validate(email) {
-            if(!validator.isEmail(email)) {
+            if (!validator.isEmail(email)) {
                 throw new Error("Invalid Email");
             }
         }
@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: [true, "This phone is already in used."],
         validate(value) {
-            if(value.toString().length != 10) {
+            if (value.toString().length != 10) {
                 throw new Error("Invalid Phone!...");
             }
         }
@@ -46,18 +46,18 @@ const userSchema = new mongoose.Schema({
     age: {
         type: Number,
     },
-    tokens:[{
-        token:{
+    tokens: [{
+        token: {
             type: String,
             required: true
         }
     }]
 });
 
-userSchema.methods.generateAuthToken = async function() {
+userSchema.methods.generateAuthToken = async function () {
     try {
-        const token = jwt.sign({_id: this._id.toString()},process.env.SECRET_KEY);
-        this.tokens = this.tokens.concat({token});
+        const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY);
+        this.tokens = this.tokens.concat({ token });
         await this.save();
         return token;
     } catch (err) {
@@ -65,8 +65,8 @@ userSchema.methods.generateAuthToken = async function() {
     }
 }
 
-userSchema.pre("save",async function (next) {
-    if(this.isModified("password")) {
+userSchema.pre("save", async function (next) {
+    if (this.isModified("password")) {
         this.password = await bcryptjs.hash(this.password, 10);
     }
     next();

@@ -11,7 +11,7 @@ router.use(auth);
 router.post('/add', async (req, res) => {
     try {
         const addNursery = new nurseryModel(req.body);
-        const result = await addNursery.save();
+        await addNursery.save();
 
         const info = {
             status: true,

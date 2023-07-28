@@ -21,6 +21,8 @@ const auth = async (req, res, next) => {
             req.token = token;
             req._id = user._id;
             next();
+        } else{
+            throw new Error("Authentication failed");
         }
 
     } catch (err) {

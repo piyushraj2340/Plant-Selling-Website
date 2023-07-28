@@ -1,5 +1,5 @@
 const stripe = require('stripe')('sk_test_51Mh3nrSG2OBM7gGqYliQervsXmac5hUFnGL7QTvcMDGR660smHtvnX7ashBsvy21gC4Aq6hX4bPPwJ8fjwnj7SMJ00ksDhcser');
-require('dotenv').config(); 
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
 
@@ -16,7 +16,7 @@ const YOUR_DOMAIN = 'https://plant-selling-website-backend.vercel.app/';
 
 app.use(express.json());
 app.use(cookieParser());
-app.use(express.urlencoded({extended: false}));
+app.use(express.urlencoded({ extended: false }));
 // const staticPath = path.join(__dirname, "../client");
 // app.use(express.static(staticPath));
 
@@ -27,15 +27,17 @@ const nurseryRoute = require("./src/router/nursery");
 const products = require("./src/router/products");
 const orderRoute = require("./src/router/orders");
 const user = require("./src/router/user");
+const cart = require("./src/router/cart");
 
 
-app.use('/auth',authRoute);
-app.use('/user',user);
-app.use("/nursery",nurseryRoute);
-app.use("/orders",orderRoute);
-app.use("/products",products);
+app.use('/auth', authRoute);
+app.use('/user', user);
+app.use("/nursery", nurseryRoute);
+app.use("/orders", orderRoute);
+app.use("/products", products);
+app.use("/cart", cart);
 
-app.post("/payments", async (req,res) => {
+app.post("/payments", async (req, res) => {
     try {
         const data = req.body;
         // console.log(data);
@@ -56,7 +58,7 @@ app.post("/payments", async (req,res) => {
             mode: 'payment',
             success_url: `${YOUR_DOMAIN}/success`,
             cancel_url: `${YOUR_DOMAIN}/cancel`,
-          });
+        });
 
         const result = {
             status: true,
@@ -77,20 +79,20 @@ app.post("/payments", async (req,res) => {
 })
 
 
-if(process.env.NODE_ENV == 'production') {
-    app.use(express.static(path.resolve(__dirname,'client','build')));
-    app.get('/',(req,res) => {
-        res.sendFile(path.resolve(__dirname,'client','build','index.html'));
+if (process.env.NODE_ENV == 'production') {
+    app.use(express.static(path.resolve(__dirname, 'client', 'build')));
+    app.get('/', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
     })
 } else {
-    app.use(express.static(path.resolve(__dirname,'client','build')));
+    app.use(express.static(path.resolve(__dirname, 'client', 'build')));
 }
 
-app.get('*',(req,res) => {
-    res.sendFile(path.resolve(__dirname,'client','build','index.html'));
+app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, 'client', 'build', 'index.html'));
 })
 
 
-app.listen(port,() => {
+app.listen(port, () => {
     console.log("listening to port 8000");
 })
