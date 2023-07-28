@@ -43,6 +43,10 @@ const nurserySchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    pinCode: {
+        type: Number,
+        required: true,
+    },
     city: {
         type: String,
         required: true,

@@ -89,11 +89,9 @@ router.post('/sign-in', async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
     try {
-        if (req._id) {
-
-            const _id = req._id;
+        const _id = req._id;
+        if (_id) {
             const result = await userModel.findOne({ _id });
-
             if (result) {
                 const info = {
                     status: true,
