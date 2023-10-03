@@ -1,11 +1,10 @@
-const express = require('express');
+const router = require('express').Router();
 const bcryptjs = require('bcryptjs');
-
-const router = express.Router();
 
 const auth = require('../middleware/auth');
 const userModel = require('../model/user');
 const cartModel = require('../model/cart');
+const addressModel = require('../model/address');
 
 router.post('/sign-up', async (req, res) => {
     try {
@@ -21,6 +20,9 @@ router.post('/sign-up', async (req, res) => {
 
         const cart = new cartModel({ userId: result._id });
         await cart.save();
+
+        const address = new addressModel({ userId: result._id });
+        await address.save();
 
         const info = {
             status: true,

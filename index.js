@@ -28,6 +28,7 @@ const products = require("./src/router/products");
 const orderRoute = require("./src/router/orders");
 const user = require("./src/router/user");
 const cart = require("./src/router/cart");
+const address = require("./src/router/address");
 
 
 app.use('/auth', authRoute);
@@ -36,6 +37,7 @@ app.use("/nursery", nurseryRoute);
 app.use("/orders", orderRoute);
 app.use("/products", products);
 app.use("/cart", cart);
+app.use("/address", address);
 
 app.post("/payments", async (req, res) => {
     try {
