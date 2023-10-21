@@ -18,15 +18,30 @@ const plantsSchema = new mongoose.Schema({
     },
     price: {
         type: Number,
-        required: true
+        required: true,
+        validator(value) {
+            if(value < 0) {
+                throw new Error("Price should not be negative!...");
+            }
+        }
     },
     discount: {
         type: Number,
-        required: true
+        required: true,
+        validator(value) {
+            if(value < 0 && value > 100) {
+                throw new Error("Discount must be greater then 0 and smaller then 100!...");
+            }
+        }
     },
     stock: {
         type: Number,
-        required: true
+        required: true,
+        validator(value) {
+            if(value < 0) {
+                throw new Error("Stock should not be negative!...")
+            }
+        }
     },
     category: {
         type: String,
@@ -36,6 +51,18 @@ const plantsSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    images: [
+        {
+            public_id:{
+                type: String,
+                required: true
+            },
+            url: {
+                type: String,
+                required: true
+            }
+        }
+    ],
     reviews: [{
         userId: {
             type: mongoose.Schema.ObjectId,
@@ -45,6 +72,7 @@ const plantsSchema = new mongoose.Schema({
         rating: {
             type: Number,
             required: true,
+            // add validator
         },
         review: {
             type: String,
@@ -57,6 +85,11 @@ const plantsSchema = new mongoose.Schema({
     noOfVisit: {
         type: Number,
         required: true,
+        validator(value) {
+            if(value < 0) {
+                throw new Error("noOfVisit should not be negative!...")
+            }
+        },
         default: 0
     },
     postedAt: {

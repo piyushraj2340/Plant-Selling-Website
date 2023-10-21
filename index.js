@@ -1,19 +1,22 @@
 const stripe = require('stripe')('sk_test_51Mh3nrSG2OBM7gGqYliQervsXmac5hUFnGL7QTvcMDGR660smHtvnX7ashBsvy21gC4Aq6hX4bPPwJ8fjwnj7SMJ00ksDhcser');
 require('dotenv').config();
-const express = require('express');
-const path = require('path');
-
 require('./src/db/db');
+
+const express = require('express');
+const app = express();
+const fileUpload = require('express-fileUpload');
 
 const cookieParser = require('cookie-parser');
 
-
+const path = require('path');
 const port = process.env.port || 8000;
-const app = express();
+
 
 const YOUR_DOMAIN = 'https://plant-selling-website-backend.vercel.app/';
 
-
+app.use(fileUpload({
+    useTempFiles: true,
+}));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -24,6 +27,7 @@ app.use(express.urlencoded({ extended: false }));
 // route 
 const authRoute = require("./src/router/auth");
 const nurseryRoute = require("./src/router/nursery");
+const plantsRoute = require("./src/router/plants");
 const products = require("./src/router/products");
 const orderRoute = require("./src/router/orders");
 const user = require("./src/router/user");
@@ -34,6 +38,7 @@ const address = require("./src/router/address");
 app.use('/auth', authRoute);
 app.use('/user', user);
 app.use("/nursery", nurseryRoute);
+app.use("/plants", plantsRoute);
 app.use("/orders", orderRoute);
 app.use("/products", products);
 app.use("/cart", cart);

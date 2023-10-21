@@ -250,11 +250,13 @@ router.post('/get',async (req, res) => {
     }
 });
 
-router.post('/get/:id',async (req, res) => {
+router.post('/getById/:id',async (req, res) => {
     try {
         if (req._id) {
             const addressId = req.params.id;
             const result = await addressModel.findOne({ userId: req._id, "address._id": addressId });
+
+            result.address = result.address.id(addressId);
 
             if (result) {
                 const info = {
@@ -282,7 +284,7 @@ router.post('/get/:id',async (req, res) => {
             status: false,
             message: "Something Went Wrong!..."
         }
-        console.log(error);
+        console.error(error);
         res.status(500).send(info);
     }
 });
@@ -292,11 +294,6 @@ router.post('/get/default', async (req, res) => {
         if (req._id) {
             const result = await addressModel.findOne({ userId: req._id, "address.setAsDefault": true});
             
-            result.address = result.address.filter(elem => {
-                if(elem.setAsDefault) {
-                    return elem;
-                }
-            })
 
             if (result) {
                 const info = {

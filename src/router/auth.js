@@ -49,6 +49,8 @@ router.post('/sign-in', async (req, res) => {
         // search for the result from the database using email 
         const result = await userModel.findOne({ email });
 
+        console.log(result);
+
         // compare the hash password bcryptjs.compare(textPass,hashPass) method
         const isPassMatch = await bcryptjs.compare(password, result.password);
 

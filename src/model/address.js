@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 
+const validator = require('validator');
+
 const addressSchema = new mongoose.Schema({
     userId: {
         type: mongoose.Schema.Types.ObjectId,
@@ -14,7 +16,12 @@ const addressSchema = new mongoose.Schema({
         },
         phone: {
             type: Number,
-            required: true
+            required: true,
+            validate(value) {
+                if (value.toString().length != 10) {
+                    throw new Error("Invalid Phone!...");
+                }
+            }
         },
         pinCode: {
             type: Number,

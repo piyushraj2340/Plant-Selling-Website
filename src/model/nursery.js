@@ -9,17 +9,32 @@ const nurserySchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    name: {
+    nurseryOwnerName: {
         type: String,
         required: true,
-        minlength: 3,
     },
     nurseryName: {
         type: String,
         required: true,
         minlength: 3,
     },
-    email: {
+    avatar: {
+        public_id:{
+            type: String,
+        },
+        url: {
+            type: String,
+        }
+    },
+    cover: {
+        public_id:{
+            type: String,
+        },
+        url: {
+            type: String,
+        }
+    },
+    nurseryEmail: {
         type: String,
         required: true,
         unique: [true, "This email is already in used."],
@@ -29,7 +44,7 @@ const nurserySchema = new mongoose.Schema({
             }
         }
     },
-    phone: {
+    nurseryPhone: {
         type: String,
         required: true,
         unique: [true, "This phone is already in used."],
