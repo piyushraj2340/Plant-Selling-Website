@@ -5,12 +5,11 @@ const uploadImages = async (images,options) => {
         const uploadedImages = [];
 
         for (const image of images) {
-            const result = await cloudinary.uploader.upload(image.tempFilePath, options);
-            console.log(result);
-            uploadedImages.push(result);
+            if(image) {
+                const result = await cloudinary.uploader.upload(image.tempFilePath, options);
+                uploadedImages.push(result);
+            }
         }
-
-        if (uploadedImages.length == 1) return uploadedImages[0];
 
         return uploadedImages;
     } catch (error) {
