@@ -1,0 +1,9 @@
+node_modules
+
+/client/frontend/node_modules
+
+.env
+
+backend.rar
+
+tmp
