@@ -48,7 +48,7 @@ app.use("/api/v2", nurseryRoute);
 app.use("/api/v2", nurseryStoreRoute);
 app.use("/api/v2", plantsRoute);
 app.use("/api/v2/orders", orderRoute);
-app.use("/api/v2/products", products);
+app.use("/products", products);
 app.use("/api/v2", cart);
 app.use("/api/v2", address);
 app.use("/api/v2", payment);
