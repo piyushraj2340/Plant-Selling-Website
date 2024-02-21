@@ -110,7 +110,7 @@ app.use("/api/v2", payment);
 
 
 app.get('/', (req, res) => {
-    res.status(200).send("Welcome to Plant Selling Website.");
+    res.status(200).send("Welcome to Plant Selling Website." + "<br />" + "Frontend App: " + `<a href="${process.env.FRONTEND_URL}" target="_blank">${process.env.FRONTEND_URL}</a>`);
 })
 
 app.listen(port, () => {
