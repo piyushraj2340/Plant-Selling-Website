@@ -91,10 +91,10 @@ router.post('/sign-in', async (req, res) => {
     }
 });
 
-router.post('/', auth, async (req, res) => {
+router.get('/', auth, async (req, res) => {
     try {
         if (req.user) {
-            const result = await userModel.findOne({ _id });
+            const result = await userModel.findOne({ _id: req.user });
             if (result) {
                 const info = {
                     status: true,

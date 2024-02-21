@@ -53,7 +53,7 @@ function Login() {
 
     const handleVerification = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/auth", method: "POST" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/auth", method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 navigate('/profile')
