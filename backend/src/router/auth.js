@@ -13,8 +13,10 @@ router.post('/sign-up', async (req, res) => {
         await newUser.save();
 
         res.cookie('auth', token, {
-            expires: new Date(Date.now() + 500000),
-            httpOnly: true
+            expires: new Date(Date.now() + 50000000),
+            httpOnly: true,
+            secure: true,
+            sameSite: 'none'
         });
 
         const info = {
@@ -142,8 +144,11 @@ router.post('/logout', auth, async (req, res) => {
                 }
             });
 
-            if(result) {
-                res.clearCookie('auth');
+            if (result) {
+                res.clearCookie('auth', {
+                    sameSite: 'none',
+                    secure: true
+                });
                 const info = {
                     status: true,
                     message: "Logout Successfully.",
@@ -156,7 +161,7 @@ router.post('/logout', auth, async (req, res) => {
                 }
                 res.status(400).send(info);
             }
-            
+
         } else {
             const info = {
                 status: false,
