@@ -11,6 +11,8 @@ const auth = async (req, res, next) => {
         // request to the browser for the cookies 
         const token = req.cookies.auth;
 
+        if(!token) throw new Error("User must be logged in.");
+
         // verify the jwt token and return the document id 
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY);
 

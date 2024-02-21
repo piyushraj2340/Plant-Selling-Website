@@ -1,12 +1,16 @@
 const handelDataFetch = async ({path, method, body = null}, callback) => {
+    // attaching the backend api url to frontend
+    const apiUrl = process.env.REACT_APP_API_URL_BACKEND + path;
+
     try {
         callback(true);
-        const res = await fetch(path, {
+        const res = await fetch(apiUrl, {
             method,
             headers: {
                 "Content-Type": "application/json",
                 Accept: "application/json",
             },
+            credentials: 'include',
             body: body === null ? null : JSON.stringify(body)
         });
 

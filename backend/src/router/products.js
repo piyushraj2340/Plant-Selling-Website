@@ -1,59 +1,52 @@
 const express = require('express');
 
 const plantsModel = require('../model/plants');
-const nurseryModel = require('../model/nursery');
-
 const router = express.Router();
 
-router.post('/plants', async (req, res) => {
+router.get('/plants', async (req, res) => {
     try {
         const result = await plantsModel.find();
 
         const info = {
             status: true,
-            message: "Data of all products!...",
+            message: "Data of all products",
             result
         }
         res.status(200).send(info);
-    } catch (err) {
+    } catch (error) {
         const info = {
             status: false,
-            message: "Something Went Wrong!..."
+            message: error.message
         }
-        console.log(err);
+        console.log(error);
         res.status(400).send(info);
     }
 });
-router.post('/plant/:id', async (req, res) => {
+router.get('/plant/:id', async (req, res) => {
     try {
         const _id = req.params.id;
-        const data = await plantsModel.findOne({ _id });
+        const result = await plantsModel.findOne({ _id }).populate("nursery"); // only select the particular products that we needs in frontend 
 
-        await data.increaseVisit();
-
-        const nursery = await nurseryModel.findOne({ _id: data.nursery }).select({ nurseryName: 1 });
+        await result.increaseVisit();
 
         const info = {
             status: true,
             message: "Data of Product",
-            result: {
-                data,
-                nurseryName: nursery.nurseryName
-            },
+            result
         }
         res.status(200).send(info);
 
-    } catch (err) {
+    } catch (error) {
         const info = {
             status: false,
-            message: "Something Went Wrong!..."
+            message: error.message
         }
-        console.log(err);
+        console.log(error);
         res.status(400).send(info);
     }
 });
 
-router.post('/plantsByCategory/:id', async (req, res) => {
+router.get('/plantsByCategory/:id', async (req, res) => {
     try {
         const category = req.params.id;
         const result = await plantsModel.find({ category });
@@ -66,12 +59,12 @@ router.post('/plantsByCategory/:id', async (req, res) => {
 
         res.status(200).send(info);
 
-    } catch (err) {
+    } catch (error) {
         const info = {
             status: false,
-            message: "Something Went Wrong!..."
+            message: error.message
         }
-        console.log(err);
+        console.log(error);
         res.status(404).send(info);
     }
 });
