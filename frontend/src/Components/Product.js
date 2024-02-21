@@ -45,19 +45,12 @@ const Product = () => {
         }
     }
 
-    const handleGetProductData = async () => { // need to update this 
+    const handleGetProductData = async () => {
         try {
-            const res = await fetch(`/products/plant/${productId}`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-            });
-
-            const result = await res.json();
+            const result = await handelDataFetch({path: `/api/v2/products/plant/${productId}`, method: "GET"}, setShowAnimation);
 
             if (result.status) {
-                setProduct(result.result.data);
+                setProduct(result.result);
                 setNurseryName(result.result.nurseryName);
             } else {
                 throw new Error(result.message);

@@ -2,27 +2,31 @@
 require('dotenv').config();
 require('./src/db/db');
 
-
 const express = require('express');
-const app = express();
+const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
 
-const cookieParser = require('cookie-parser');
 
-const path = require('path');
 const port = process.env.port || 8000;
+const app = express();
 
+// express middleware 
+app.use(cors(
+    {
+        origin: process.env.FRONTEND_URL,
+        methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+        credentials: true
+    }
+));
 
-const YOUR_DOMAIN = 'https://plant-selling-website-backend.vercel.app/';
-
+app.use(cookieParser());
 app.use(fileUpload({
     useTempFiles: true,
 }));
 app.use(express.json());
-app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
-// const staticPath = path.join(__dirname, "../client");
-// app.use(express.static(staticPath));
+
 
 
 // route 
@@ -37,14 +41,14 @@ const cart = require("./src/router/cart");
 const address = require("./src/router/address");
 const payment = require("./src/router/payment");
 
-
+// route middleware
 app.use('/api/v2/auth', authRoute);
 app.use('/api/v2/user', user);
 app.use("/api/v2", nurseryRoute);
 app.use("/api/v2", nurseryStoreRoute);
 app.use("/api/v2", plantsRoute);
-app.use("/orders", orderRoute);
-app.use("/products", products);
+app.use("/api/v2/orders", orderRoute);
+app.use("/api/v2/products", products);
 app.use("/api/v2", cart);
 app.use("/api/v2", address);
 app.use("/api/v2", payment);
