@@ -10,7 +10,7 @@ const auth = require('../middleware/auth');
 
 router.use(auth);
 
-router.route('/cart')
+router.route('/carts')
     .post(async (req, res) => {
         try {
             if (req.user) {
@@ -81,7 +81,7 @@ router.route('/cart')
         }
     });
 
-router.route('/cart/:id')
+router.route('/carts/:id')
     .get(async (req, res) => {
         try {
             console.log(true);
@@ -193,10 +193,10 @@ router.route('/cart/:id')
         }
     });
 
-router.get('/isAddedCart/:id', auth, async (req, res) => {
+router.get('/isPlantsAddedToCart/:plantId', auth, async (req, res) => {
     try {
         if (req.user) {
-            const plant = req.params.id;
+            const plant = req.params.plantId;
 
             const result = await cartModel.findOne({plant});
 

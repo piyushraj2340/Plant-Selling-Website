@@ -35,7 +35,7 @@ function AddNursery() {
 
     const handelNurseryData = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/nursery", method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/nursery/profile", method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setNursery(result.result);
@@ -57,7 +57,7 @@ function AddNursery() {
         try {
             e.preventDefault();
 
-            const result = await handelDataFetch({path: `/api/v2/nursery/${id}`, method: "PATCH", body: nursery}, setShowAnimation);
+            const result = await handelDataFetch({path: `/api/v2/nursery/profile/${id}`, method: "PATCH", body: nursery}, setShowAnimation);
 
             if (result.status) {
                 navigate('/nursery');

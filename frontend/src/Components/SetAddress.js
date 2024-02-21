@@ -119,7 +119,7 @@ function AddAddress() {
 
             if (address.name !== "" && address.phone !== "" && address.pinCode !== "" && address.address !== "" && address.city !== "" && address.state !== "") {
 
-                const result = await handelDataFetch({ path: '/api/v2/address', method: "POST", body: address }, setShowAnimation);
+                const result = await handelDataFetch({ path: '/api/v2/user/address', method: "POST", body: address }, setShowAnimation);
 
                 if (result.status) {
                     navigate('/address');

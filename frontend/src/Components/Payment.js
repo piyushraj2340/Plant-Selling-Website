@@ -26,7 +26,7 @@ const Payment = () => {
     try {
       event.preventDefault();
 
-      const data = await handelDataFetch({ path: "/api/v2/payment/process", method: "POST", body: { amount: 2342.34 } }, setShowAnimation)
+      const data = await handelDataFetch({ path: "/api/v2/checkout/payments", method: "POST", body: { amount: 2342.34 } }, setShowAnimation)
 
       if (!stripe || !elements) {
         return;

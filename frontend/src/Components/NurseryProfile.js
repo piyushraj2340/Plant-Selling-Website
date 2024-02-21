@@ -73,7 +73,7 @@ function NurseryProfile() {
             data.append(e.target.name, e.target.files[0]);
             data.append("nurserId", nursery._id);
 
-            const res = await fetch('/api/v2/images/nursery', {
+            const res = await fetch('/api/v2/nursery/profile/images', {
                 method: "POST",
                 body: data
             });
@@ -104,7 +104,7 @@ function NurseryProfile() {
 
     const handelNurseryData = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/nursery", method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/nursery/profile", method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setNursery(result.result);
@@ -314,7 +314,7 @@ function NurseryProfile() {
             data.append("rendersId", renderId);
             data.append("tabId", tabId);
 
-            const res = await fetch(`/api/v2/images/nursery/store/${imageId}`, {
+            const res = await fetch(`/api/v2/nursery/store/images/${imageId}`, {
                 method: "POST",
                 body: data
             });

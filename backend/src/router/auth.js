@@ -3,8 +3,7 @@ const bcryptjs = require('bcryptjs');
 
 const auth = require('../middleware/auth');
 const userModel = require('../model/user');
-// const cartModel = require('../model/cart');
-// const addressModel = require('../model/address');
+
 
 router.post('/sign-up', async (req, res) => {
     try {
@@ -94,13 +93,12 @@ router.post('/sign-in', async (req, res) => {
 
 router.post('/', auth, async (req, res) => {
     try {
-        const _id = req.user;
-        if (_id) {
+        if (req.user) {
             const result = await userModel.findOne({ _id });
             if (result) {
                 const info = {
                     status: true,
-                    message: "Authentication Successfully!..",
+                    message: "Authentication Successfully.",
                 }
 
                 res.status(200).send(info);
@@ -134,20 +132,29 @@ router.post('/logout', auth, async (req, res) => {
     try {
         if (req.user) {
 
-            const result = await userModel.findOne({ _id: req.user });
-
-            result.tokens = result.tokens.filter((elem) => {
-                return elem.token !== req.token;
+            const result = await userModel.findByIdAndUpdate({ _id: req.user }, {
+                $pull: {
+                    tokens: {
+                        token: req.token
+                    }
+                }
             });
 
-            await result.save();
-
-            res.clearCookie('auth');
-            const info = {
-                status: true,
-                message: "Logout Successfully",
+            if(result) {
+                res.clearCookie('auth');
+                const info = {
+                    status: true,
+                    message: "Logout Successfully.",
+                }
+                res.status(200).send(info);
+            } else {
+                const info = {
+                    status: false,
+                    message: "Logout failed.",
+                }
+                res.status(400).send(info);
             }
-            res.status(200).send(info);
+            
         } else {
             const info = {
                 status: false,

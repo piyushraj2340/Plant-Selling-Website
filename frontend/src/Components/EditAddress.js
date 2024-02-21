@@ -85,7 +85,7 @@ function EditAddress() {
 
     const handelAddressData = async () => {
         try {
-            const result = await handelDataFetch({ path: `/api/v2/address/${id}`, method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: `/api/v2/user/address/${id}`, method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setAddress(result.result);
@@ -139,7 +139,7 @@ function EditAddress() {
 
             if (address.name !== "" && address.phone !== "" && address.pinCode !== "" && address.address !== "" && address.city !== "" && address.state !== "") {
 
-                const result = await handelDataFetch({path: `/api/v2/address/${id}`, method: "PATCH", body: address}, setShowAnimation);
+                const result = await handelDataFetch({path: `/api/v2/user/address/${id}`, method: "PATCH", body: address}, setShowAnimation);
 
                 if (result.status) {
                     navigate('/address');

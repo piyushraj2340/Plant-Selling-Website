@@ -1,8 +1,6 @@
 const express = require('express');
-const cloudinary = require('../cloudinary/cloudinary');
-const { uploadImages, deleteImages, deleteFolder, deleteResourcesByPrefix } = require('../cloudinary/uploadImages');
+const { uploadImages, deleteFolder, deleteResourcesByPrefix } = require('../cloudinary/uploadImages');
 
-const nurseryModel = require('../model/nursery');
 const plantsModel = require('../model/plants');
 const auth = require('../middleware/auth');
 const { default: mongoose } = require('mongoose');

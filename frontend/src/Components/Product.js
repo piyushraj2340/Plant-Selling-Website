@@ -30,7 +30,7 @@ const Product = () => {
 
     const handleIsProductIsAddedToCart = async () => {
         try {
-            const result = await handelDataFetch({ path: `/api/v2/isAddedCart/${productId}`, method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: `/api/v2/checkout/isPlantsAddedToCart/${productId}`, method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setCart(result.result);
@@ -47,7 +47,7 @@ const Product = () => {
 
     const handleGetProductData = async () => {
         try {
-            const result = await handelDataFetch({path: `/products/plant/${productId}`, method: "GET"}, setShowAnimation);
+            const result = await handelDataFetch({path: `/api/v2/products/plant/${productId}`, method: "GET"}, setShowAnimation);
 
             if (result.status) {
                 setProduct(result.result);
@@ -62,7 +62,7 @@ const Product = () => {
 
     const getDefaultAddress = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/default/address", method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/user/default/address", method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setAddress(result.result);
@@ -70,7 +70,7 @@ const Product = () => {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
         }
     }
 
@@ -82,7 +82,7 @@ const Product = () => {
 
     const getListOfAddress = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/address", method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/user/address", method: "GET" }, setShowAnimation);
 
             if (result) {
                 setAddressList(result.result);
@@ -90,13 +90,13 @@ const Product = () => {
                 throw new Error(result.message)
             }
         } catch (error) {
-            console.log(error.message);
+            console.log(error);
         }
     }
 
     const handleAddToCart = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/cart", method: "POST", body: { plant: product._id, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/checkout/cart", method: "POST", body: { plant: product._id, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
 
             if (result.status) {
                 setCart(result.result);
@@ -112,7 +112,7 @@ const Product = () => {
 
     const handleUpdateCart = async () => {
         try {
-            const result = await handelDataFetch({ path: `/api/v2/cart/${cart._id}`, method: "PATCH", body: { quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
+            const result = await handelDataFetch({ path: `/api/v2/checkout/cart/${cart._id}`, method: "PATCH", body: { quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
 
             if (result.status) {
                 handleIsProductIsAddedToCart();
@@ -147,7 +147,7 @@ const Product = () => {
                                     {
                                         product.images.map((elem, index) => {
                                             return (
-                                                <div key={index} onClick={() => setViewImgByIndex(index)} className="img border p-1 mt-1 mb-1">
+                                                <div key={elem.public_id} onClick={() => setViewImgByIndex(index)} className="img border p-1 mt-1 mb-1">
                                                     <img className='img-fluid' src={elem.url} alt="Plants" />
                                                 </div>
                                             );

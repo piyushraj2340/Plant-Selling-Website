@@ -88,7 +88,7 @@ function AddPlants() {
 
     const handelNurseryData = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/nursery", method: "GET" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/nursery/profile", method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setPlants({ ...plant, user: result.result.user, nursery: result.result._id })
@@ -143,7 +143,7 @@ function AddPlants() {
                     data.append(`image_${index}`, image);
                 });
 
-                const res = await fetch("/api/v2/plants", {
+                const res = await fetch("/api/v2/nursery/plants", {
                     method: "POST",
                     body: data
                 });

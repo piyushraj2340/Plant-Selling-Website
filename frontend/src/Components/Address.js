@@ -10,7 +10,7 @@ function Address() {
 
   const getListOfAddress = async () => {
     try {
-      const result = await handelDataFetch({ path: '/api/v2/address', method: "GET" }, setShowAnimation);
+      const result = await handelDataFetch({ path: '/api/v2/user/address', method: "GET" }, setShowAnimation);
 
       if (result) {
         setAddressList(result.result);
@@ -26,7 +26,7 @@ function Address() {
 
   const deleteAddress = async (_id) => {
     try {
-      const result = await handelDataFetch({ path: `/api/v2/address/${_id}`, method: "DELETE" }, setShowAnimation);
+      const result = await handelDataFetch({ path: `/api/v2/user/address/${_id}`, method: "DELETE" }, setShowAnimation);
 
       if (result.status) {
         getListOfAddress();
@@ -45,7 +45,7 @@ function Address() {
         },
         body: JSON.stringify({ setAsDefault: true })
       });
-      const result = await handelDataFetch({ path: `/api/v2/address/${_id}`, method: "PATCH", body: { setAsDefault: true } }, setShowAnimation);
+      const result = await handelDataFetch({ path: `/api/v2/user/address/${_id}`, method: "PATCH", body: { setAsDefault: true } }, setShowAnimation);
 
       if (result.status) {
         getListOfAddress();

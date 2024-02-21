@@ -6,7 +6,7 @@ const auth = require('../middleware/auth');
 
 router.use(auth);
 
-router.route('/order')
+router.route('/orders')
     .post(async (req, res) => {
         try {
             if (req.user) {
@@ -79,7 +79,7 @@ router.route('/order')
         }
     });
 
-router.route('/order/:id').get(async (req, res) => {
+router.route('/orders/:id').get(async (req, res) => {
     try {
         const _id = req.params.id;
         if (req.user) {

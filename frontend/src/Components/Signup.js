@@ -11,7 +11,7 @@ function Signup() {
 
     const { setLoginLogout } = useContext(UserContext);
 
-    const [loginStatus, setLoginStatus] = useState({
+    const [signUpStatus, setSignUpStatus] = useState({
         status: "",
         message: ""
     });
@@ -40,7 +40,7 @@ function Signup() {
 
     const handleVerification = async () => {
         try {
-            const result = await handelDataFetch({path: '/api/v1/auth', method: 'POST'}, setShowAnimation);
+            const result = await handelDataFetch({ path: '/api/v2/auth', method: 'POST' }, setShowAnimation);
 
             if (result.status) {
                 navigate('/profile');
@@ -55,28 +55,33 @@ function Signup() {
         handleVerification();
     }, []);
 
-    const handleUserSignup = async (e) => {
+    const handleUserSignUp = async (e) => {
         try {
 
-            setLoginStatus({ status: "", message: "" });
+            setSignUpStatus({ status: "", message: "" });
             e.preventDefault();
 
-            if (user.password !== user.confirmPassword) {
-                setLoginStatus({ status: false, message: "Password not matched" });
+            if(user.name === "" || user.email === "" || user.phone === "" || user.age === "" || user.gender === "" || user.password === "" || user.confirmPassword === "") {
+                setSignUpStatus({ status: false, message: "Please provide all details." });
                 return;
             }
 
-            const result = await handelDataFetch({path: "/api/v2/auth/sign-up", method: "POST", body: user}, setShowAnimation);
+            if (user.password !== user.confirmPassword) {
+                setSignUpStatus({ status: false, message: "password & confirm password doesn't match." });
+                return;
+            }
+
+            const result = await handelDataFetch({ path: "/api/v2/auth/sign-up", method: "POST", body: user }, setShowAnimation);
 
             if (result.status) {
                 setLoginLogout({ type: "USER", payload: true });
-                setLoginStatus({ status: true, message: result.message })
+                setSignUpStatus({ status: true, message: result.message })
                 setTimeout(() => {
                     navigate('/profile');
                 }, 1000);
             } else {
                 setLoginLogout({ type: "USER", payload: false });
-                setLoginStatus({ status: false, message: result.message });
+                setSignUpStatus({ status: false, message: result.message });
                 setUser({ ...user, password: "", confirmPassword: "" });
             }
         } catch (error) {
@@ -110,47 +115,50 @@ function Signup() {
                     <div className="row">
                         <p className="text-center">Or:</p>
                     </div>
-                    {typeof (loginStatus.status) === "boolean" &&
+                    {typeof (signUpStatus.status) === "boolean" &&
                         <div className="row p-3">
-                            <p className={`text-center ${loginStatus.status === true ? 'text-success' : 'text-danger'} m-0`}>{`${loginStatus.status === true ? loginStatus.message : loginStatus.message}`}</p>
+                            <p className={`text-center ${signUpStatus.status === true ? 'text-success' : 'text-danger'} m-0`}>{signUpStatus.message}</p>
                         </div>
                     }
-                    <div className="d-flex justify-content-center">
-                        <div className="col-12">
-                            <input type="text" className='form-control mb-3' onChange={handleInputs} name="name" id="name" placeholder='Enter Name' />
-                            <input type="email" className='form-control mb-3' onChange={handleInputs} name="email" id="email" placeholder='Enter Email' />
-                            <input type="tel" className='form-control mb-3' onChange={handleInputs} name="phone" id="phone" placeholder='Enter Phone' />
-                            <input type="number" className='form-control mb-3' onChange={handleInputs} name="age" id="age" placeholder='Enter Age' />
-                            <div className="row mb-3">
-                                <div className="row ms-1 mt-1">
-                                    <label className="m-1 radio-label-container text-muted" htmlFor="gender-male">Male
-                                        <input type="radio" onChange={handleInputs} className="m-2" id="gender-male" name="gender" value="male" />
-                                        <span className="check-mark-span"></span>
-                                    </label>
+                    <form onSubmit={handleUserSignUp}>
+                        <div className="d-flex justify-content-center">
+                            <div className="col-12">
+                                <input type="text" className='form-control mb-3' onChange={handleInputs} name="name" id="name" placeholder='Enter Name' />
+                                <input type="email" className='form-control mb-3' onChange={handleInputs} name="email" id="email" placeholder='Enter Email' />
+                                <input type="tel" className='form-control mb-3' onChange={handleInputs} name="phone" id="phone" placeholder='Enter Phone' />
+                                <input type="number" className='form-control mb-3' onChange={handleInputs} name="age" id="age" placeholder='Enter Age' />
+                                <div className="row mb-3">
+                                    <div className="row ms-1 mt-1">
+                                        <label className="m-1 radio-label-container text-muted" htmlFor="gender-male">Male
+                                            <input type="radio" onChange={handleInputs} className="m-2" id="gender-male" name="gender" value="male" />
+                                            <span className="check-mark-span"></span>
+                                        </label>
+                                    </div>
+                                    <div className="row ms-1 mt-1">
+                                        <label className="m-1 radio-label-container text-muted" htmlFor="gender-female">Female
+                                            <input type="radio" onChange={handleInputs} className="m-2" id="gender-female" name="gender" value="female" />
+                                            <span className="check-mark-span"></span>
+                                        </label>
+                                    </div>
+                                    <div className="row ms-1 mt-1">
+                                        <label className="m-1 radio-label-container text-muted">Other
+                                            <input type="radio" onChange={handleInputs} className="m-2" id="gender-other" name="gender" value="other" />
+                                            <span className="check-mark-span"></span>
+                                        </label>
+                                    </div>
                                 </div>
-                                <div className="row ms-1 mt-1">
-                                    <label className="m-1 radio-label-container text-muted" htmlFor="gender-female">Female
-                                        <input type="radio" onChange={handleInputs} className="m-2" id="gender-female" name="gender" value="female" />
-                                        <span className="check-mark-span"></span>
-                                    </label>
-                                </div>
-                                <div className="row ms-1 mt-1">
-                                    <label className="m-1 radio-label-container text-muted">Other
-                                        <input type="radio" onChange={handleInputs} className="m-2" id="gender-other" name="gender" value="other" />
-                                        <span className="check-mark-span"></span>
-                                    </label>
-                                </div>
-                            </div>
-                            <input type="password" className='form-control mb-3' onChange={handleInputs} name="password" id="password" placeholder='Enter Password' value={user.password === "" ? "" : user.password} />
-                            <input type="password" className='form-control mb-3' onChange={handleInputs} name="confirmPassword" id="confirmPassword" placeholder='Enter Confirm Password' value={user.confirmPassword === "" ? "" : user.confirmPassword} />
+                                <input type="password" className='form-control mb-3' onChange={handleInputs} name="password" id="password" placeholder='Enter Password' value={user.password === "" ? "" : user.password} />
+                                <input type="password" className='form-control mb-3' onChange={handleInputs} name="confirmPassword" id="confirmPassword" placeholder='Enter Confirm Password' value={user.confirmPassword === "" ? "" : user.confirmPassword} />
 
+                            </div>
                         </div>
-                    </div>
-                    <div className="row justify-content-center mt-2">
-                        <div className="col-12">
-                            <button onClick={handleUserSignup} className='btn btn-primary w-100' type="submit">Sign Up</button>
+                        <div className="row justify-content-center mt-2">
+                            <div className="col-12">
+                                <button className='btn btn-primary w-100' type="submit">Sign Up</button>
+                            </div>
                         </div>
-                    </div>
+                    </form>
+
                 </div>
             </div>
             {
