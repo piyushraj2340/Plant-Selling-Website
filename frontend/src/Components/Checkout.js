@@ -18,7 +18,7 @@ const Checkout = () => {
 
   const handelGetClientKey = async () => {
     try {
-      const result = await handelDataFetch({ path: "/api/v2/stripe/public/key", method: "GET" }, setShowAnimation);
+      const result = await handelDataFetch({ path: "/api/v2/checkout/stripe/public/key", method: "GET" }, setShowAnimation);
 
       if (result) {
         setClientKey(result.result.stripeApiKey);
@@ -32,7 +32,7 @@ const Checkout = () => {
 
   const handelClientSecretKey = async () => {
     try {
-      const result = await handelDataFetch({ path: "/api/v2/payment/process", method: "POST", body: { amount: 200 } }, setShowAnimation);
+      const result = await handelDataFetch({ path: "/api/v2/checkout/payments", method: "POST", body: { amount: 200 } }, setShowAnimation);
       if (result.status) {
         setClientSecret(result.result.client_secret);
       } else {

@@ -53,13 +53,13 @@ function Login() {
 
     const handleVerification = async () => {
         try {
-            const result = await handelDataFetch({path: "/api/v2/auth", method: "POST"}, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/auth", method: "POST" }, setShowAnimation);
 
             if (result.status) {
                 navigate('/profile')
             }
-        } catch (err) {
-            console.log(err);
+        } catch (error) {
+            console.log(error);
         }
     }
 
@@ -77,24 +77,26 @@ function Login() {
 
     const handleUserLogin = async (e) => {
         try {
-            setLoginStatus({ status: "", message: "" });
-            e.preventDefault(e);
+            e.preventDefault();
+            setLoginStatus({ ...loginStatus, status: "", message: "" });
 
-            const result = await handelDataFetch({path: "/api/v2/auth/sign-in", method: "POST", body: user}, setShowAnimation);
+            if (user.email === "" || user.password === "") {
+                setLoginStatus({ ...loginStatus, status: false, message: "Please enter your credentials." });
+                return;
+            }
+
+            const result = await handelDataFetch({ path: "/api/v2/auth/sign-in", method: "POST", body: user }, setShowAnimation);
 
             if (result.status) {
-                setLoginLogout({ type: "USER", payload: true });
-                setLoginStatus({ status: true, message: result.message })
+                setLoginStatus({ ...loginStatus, status: true, message: result.message })
                 setTimeout(() => {
                     navigate('/profile');
-                }, 1000);
-                // handleCartLength();
+                }, 500);
             } else {
-                setLoginLogout({ type: "USER", payload: false });
-                setLoginStatus({ status: false, message: result.message });
+                setLoginStatus({ ...loginStatus, status: false, message: result.message });
                 setUser({ ...user, password: "" });
             }
-            
+
         } catch (error) {
             console.log(error);
         }
@@ -128,25 +130,28 @@ function Login() {
                     </div>
                     {typeof (loginStatus.status) === "boolean" &&
                         <div className="row p-3">
-                            <p className={`text-center ${loginStatus.status === true ? 'text-success' : 'text-danger'} m-0`}>{`${loginStatus.status === true ? 'Login Successful' : 'Invalid User'}`}</p>
+                            <p className={`text-center ${loginStatus.status === true ? 'text-success' : 'text-danger'} m-0`}>{`${loginStatus.status === true ? 'Login Successful' : loginStatus.message}`}</p>
                         </div>
                     }
-                    <div className="d-flex justify-content-center">
-                        <div className="col-12">
-                            <input type="email" onChange={handleInputs} className='form-control mb-3' name="email" id="email" placeholder='Enter Email' />
-                            <input type="password" onChange={handleInputs} className='form-control mb-2' name="password" id="password" placeholder='Enter Password' value={user.password === "" ? "" : user.password} />
+
+                    <form onSubmit={handleUserLogin}>
+                        <div className="d-flex justify-content-center">
+                            <div className="col-12">
+                                <input type="email" onChange={handleInputs} className='form-control mb-3' name="email" id="email" placeholder='Enter Email' />
+                                <input type="password" onChange={handleInputs} className='form-control mb-2' name="password" id="password" placeholder='Enter Password' value={user.password === "" ? "" : user.password} />
+                            </div>
                         </div>
-                    </div>
-                    <div className="d-flex justify-content-end p-2">
-                        <p className="m-0">
-                            <Link to={"/user/forgot-password"}>Forgot Password?</Link>
-                        </p>
-                    </div>
-                    <div className="justify-content-center mt-2">
-                        <div className="col-12">
-                            <button onClick={handleUserLogin} className='btn btn-primary w-100' type="submit">Login</button>
+                        <div className="d-flex justify-content-end p-2">
+                            <p className="m-0">
+                                <Link to={"/user/forgot-password"}>Forgot Password?</Link>
+                            </p>
                         </div>
-                    </div>
+                        <div className="justify-content-center mt-2">
+                            <div className="col-12">
+                                <button className='btn btn-primary w-100' type="submit">Login</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
 

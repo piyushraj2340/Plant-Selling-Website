@@ -5,7 +5,7 @@ const auth = require('../middleware/auth');
 
 router.use(auth);
 
-router.route('/payment/process').post(async (req, res) => {
+router.route('/payments').post(async (req, res) => {
     try {
         if (req.user) {
             const myPayment = await stripe.paymentIntents.create({

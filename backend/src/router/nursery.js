@@ -13,7 +13,7 @@ const { default: mongoose } = require('mongoose');
 const nurseryStores = require('../model/nurseryStore');
 router.use(auth);
 
-router.route('/nursery')
+router.route('/profile')
     .post(async (req, res) => {
         // creating the atomic unit process 
         const session = await mongoose.startSession();
@@ -252,7 +252,7 @@ router.route('/nursery')
         }
     });;
 
-router.post('/images/nursery', auth, async (req, res) => {
+router.route('/profile/images').post(async (req, res) => {
     try {
         if (req.user) {
 
@@ -264,7 +264,7 @@ router.post('/images/nursery', auth, async (req, res) => {
                 } else if (req.body.type === "cover") {
                     image = req.files.cover;
                 } else {
-                    throw new Error("Invalid File Upload!...");
+                    throw new Error("Invalid File Upload.");
                 }
 
                 const upload = await uploadImage(image, {
@@ -330,7 +330,7 @@ router.post('/images/nursery', auth, async (req, res) => {
         console.log(error);
         res.status(500).send(info);
     }
-})
+}).get().patch().delete() // need to work on 
 
 
 module.exports = router;

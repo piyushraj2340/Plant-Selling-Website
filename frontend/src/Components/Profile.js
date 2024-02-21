@@ -46,7 +46,7 @@ function Profile() {
 
     const handelGetDefaultAddress = async () => {
         try {
-            const result = await handelDataFetch({path: "/api/v2/default/address", method: "GET"}, setShowAnimation);
+            const result = await handelDataFetch({path: "/api/v2/user/default/address", method: "GET"}, setShowAnimation);
 
             if (result.status) {
                 setAddress(result.result);

@@ -24,6 +24,7 @@ app.use(cookieParser());
 app.use(fileUpload({
     useTempFiles: true,
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -42,16 +43,25 @@ const address = require("./src/router/address");
 const payment = require("./src/router/payment");
 
 // route middleware
+
+// secured routes 
 app.use('/api/v2/auth', authRoute);
-app.use('/api/v2/user', user);
-app.use("/api/v2", nurseryRoute);
-app.use("/api/v2", nurseryStoreRoute);
-app.use("/api/v2", plantsRoute);
-app.use("/api/v2/orders", orderRoute);
-app.use("/products", products);
-app.use("/api/v2", cart);
-app.use("/api/v2", address);
-app.use("/api/v2", payment);
+app.use('/api/v2/user', user, address);
+app.use("/api/v2/nursery", nurseryRoute, nurseryStoreRoute, plantsRoute);
+app.use("/api/v2/checkout", orderRoute, cart, payment);
+
+// public routes
+app.use("/api/v2/products", products);
+
+
+
+
+// after testing delete this route
+// app.use("/api/v2", nurseryStoreRoute);
+// app.use("/api/v2", plantsRoute);
+// app.use("/api/v2", cart);
+// app.use("/api/v2", address);
+// app.use("/api/v2", payment);
 
 // app.post("/payments", async (req, res) => {
 //     try {

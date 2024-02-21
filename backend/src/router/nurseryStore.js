@@ -1,5 +1,4 @@
 const express = require('express');
-const mongoose = require('mongoose');
 const router = express.Router();
 
 const nurseryStore = require('../model/nurseryStore');
@@ -7,7 +6,7 @@ const { uploadImage, deleteResourcesByPrefix, deleteFolder } = require('../cloud
 const auth = require('../middleware/auth');
 
 
-router.route('/nursery/store')
+router.route('/store')
     .post(async (req, res) => {
         try {
             if (req.user.toString() === req.body.user && req.nursery.toString() === req.body.nursery) {
@@ -85,7 +84,7 @@ router.route('/nursery/store')
         }
     });
 
-router.route('/nursery/store/:id')
+router.route('/store/:id')
     .get(async (req, res) => {
         try {
             if (req.user && req.nursery) {
@@ -229,7 +228,7 @@ router.route('/nursery/store/:id')
     });
 
 
-router.post('/images/nursery/store/:id', auth, async (req, res) => {
+router.post('/store/images/:id', auth, async (req, res) => {
     try {
         if (req.user && req.nursery) {
             if (req.files) {

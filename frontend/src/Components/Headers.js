@@ -16,11 +16,11 @@ const Headers = () => {
                     <div className='d-flex flex-column align-items-center justify-content-center'>
                         <p className='h6'>Subscribe to our Newsletter! and Stay updated.</p>
                         <div className='col-6'>
-                            <div class="form-floating">
+                            <div className="form-floating">
                                 <input type="text" className="form-control" id="email" placeholder="Enter email" name="email" />
                                 <label htmlFor="email" >Email</label>
                             </div>
-                            <div class="ms-2 small mt-1">
+                            <div className="ms-2 small mt-1">
                                 <p className="small"><i className="fas fa-info-circle"></i> Enter Your Email to subscribe us.</p>
                             </div>
                         </div>

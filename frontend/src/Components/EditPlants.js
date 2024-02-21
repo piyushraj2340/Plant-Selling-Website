@@ -86,7 +86,7 @@ function EditPlants() {
 
     const handelNurseryData = async () => {
         try {
-            const result = await handelDataFetch({path: "/api/v2/nursery", method: "GET"}, setShowAnimation);
+            const result = await handelDataFetch({path: "/api/v2/nursery/plants", method: "GET"}, setShowAnimation);
 
             if (result.status) {
                 setPlants({ ...plant, user: result.result.user, nursery: result.result._id })
