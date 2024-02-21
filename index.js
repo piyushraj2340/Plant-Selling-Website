@@ -5,7 +5,7 @@ require('./src/db/db');
 
 const express = require('express');
 const app = express();
-const fileUpload = require('express-fileUpload');
+const fileUpload = require('express-fileupload');
 
 const cookieParser = require('cookie-parser');
 
