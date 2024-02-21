@@ -10,7 +10,7 @@ router.post('/sign-up', async (req, res) => {
         const newUser = new userModel(req.body);
 
         const token = await newUser.generateAuthToken();
-        const result = await newUser.save();
+        await newUser.save();
 
         res.cookie('auth', token, {
             expires: new Date(Date.now() + 500000),
