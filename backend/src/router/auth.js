@@ -54,7 +54,8 @@ router.post('/sign-in', async (req, res) => {
                 // adding cookie into the database 
                 res.cookie('auth', token, {
                     expires: new Date(Date.now() + 50000000),
-                    httpOnly: false
+                    httpOnly: true,
+                    secure: process.env.NODE_ENV === 'production'
                 });
 
                 const info = {
