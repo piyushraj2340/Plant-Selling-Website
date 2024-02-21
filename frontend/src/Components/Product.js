@@ -47,7 +47,7 @@ const Product = () => {
 
     const handleGetProductData = async () => {
         try {
-            const result = await handelDataFetch({path: `/api/v2/products/plant/${productId}`, method: "GET"}, setShowAnimation);
+            const result = await handelDataFetch({path: `/products/plant/${productId}`, method: "GET"}, setShowAnimation);
 
             if (result.status) {
                 setProduct(result.result);
