@@ -12,6 +12,7 @@ const port = process.env.port || 8000;
 const app = express();
 
 // express middleware 
+app.use(cookieParser());
 app.use(cors(
     {
         origin: process.env.FRONTEND_URL,
@@ -20,7 +21,6 @@ app.use(cors(
     }
 ));
 
-app.use(cookieParser());
 app.use(fileUpload({
     useTempFiles: true,
 }));
