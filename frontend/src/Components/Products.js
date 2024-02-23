@@ -52,8 +52,8 @@ const Products = () => {
 
     return (
         <>
-            <div className="container">
-                <div className="row">
+            <div className="container product-container">
+                <div className="p-2">
                     <h1 className='text-center p-2'>Available Plants for Sell</h1>
                 </div>
                 <div className="p-2 d-flex flex-wrap justify-content-center align-item-center">
@@ -64,16 +64,16 @@ const Products = () => {
                     <button onClick={() => getProductsDataByCategory("ornamental-plants")} className="btn btn-secondary m-1">Ornamental Plants</button>
                     <button onClick={() => getProductsDataByCategory("indoor-plants")} className="btn btn-secondary m-1">Indoor Plants</button>
                 </div>
-                <div className="row">
+                <div className="product-content px-2">
                     {
                         products.length > 0 ?
 
                             products.map((elem) => {
                                 return (
-                                    <div key={elem.id} className="col-md-6 col-lg-4 col-xl-3 d-flex justify-content-center center-text">
+                                    <div key={elem.id} className="px-1 d-flex center-text overflow-hidden">
                                         <Link className='text-dark' style={{ textDecoration: "none" }} to={`/product/${elem._id}`}>
-                                            <div className="card m-2" style={{ width: "300px" }}>
-                                                <img className="card-img-top" src={elem.images[0].url} alt="Card plants" style={{ width: "100%", height: "253px", aspectRatio: "4/3", objectFit: "contain" }} />
+                                            <div className="card my-1">
+                                                <img className="img-fluid" src={elem.images[0].url} alt="Card plants" />
                                                 <div className="card-body">
                                                     <h4 className="card-title">{elem.plantName}</h4>
                                                     <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>price</p>
