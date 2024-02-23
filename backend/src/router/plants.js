@@ -28,7 +28,7 @@ router.route('/plants')
                     plant.images = resultImage.map((elem) => {
                         return {
                             public_id: elem.public_id,
-                            url: elem.url
+                            url: elem.secure_url
                         }
                     });
 

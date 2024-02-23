@@ -272,12 +272,12 @@ router.route('/profile/images').post(async (req, res) => {
                     tags: req.body.type,
                 });
 
-                const { public_id, url } = upload;
+                const { public_id, secure_url } = upload;
 
 
                 image = {
                     public_id,
-                    url
+                    url: secure_url
                 }
 
                 const result = await nurseryModel.findOneAndUpdate({ user: req.user }, {

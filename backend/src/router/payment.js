@@ -27,7 +27,6 @@ router.route('/payments').post(async (req, res) => {
                 }
             });
 
-            console.log(myPayment);
 
             if (myPayment) {
                 const info = {
