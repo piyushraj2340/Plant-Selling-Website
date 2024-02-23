@@ -435,23 +435,29 @@ a:hover {
 
 
 .address-list-container-open {
+    animation: open 0.5s linear;
     background-color: rgba(34, 34, 34, 0.9);
     z-index: calc($z-index + 1);
-    animation: open 0.5s linear;  // animation while opening
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    height: 100vh;
 
     .container-address-list {
-        width: 100%;
-        height: 100%;
-        background-color: #f4f3f3;
-        opacity: 1;
+        // width: 100%;
+        // height: 100%;
+        // background-color: #f4f3f3;
+        // opacity: 1;
 
-        @media screen and (min-width: $medium) {
-            width: 75%;
-        }
+        // @media screen and (min-width: $medium) {
+        //     width: 75%;
+        // }
 
-        @media screen and (min-width: $large) {
-            width: 50%;
-        }
+        // @media screen and (min-width: $large) {
+        //     width: 50%;
+        // }
 
         .select-address:hover {
             background-color: #f0f0f0;
@@ -466,10 +472,10 @@ a:hover {
     }
 }
 
-.address-list-container-close {
-    animation: close 0.5s ease-in-out;
-    display: none;
-}
+// .address-list-container-close {
+//     animation: close 0.5s ease-in-out;
+//     display: none;
+// }
 
 .address-container {
     .address-list {
@@ -527,21 +533,6 @@ a:hover {
     0% {
         width: 0%;
         height: 0vh;
-    }
-
-    25% {
-        width: 25%;
-        height: 25vh;
-    }
-
-    50% {
-        width: 50%;
-        height: 50vh;
-    }
-
-    75% {
-        width: 75%;
-        height: 75vh;
     }
 
     100% {
