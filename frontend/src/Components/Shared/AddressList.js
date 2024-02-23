@@ -19,9 +19,9 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
 
 
     return (
-        <div className="address-list-container-open p-2 p-md-4 position-fixed top-0 d-flex justify-content-center align-items-center w-100 h-100">
-            <div className='container-address-list p-0'>
-                <div className="p-3 d-flex justify-content-between border bg-dark">
+        <div className="address-list-container-open p-2 p-md-4 position-fixed d-flex justify-content-center align-items-center">
+            <div className='container-address-list col-12 col-sm-8 col-md-6 col-lg-4 bg-light rounded'>
+                <div className="p-3 d-flex justify-content-between bg-dark">
                     <p className="m-2 h5 text-light">
                         <span>Choose Your Address</span>
                     </p>
@@ -30,6 +30,7 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
                     </p>
                 </div>
                 <div className="p-3 address-list">
+                    <p>Select a delivery location to see product availability and delivery options</p>
                     {list}
                 </div>
             </div>
