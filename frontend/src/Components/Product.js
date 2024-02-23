@@ -7,7 +7,7 @@ import AddressList from './Shared/AddressList';
 import noPlantsImage from '../Asset/img/noDataFound.jpg';
 import FullScreenImageView from './Shared/FullScreenImageView';
 import handelDataFetch from '../Controller/handelDataFetch';
-import { Alert, Button, Popover } from 'antd';
+import { Popover } from 'antd';
 
 const Product = () => {
 
@@ -96,7 +96,7 @@ const Product = () => {
         handelUserData();
     }, []);
 
-    const getListOfAddress = async () => {
+    const handelGetListOfAddress = async () => {
         try {
             const result = await handelDataFetch({ path: "/api/v2/user/address", method: "GET" }, setShowAnimation);
 
@@ -153,7 +153,7 @@ const Product = () => {
 
     const handelOpenAddressList = () => {
         if (!user) return;
-        getListOfAddress();
+        handelGetListOfAddress();
         setViewAddressList(!viewAddressList);
     }
 

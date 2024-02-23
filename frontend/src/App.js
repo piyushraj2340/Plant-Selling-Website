@@ -33,6 +33,8 @@ import EditAddress from "./Components/EditAddress";
 import { initialState, reducer } from './reducer/Reducer';
 import ChooseTemplate from "./Components/Shared/ChooseTemplate";
 import Checkout from "./Components/Checkout";
+import Shipping from "./Components/Shipping";
+import Confirm from "./Components/Confirm";
 
 
 
@@ -61,7 +63,9 @@ const Routing = () => {
       <Route exact path="/contact-us" element={<ContactUs />} />
       <Route path="/cart" element={<Cart />} />
 
-      <Route path="/payment" element={<Checkout />} />
+      <Route path="/checkout/shipping" element={<Shipping />} />
+      <Route path="/checkout/confirm" element={<Confirm />} />
+      <Route path="/checkout/payment" element={<Checkout />} />
 
       <Route exact path="/choose/template" element={<ChooseTemplate />} /> {/* Choose template view for testing */}
       <Route exact path="/success" element={<Success />} /> {/*create a dynamic store page*/}

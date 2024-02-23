@@ -265,6 +265,29 @@ a:hover {
     }
 }
 
+.section-checkout {
+    z-index: calc($z-index + 1);
+    background-color: rgba(0, 0, 0, 0.9);
+
+    .address-list {
+        background-color: #fff;
+        cursor: pointer
+    }
+    
+    .address-list:hover {
+        background-color: #eeeeee;
+    }
+
+    .active-address {
+        background-color: #285192;
+        color: #fff;
+    }
+
+    .active-address:hover {
+        background-color: #112b55;
+    }
+
+}
 
 @keyframes animate-svg-fill {
     0% {

@@ -7,7 +7,7 @@ import {
 import handelDataFetch from '../Controller/handelDataFetch';
 import Animation from './Shared/Animation';
 
-const Payment = () => {
+const Payment = ({ amount }) => {
   const stripe = useStripe();
   const elements = useElements();
 
@@ -56,8 +56,8 @@ const Payment = () => {
 
 
   return (
+    <>
 
-    <section className='card bg-section'>
       <div className="container py-5">
         <div className="d-flex justify-content-center align-items-center">
           <div className="col col-md-9 col-lg-6 bg-light p-2 p-3 rounded">
@@ -71,7 +71,7 @@ const Payment = () => {
                 },
               }} />
               <button ref={payBtn} type="submit" disabled={!stripe || !elements} className='btn btn-primary w-100 mt-2'>
-                Pay - 9099.93
+                Pay - ₹{Number(amount).toFixed(2)}
               </button>
             </form>
           </div>
@@ -80,7 +80,9 @@ const Payment = () => {
       {
         showAnimation && <Animation />
       }
-    </section>
+
+    </>
+
 
   )
 }
