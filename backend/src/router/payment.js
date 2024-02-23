@@ -11,19 +11,29 @@ router.route('/payments').post(async (req, res) => {
             const myPayment = await stripe.paymentIntents.create({
                 description: 'Software development services',
                 shipping: {
-                    name: 'Jenny Rosen',
+                    name: req.body.address.name,
                     address: {
-                        line1: '510 Townsend St',
-                        postal_code: '98140',
-                        city: 'San Francisco',
-                        state: 'CA',
-                        country: 'US',
+                        line1: req.body.address.address,
+                        postal_code: req.body.address.pinCode,
+                        city: req.body.address.city,
+                        state: req.body.address.state,
+                        country: "India", // seating the default country.
                     },
                 },
                 amount: req.body.amount * 100,
                 currency: "inr",
                 metadata: {
-                    company: "PlantSeller"
+                    company: "PlantSeller",
+                    user: req.body.user.userId,
+                    email: req.body.user.email,
+                    products: [
+                        {
+                            product: req.body.product.productId,
+                            productName: req.body.product.productName,
+                            seller: req.body.seller.sellerId,
+                            sellerName: req.body.seller.sellerName,
+                        }
+                    ]
                 }
             });
 
@@ -31,9 +41,10 @@ router.route('/payments').post(async (req, res) => {
             if (myPayment) {
                 const info = {
                     status: true,
-                    message: "Payment is successfully completed.",
+                    message: "Payment intents created.",
                     result: {
-                        client_secret: myPayment.client_secret
+                        client_secret: myPayment.client_secret,
+                        amount: req.body.amount * 100
                     }
                 }
 
