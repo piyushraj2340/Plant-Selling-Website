@@ -10,3 +10,4 @@ node_modules
 build
 /frontend/build
 
+/backend/tmp

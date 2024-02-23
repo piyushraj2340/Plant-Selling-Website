@@ -73,9 +73,10 @@ function NurseryProfile() {
             data.append(e.target.name, e.target.files[0]);
             data.append("nurserId", nursery._id);
 
-            const res = await fetch('/api/v2/nursery/profile/images', {
+            const res = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}/api/v2/nursery/profile/images`, {
                 method: "POST",
-                body: data
+                body: data,
+                credentials: 'include'
             });
 
             const result = await res.json();

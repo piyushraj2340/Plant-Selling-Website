@@ -143,9 +143,10 @@ function AddPlants() {
                     data.append(`image_${index}`, image);
                 });
 
-                const res = await fetch("/api/v2/nursery/plants", {
+                const res = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}/api/v2/nursery/plants`, {
                     method: "POST",
-                    body: data
+                    body: data,
+                    credentials: 'include'
                 });
 
                 const result = await res.json();
