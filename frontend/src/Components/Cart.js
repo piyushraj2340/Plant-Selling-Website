@@ -37,7 +37,7 @@ function Cart() {
 
   const handleGetAddedCart = async () => {
     try {
-      const result = await handelDataFetch({ path: '/api/v2/checkout/cart', method: "GET" }, setShowAnimation);
+      const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
 
       if (result.status) {
         const cartValues = result.result.reduce((total, curObj) => total + ((curObj.plant.price - curObj.plant.discount / 100 * curObj.plant.price) * curObj.quantity), 0);
@@ -82,7 +82,7 @@ function Cart() {
 
   const handleDeleteFromCart = async (cartId) => {
     try {
-      const result = await handelDataFetch({ path: `/api/v2/checkout/cart/${cartId}`, method: "DELETE" }, setShowAnimation);
+      const result = await handelDataFetch({ path: `/api/v2/checkout/carts/${cartId}`, method: "DELETE" }, setShowAnimation);
 
       if (result.status) {
         setCartLength({ type: "CART", length: result.cartLength });
@@ -98,7 +98,7 @@ function Cart() {
 
   const handleUpdateCart = async (cartId, plant, quantity, price, discount) => {
     try {
-      const result = await handelDataFetch({ path: `/api/v2/checkout/cart/${cartId}`, method: "PATCH", body: { plant, quantity, addedAtPrice: Math.round(price - discount / 100 * price) } }, setShowAnimation);
+      const result = await handelDataFetch({ path: `/api/v2/checkout/carts/${cartId}`, method: "PATCH", body: { plant, quantity, addedAtPrice: Math.round(price - discount / 100 * price) } }, setShowAnimation);
 
       if (result.status) {
         setCartLength({ type: "CART", length: result.result.length });

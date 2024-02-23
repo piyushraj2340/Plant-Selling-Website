@@ -5,7 +5,7 @@ import logoImg from '../Asset/img/plant_seller_remove_bg.png';
 
 const Footer = () => {
     return (
-        <footer className="text-light bg-dark p-4 p-md-5 mt-5 footer-container">
+        <footer className="text-light bg-dark p-4 p-md-5 footer-container">
             <div className="container">
                 <section className="footer-content-desc-links">
                     <div className="text-md-start">
