@@ -7,6 +7,7 @@ import AddressList from './Shared/AddressList';
 import noPlantsImage from '../Asset/img/noDataFound.jpg';
 import FullScreenImageView from './Shared/FullScreenImageView';
 import handelDataFetch from '../Controller/handelDataFetch';
+import { Alert, Button, Popover } from 'antd';
 
 const Product = () => {
 
@@ -15,6 +16,7 @@ const Product = () => {
     const [address, setAddress] = useState(null);
     const [addressList, setAddressList] = useState(null);
     const [viewAddressList, setViewAddressList] = useState(false);
+    const [user, setUser] = useState(null);
 
     const params = useParams();
     const productId = params.id;
@@ -45,9 +47,22 @@ const Product = () => {
         }
     }
 
+    const handelUserData = async () => {
+        try {
+            const result = await handelDataFetch({ path: '/api/v2/user/profile', method: "GET" }, setShowAnimation);
+
+            if (result.status) {
+                setUser(result.result);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const handleGetProductData = async () => {
         try {
-            const result = await handelDataFetch({path: `/api/v2/products/plant/${productId}`, method: "GET"}, setShowAnimation);
+            const result = await handelDataFetch({ path: `/api/v2/products/plant/${productId}`, method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setProduct(result.result);
@@ -78,6 +93,7 @@ const Product = () => {
         handleIsProductIsAddedToCart();
         handleGetProductData();
         getDefaultAddress();
+        handelUserData();
     }, []);
 
     const getListOfAddress = async () => {
@@ -95,6 +111,7 @@ const Product = () => {
     }
 
     const handleAddToCart = async () => {
+        if (!user) return;
         try {
             const result = await handelDataFetch({ path: "/api/v2/checkout/cart", method: "POST", body: { plant: product._id, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
 
@@ -132,6 +149,27 @@ const Product = () => {
         });
         setAddress(address[0]);
         setViewAddressList(!viewAddressList);
+    }
+
+    const handelOpenAddressList = () => {
+        if (!user) return;
+        getListOfAddress();
+        setViewAddressList(!viewAddressList);
+    }
+
+
+    const loginAlertUI = (
+        <div>
+            <Link to='/login' className='btn btn-sm btn-warning'>Login</Link>
+        </div>
+    )
+
+    const alert = (title, content) => {
+        return (
+            <Popover content={loginAlertUI} title={title} trigger="click">
+                {content}
+            </Popover>
+        )
     }
 
 
@@ -201,8 +239,8 @@ const Product = () => {
                                             Math.round(product.price - product.discount / 100 * product.price) * 1
                                     }
                                 </p>
-                                <p className="text-muted small link-underline-hover" onClick={() => { getListOfAddress(); setViewAddressList(!viewAddressList) }}>
-                                    <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : "Select delivery location"}</small>
+                                <p className="text-muted small link-underline-hover" onClick={handelOpenAddressList}>
+                                    <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : alert("Sign in to see your addresses", <span>Select delivery location</span>)}</small>
                                 </p>
                                 <p className="text-muted">
                                     <small>Quantity: </small>
@@ -227,15 +265,20 @@ const Product = () => {
                                                 :
                                                 <button style={{ width: "100%" }} onClick={handleUpdateCart} className='btn btn-primary'>Update Your Cart</button>
                                             :
-                                            <button style={{ width: "100%" }} onClick={handleAddToCart} className='btn btn-primary'>Add to Cart</button>
+                                            alert("Sign in to add plants to cart", < button style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>)
                                     }
                                 </p>
                                 <p className="card-text">
-                                    <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>
+                                    {
+                                        user ?
+                                            <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>
+                                            :
+                                            alert("Sign in to buy this plant", <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>)
+                                    }
                                 </p>
                             </div>
                         </div>
-                    </div>
+                    </div >
                     :
 
 
