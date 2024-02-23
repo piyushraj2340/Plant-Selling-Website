@@ -1116,3 +1116,22 @@ a:hover {
         }
     }
 }
+
+
+.footer-container {
+    font-size: 14px;
+    @media screen and (min-width: $medium) {
+        font-size: 16px;
+    }
+
+    .footer-content-desc-links {
+        .highlight-desc {
+            font-size: 16px;
+            font-weight: 600;
+
+            @media screen and (min-width: $medium) {
+                font-size: 18px;
+            }
+        }
+    }
+}
