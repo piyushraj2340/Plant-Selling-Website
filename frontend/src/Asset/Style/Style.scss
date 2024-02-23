@@ -1,6 +1,7 @@
 $small: 576px;
 $medium: 768px;
 $large: 992px;
+$extra_large: 1200px;
 
 $active-color: #285192;
 $muted-color: #f7eded;
@@ -94,6 +95,24 @@ $z-index: 1030;
     .blur-bg {
         background-color: rgba(34, 34, 34, 0.7);
         min-height: calc(100vh - 71px);
+    }
+}
+
+
+.product-container {
+    .product-content {
+        display: grid;
+        grid-template-columns: auto;
+
+        @media screen and (min-width: calc($small - 100px)) {
+            grid-template-columns: auto auto;
+        }
+        @media screen and (min-width: $medium) {
+            grid-template-columns: auto auto auto;
+        }
+        @media screen and (min-width: $large) {
+            grid-template-columns: auto auto auto auto;
+        }
     }
 }
 
