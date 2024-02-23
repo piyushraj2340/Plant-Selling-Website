@@ -28,7 +28,7 @@ const userSchema = new mongoose.Schema({
         required: [true, "Phone number is required"],
         unique: [true, "This phone is already in used."],
         validate(phone) {
-            if (!validator.isMobilePhone(phone,'en-IN')) {
+            if (!validator.isMobilePhone(phone, 'en-IN')) {
                 throw new Error("Invalid Phone");
             }
         }
@@ -42,7 +42,7 @@ const userSchema = new mongoose.Schema({
         default: ["user"]
     },
     avatar: {
-        public_id:{
+        public_id: {
             type: String,
         },
         url: {
@@ -50,7 +50,7 @@ const userSchema = new mongoose.Schema({
         }
     },
     avatarList: [{
-        public_id:{
+        public_id: {
             type: String,
         },
         url: {
@@ -65,7 +65,7 @@ const userSchema = new mongoose.Schema({
         type: Number,
         required: [true, "Age is required"],
         validate(age) {
-            if(!(age >= 18 && age <= 100)) {
+            if (!(age >= 18 && age <= 100)) {
                 throw new Error("Invalid Age");
             }
         }
@@ -78,9 +78,10 @@ const userSchema = new mongoose.Schema({
     }]
 });
 
+// generating the JWT Tokens 
 userSchema.methods.generateAuthToken = async function () {
     try {
-        const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY);
+        const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY, { expiresIn: "6h" });
         this.tokens = this.tokens.concat({ token });
         await this.save();
         return token;
@@ -91,7 +92,8 @@ userSchema.methods.generateAuthToken = async function () {
 
 userSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
-        this.password = await bcryptjs.hash(this.password, 10);
+        const salt = await bcryptjs.genSalt(10);
+        this.password = await bcryptjs.hash(this.password, salt);
     }
     next();
 })
