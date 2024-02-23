@@ -11,7 +11,6 @@ const handelDataFetch = async ({path, method, body = null}, callback) => {
                 Accept: "application/json",
             },
             credentials: 'include',
-            withCredentials: true,
             body: body === null ? null : JSON.stringify(body)
         });
 

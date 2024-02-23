@@ -19,7 +19,7 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
 
 
     return (
-        <div className={"address-list-container-open p-4"}>
+        <div className="address-list-container-open p-2 p-md-4 position-fixed top-0 d-flex justify-content-center align-items-center w-100 h-100">
             <div className='container-address-list p-0'>
                 <div className="p-3 d-flex justify-content-between border bg-dark">
                     <p className="m-2 h5 text-light">
