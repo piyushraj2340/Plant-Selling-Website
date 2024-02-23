@@ -18,7 +18,7 @@ const Headers = () => {
                         <p className='highlight-desc'>Welcome to Plant Seller: Where Green Dreams Come True!</p>
                         <p>Explore our lush collection of plants to elevate your living space. From vibrant succulents to elegant ferns, find the perfect green companions to breathe life into your home.</p>
                         <p className='highlight-desc'>Let's grow together!</p>
-                        <Link to="/products" className='btn btn-success d-flex'>Go To Products <span class="material-symbols-outlined">arrow_right_alt</span></Link>
+                        <Link to="/products" className='btn btn-success d-flex'>Go To Products <span className="material-symbols-outlined">arrow_right_alt</span></Link>
 
                     </div>
                     {/* <div className='d-none d-lg-flex flex-column w-100'>
