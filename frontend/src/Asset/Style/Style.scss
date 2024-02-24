@@ -102,16 +102,16 @@ $z-index: 1030;
 .product-container {
     .product-content {
         display: grid;
-        grid-template-columns: auto;
+        grid-template-columns: 100%;
 
         @media screen and (min-width: calc($small - 100px)) {
-            grid-template-columns: auto auto;
+            grid-template-columns: 50% 50%;
         }
         @media screen and (min-width: $medium) {
-            grid-template-columns: auto auto auto;
+            grid-template-columns: 33.33% 33.33% 33.33%;
         }
         @media screen and (min-width: $large) {
-            grid-template-columns: auto auto auto auto;
+            grid-template-columns: 25% 25% 25% 25%;
         }
     }
 }

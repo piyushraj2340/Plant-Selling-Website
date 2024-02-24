@@ -113,7 +113,7 @@ const Product = () => {
     const handleAddToCart = async () => {
         if (!user) return;
         try {
-            const result = await handelDataFetch({ path: "/api/v2/checkout/cart", method: "POST", body: { plant: product._id, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/checkout/carts", method: "POST", body: { plant: product._id, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
 
             if (result.status) {
                 setCart(result.result);
@@ -259,12 +259,15 @@ const Product = () => {
                                 </p>
                                 <p className="card-text">
                                     {
-                                        cart ?
+                                        user ?
+                                        cart?
                                             cart.quantity === cartQuantity ?
                                                 <Link style={{ width: "100%" }} to={`/cart`} className='btn btn-secondary'>Go To Cart</Link>
                                                 :
                                                 <button style={{ width: "100%" }} onClick={handleUpdateCart} className='btn btn-primary'>Update Your Cart</button>
                                             :
+                                            < button onClick={handleAddToCart} style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>
+                                                :
                                             alert("Sign in to add plants to cart", < button style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>)
                                     }
                                 </p>
