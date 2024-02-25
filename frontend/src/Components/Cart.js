@@ -45,6 +45,7 @@ function Cart() {
         setCart(result.result);
         setCartLength({ type: "CART", length: result.result.length });
       } else {
+        setCart([]);
         throw new Error(result.message);
       }
     } catch (error) {
@@ -169,7 +170,7 @@ function Cart() {
                             </div>
                             <div className="item-content-menu d-none-lg">
                               <div className="d-flex">
-                                <p className="m-0 menu p-2" onClick={() => handleDeleteFromCart(elem.plant)}>
+                                <p className="m-0 menu p-2" onClick={() => handleDeleteFromCart(elem._id)}>
                                   <i className='fas fa-trash-alt p-2'></i>
                                   <span className='menu-text p-1 center'>Delete</span>
                                 </p>
@@ -188,7 +189,7 @@ function Cart() {
                         <div className="row">
                           <div className="menu-control d-lg">
                             <div className="d-flex justify-content-around mt-3 mb-3">
-                              <p className="m-0 small" onClick={() => handleDeleteFromCart(elem.plant)}>
+                              <p className="m-0 small" onClick={() => handleDeleteFromCart(elem._id)}>
                                 <i className='fas fa-trash-alt p-2'></i>
                                 <span className='p-1 center'>Delete</span>
                               </p>
