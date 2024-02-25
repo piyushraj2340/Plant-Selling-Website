@@ -35,6 +35,7 @@ import ChooseTemplate from "./Components/Shared/ChooseTemplate";
 import Checkout from "./Components/Checkout";
 import Shipping from "./Components/Shipping";
 import Confirm from "./Components/Confirm";
+import EditPlants from "./Components/EditPlants";
 
 
 
@@ -57,6 +58,7 @@ const Routing = () => {
       <Route exact path="/nursery/add" element={<SetNursery />} />
       <Route exact path="/nursery/update/:id" element={<EditNursery />} />
       <Route exact path="/nursery/plant/add" element={<SetPlants />} />
+      <Route exact path="/nursery/plant/update/:id" element={<EditPlants />} />
       <Route exact path="/address" element={<Address />} />
       <Route exact path="/address/add" element={<SetAddress />} />
       <Route exact path="/address/update/:id" element={<EditAddress />} />
