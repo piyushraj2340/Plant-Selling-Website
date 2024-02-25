@@ -113,7 +113,7 @@ const Product = () => {
     const handleAddToCart = async () => {
         if (!user) return;
         try {
-            const result = await handelDataFetch({ path: "/api/v2/checkout/carts", method: "POST", body: { plant: product._id, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/checkout/carts", method: "POST", body: { plant: product._id, nursery: product.nursery, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
 
             if (result.status) {
                 setCart(result.result);
@@ -129,7 +129,7 @@ const Product = () => {
 
     const handleUpdateCart = async () => {
         try {
-            const result = await handelDataFetch({ path: `/api/v2/checkout/cart/${cart._id}`, method: "PATCH", body: { quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
+            const result = await handelDataFetch({ path: `/api/v2/checkout/carts/${cart._id}`, method: "PATCH", body: { quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
 
             if (result.status) {
                 handleIsProductIsAddedToCart();
@@ -244,7 +244,7 @@ const Product = () => {
                                 </p>
                                 <p className="text-muted">
                                     <small>Quantity: </small>
-                                    <select onChange={(e) => { setCartQuantity(Number(e.target.value)) }} value={cart ? cart.quantity : cartQuantity} style={{ margin: "0 0 0 4px" }} name="quantity" id="quantity">
+                                    <select onChange={(e) => { setCartQuantity(e.target.value) }} value={cartQuantity} style={{ margin: "0 0 0 4px" }} name="quantity" id="quantity">
                                         <option value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
@@ -258,23 +258,32 @@ const Product = () => {
                                     </select>
                                 </p>
                                 <p className="card-text">
+
                                     {
-                                        user ?
-                                        cart?
-                                            cart.quantity === cartQuantity ?
-                                                <Link style={{ width: "100%" }} to={`/cart`} className='btn btn-secondary'>Go To Cart</Link>
-                                                :
-                                                <button style={{ width: "100%" }} onClick={handleUpdateCart} className='btn btn-primary'>Update Your Cart</button>
+                                        user && user._id === product.user ?
+                                            < Link to={`/nursery/plant/update/${product._id}`} style={{ width: "100%" }} className='btn btn-primary'>Edit Your Plants</Link>
                                             :
-                                            < button onClick={handleAddToCart} style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>
+                                            cart ?
+                                                cart.quantity === cartQuantity ?
+                                                    <Link style={{ width: "100%" }} to={`/cart`} className='btn btn-secondary'>Go To Cart</Link>
+                                                    :
+                                                    <button style={{ width: "100%" }} onClick={handleUpdateCart} className='btn btn-primary'>Update Your Cart</button>
                                                 :
-                                            alert("Sign in to add plants to cart", < button style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>)
+                                                user && < button onClick={handleAddToCart} style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>
+
                                     }
+
+                                    {
+                                        !user &&
+
+                                        alert("Sign in to add plants to cart", < button style={{ width: "100%" }} className='btn btn-primary'>Add to Cart</button>)
+                                    }
+
                                 </p>
                                 <p className="card-text">
                                     {
                                         user ?
-                                            <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>
+                                            !(user._id === product.user) && <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>
                                             :
                                             alert("Sign in to buy this plant", <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>)
                                     }
