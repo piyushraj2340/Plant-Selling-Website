@@ -139,11 +139,23 @@ const Product = () => {
     const handleAddToCart = async () => {
         if (!user) return;
         try {
-            const result = await handelDataFetch({ path: "/api/v2/checkout/carts", method: "POST", body: { plant: product._id, nursery: product.nursery, quantity: cartQuantity, addedAtPrice: Math.round(product.price - product.discount / 100 * product.price) } }, setShowAnimation);
+            const cart = {
+                plant: product._id,
+                nursery: product.nursery,
+                quantity: cartQuantity,
+                pricing: {
+                    priceWithoutDiscount: pricing.totalPriceWithoutDiscount,
+                    priceAfterDiscount: pricing.actualPriceAfterDiscount,
+                    discount: product.discount,
+                    discountPrice: (Number(pricing.totalPriceWithoutDiscount) - Number(pricing.actualPriceAfterDiscount)).toFixed(2)
+                }
+            }
+            const result = await handelDataFetch({ path: "/api/v2/checkout/carts", method: "POST", body: cart }, setShowAnimation);
 
             if (result.status) {
                 setCart(result.result);
                 setCartLength({ type: "CART", length: result.result.length });
+                handleGetProductData();
             } else {
                 setCartLength({ type: "CART", length: null });
                 throw new Error(result.message);
