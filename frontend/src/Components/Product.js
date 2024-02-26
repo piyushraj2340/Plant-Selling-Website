@@ -16,6 +16,7 @@ const Product = () => {
     const [address, setAddress] = useState(null);
     const [addressList, setAddressList] = useState(null);
     const [viewAddressList, setViewAddressList] = useState(false);
+    const [pricing, setPricing] = useState(null);
     const [user, setUser] = useState(null);
 
     const params = useParams();
@@ -60,11 +61,36 @@ const Product = () => {
         }
     }
 
+    const handelCalculatePricing = (quantity, productObj = product) => {
+        const totalPriceWithoutDiscount = (productObj.price * quantity).toFixed(2);
+        const actualPriceAfterDiscount = (totalPriceWithoutDiscount - (totalPriceWithoutDiscount * productObj.discount / 100)).toFixed(2);
+        const discountPrice = (totalPriceWithoutDiscount - actualPriceAfterDiscount).toFixed(2);
+        const deliveryPrice = (actualPriceAfterDiscount) < 500 ? 90.00 : 0;
+
+        const pricing = {
+            totalPriceWithoutDiscount,
+            actualPriceAfterDiscount,
+            discountPrice,
+            deliveryPrice, // calculate the delivery price dynamic
+            totalPrice: (Number(actualPriceAfterDiscount) + Number(deliveryPrice)).toFixed(2)
+        }
+        setPricing(pricing);
+    }
+
+    const handelChangeQuantity = (e) => {
+        const quantity = e.target.value;
+        handelCalculatePricing(quantity);
+        setCartQuantity(quantity);
+    }
+
     const handleGetProductData = async () => {
         try {
             const result = await handelDataFetch({ path: `/api/v2/products/plant/${productId}`, method: "GET" }, setShowAnimation);
 
             if (result.status) {
+                const quantity = cart && cart.quantity || 1;
+                setCartQuantity(quantity);
+                handelCalculatePricing(quantity, result.result);
                 setProduct(result.result);
                 setNurseryName(result.result.nurseryName);
             } else {
@@ -175,7 +201,6 @@ const Product = () => {
 
     return (
         <>
-
             {
                 product ?
                     <div className='container mt-3 p-2 bg-light'>
@@ -232,19 +257,21 @@ const Product = () => {
                                 </p>
                                 <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Total: </p>
                                 <p className="card-text h3">
-                                    <sup>₹</sup>{
-                                        cart ?
-                                            Math.round(product.price - product.discount / 100 * product.price) * cart.quantity
-                                            :
-                                            Math.round(product.price - product.discount / 100 * product.price) * 1
-                                    }
+                                    <sup>₹</sup> {pricing.actualPriceAfterDiscount}
                                 </p>
                                 <p className="text-muted small link-underline-hover" onClick={handelOpenAddressList}>
-                                    <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : alert("Sign in to see your addresses", <span>Select delivery location</span>)}</small>
+                                    {
+                                        user ?
+                                            <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : <span>Select delivery location</span>}</small>
+                                            : 
+
+                                            alert("Sign in to see your addresses", <span>Select delivery location</span>)
+                                    }
+
                                 </p>
                                 <p className="text-muted">
                                     <small>Quantity: </small>
-                                    <select onChange={(e) => { setCartQuantity(e.target.value) }} value={cartQuantity} style={{ margin: "0 0 0 4px" }} name="quantity" id="quantity">
+                                    <select onChange={(e) => { handelChangeQuantity(e) }} value={cartQuantity} style={{ margin: "0 0 0 4px" }} name="quantity" id="quantity">
                                         <option value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
