@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../App';
 import AddressList from './Shared/AddressList';
 
 import noDataFound from '../Asset/img/noDataFound.jpg';
 import Animation from './Shared/Animation';
 import handelDataFetch from '../Controller/handelDataFetch';
+import { message } from 'antd';
 
 function Cart() {
 
   const [cart, setCart] = useState([]);
-  const [deliveryPrice, setDeliveryPrice] = useState(90);
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [pricing, setPricing] = useState(null);
 
   const [address, setAddress] = useState(null);
   const [addressList, setAddressList] = useState(null);
@@ -21,7 +21,9 @@ function Cart() {
 
   const { setCartLength } = useContext(UserContext);
 
-  const getDefaultAddress = async () => {
+  const navigate = useNavigate();
+
+  const handelGetDefaultAddress = async () => {
     try {
       const result = await handelDataFetch({ path: '/api/v2/user/default/address', method: "GET" }, setShowAnimation);
 
@@ -35,13 +37,29 @@ function Cart() {
     }
   }
 
+  const handelCalculatePricing = (productArray) => {
+    const totalPriceWithoutDiscount = (productArray.reduce((total, curObj) => total + (curObj.pricing.priceWithoutDiscount * curObj.quantity), 0).toFixed(2));
+    const actualPriceAfterDiscount = (productArray.reduce((total, curObj) => total + (curObj.pricing.priceAfterDiscount * curObj.quantity), 0)).toFixed(2);
+    const discountPrice = (productArray.reduce((total, curObj) => total + (curObj.pricing.discountPrice * curObj.quantity), 0)).toFixed(2);
+    const deliveryPrice = (actualPriceAfterDiscount < 500 ? 90 : 0).toFixed(2)
+
+    const pricing = {
+      totalPriceWithoutDiscount,
+      actualPriceAfterDiscount,
+      discountPrice,
+      deliveryPrice, // calculate the delivery price dynamic
+      totalPrice: (Number(actualPriceAfterDiscount) + Number(deliveryPrice)).toFixed(2)
+    }
+    setPricing(pricing);
+  }
+
   const handleGetAddedCart = async () => {
     try {
       const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
 
       if (result.status) {
-        const cartValues = result.result.reduce((total, curObj) => total + ((curObj.plant.price - curObj.plant.discount / 100 * curObj.plant.price) * curObj.quantity), 0);
-        setTotalPrice(cartValues);
+        // const cartValues = result.result.reduce((total, curObj) => total + ((curObj.plant.price - curObj.plant.discount / 100 * curObj.plant.price) * curObj.quantity), 0);
+        handelCalculatePricing(result.result);
         setCart(result.result);
         setCartLength({ type: "CART", length: result.result.length });
       } else {
@@ -55,10 +73,10 @@ function Cart() {
 
   useEffect(() => {
     handleGetAddedCart();
-    getDefaultAddress();
+    handelGetDefaultAddress();
   }, []);
 
-  const getListOfAddress = async () => {
+  const handelGetListOfAddress = async () => {
     try {
 
       const result = await handelDataFetch({ path: "/api/v2/user/address", method: "GET" }, setShowAnimation);
@@ -113,6 +131,41 @@ function Cart() {
     }
   }
 
+  const handelBuyProduct = async () => {
+    try {
+      const data = {
+        cartOrProducts: cart,
+        pricing,
+        shippingInfo: address
+      }
+
+      const result = await handelDataFetch({ path: "/api/v2/checkout", method: "POST", body: data }, setShowAnimation);
+
+      message.config({
+        top: 100,
+        maxCount: 3,
+        CSSProperties: {
+          backgroundColor: "#000",
+          color: "#fff"
+        }
+      })
+
+      if (result.status) {
+
+        if (address) {
+          navigate("/checkout/confirm");
+        } else {
+          navigate("/checkout/shipping");
+        }
+      } else {
+
+        message.error("An error occurred during order processing");
+      }
+
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <section className='cart bg-section'>
@@ -142,7 +195,7 @@ function Cart() {
                                 <div className='m-0'>
                                   <Link to={`/product/${elem.plant._id}`} className='link-dark link-underline-hover'><h3 className='h5 mb-0'>{elem.plant.plantName}</h3></Link>
                                 </div>
-                                <p className='m-0'><small><Link to={`/nursery/store/view/${elem.plant.nursery}`} className='small link-secondary link-underline-hover'><i className="fas fa-store"></i> {elem.plant.nurseryName}</Link></small></p>
+                                <p className='m-0'><small><Link to={`/nursery/store/view/${elem.nursery._id}`} className='small link-secondary link-underline-hover'><i className="fas fa-store"></i> {elem.nursery.nurseryName}</Link></small></p>
                                 <p className="text-muted small m-0" style={{ fontSize: "14px", margin: "0" }}>
                                   Price: <small className='text-decoration-line-through'>₹ {elem.plant.price}</small>
                                 </p>
@@ -154,7 +207,7 @@ function Cart() {
                               </div>
                               <div className='m-0 d-flex small'>
                                 <p className="m-0 d-none-md">Quantity: </p>
-                                <select defaultValue={`${elem.quantity.toString()}`} onChange={(e) => { handleUpdateCart(elem.plant, e.target.value, elem.price, elem.discount); elem.quantity = e.target.value; }} style={{ margin: "0 0 0 4px" }} name="quantity" id="quantity">
+                                <select value={elem.quantity} onChange={(e) => { handleUpdateCart(elem._id, elem.plant, e.target.value, elem.price, elem.discount); elem.quantity = e.target.value; }} style={{ margin: "0 0 0 4px" }} name="quantity" id="quantity">
                                   <option value="1">1</option>
                                   <option value="2">2</option>
                                   <option value="3">3</option>
@@ -216,7 +269,7 @@ function Cart() {
 
               }
               <div className="d-flex flex-row-reverse p-3">
-                <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{totalPrice}</b></p>
+                <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{pricing && pricing.actualPriceAfterDiscount}</b></p>
               </div>
             </div>
             <div className="m-0 p-0 col-md-4 summary">
@@ -227,9 +280,9 @@ function Cart() {
                 <div className="row">
                   <p className="d-flex justify-content-between">
                     <small>ITEMS {(cart ?? 0) && Number(cart.length)}</small>
-                    <span><small className='small'>Subtotal ₹</small><b>{totalPrice}</b></span>
+                    <span><small className='small'>Subtotal ₹</small><b>{pricing && pricing.actualPriceAfterDiscount}</b></span>
                   </p>
-                  <p className="text-muted small link-underline-hover" onClick={() => { getListOfAddress(); setViewAddressList(!viewAddressList) }}>
+                  <p className="text-muted small link-underline-hover" onClick={() => { handelGetListOfAddress(); setViewAddressList(!viewAddressList) }}>
                     <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : "Select delivery location"}</small>
                   </p>
                   <p className="text-muted mb-0">
@@ -242,36 +295,40 @@ function Cart() {
                   <p className="text-muted border-bottom pb-3">
                     <i className='fas fa-info-circle'></i>
                     {
-                      Math.round(totalPrice) > 500 ?
+                      pricing && pricing.actualPriceAfterDiscount > 500 ?
                         <span className="m-0">
                           <small className='small'> Eligible for FREE Delivery. <Link>Detail</Link></small>
                         </span>
                         :
                         <span className="m-0">
-                          <small className='small'> Add items of </small><small>₹</small><b>{(500 - totalPrice).toFixed(2)}</b><small> to get the for FREE Delivery <Link>Detail</Link></small>
+                          <small className='small'> Add items of </small><small>₹</small><b>{pricing && (500 - Number(pricing.actualPriceAfterDiscount)).toFixed(2)}</b><small> to get the for FREE Delivery <Link>Detail</Link></small>
                         </span>
                     }
 
                   </p>
                   <div className="row border-bottom pb-2">
                     <p className="text-muted d-flex justify-content-between">
-                      <small>Subtotal : </small>
-                      <span>₹<b>{totalPrice}</b></span>
+                      <small>Total : </small>
+                      <span>₹<b>{pricing && pricing.totalPriceWithoutDiscount}</b></span>
+                    </p>
+                    <p className="text-muted d-flex justify-content-between">
+                      <small>Discount : </small>
+                      <span>- ₹<b>{pricing && pricing.discountPrice}</b></span>
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Delivery : </small>
-                      {totalPrice < 500 ?
-                        <span>₹<b>{deliveryPrice.toFixed(2)}</b></span> // need to be dynamic here
-                        :
-                        <span>₹<b>0</b></span> // need to be dynamic here
-                      }
+                      <span>₹<b>{pricing && pricing.deliveryPrice}</b></span>
+                    </p>
+                    <p className="text-muted d-flex justify-content-between">
+                      <small>Subtotal : </small>
+                      <span>₹<b>{pricing && pricing.actualPriceAfterDiscount}</b></span>
                     </p>
                   </div>
                   <div className="d-flex flex-row-reverse p-3">
-                    <p className="h5">Total: <sup>₹</sup>{totalPrice < 500 && totalPrice > 0 ? totalPrice + deliveryPrice : totalPrice}</p>
+                    <p className="h5">Total: <sup>₹</sup>{pricing && pricing.totalPrice}</p>
                   </div>
                   <div className="row m-0">
-                    <button className="btn btn-success">Checkout</button>
+                    <button onClick={handelBuyProduct} className="btn btn-success">Checkout</button>
                   </div>
                 </div>
               </div>
@@ -279,7 +336,7 @@ function Cart() {
           </div>
         </div>
       </div>
-      {viewAddressList && <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} />}
+      {viewAddressList && <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} redirect={"/?redirect=/cart"} />}
       {showAnimation && <Animation />}
     </section>
   )
