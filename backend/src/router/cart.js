@@ -1,8 +1,6 @@
 const express = require("express");
 
 const cartModel = require('../model/cart');
-const plantModel = require('../model/plants');
-const nurseryModel = require('../model/nursery');
 
 const router = express.Router();
 
@@ -46,7 +44,7 @@ router.route('/carts')
     }).get(async (req, res) => {
         try {
             if (req.user) {
-                const result = await cartModel.find({ user: req.user }).populate('plant');
+                const result = await cartModel.find({ user: req.user }).populate('plant').populate('nursery');
 
                 if (result.length > 0) {
                     const info = {
@@ -84,7 +82,6 @@ router.route('/carts')
 router.route('/carts/:id')
     .get(async (req, res) => {
         try {
-            console.log(true);
             if (req.user) {
                 const _id = req.params.id;
                 const result = await cartModel.findOne({ _id });
@@ -198,7 +195,7 @@ router.get('/isPlantsAddedToCart/:plantId', auth, async (req, res) => {
         if (req.user) {
             const plant = req.params.plantId;
 
-            const result = await cartModel.findOne({plant});
+            const result = await cartModel.findOne({ user: req.user, plant });
 
             if (result) {
                 const info = {
