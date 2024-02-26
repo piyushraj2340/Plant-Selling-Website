@@ -17,17 +17,45 @@ const cartSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "plant",
         required: [true, "PlantId is required."],
-        unique: [true, "Plant is already in your cart."],
         immutable: true
     },
     quantity: {
         type: Number,
         default: 1,
         require: [true, "Cart quantity is required."],
+        validate(quantity) {
+            if(quantity < 1) throw new Error("Cart should not be less than 1.");
+        }
     },
-    addedAtPrice: {
-        type: Number,
-        required: [true, "Cart Added at Price is required."],
+    pricing: {
+        priceWithoutDiscount: {
+            type: Number,
+            required: [true, "priceWithoutDiscount is required."],
+            validate(price) {
+                if(price < 0) throw new Error("Price must be greater than zero.");
+            }
+        },
+        priceAfterDiscount: {
+            type: Number,
+            required: [true, "priceAfterDiscount is required."],
+            validate(price) {
+                if(price < 0) throw new Error("Price must be greater than zero.");
+            }
+        },
+        discount: {
+            type: Number,
+            required: [true, "discount is required."],
+            validate(price) {
+                if(price < 0) throw new Error("Price must be greater than zero.");
+            }
+        },
+        discountPrice: {
+            type: Number,
+            required: [true, "discountPrice is required."],
+            validate(price) {
+                if(price < 0) throw new Error("Price must be greater than zero.");
+            }
+        },
     },
     addedAt: {
         type: Date,
