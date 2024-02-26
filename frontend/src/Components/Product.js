@@ -183,10 +183,59 @@ const Product = () => {
         setViewAddressList(!viewAddressList);
     }
 
+    const handelBuyProduct = async () => {
+        try {
+            const data = {
+                cartOrProducts: [
+                    {
+                        plant: {
+                            _id: product._id,
+                            plantName: product.plantName,
+                            images: product.images,
+                            discount: product.discount,
+                            price: product.price,
+                        },
+                        nursery: product.nursery,
+                        quantity: cartQuantity
+                    }
+                ],
+                pricing,
+                shippingInfo: address
+            }
+
+            const result = await handelDataFetch({ path: "/api/v2/checkout", method: "POST", body: data }, setShowAnimation);
+
+            message.config({
+                top: 100,
+                maxCount: 3,
+                CSSProperties: {
+                    backgroundColor: "#000",
+                    color: "#fff"
+                }
+            })
+
+
+
+            if (result.status) {
+                if (address) {
+                    navigate("/checkout/confirm");
+                } else {
+                    navigate("/checkout/shipping");
+                }
+            } else {
+
+                message.error("An error occurred during order processing");
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
 
     const loginAlertUI = (
         <div>
-            <Link to='/login' className='btn btn-sm btn-warning'>Login</Link>
+            <Link to={`/login/${product && '?redirect=/product/' + product._id}`} className='btn btn-sm btn-warning'>Login</Link>
         </div>
     )
 
@@ -310,7 +359,7 @@ const Product = () => {
                                 <p className="card-text">
                                     {
                                         user ?
-                                            !(user._id === product.user) && <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>
+                                            !(user._id === product.user) && <button onClick={handelBuyProduct} style={{ width: "100%" }} className='btn btn-success'>Order Now</button>
                                             :
                                             alert("Sign in to buy this plant", <button style={{ width: "100%" }} className='btn btn-success'>Order Now</button>)
                                     }
