@@ -1,4 +1,4 @@
-import { Route, Routes } from "react-router-dom";
+import { Route, Routes,  } from "react-router-dom";
 import React, { createContext, useEffect, useReducer, useState } from "react";
 
 // styling  
@@ -38,6 +38,7 @@ import Confirm from "./Components/Confirm";
 import EditPlants from "./Components/EditPlants";
 import { message } from "antd";
 import handelDataFetch from "./Controller/handelDataFetch";
+import ScrollToTop from "./Components/ScrollToTop";
 
 
 
@@ -134,6 +135,7 @@ function App() {
     <>
       <UserContext.Provider value={{ isUserLogin, setIsUserLogin, cartLength, setCartLength }}>
         <Navigation />
+        <ScrollToTop />
         <div style={{ marginTop: "70px" }}>
           <Routing />
         </div>
