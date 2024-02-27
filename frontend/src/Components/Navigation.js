@@ -84,16 +84,16 @@ const Navigation = () => {
                     </div>
                     <div className="navbar-nav d-flex justify-content-end">
                         <div className="nav-item">
-                            <Link className="nav-link d-flex" to="/products">Products</Link>
+                            <Link className="nav-link d-flex" to="/products" onClick={() => setNavBarToggle(false)}>Products</Link>
                         </div>
                         <div className="nav-item">
-                            <Link className="nav-link" to="/contact-us">Contact Us</Link>
+                            <Link className="nav-link" to="/contact-us" onClick={() => setNavBarToggle(false)}>Contact Us</Link>
                         </div>
                         <div className="nav-item">
-                            <Link className="nav-link" to={`${isUserLogin ? "/profile" : "/login"}`}><i className='fas fa-user-alt'></i>{isUserLogin ? " Profile" : " Login"}</Link>
+                            <Link className="nav-link" to={`${isUserLogin ? "/profile" : "/login"}`} onClick={() => setNavBarToggle(false)}><i className='fas fa-user-alt'></i>{isUserLogin ? " Profile" : " Login"}</Link>
                         </div>
                         <div className="nav-item">
-                            <Link style={{ position: "relative" }} className="nav-link" to="/cart">
+                            <Link style={{ position: "relative" }} className="nav-link" to="/cart" onClick={() => setNavBarToggle(false)}>
                                 <i style={{ fontSize: "23px" }} className="fas fa-shopping-cart small"> </i>
                                 <span style={{ fontSize: "10px", position: "absolute", top: "0px", left: "18px" }} className='badge bg-success'>{cartLength??0}</span>
                                 <span> Cart</span>
