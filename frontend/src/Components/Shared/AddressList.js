@@ -1,6 +1,8 @@
 import React from 'react'
+import noPlantsImage from '../../Asset/img/noDataFound.jpg';
+import { Link } from 'react-router-dom';
 
-function AddressList({ addressList, setSelectedAddress, setViewAddressList, viewAddressList }) {
+function AddressList({ addressList, setSelectedAddress, setViewAddressList, viewAddressList, redirect }) {
 
     return (
         <div className="address-list-container-open p-2 p-md-4 position-fixed d-flex justify-content-center align-items-center">
@@ -13,8 +15,21 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
                         <i className="fas fa-times"></i>
                     </p>
                 </div>
-               <div className="p-3 address-list">
-                     <p>Select a delivery location to see product availability and delivery options</p>
+                <div className="p-3 address-list">
+                    <p>Select a delivery location to see product availability and delivery options</p>
+
+                    {
+                        addressList && 
+
+                        <div className="container">
+                            <div className="d-flex">
+                            <Link to={`/address/new${redirect}`} className='btn btn-success btn-lg w-100'><i className="fas fa-plus"></i> New Address</Link>
+                            </div>
+                        </div>
+
+
+                    }
+
                     {
                         addressList &&
 
@@ -28,6 +43,24 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
                                 </div>
                             )
                         })
+                    }
+
+                    {
+                        !addressList &&
+
+                        <div className="container">
+                            <div className="row">
+                                <div className="d-flex justify-content-center">
+                                    <img src={noPlantsImage} style={{ maxHeight: "60vh" }} alt="no plants data found" className='img-fluid' />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="d-flex d-flex flex-column align-items-center">
+                                    <h3 className="h3" style={{ fontFamily: "cursive" }}>No Address Found!</h3>
+                                    <Link to={`/address/new${redirect}`} className='btn btn-primary'><i className="fas fa-plus"></i> New Address</Link>
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
             </div>
