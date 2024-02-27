@@ -104,7 +104,7 @@ function Profile() {
                                                 <p className="mb-0">Manage Your Address</p>
                                             </li>
                                         </Link>
-                                        <Link to={isNurseryRegister ? "/nursery" : "/nursery/add"}>
+                                        <Link to={isNurseryRegister ? "/nursery" : "/nursery/create"}>
                                             <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                                                 <i className="fas fa-tree fa-lg text-warning"></i>
                                                 <p className="mb-0">{isNurseryRegister ? "Manage Your Nursery" : "Add Your Nursery"}</p>
@@ -228,7 +228,7 @@ function Profile() {
                                         <div className="card-footer">
                                             <div className="d-flex justify-content-around">
                                                 <p className="mt-3 d-flex justify-content-center">
-                                                    <Link to={'/address/add'} className='btn btn-light'><i className="fas fa-plus"></i> Add Address</Link>
+                                                    <Link to={'/address/new'} className='btn btn-light'><i className="fas fa-plus"></i> Add Address</Link>
                                                 </p>
                                                 <p className="mt-3 d-flex justify-content-center">
                                                     <Link to={'/address'} className='btn btn-light'><i className="fas fa-angle-double-right"></i> View More</Link>

@@ -382,7 +382,7 @@ function NurseryProfile() {
                                                 <Link to={'/dashboard'} className="btn btn-sm btn-light border-dark d-flex align-items-center"><i className="material-symbols-outlined me-1" style={{ fontSize: "20px" }}>dashboard</i> Dashboard</Link>
                                             </div>
                                             <div className="mx-1 my-1">
-                                                <Link to={'/nursery/plant/add'} className="btn btn-sm btn-light border-dark"><i className="fas fa-plus"></i> Plants</Link>
+                                                <Link to={'/nursery/plant/new'} className="btn btn-sm btn-light border-dark"><i className="fas fa-plus"></i> Plants</Link>
                                             </div>
                                             <div className="mx-1 my-1">
                                                 <Link to={`/nursery/update/${nursery._id}`} className="btn btn-sm btn-light border-dark"><i className="fas fa-pen"></i> Nursery</Link>
@@ -398,7 +398,7 @@ function NurseryProfile() {
                                                     <Link to={'/dashboard'} className="d-flex align-items-center"><i className="material-symbols-outlined me-1" style={{ fontSize: "20px" }}>dashboard</i> Dashboard</Link>
                                                 </div>
                                                 <div className="p-2 border-bottom">
-                                                    <Link to={'/nursery/plant/add'}><i className="fas fa-plus"></i> Plants</Link>
+                                                    <Link to={'/nursery/plant/new'}><i className="fas fa-plus"></i> Plants</Link>
                                                 </div>
                                                 <div className="p-2 border-bottom">
                                                     <Link to={`/nursery/update/${nursery._id}`}><i className="fas fa-pen"></i> Nursery</Link>
@@ -416,7 +416,7 @@ function NurseryProfile() {
                                                     <Link to={`/nursery/order`}><i className="fas fa-history"></i> Manage Order</Link>
                                                 </div>
                                                 <div className="p-2 border-bottom">
-                                                    <Link to={`/nursery/plant/add`}><i className="fas fa-tree"></i> Add Plant</Link>
+                                                    <Link to={`/nursery/plant/new`}><i className="fas fa-tree"></i> Add Plant</Link>
                                                 </div>
                                                 <div className="p-2 border-bottom">
                                                     <Link to={`/nursery/settings`}><i className="fa fa-gear"></i> Settings</Link>
@@ -455,7 +455,7 @@ function NurseryProfile() {
                                                 <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Manage Your Orders</p>
                                             </div>
                                         </Link>
-                                        <Link to={"/nursery/plant/add"}>
+                                        <Link to={"/nursery/plant/new"}>
                                             <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Add Selling Plants'>
                                                 <i className="fas fa-tree fa-lg text-warning"></i>
                                                 <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Add Selling Plants</p>

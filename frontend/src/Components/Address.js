@@ -102,7 +102,7 @@ function Address() {
           <div className="row address-container">
             <div className="col-sm-12 col-md-6 col-lg-4 address-list address-add my-2">
               <div className="address-add-btn w-100">
-                <Link to={'/address/add'} className='btn btn-secondary border'><i className="fas fa-plus"></i> <span>Add New Address</span></Link>
+                <Link to={'/address/new'} className='btn btn-secondary border'><i className="fas fa-plus"></i> <span>Add New Address</span></Link>
               </div>
             </div>
             {list}
