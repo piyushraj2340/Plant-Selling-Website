@@ -1,4 +1,4 @@
-import { Route, Routes,  } from "react-router-dom";
+import { Route, Routes, } from "react-router-dom";
 import React, { createContext, useEffect, useReducer, useState } from "react";
 
 // styling  
@@ -140,6 +140,9 @@ function App() {
         <div style={{ marginTop: "70px" }}>
           <Routing />
         </div>
+        {
+          showAnimation && <Animation />
+        }
       </UserContext.Provider>
       <Footer />
     </>

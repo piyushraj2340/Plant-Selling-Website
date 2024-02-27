@@ -11,25 +11,27 @@ import { Popover, message } from 'antd';
 
 const Product = () => {
 
-    const [cart, setCart] = useState(null);
-    const [cartQuantity, setCartQuantity] = useState(1);
+    const [product, setProduct] = useState(null);
+
+    const [user, setUser] = useState(null);
+    
     const [address, setAddress] = useState(null);
     const [addressList, setAddressList] = useState(null);
     const [viewAddressList, setViewAddressList] = useState(false);
+
+    const [cart, setCart] = useState(null);
+    const [cartQuantity, setCartQuantity] = useState(1);
+
     const [pricing, setPricing] = useState(null);
-    const [user, setUser] = useState(null);
 
     const params = useParams();
     const productId = params.id;
-
-    const [product, setProduct] = useState(null);
-    const [nurseryName, setNurseryName] = useState("store name");
 
     const [showAnimation, setShowAnimation] = useState(false);
 
     const [viewImgByIndex, setViewImgByIndex] = useState(0);
 
-    const { setCartLength } = useContext(UserContext);
+    const {isUserLogin, setCartLength } = useContext(UserContext);
 
     const navigate = useNavigate();
 
@@ -63,12 +65,28 @@ const Product = () => {
         }
     }
 
+    const handelGetDefaultAddress = async () => {
+        try {
+            const result = await handelDataFetch({ path: "/api/v2/user/default/address", method: "GET" }, setShowAnimation);
+
+            if (result.status) {
+                setAddress(result.result);
+            } else {
+                throw new Error(result.message);
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
     const handelUserData = async () => {
         try {
             const result = await handelDataFetch({ path: '/api/v2/user/profile', method: "GET" }, setShowAnimation);
 
             if (result.status) {
+                handleIsProductIsAddedToCart();
                 handleGetAddedCart();
+                handelGetDefaultAddress();
                 setUser(result.result);
             } else {
                 setCartLength({ type: "CART", length: null });
@@ -110,21 +128,6 @@ const Product = () => {
                 setCartQuantity(quantity);
                 handelCalculatePricing(quantity, result.result);
                 setProduct(result.result);
-                setNurseryName(result.result.nurseryName);
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            console.log(error);
-        }
-    }
-
-    const handelGetDefaultAddress = async () => {
-        try {
-            const result = await handelDataFetch({ path: "/api/v2/user/default/address", method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setAddress(result.result);
             } else {
                 throw new Error(result.message);
             }
@@ -134,10 +137,8 @@ const Product = () => {
     }
 
     useEffect(() => {
-        handleIsProductIsAddedToCart();
         handleGetProductData();
-        handelGetDefaultAddress();
-        handelUserData();
+        isUserLogin && handelUserData();
     }, []);
 
     document.title = product ? product.plantName : "Plant info";
