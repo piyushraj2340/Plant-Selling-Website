@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom';
 import handelDataFetch from '../Controller/handelDataFetch';
 import Animation from './Shared/Animation';
+import { message } from 'antd';
 
 
 function AddAddress() {
@@ -106,7 +107,7 @@ function AddAddress() {
         handelProfileData();
     }, [])
 
-    const handlePostData = async (e) => {
+    const handleAddNewAddress = async (e) => {
         try {
             e.preventDefault();
 
@@ -122,10 +123,13 @@ function AddAddress() {
                 const result = await handelDataFetch({ path: '/api/v2/user/address', method: "POST", body: address }, setShowAnimation);
 
                 if (result.status) {
-                    navigate('/address');
+                    const [redirect, to] = window.location.search && window.location.search.split("=");
+                    navigate(redirect === "?redirect" ? to : "/address");
+                } else {
+                    throw new Error(result.message);
                 }
             } else {
-                alert("Input should not be empty.");
+                message.warning("Input should not be empty.")
             }
         } catch (error) {
             console.log(error);
@@ -137,7 +141,7 @@ function AddAddress() {
             <div className="container my-5 d-flex justify-content-center" >
                 <div className="col-sm-12 col-md-9 mt-5 border py-3">
                     <h3 className='h3 mb-3 text-center'>
-                        Add Your Address
+                        Add Your Shipping Address
                     </h3>
                     <div className="row p-4">
                         <form method="POST">
@@ -197,7 +201,7 @@ function AddAddress() {
                                 </label>
                             </div>
 
-                            <button onClick={handlePostData} type="submit" className="btn btn-primary btn-block mb-2">Add New Address</button>
+                            <button onClick={handleAddNewAddress} type="submit" className="btn btn-primary btn-block mb-2"><i className="fas fa-plus"></i> New Address</button>
                         </form>
                     </div>
                 </div>

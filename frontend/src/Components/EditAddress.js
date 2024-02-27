@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
 import handelDataFetch from '../Controller/handelDataFetch';
 import Animation from './Shared/Animation';
+import { message } from 'antd';
 
 
 
@@ -142,12 +143,13 @@ function EditAddress() {
                 const result = await handelDataFetch({path: `/api/v2/user/address/${id}`, method: "PATCH", body: address}, setShowAnimation);
 
                 if (result.status) {
-                    navigate('/address');
+                    const [redirect, to] = window.location.search && window.location.search.split("=");
+                    navigate(redirect === "?redirect" ? to : "/address");
                 } else {
-                    navigate('/login');
+                    throw new Error(result.message);
                 }
             } else {
-                alert("Input should not be empty.");
+                message.warning("Input should not be empty.")
             }
         } catch (error) {
             console.log(error);
@@ -159,7 +161,7 @@ function EditAddress() {
             <div className="container my-5 d-flex justify-content-center" >
                 <div className="col-sm-12 col-md-9 mt-5 border py-3">
                     <h3 className='h3 mb-3 text-center'>
-                        Add Your Address
+                        Edit Your Shipping Address
                     </h3>
                     <div className="row p-4">
                         <form method="POST">
@@ -219,7 +221,7 @@ function EditAddress() {
                                 </label>
                             </div>
 
-                            <button onClick={handlePostData} type="submit" className="btn btn-primary btn-block mb-2">Edit Your Address</button>
+                            <button onClick={handlePostData} type="submit" className="btn btn-primary btn-block mb-2"><i className="fas fa-edit"></i> Your Address</button>
                         </form>
                     </div>
                 </div>

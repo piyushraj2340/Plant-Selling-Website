@@ -56,7 +56,8 @@ function Login() {
             const result = await handelDataFetch({ path: "/api/v2/auth", method: "GET" }, setShowAnimation);
 
             if (result.status) {
-                navigate('/profile')
+                const [redirect, to] = window.location.search && window.location.search.split("=");
+                navigate(redirect === "?redirect"? to : "/profile");
             }
         } catch (error) {
             console.log(error);
@@ -89,8 +90,11 @@ function Login() {
 
             if (result.status) {
                 setLoginStatus({ ...loginStatus, status: true, message: result.message })
+
+                const [redirect, to] = window.location.search && window.location.search.split("=");
+                
                 setTimeout(() => {
-                    navigate('/profile');
+                    navigate(redirect === "?redirect"? to : "/profile");
                 }, 500);
             } else {
                 setLoginStatus({ ...loginStatus, status: false, message: result.message });
