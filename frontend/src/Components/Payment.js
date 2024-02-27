@@ -58,12 +58,12 @@ const Payment = ({ amount }) => {
   return (
     <>
 
-      <div className="container py-5">
+      <div className="py-5">
         <div className="d-flex justify-content-center align-items-center">
-          <div className="col col-md-9 col-lg-6 bg-light p-2 p-3 rounded">
-            <h4 className='h4 text-center'>Card Information</h4>
+          <div className="col col-md-9 col-lg-6 p-2 p-3 rounded bg-dark">
+            <h4 className='h4 text-center text-warning'>Card Information</h4>
             {errorMessage && <div className='text-center mt-2 p-2 text-danger'>{errorMessage}</div>}
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className='bg-dark rounded p-2'>
               <PaymentElement options={{
                 layout: {
                   type: 'accordion',
@@ -71,7 +71,7 @@ const Payment = ({ amount }) => {
                 },
               }} />
               <button ref={payBtn} type="submit" disabled={!stripe || !elements} className='btn btn-primary w-100 mt-2'>
-                Pay - ₹{Number(amount).toFixed(2)}
+                Pay - ₹{(Number(amount) /  100).toFixed(2)}
               </button>
             </form>
           </div>
