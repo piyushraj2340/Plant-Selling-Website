@@ -64,6 +64,7 @@ function Cart() {
         setCartLength({ type: "CART", length: result.result.length });
       } else {
         setCart([]);
+        setPricing(null);
         throw new Error(result.message);
       }
     } catch (error) {
