@@ -1,5 +1,5 @@
 import { Route, Routes } from "react-router-dom";
-import React, { createContext, useReducer } from "react";
+import React, { createContext, useEffect, useReducer, useState } from "react";
 
 // styling  
 import "./Asset/Style/Style.scss"
@@ -37,6 +37,7 @@ import Shipping from "./Components/Shipping";
 import Confirm from "./Components/Confirm";
 import EditPlants from "./Components/EditPlants";
 import { message } from "antd";
+import handelDataFetch from "./Controller/handelDataFetch";
 
 
 
@@ -81,22 +82,42 @@ const Routing = () => {
 }
 
 function App() {
-  const [loginLogout, setLoginLogout] = useReducer(reducer, initialState);
+  const [isUserLogin, setIsUserLogin] = useReducer(reducer, initialState);
   const [cartLength, setCartLength] = useReducer(reducer, initialState);
+
+  const [showAnimation, setShowAnimation] = useState(false);
 
   // global configuration antd to alert the message to users
   message.config({
     top: 75,
     maxCount: 3,
     CSSProperties: {
-        backgroundColor: "#000",
-        color: "#fff"
+      backgroundColor: "#000",
+      color: "#fff"
     }
-})
+  })
+
+  const handleVerification = async () => {
+    try {
+      const result = await handelDataFetch({ path: '/api/v2/auth', method: 'GET' }, setShowAnimation);
+
+      if (result.status) {
+        setIsUserLogin({ type: "USER", payload: true });
+      } else {
+        setIsUserLogin({ type: "USER", payload: false });
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  useEffect(() => {
+    handleVerification();
+  }, []);
 
   return (
     <>
-      <UserContext.Provider value={{ loginLogout, setLoginLogout, cartLength, setCartLength }}>
+      <UserContext.Provider value={{ isUserLogin, setIsUserLogin, cartLength, setCartLength }}>
         <Navigation />
         <div style={{ marginTop: "70px" }}>
           <Routing />
