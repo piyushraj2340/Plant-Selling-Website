@@ -9,7 +9,7 @@ import handelDataFetch from '../Controller/handelDataFetch';
 function Signup() {
     document.title = "Signup";
 
-    const { setLoginLogout } = useContext(UserContext);
+    const { setIsUserLogin } = useContext(UserContext);
 
     const [signUpStatus, setSignUpStatus] = useState({
         status: "",
@@ -40,14 +40,16 @@ function Signup() {
 
     const handleVerification = async () => {
         try {
-            const result = await handelDataFetch({ path: '/api/v2/auth', method: 'POST' }, setShowAnimation);
+            const result = await handelDataFetch({ path: '/api/v2/auth', method: 'GET' }, setShowAnimation);
 
             if (result.status) {
+                setIsUserLogin({ type: "USER", payload: true });
                 navigate('/profile');
+            } else {
+                setIsUserLogin({ type: "USER", payload: false });
             }
         } catch (err) {
             console.log(err);
-
         }
     }
 
@@ -74,13 +76,13 @@ function Signup() {
             const result = await handelDataFetch({ path: "/api/v2/auth/sign-up", method: "POST", body: user }, setShowAnimation);
 
             if (result.status) {
-                setLoginLogout({ type: "USER", payload: true });
+                setIsUserLogin({ type: "USER", payload: true });
                 setSignUpStatus({ status: true, message: result.message })
                 setTimeout(() => {
                     navigate('/profile');
                 }, 1000);
             } else {
-                setLoginLogout({ type: "USER", payload: false });
+                setIsUserLogin({ type: "USER", payload: false });
                 setSignUpStatus({ status: false, message: result.message });
                 setUser({ ...user, password: "", confirmPassword: "" });
             }

@@ -6,7 +6,7 @@ import { UserContext } from '../App';
 
 
 const Navigation = () => {
-    const { loginLogout, cartLength } = useContext(UserContext);
+    const { isUserLogin, cartLength } = useContext(UserContext);
 
     const [viewSearchFilter, setViewSearchFilter] = useState(false);
     const [navBarToggle, setNavBarToggle] = useState(false);
@@ -90,7 +90,7 @@ const Navigation = () => {
                             <Link className="nav-link" to="/contact-us">Contact Us</Link>
                         </div>
                         <div className="nav-item">
-                            <Link className="nav-link" to={`${loginLogout ? "/profile" : "/login"}`}><i className='fas fa-user-alt'></i>{loginLogout ? " Profile" : " Login"}</Link>
+                            <Link className="nav-link" to={`${isUserLogin ? "/profile" : "/login"}`}><i className='fas fa-user-alt'></i>{isUserLogin ? " Profile" : " Login"}</Link>
                         </div>
                         <div className="nav-item">
                             <Link style={{ position: "relative" }} className="nav-link" to="/cart">

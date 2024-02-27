@@ -10,7 +10,7 @@ import handelDataFetch from '../Controller/handelDataFetch';
 function Login() {
     document.title = "Login";
 
-    const { setLoginLogout, setCartLength } = useContext(UserContext);
+    const { setIsUserLogin, setCartLength } = useContext(UserContext);
 
     const [loginStatus, setLoginStatus] = useState({
         status: "",
@@ -57,7 +57,10 @@ function Login() {
 
             if (result.status) {
                 const [redirect, to] = window.location.search && window.location.search.split("=");
+                setIsUserLogin({ type: "USER", payload: true });
                 navigate(redirect === "?redirect"? to : "/profile");
+            } else {
+                setIsUserLogin({ type: "USER", payload: false });
             }
         } catch (error) {
             console.log(error);
@@ -89,7 +92,9 @@ function Login() {
             const result = await handelDataFetch({ path: "/api/v2/auth/sign-in", method: "POST", body: user }, setShowAnimation);
 
             if (result.status) {
-                setLoginStatus({ ...loginStatus, status: true, message: result.message })
+                setLoginStatus({ ...loginStatus, status: true, message: result.message });
+
+                setIsUserLogin({ type: "USER", payload: true });
 
                 const [redirect, to] = window.location.search && window.location.search.split("=");
                 
@@ -98,6 +103,7 @@ function Login() {
                 }, 500);
             } else {
                 setLoginStatus({ ...loginStatus, status: false, message: result.message });
+                setIsUserLogin({ type: "USER", payload: false });
                 setUser({ ...user, password: "" });
             }
 

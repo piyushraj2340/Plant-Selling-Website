@@ -8,7 +8,7 @@ function Logout() {
     document.title = "Logout";
     const navigate = useNavigate();
 
-    const { setLoginLogout, setCartLength } = useContext(UserContext);
+    const { setIsUserLogin, setCartLength } = useContext(UserContext);
 
     
     const [showAnimation, setShowAnimation] = useState(false);
@@ -19,9 +19,8 @@ function Logout() {
 
             if (result.status) {
                 setCartLength({ type: "CART", length: null });
-                setLoginLogout({ type: "USER", payload: false });
-            } 
-            
+                setIsUserLogin({ type: "USER", payload: false });
+            }            
         } catch (error) {
             console.log(error);
         } finally {
