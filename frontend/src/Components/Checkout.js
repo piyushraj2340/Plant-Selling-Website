@@ -5,12 +5,10 @@ import Payment from './Payment'
 import handelDataFetch from '../Controller/handelDataFetch';
 import Animation from './Shared/Animation';
 import { useNavigate } from 'react-router-dom';
-import { Steps } from 'antd';
-
+import { Steps, message } from 'antd';
 
 
 const Checkout = () => {
-
   const [clientKey, setClientKey] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [amount, setAmount] = useState(null);
@@ -19,28 +17,16 @@ const Checkout = () => {
 
   const navigate = useNavigate();
 
-  const handelChangeActiveStep = (step) => {
-    if(step > activeStep) return;
-    
-    switch (step) {
-      case 0: navigate('/checkout/shipping');
-        break;
-      case 1: navigate('/checkout/confirm');
-        break;
-      case 2: navigate('/checkout/payment');
-        break;
-      default: navigate('/');
-    }
-  }
-
   const stepsOptions = [
     {
       title: 'Shipping Details',
       icon: <span className='fas fa-shipping-fast'></span>,
+      disabled: true,
     },
     {
       title: 'Confirm Order',
       icon: <span className='	fas fa-check-square'></span>,
+      disabled: true
     },
     {
       title: 'Payment',
@@ -57,11 +43,12 @@ const Checkout = () => {
       if (result) {
         setClientKey(result.result.stripeApiKey);
       } else {
-        navigate('/login');
+        message.error("Invalid Payment Session!.")
         throw new Error(result.message)
       }
     } catch (error) {
       console.log(error);
+      navigate('/');
     }
   }
 
@@ -72,18 +59,19 @@ const Checkout = () => {
         setClientSecret(result.result.client_secret);
         setAmount(result.result.amount);
       } else {
-        navigate('/login');
-        throw new Error(result.message)
+        message.error("Invalid Payment Session!.")
+        throw new Error(result.message);
       }
     } catch (error) {
       console.log(error);
+      navigate('/');
     }
   }
 
 
   useEffect(() => {
-    // handelGetClientKey();
-    // handelClientSecretKey();
+    handelGetClientKey();
+    handelClientSecretKey();
   }, []);
 
   return (
@@ -91,26 +79,51 @@ const Checkout = () => {
 
       <div className='container bg-section h-100 py-4'>
         <div className='py-2 py-md-4 border-bottom px-2 px-md-4'>
-          <Steps items={stepsOptions} current={activeStep} onChange={handelChangeActiveStep} />
+          <Steps items={stepsOptions} current={activeStep} />
         </div>
+
+        {
+          (clientKey && clientSecret) ?
+            <Elements stripe={loadStripe(clientKey)} options={{
+              clientSecret,
+              appearance: {
+                theme: 'night',
+                labels: 'floating',
+              },
+              loader: "always"
+            }} >
+              <Payment amount={amount} />
+
+            </Elements>
+            :
+            
+            // loading animation while waiting to Loading the payment Element.
+            <div className='d-flex h-50 justify-content-center align-items-center'>
+              <div className="spinner-grow text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="spinner-grow text-secondary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="spinner-grow text-success" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="spinner-grow text-danger" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="spinner-grow text-warning" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="spinner-grow text-info" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <div className="spinner-grow text-dark" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+        }
       </div>
 
-
-
-      {/* {
-        (clientKey && clientSecret) ?
-        <Elements stripe={loadStripe(clientKey)} options={{
-          clientSecret, 
-          appearance: {
-            theme: 'stripe',
-            labels: 'floating',
-          }}} >
-          <Payment amount={amount}/>
-        </Elements>
-        :
-
-        <div>Payment Form not found!...</div>
-      } */}
       {
         showAnimation && <Animation />
       }
