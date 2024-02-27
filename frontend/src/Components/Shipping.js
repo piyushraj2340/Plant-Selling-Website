@@ -2,7 +2,8 @@ import React, { useEffect, useState } from 'react'
 import handelDataFetch from '../Controller/handelDataFetch';
 import Animation from './Shared/Animation';
 import { Link, useNavigate } from 'react-router-dom';
-import { Steps } from 'antd';
+import { Steps, message } from 'antd';
+import noPlantsImage from '../Asset/img/noDataFound.jpg';
 
 
 
@@ -15,8 +16,8 @@ const Shipping = () => {
     const navigate = useNavigate();
 
     const handelChangeActiveStep = (step) => {
-        if(step > activeStep) return;
-        
+        if (step > activeStep) return;
+
         switch (step) {
             case 0: navigate('/checkout/shipping');
                 break;
@@ -43,20 +44,60 @@ const Shipping = () => {
         }
     }
 
-    const handelChangeAddress = (_id) => {
-        const address = addressList.find((address) => address._id === _id);
-        const addressString = JSON.stringify(address);
-        localStorage.setItem("shippingAddress", addressString);
-        setSelectedAddress(address);
+    const handelValidateOrder = async () => {
+        try {
+            const data = await handelDataFetch({ path: "/api/v2/checkout", method: "GET" }, setShowAnimation);
+            if (!data.status) {
+                message.error("Invalid Order Session!.")
+                navigate("/");
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handelChangeAddress = async (_id) => {
+        try {
+            const address = addressList.find((address) => address._id === _id);
+            const response = await handelDataFetch({ path: "/api/v2/checkout/shipping", method: "POST", body: address }, setShowAnimation);
+
+            if (response.status) {
+                navigate('/checkout/confirm')
+            } else {
+                message.config({
+                    top: 100,
+                    maxCount: 3,
+                    CSSProperties: {
+                        backgroundColor: "#000",
+                        color: "#fff"
+                    }
+                })
+
+                message.error("Invalid Order Session.");
+                navigate('/')
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handelGetSelectedAddress = async () => {
+        try {
+            const data = await handelDataFetch({ path: "/api/v2/checkout/shipping", method: "GET" }, setShowAnimation);
+
+            if (data.status) {
+                setSelectedAddress(data.result);
+            }
+
+        } catch (error) {
+            console.log(error);
+        }
     }
 
     useEffect(() => {
         handelGetListOfAddress();
-        const selectedAddressJSON = localStorage.getItem("shippingAddress")
-        if(!selectedAddressJSON) {
-            navigate("/");
-        }
-        setSelectedAddress(JSON.parse(selectedAddressJSON));
+        handelValidateOrder();
+        handelGetSelectedAddress();
     }, [])
 
     const stepsOptions = [
@@ -82,7 +123,7 @@ const Shipping = () => {
                 </div>
                 <div className="d-flex flex-column justify-content-start align-items-start">
                     <div className='p-2 p-md-3 w-100'>
-                        <Link to="/address/add" className="btn btn-success btn-lg w-100">Add New Address</Link>
+                        <Link to={`/address/new/?redirect=/checkout/shipping`} className="btn btn-success btn-lg w-100">Add New Address</Link>
                     </div>
                     <h3 className="h3 p-2 p-md-3">List of all the address.</h3>
                     {
@@ -90,7 +131,7 @@ const Shipping = () => {
 
                         addressList.map((address) => {
                             return (
-                                <div key={address._id} onClick={() => handelChangeAddress(address._id)} className={`p-2 p-md-3 border rounded w-100 m-0 mb-2 border-secondary address-list ${address._id === selectedAddress._id && ' active-address'}`}>
+                                <div key={address._id} onClick={() => handelChangeAddress(address._id)} className={`p-2 p-md-3 border rounded w-100 m-0 mb-2 border-secondary address-list ${selectedAddress && address._id === selectedAddress._id && ' active-address'}`}>
                                     <p className='mb-1 h6'>{address.name}</p>
                                     <p className='mb-1'>{address.address}</p>
                                     <p className='mb-1'>{address.city} {address.state} {address.pinCode}</p>
@@ -98,6 +139,23 @@ const Shipping = () => {
                                 </div>
                             )
                         })
+                    }
+
+                    {
+                        !addressList &&
+                        <div className="container">
+                            <div className="row">
+                                <div className="img d-flex justify-content-center">
+                                    <img src={noPlantsImage} style={{ maxHeight: "60vh" }} alt="no plants data found" className='img-fluid rounded border mb-3' />
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="d-flex d-flex flex-column align-items-center">
+                                    <h3 className="h3" style={{ fontFamily: "cursive" }}>No Address Found</h3>
+                                    <Link to={`/address/new/?redirect=/checkout/shipping`} className='btn btn-primary'><i className="fas fa-arrow-right"></i> Add New Address</Link>
+                                </div>
+                            </div>
+                        </div>
                     }
                 </div>
             </div>
