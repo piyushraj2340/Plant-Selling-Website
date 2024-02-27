@@ -40,11 +40,24 @@ const Product = () => {
             if (result.status) {
                 setCart(result.result);
                 setCartQuantity(result.result.quantity);
-                setCartLength({ type: "CART", length: result.result.length });
             } else {
                 throw new Error(result.message);
             }
 
+        } catch (error) {
+            console.log(error);
+        }
+    }
+
+    const handleGetAddedCart = async () => {
+        try {
+            const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
+
+            if (result.status) {
+                setCartLength({ type: "CART", length: result.result.length });
+            } else {
+                setCartLength({ type: "CART", length: null });
+            }
         } catch (error) {
             console.log(error);
         }
@@ -55,7 +68,10 @@ const Product = () => {
             const result = await handelDataFetch({ path: '/api/v2/user/profile', method: "GET" }, setShowAnimation);
 
             if (result.status) {
+                handleGetAddedCart();
                 setUser(result.result);
+            } else {
+                setCartLength({ type: "CART", length: null });
             }
 
         } catch (error) {
@@ -158,10 +174,9 @@ const Product = () => {
 
             if (result.status) {
                 setCart(result.result);
-                setCartLength({ type: "CART", length: result.result.length });
                 handleGetProductData();
+                handleGetAddedCart();
             } else {
-                setCartLength({ type: "CART", length: null });
                 throw new Error(result.message);
             }
         } catch (error) {
@@ -175,9 +190,7 @@ const Product = () => {
 
             if (result.status) {
                 handleIsProductIsAddedToCart();
-                setCartLength({ type: "CART", length: result.result.length });
             } else {
-                setCartLength({ type: "CART", length: null });
                 throw new Error(result.message);
             }
         } catch (error) {
@@ -328,7 +341,7 @@ const Product = () => {
                                     {
                                         user ?
                                             <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : <span>Select delivery location</span>}</small>
-                                            : 
+                                            :
 
                                             alert("Sign in to see your addresses", <span>Select delivery location</span>)
                                     }

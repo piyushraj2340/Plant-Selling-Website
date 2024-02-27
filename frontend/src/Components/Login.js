@@ -26,29 +26,18 @@ function Login() {
 
     const navigate = useNavigate();
 
-    // fetch the login and add the cart data into the app use state 
-
-    // const handleCartLength = async () => {
-    //     try {
-    //         const res = await fetch('/cart/get', {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //                 Accept: "application/json",
-    //             },
-    //             credentials: "include"
-    //         });
-    //         const result = await res.json();
-
-    //         if (result.status) {
-    //             setCartLength({ type: "CART", length: result.cartLength });
-    //         } else {
-    //             setCartLength({ type: "CART", length: null });
-    //         }
-    //     } catch (error) {
-    //         console.log(error);
-    //     }
-    // }
+    const handleGetAddedCart = async () => {
+        try {
+            const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
+            if (result.status) {
+                setCartLength({ type: "CART", length: result.result.length });
+            } else {
+                setCartLength({ type: "CART", length: null });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    }
 
 
     const handleVerification = async () => {
@@ -56,11 +45,13 @@ function Login() {
             const result = await handelDataFetch({ path: "/api/v2/auth", method: "GET" }, setShowAnimation);
 
             if (result.status) {
+                handleGetAddedCart();
                 const [redirect, to] = window.location.search && window.location.search.split("=");
                 setIsUserLogin({ type: "USER", payload: true });
-                navigate(redirect === "?redirect"? to : "/profile");
+                navigate(redirect === "?redirect" ? to : "/profile");
             } else {
                 setIsUserLogin({ type: "USER", payload: false });
+                setCartLength({ type: "CART", length: null });
             }
         } catch (error) {
             console.log(error);
@@ -92,18 +83,20 @@ function Login() {
             const result = await handelDataFetch({ path: "/api/v2/auth/sign-in", method: "POST", body: user }, setShowAnimation);
 
             if (result.status) {
+                handleGetAddedCart();
                 setLoginStatus({ ...loginStatus, status: true, message: result.message });
 
                 setIsUserLogin({ type: "USER", payload: true });
 
                 const [redirect, to] = window.location.search && window.location.search.split("=");
-                
+
                 setTimeout(() => {
-                    navigate(redirect === "?redirect"? to : "/profile");
+                    navigate(redirect === "?redirect" ? to : "/profile");
                 }, 500);
             } else {
                 setLoginStatus({ ...loginStatus, status: false, message: result.message });
                 setIsUserLogin({ type: "USER", payload: false });
+                setCartLength({ type: "CART", length: null });
                 setUser({ ...user, password: "" });
             }
 
