@@ -98,14 +98,30 @@ function App() {
     }
   })
 
+  const handleGetAddedCart = async () => {
+    try {
+      const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
+
+      if (result.status) {
+        setCartLength({ type: "CART", length: result.result.length });
+      } else {
+        setCartLength({ type: "CART", length: null });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   const handleVerification = async () => {
     try {
       const result = await handelDataFetch({ path: '/api/v2/auth', method: 'GET' }, setShowAnimation);
 
       if (result.status) {
+        handleGetAddedCart();
         setIsUserLogin({ type: "USER", payload: true });
       } else {
         setIsUserLogin({ type: "USER", payload: false });
+        setCartLength({ type: "CART", length: null });
       }
     } catch (err) {
       console.log(err);
