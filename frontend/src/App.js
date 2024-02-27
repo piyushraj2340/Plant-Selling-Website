@@ -111,8 +111,23 @@ function App() {
     }
   }
 
+  const handleGetAddedCart = async () => {
+    try {
+      const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
+
+      if (result.status) {
+        setCartLength({ type: "CART", length: result.result.length });
+      } else {
+        setCartLength({ type: "CART", length: null });
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   useEffect(() => {
     handleVerification();
+    handleGetAddedCart();
   }, []);
 
   return (
@@ -122,6 +137,9 @@ function App() {
         <div style={{ marginTop: "70px" }}>
           <Routing />
         </div>
+        {
+          showAnimation && <Animation />
+        }
       </UserContext.Provider>
       <Footer />
     </>
