@@ -149,6 +149,10 @@ router.post('/logout', auth, async (req, res) => {
                     sameSite: 'none',
                     secure: true
                 });
+                res.clearCookie('orderSession', {
+                    sameSite: 'none',
+                    secure: true
+                });
                 const info = {
                     status: true,
                     message: "Logout Successfully.",
