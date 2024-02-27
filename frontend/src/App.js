@@ -56,12 +56,12 @@ const Routing = () => {
       <Route exact path="/profile" element={<Profile />} />
       <Route exact path="/nursery" element={<NurseryProfile />} />
       <Route exact path="/nursery/store/view/:id" element={<NurseryStoreView />} />
-      <Route exact path="/nursery/add" element={<SetNursery />} />
+      <Route exact path="/nursery/create" element={<SetNursery />} />
       <Route exact path="/nursery/update/:id" element={<EditNursery />} />
-      <Route exact path="/nursery/plant/add" element={<SetPlants />} />
+      <Route exact path="/nursery/plant/new" element={<SetPlants />} />
       <Route exact path="/nursery/plant/update/:id" element={<EditPlants />} />
       <Route exact path="/address" element={<Address />} />
-      <Route exact path="/address/add" element={<SetAddress />} />
+      <Route exact path="/address/new" element={<SetAddress />} />
       <Route exact path="/address/update/:id" element={<EditAddress />} />
       <Route exact path="/contact-us" element={<ContactUs />} />
       <Route path="/cart" element={<Cart />} />
