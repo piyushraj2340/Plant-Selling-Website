@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Rating } from 'react-simple-star-rating';
 import Animation from './Shared/Animation';
 import { UserContext } from '../App';
@@ -7,7 +7,7 @@ import AddressList from './Shared/AddressList';
 import noPlantsImage from '../Asset/img/noDataFound.jpg';
 import FullScreenImageView from './Shared/FullScreenImageView';
 import handelDataFetch from '../Controller/handelDataFetch';
-import { Popover } from 'antd';
+import { Popover, message } from 'antd';
 
 const Product = () => {
 
@@ -30,6 +30,8 @@ const Product = () => {
     const [viewImgByIndex, setViewImgByIndex] = useState(0);
 
     const { setCartLength } = useContext(UserContext);
+
+    const navigate = useNavigate();
 
     const handleIsProductIsAddedToCart = async () => {
         try {
@@ -101,7 +103,7 @@ const Product = () => {
         }
     }
 
-    const getDefaultAddress = async () => {
+    const handelGetDefaultAddress = async () => {
         try {
             const result = await handelDataFetch({ path: "/api/v2/user/default/address", method: "GET" }, setShowAnimation);
 
@@ -118,9 +120,11 @@ const Product = () => {
     useEffect(() => {
         handleIsProductIsAddedToCart();
         handleGetProductData();
-        getDefaultAddress();
+        handelGetDefaultAddress();
         handelUserData();
     }, []);
+
+    document.title = product ? product.plantName : "Plant info";
 
     const handelGetListOfAddress = async () => {
         try {
@@ -289,7 +293,7 @@ const Product = () => {
                             <div className="col-lg-5 ps-4 mt-3">
                                 <div className="row">
                                     <h3 className='h3 mb-0'>{product.plantName}</h3>
-                                    <small style={{ position: "relative", top: "9px", left: "3px" }}><Link to={`/nursery/public/view/${product.nursery}`} className='small link-secondary'><i className="fas fa-store"></i> {nurseryName}</Link></small>
+                                    <small style={{ position: "relative", top: "5px", left: "3px" }}><Link to={`/nursery/public/view/${product.nursery._id}`} className='small link-secondary'><i className="fas fa-store"></i> {product.nursery.nurseryName}</Link></small>
                                     <p className="card-text">
                                         <Rating initialValue={3 + Math.random() * 2} readonly={true} size={20} allowFraction={true} />
                                         <small className='ps-2 pe-2' style={{ position: "relative", top: "4px" }}>
@@ -381,17 +385,17 @@ const Product = () => {
                     </div >
                     :
 
-
-                    <div className="container">
+                    // no product found
+                    <div className="container mb-4 mb-md-5">
                         <div className="row">
-                            <div className="img d-flex justify-content-center">
+                            <div className="d-flex justify-content-center">
                                 <img src={noPlantsImage} style={{ maxHeight: "60vh" }} alt="no plants data found" className='img-fluid' />
                             </div>
                         </div>
                         <div className="row">
                             <div className="d-flex d-flex flex-column align-items-center">
                                 <h3 className="h3" style={{ fontFamily: "cursive" }}>No Product Found</h3>
-                                <Link to="/products"><i className="fas fa-arrow-left"></i> Back To Products</Link>
+                                <Link to="/products" className='btn'><i className="fas fa-arrow-left"></i> Back To Products</Link>
                             </div>
                         </div>
                     </div>
@@ -401,7 +405,7 @@ const Product = () => {
             {
                 viewAddressList
                 &&
-                <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} />
+                <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} redirect={`/${product && '?redirect=/product/' + product._id}`} />
             }
             {
                 showAnimation && <Animation />
