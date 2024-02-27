@@ -23,7 +23,6 @@ const Product = () => {
     const productId = params.id;
 
     const [product, setProduct] = useState(null);
-    const [nurseryName, setNurseryName] = useState("store name");
 
     const [showAnimation, setShowAnimation] = useState(false);
 
@@ -94,7 +93,6 @@ const Product = () => {
                 setCartQuantity(quantity);
                 handelCalculatePricing(quantity, result.result);
                 setProduct(result.result);
-                setNurseryName(result.result.nurseryName);
             } else {
                 throw new Error(result.message);
             }
@@ -117,11 +115,26 @@ const Product = () => {
         }
     }
 
+    const handleGetAddedCart = async () => {
+        try {
+          const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
+    
+          if (result.status) {
+            setCartLength({ type: "CART", length: result.result.length });
+          } else {
+            setCartLength({ type: "CART", length: null });
+          }
+        } catch (error) {
+          console.log(error);
+        }
+      }
+
     useEffect(() => {
+        handelUserData();
         handleIsProductIsAddedToCart();
         handleGetProductData();
         handelGetDefaultAddress();
-        handelUserData();
+        handleGetAddedCart();
     }, []);
 
     document.title = product ? product.plantName : "Plant info";
@@ -157,6 +170,7 @@ const Product = () => {
             const result = await handelDataFetch({ path: "/api/v2/checkout/carts", method: "POST", body: cart }, setShowAnimation);
 
             if (result.status) {
+                handleGetAddedCart();
                 setCart(result.result);
                 setCartLength({ type: "CART", length: result.result.length });
                 handleGetProductData();
@@ -293,7 +307,7 @@ const Product = () => {
                             <div className="col-lg-5 ps-4 mt-3">
                                 <div className="row">
                                     <h3 className='h3 mb-0'>{product.plantName}</h3>
-                                    <small style={{ position: "relative", top: "5px", left: "3px" }}><Link to={`/nursery/public/view/${product.nursery._id}`} className='small link-secondary'><i className="fas fa-store"></i> {product.nursery.nurseryName}</Link></small>
+                                    <small style={{ position: "relative", top: "5px", left: "3px" }}><Link to={`/nursery/public/view/${product.nursery._id}`} className='small link-secondary'><i className="fas fa-store"></i> {product.nursery.nurseryName || "store name"}</Link></small>
                                     <p className="card-text">
                                         <Rating initialValue={3 + Math.random() * 2} readonly={true} size={20} allowFraction={true} />
                                         <small className='ps-2 pe-2' style={{ position: "relative", top: "4px" }}>
