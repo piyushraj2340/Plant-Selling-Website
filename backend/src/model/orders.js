@@ -58,17 +58,9 @@ const orderSchema = new mongoose.Schema({
                     }
                 }
             },
-            deliveryPrice: {
-                type: Number,
-                required: [true, "Delivery price is required."],
-            },
             quantity: {
                 type: Number,
                 required: [true, "Quantity is required."],
-            },
-            totalPrice: {
-                type: Number,
-                required: [true, "Total Price is required."]
             },
         }
     ],
@@ -109,6 +101,28 @@ const orderSchema = new mongoose.Schema({
         state: {
             type: String,
             required: [true, "State is required"]
+        },
+    },
+    pricing: {
+        totalPriceWithoutDiscount: {
+            type: Number,
+            required: [true, "totalPriceWithoutDiscount price is required."],
+        },
+        actualPriceAfterDiscount: {
+            type: Number,
+            required: [true, "totalPriceWithoutDiscount price is required."],
+        },
+        discountPrice: {
+            type: Number,
+            required: [true, "discountPrice price is required."],
+        },
+        deliveryPrice: {
+            type: Number,
+            required: [true, "Delivery price is required."],
+        },
+        totalPrice: {
+            type: Number,
+            required: [true, "Total Price is required."]
         },
     },
     orderStatus: {
