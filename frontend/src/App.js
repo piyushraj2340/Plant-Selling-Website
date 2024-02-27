@@ -36,6 +36,7 @@ import Checkout from "./Components/Checkout";
 import Shipping from "./Components/Shipping";
 import Confirm from "./Components/Confirm";
 import EditPlants from "./Components/EditPlants";
+import { message } from "antd";
 
 
 
@@ -82,6 +83,16 @@ const Routing = () => {
 function App() {
   const [loginLogout, setLoginLogout] = useReducer(reducer, initialState);
   const [cartLength, setCartLength] = useReducer(reducer, initialState);
+
+  // global configuration antd to alert the message to users
+  message.config({
+    top: 75,
+    maxCount: 3,
+    CSSProperties: {
+        backgroundColor: "#000",
+        color: "#fff"
+    }
+})
 
   return (
     <>
