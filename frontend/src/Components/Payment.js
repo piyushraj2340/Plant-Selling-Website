@@ -1,11 +1,9 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { useRef, useState } from 'react'
 import {
   PaymentElement,
   useStripe,
   useElements
 } from '@stripe/react-stripe-js'
-import handelDataFetch from '../Controller/handelDataFetch';
-import Animation from './Shared/Animation';
 
 const Payment = ({ amount }) => {
   const stripe = useStripe();
@@ -14,19 +12,12 @@ const Payment = ({ amount }) => {
   const payBtn = useRef(null);
 
   const [errorMessage, setErrorMessage] = useState(null);
-  const [showAnimation, setShowAnimation] = useState(false);
-
-  useEffect(() => {
-
-  })
 
   const handleSubmit = async (event) => {
     payBtn.current.disabled = true;
 
     try {
       event.preventDefault();
-
-      const data = await handelDataFetch({ path: "/api/v2/checkout/payments", method: "POST", body: { amount: 2342.34 } }, setShowAnimation)
 
       if (!stripe || !elements) {
         return;
@@ -35,16 +26,13 @@ const Payment = ({ amount }) => {
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: 'http://localhost:3000/success',
+          return_url: `${window.location.origin}/success`, // change to /order
         },
       });
-
 
       if (error) {
         payBtn.current.disabled = false;
         setErrorMessage(error.message);
-      } else {
-        alert("Payment done successfully.")
       }
 
     } catch (error) {
@@ -71,16 +59,12 @@ const Payment = ({ amount }) => {
                 },
               }} />
               <button ref={payBtn} type="submit" disabled={!stripe || !elements} className='btn btn-primary w-100 mt-2'>
-                Pay - ₹{(Number(amount) /  100).toFixed(2)}
+                <span>Pay - ₹{(Number(amount) /  100).toFixed(2)}</span>
               </button>
             </form>
           </div>
         </div>
       </div>
-      {
-        showAnimation && <Animation />
-      }
-
     </>
 
 
