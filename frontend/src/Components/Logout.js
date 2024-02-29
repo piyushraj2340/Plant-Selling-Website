@@ -7,18 +7,18 @@ function Logout() {
     document.title = "Logout";
     const navigate = useNavigate();
 
-    const { setIsUserLogin, setCartLength, setShowAnimation } = useContext(UserContext);
+    const { setUser, setCartLength, setShowAnimation } = useContext(UserContext);
 
     const handleLogout = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/auth/logout", method: "POST" }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/auth/logout", method: "GET" }, setShowAnimation);
 
             if (result.status) {
                 setCartLength({ type: "CART", length: null });
-                setIsUserLogin({ type: "USER", payload: false });
+                setUser({ type: "USER", user: null });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             navigate("/");
         }

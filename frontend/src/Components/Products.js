@@ -23,7 +23,7 @@ const Products = () => {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
 
     }
@@ -38,7 +38,7 @@ const Products = () => {
                 throw new Error(result.message)
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
 
     }

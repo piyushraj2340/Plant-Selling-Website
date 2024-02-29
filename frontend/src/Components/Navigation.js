@@ -6,7 +6,7 @@ import { UserContext } from '../App';
 
 
 const Navigation = () => {
-    const { isUserLogin, cartLength } = useContext(UserContext);
+    const { user, cartLength } = useContext(UserContext);
 
     const [viewSearchFilter, setViewSearchFilter] = useState(false);
     const [navBarToggle, setNavBarToggle] = useState(false);
@@ -90,7 +90,7 @@ const Navigation = () => {
                             <Link className="nav-link" to="/contact-us" onClick={() => setNavBarToggle(false)}>Contact Us</Link>
                         </div>
                         <div className="nav-item">
-                            <Link className="nav-link" to={`${isUserLogin ? "/profile" : "/login"}`} onClick={() => setNavBarToggle(false)}><i className='fas fa-user-alt'></i>{isUserLogin ? " Profile" : " Login"}</Link>
+                            <Link className="nav-link" to={`${user ? "/profile" : "/login"}`} onClick={() => setNavBarToggle(false)}><i className='fas fa-user-alt'></i>{user ? " Profile" : " Login"}</Link>
                         </div>
                         <div className="nav-item">
                             <Link style={{ position: "relative" }} className="nav-link" to="/cart" onClick={() => setNavBarToggle(false)}>

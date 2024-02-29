@@ -39,7 +39,7 @@ const Confirm = () => {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -59,7 +59,7 @@ const Confirm = () => {
                 navigate("/");
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 

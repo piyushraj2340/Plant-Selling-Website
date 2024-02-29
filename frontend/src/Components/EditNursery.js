@@ -45,7 +45,7 @@ function AddNursery() {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -67,7 +67,7 @@ function AddNursery() {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
