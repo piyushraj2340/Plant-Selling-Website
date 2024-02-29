@@ -41,7 +41,7 @@ const NurseryStoreView = () => {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }

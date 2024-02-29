@@ -83,7 +83,7 @@ const Routing = () => {
 }
 
 function App() {
-  const [isUserLogin, setIsUserLogin] = useReducer(reducer, initialState);
+  const [user, setUser] = useReducer(reducer, initialState);
   const [cartLength, setCartLength] = useReducer(reducer, initialState);
   const [showAnimation, setShowAnimation] = useReducer(reducer, initialState);
 
@@ -111,15 +111,15 @@ function App() {
     }
   }
 
-  const handleVerification = async () => {
+  const handleGetUserData = async () => {
     try {
-      const result = await handelDataFetch({ path: '/api/v2/auth', method: 'GET' }, setShowAnimation);
+      const result = await handelDataFetch({ path: '/api/v2/user/profile', method: 'GET' }, setShowAnimation);
 
       if (result.status) {
         handleGetAddedCart();
-        setIsUserLogin({ type: "USER", payload: true });
+        setUser({ type: "USER", user: result.result });
       } else {
-        setIsUserLogin({ type: "USER", payload: false });
+        setUser({ type: "USER", user: null });
         setCartLength({ type: "CART", length: null });
       }
     } catch (err) {
@@ -128,12 +128,12 @@ function App() {
   }
 
   useEffect(() => {
-    handleVerification();
+    handleGetUserData();
   }, []);
 
   return (
     <>
-      <UserContext.Provider value={{ isUserLogin, setIsUserLogin, cartLength, setCartLength, setShowAnimation }}>
+      <UserContext.Provider value={{ user, setUser, cartLength, setCartLength, setShowAnimation }}>
         <Navigation />
         <ScrollToTop />
         <div style={{ marginTop: "70px" }}>

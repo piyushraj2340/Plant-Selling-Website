@@ -79,7 +79,7 @@ function EditAddress() {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -92,7 +92,7 @@ function EditAddress() {
                 setAddress(result.result);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -152,7 +152,7 @@ function EditAddress() {
                 message.warning("Input should not be empty.")
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 

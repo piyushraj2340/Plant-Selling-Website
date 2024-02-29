@@ -43,7 +43,7 @@ const Shipping = () => {
                 throw new Error(result.message)
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -55,7 +55,7 @@ const Shipping = () => {
                 navigate("/");
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -80,7 +80,7 @@ const Shipping = () => {
                 navigate('/')
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
@@ -93,7 +93,7 @@ const Shipping = () => {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 

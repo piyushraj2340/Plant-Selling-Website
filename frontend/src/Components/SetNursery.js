@@ -39,7 +39,7 @@ function SetNursery() {
                 navigate('/nursery');
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -55,7 +55,7 @@ function SetNursery() {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -78,7 +78,7 @@ function SetNursery() {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 

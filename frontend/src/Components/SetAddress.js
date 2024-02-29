@@ -98,7 +98,7 @@ function AddAddress() {
                 throw new Error(result.message);
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -132,7 +132,7 @@ function AddAddress() {
                 message.warning("Input should not be empty.")
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 

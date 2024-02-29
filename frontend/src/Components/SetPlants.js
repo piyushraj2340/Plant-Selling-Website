@@ -171,7 +171,7 @@ function AddPlants() {
                 });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             setMessage({
                 status: false,
                 message: error

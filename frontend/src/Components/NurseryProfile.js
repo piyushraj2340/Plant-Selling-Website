@@ -98,7 +98,7 @@ function NurseryProfile() {
 
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             setShowAnimation(false);
         }
@@ -116,7 +116,7 @@ function NurseryProfile() {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -130,7 +130,7 @@ function NurseryProfile() {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -216,7 +216,7 @@ function NurseryProfile() {
                 alert("New Section is required.");
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
 
@@ -234,7 +234,7 @@ function NurseryProfile() {
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
             navigate('/login');
         }
     }
@@ -332,7 +332,7 @@ function NurseryProfile() {
 
         }
         catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             setShowAnimation(false);
         }

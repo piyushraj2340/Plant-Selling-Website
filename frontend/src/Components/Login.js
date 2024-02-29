@@ -3,19 +3,15 @@ import { UserContext } from '../App';
 import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import handelDataFetch from '../utils/handelDataFetch';
+import { message } from 'antd';
 
 
 function Login() {
     document.title = "Login";
 
-    const { setIsUserLogin, setCartLength, setShowAnimation } = useContext(UserContext);
+    const { user, setUser, setCartLength, setShowAnimation } = useContext(UserContext);
 
-    const [loginStatus, setLoginStatus] = useState({
-        status: "",
-        message: ""
-    });
-
-    const [user, setUser] = useState({
+    const [userFormData, setUserFormData] = useState({
         email: "",
         password: ""
     });
@@ -31,31 +27,38 @@ function Login() {
                 setCartLength({ type: "CART", length: null });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
 
-    const handleVerification = async () => {
+    const handleGetUserData = async () => {
         try {
-            const result = await handelDataFetch({ path: "/api/v2/auth", method: "GET" }, setShowAnimation);
+            if(user) {
+                const [redirect, to] = window.location.search && window.location.search.split("=");
+                navigate(redirect === "?redirect" ? to : "/profile");
+
+                return;
+            }
+
+            const result = await handelDataFetch({ path: "/api/v2/user/profile", method: "GET" }, setShowAnimation);
 
             if (result.status) {
-                handleGetAddedCart();
+                handleGetAddedCart(); // if user is already logged in fetch the cart length
                 const [redirect, to] = window.location.search && window.location.search.split("=");
-                setIsUserLogin({ type: "USER", payload: true });
+                setUser({ type: "USER", user: result.result });
                 navigate(redirect === "?redirect" ? to : "/profile");
             } else {
-                setIsUserLogin({ type: "USER", payload: false });
+                setUser({ type: "USER", user: null });
                 setCartLength({ type: "CART", length: null });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
     useEffect(() => {
-        handleVerification();
+        handleGetUserData();
     }, []);
 
     let name, value;
@@ -63,26 +66,25 @@ function Login() {
         name = e.target.name;
         value = e.target.value;
 
-        setUser({ ...user, [name]: value });
+        setUserFormData({ ...userFormData, [name]: value });
     }
 
     const handleUserLogin = async (e) => {
         try {
             e.preventDefault();
-            setLoginStatus({ ...loginStatus, status: "", message: "" });
 
-            if (user.email === "" || user.password === "") {
-                setLoginStatus({ ...loginStatus, status: false, message: "Please enter your credentials." });
+            if (userFormData.email === "" || userFormData.password === "") { // if one of the empty fields.
+                message.error("Please enter your credentials.")
                 return;
             }
 
-            const result = await handelDataFetch({ path: "/api/v2/auth/sign-in", method: "POST", body: user }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/auth/sign-in", method: "POST", body: userFormData }, setShowAnimation);
 
             if (result.status) {
-                handleGetAddedCart();
-                setLoginStatus({ ...loginStatus, status: true, message: result.message });
+                handleGetAddedCart(); // gating the cart length after the user logged in.
+                message.success(result.message);
 
-                setIsUserLogin({ type: "USER", payload: true });
+                setUser({ type: "USER", user: result.result });
 
                 const [redirect, to] = window.location.search && window.location.search.split("=");
 
@@ -90,19 +92,19 @@ function Login() {
                     navigate(redirect === "?redirect" ? to : "/profile");
                 }, 500);
             } else {
-                setLoginStatus({ ...loginStatus, status: false, message: result.message });
-                setIsUserLogin({ type: "USER", payload: false });
+                message.error(result.message);
+                setUser({ type: "USER", user: null });
                 setCartLength({ type: "CART", length: null });
-                setUser({ ...user, password: "" });
+                setUserFormData({ ...userFormData, password: "" }); // resting the password: after failed and re-tying
             }
 
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
     return (
-        <div className='d-flex justify-content-center py-2 px-2'>
+        <div className='d-flex justify-content-center py-2 px-2 mb-4 mb-md-5'>
             <div className='col-12 col-md-8 col-lg-6 col-xl-4 shadow border rounded px-2 py-2 p-md-5'>
                 <div className="d-flex flex-column flex-md-row justify-content-center">
                     <div className='col-12 col-md-6 text-center p-0 mb-2 mb-md-0 me-md-2 bg-primary rounded'>
@@ -126,17 +128,12 @@ function Login() {
                 <div className="row">
                     <p className="text-center">Or:</p>
                 </div>
-                {typeof (loginStatus.status) === "boolean" &&
-                    <div className="row p-3">
-                        <p className={`text-center ${loginStatus.status === true ? 'text-success' : 'text-danger'} m-0`}>{`${loginStatus.status === true ? 'Login Successful' : loginStatus.message}`}</p>
-                    </div>
-                }
 
                 <form onSubmit={handleUserLogin}>
                     <div className="d-flex justify-content-center">
                         <div className="col-12">
                             <input type="email" onChange={handleInputs} className='form-control mb-3' name="email" id="email" placeholder='Enter Email' />
-                            <input type="password" onChange={handleInputs} className='form-control mb-2' name="password" id="password" placeholder='Enter Password' value={user.password === "" ? "" : user.password} />
+                            <input type="password" onChange={handleInputs} className='form-control mb-2' name="password" id="password" placeholder='Enter Password' value={userFormData.password} />
                         </div>
                     </div>
                     <div className="d-flex justify-content-end p-2">

@@ -2,19 +2,15 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../App';
 import { Link, useNavigate } from 'react-router-dom';
 import handelDataFetch from '../utils/handelDataFetch';
+import { message } from 'antd';
 
 
 function Signup() {
     document.title = "Signup";
 
-    const { setIsUserLogin, setShowAnimation } = useContext(UserContext);
+    const { user, setUser, setShowAnimation } = useContext(UserContext);
 
-    const [signUpStatus, setSignUpStatus] = useState({
-        status: "",
-        message: ""
-    });
-
-    const [user, setUser] = useState({
+    const [userFormData, setUserFormData] = useState({
         name: "",
         phone: "",
         email: "",
@@ -31,18 +27,27 @@ function Signup() {
         name = e.target.name;
         value = e.target.value;
 
-        setUser({ ...user, [name]: value });
+        setUserFormData({ ...userFormData, [name]: value });
     }
 
-    const handleVerification = async () => {
+    const handleGetUserData = async () => {
         try {
-            const result = await handelDataFetch({ path: '/api/v2/auth', method: 'GET' }, setShowAnimation);
+
+            if(user) {
+                const [redirect, to] = window.location.search && window.location.search.split("=");
+                navigate(redirect === "?redirect" ? to : "/profile");
+
+                return;
+            }
+
+            const result = await handelDataFetch({ path: '/api/v2/user/profile', method: 'GET' }, setShowAnimation);
 
             if (result.status) {
-                setIsUserLogin({ type: "USER", payload: true });
+                // call the function for the cart information fetch api
+                setUser({ type: "USER", user: result.result });
                 navigate('/profile');
             } else {
-                setIsUserLogin({ type: "USER", payload: false });
+                setUser({ type: "USER", user: null });
             }
         } catch (err) {
             console.log(err);
@@ -50,45 +55,43 @@ function Signup() {
     }
 
     useEffect(() => {
-        handleVerification();
+        handleGetUserData();
     }, []);
 
     const handleUserSignUp = async (e) => {
         try {
-
-            setSignUpStatus({ status: "", message: "" });
             e.preventDefault();
 
-            if (user.name === "" || user.email === "" || user.phone === "" || user.age === "" || user.gender === "" || user.password === "" || user.confirmPassword === "") {
-                setSignUpStatus({ status: false, message: "Please provide all details." });
+            if (userFormData.name === "" || userFormData.email === "" || userFormData.phone === "" || userFormData.age === "" || userFormData.gender === "" || userFormData.password === "" || userFormData.confirmPassword === "") {
+                message.error("Please provide all details.");
                 return;
             }
 
-            if (user.password !== user.confirmPassword) {
-                setSignUpStatus({ status: false, message: "password & confirm password doesn't match." });
+            if (userFormData.password !== userFormData.confirmPassword) {
+                message.error("password & confirm password doesn't match.");
                 return;
             }
 
-            const result = await handelDataFetch({ path: "/api/v2/auth/sign-up", method: "POST", body: user }, setShowAnimation);
+            const result = await handelDataFetch({ path: "/api/v2/auth/sign-up", method: "POST", body: userFormData }, setShowAnimation);
 
             if (result.status) {
-                setIsUserLogin({ type: "USER", payload: true });
-                setSignUpStatus({ status: true, message: result.message })
+                setUser({ type: "USER", user: result.result });
+                message.success(result.message)
                 setTimeout(() => {
                     navigate('/profile');
-                }, 1000);
+                }, 500);
             } else {
-                setIsUserLogin({ type: "USER", payload: false });
-                setSignUpStatus({ status: false, message: result.message });
-                setUser({ ...user, password: "", confirmPassword: "" });
+                setUser({ type: "USER", user: null });
+                message.error(result.message);
+                setUserFormData({ ...userFormData, password: "", confirmPassword: "" });
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         }
     }
 
     return (
-        <div className='d-flex justify-content-center py-2 px-2'>
+        <div className='d-flex justify-content-center py-2 px-2 mb-4 mb-md-5'>
             <div className='col-12 col-md-8 col-lg-6 col-xl-4 shadow border rounded px-2 py-2 p-md-5'>
                 <div className="d-flex flex-column flex-md-row justify-content-center">
                     <div className='col-12 col-md-6 text-center p-0 mb-2 mb-md-0 me-md-2 bg-secondary rounded'>
@@ -112,11 +115,6 @@ function Signup() {
                 <div className="row">
                     <p className="text-center">Or:</p>
                 </div>
-                {typeof (signUpStatus.status) === "boolean" &&
-                    <div className="row p-3">
-                        <p className={`text-center ${signUpStatus.status === true ? 'text-success' : 'text-danger'} m-0`}>{signUpStatus.message}</p>
-                    </div>
-                }
                 <form onSubmit={handleUserSignUp}>
                     <div className="d-flex justify-content-center">
                         <div className="col-12">
@@ -144,8 +142,8 @@ function Signup() {
                                     </label>
                                 </div>
                             </div>
-                            <input type="password" className='form-control mb-3' onChange={handleInputs} name="password" id="password" placeholder='Enter Password' value={user.password === "" ? "" : user.password} />
-                            <input type="password" className='form-control mb-3' onChange={handleInputs} name="confirmPassword" id="confirmPassword" placeholder='Enter Confirm Password' value={user.confirmPassword === "" ? "" : user.confirmPassword} />
+                            <input type="password" className='form-control mb-3' onChange={handleInputs} name="password" id="password" placeholder='Enter Password' value={userFormData.password} />
+                            <input type="password" className='form-control mb-3' onChange={handleInputs} name="confirmPassword" id="confirmPassword" placeholder='Enter Confirm Password' value={userFormData.confirmPassword} />
 
                         </div>
                     </div>
