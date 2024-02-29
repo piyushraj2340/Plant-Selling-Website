@@ -1,17 +1,13 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useContext } from 'react';
 import { UserContext } from '../App';
-import Animation from './Shared/Animation';
-import handelDataFetch from '../Controller/handelDataFetch';
+import { useNavigate } from 'react-router-dom';
+import handelDataFetch from '../utils/handelDataFetch';
 
 function Logout() {
     document.title = "Logout";
     const navigate = useNavigate();
 
-    const { setIsUserLogin, setCartLength } = useContext(UserContext);
-
-    
-    const [showAnimation, setShowAnimation] = useState(false);
+    const { setIsUserLogin, setCartLength, setShowAnimation } = useContext(UserContext);
 
     const handleLogout = async () => {
         try {
@@ -20,7 +16,7 @@ function Logout() {
             if (result.status) {
                 setCartLength({ type: "CART", length: null });
                 setIsUserLogin({ type: "USER", payload: false });
-            }            
+            }
         } catch (error) {
             console.log(error);
         } finally {
@@ -33,15 +29,9 @@ function Logout() {
     })
 
     return (
-        <>
-            <div className='w-100 vh-100 d-flex justify-content-center align-items-center'>
-                <h1 className='h1' style={{ fontFamily: "cursive" }}>Logout Successful!....</h1>
-            </div>
-
-            {
-                showAnimation && <Animation />
-            }
-        </>
+        <div className='w-100 vh-100 d-flex justify-content-center align-items-center'>
+            <h1 className='h1' style={{ fontFamily: "cursive" }}>Logout Successful!....</h1>
+        </div>
     )
 }
 

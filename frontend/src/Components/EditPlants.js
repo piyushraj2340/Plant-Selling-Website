@@ -1,10 +1,14 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../App';
 import { useNavigate, useParams } from 'react-router-dom';
-import Animation from './Shared/Animation';
-import handelDataFetch from '../Controller/handelDataFetch';
+import handelDataFetch from '../utils/handelDataFetch';
 
 
 function EditPlants() {
+    document.title = "Edit Your Plants Details"
+
+    const { setShowAnimation } = useContext(UserContext);
+
     const [plant, setPlants] = useState({
         user: "",
         nursery: "",
@@ -50,7 +54,6 @@ function EditPlants() {
         },
     });
 
-    const [showAnimation, setShowAnimation] = useState(false);
 
     const { id } = useParams();
     const formType = (id === undefined) ? "add" : "update";

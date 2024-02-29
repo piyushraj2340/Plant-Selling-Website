@@ -1,14 +1,15 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
 import { UserContext } from '../App';
+import { Link, useNavigate } from 'react-router-dom';
 import AddressList from './Shared/AddressList';
-
 import noDataFound from '../Asset/img/noDataFound.jpg';
-import Animation from './Shared/Animation';
-import handelDataFetch from '../Controller/handelDataFetch';
+import handelDataFetch from '../utils/handelDataFetch';
 import { message } from 'antd';
 
 function Cart() {
+  document.title = "Cart Information";
+
+  const { setCartLength, setShowAnimation } = useContext(UserContext);
 
   const [cart, setCart] = useState([]);
   const [pricing, setPricing] = useState(null);
@@ -17,9 +18,6 @@ function Cart() {
   const [addressList, setAddressList] = useState(null);
   const [viewAddressList, setViewAddressList] = useState(false);
 
-  const [showAnimation, setShowAnimation] = useState(false);
-
-  const { setCartLength } = useContext(UserContext);
 
   const navigate = useNavigate();
 
@@ -338,7 +336,6 @@ function Cart() {
         </div>
       </div>
       {viewAddressList && <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} redirect={"/?redirect=/cart"} />}
-      {showAnimation && <Animation />}
     </section>
   )
 }
