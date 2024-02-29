@@ -9,42 +9,30 @@ router.use(auth);
 router.route("/profile")
     .get(async (req, res) => {
         try {
-            if (req.user) {
-                const result = await userModel.findOne({ _id: req.user }).lean();
+            const result = await userModel.findOne({ _id: req.user }).select({ password: 0, tokens: 0, __v: 0 });
 
-                if (result) {
-
-                    delete result.password;
-                    delete result.tokens;
-
-                    const info = {
-                        status: true,
-                        message: "Showing Profile Data!...",
-                        result
-                    }
-
-                    res.status(200).send(info);
-                } else {
-                    const info = {
-                        status: false,
-                        message: "Authentication Failed!..."
-                    }
-                    res.status(401).send(info);
+            if (result) {
+                const info = {
+                    status: true,
+                    message: "User Data",
+                    result
                 }
+
+                res.status(200).send(info);
             } else {
                 const info = {
                     status: false,
-                    message: "Authentication Failed!...",
+                    message: "Authentication Failed"
                 }
-
                 res.status(401).send(info);
             }
-        } catch (err) {
+
+        } catch (error) {
             const info = {
                 status: false,
-                message: "Something Went Wrong!..."
+                message: error.message
             }
-            console.log(err);
+            console.log(error);
             res.status(400).send(info);
         }
     })
