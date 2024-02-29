@@ -1,15 +1,16 @@
 import React, { useEffect, useState, useContext } from 'react';
+import { UserContext } from '../App';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Rating } from 'react-simple-star-rating';
-import Animation from './Shared/Animation';
-import { UserContext } from '../App';
 import AddressList from './Shared/AddressList';
 import noPlantsImage from '../Asset/img/noDataFound.jpg';
 import FullScreenImageView from './Shared/FullScreenImageView';
-import handelDataFetch from '../Controller/handelDataFetch';
+import handelDataFetch from '../utils/handelDataFetch';
 import { Popover, message } from 'antd';
 
 const Product = () => {
+
+    const {isUserLogin, setCartLength, setShowAnimation } = useContext(UserContext);
 
     const [product, setProduct] = useState(null);
 
@@ -27,11 +28,8 @@ const Product = () => {
     const params = useParams();
     const productId = params.id;
 
-    const [showAnimation, setShowAnimation] = useState(false);
-
     const [viewImgByIndex, setViewImgByIndex] = useState(0);
 
-    const {isUserLogin, setCartLength } = useContext(UserContext);
 
     const navigate = useNavigate();
 
@@ -421,11 +419,7 @@ const Product = () => {
                 &&
                 <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} redirect={`/${product && '?redirect=/product/' + product._id}`} />
             }
-            {
-                showAnimation && <Animation />
-            }
         </>
-
     )
 }
 

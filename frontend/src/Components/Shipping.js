@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import handelDataFetch from '../Controller/handelDataFetch';
-import Animation from './Shared/Animation';
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../App';
+import handelDataFetch from '../utils/handelDataFetch';
 import { Link, useNavigate } from 'react-router-dom';
 import { Steps, message } from 'antd';
 import noPlantsImage from '../Asset/img/noDataFound.jpg';
@@ -8,8 +8,11 @@ import noPlantsImage from '../Asset/img/noDataFound.jpg';
 
 
 const Shipping = () => {
-    const [showAnimation, setShowAnimation] = useState(false);
-    const [activeStep, setActiveStep] = useState(0);
+    document.title = "Shipping Information";
+
+    const { setShowAnimation } = useContext(UserContext);
+
+    const activeStep = 0;
     const [addressList, setAddressList] = useState([]);
     const [selectedAddress, setSelectedAddress] = useState(null);
 
@@ -159,12 +162,6 @@ const Shipping = () => {
                     }
                 </div>
             </div>
-
-
-
-            {
-                showAnimation && <Animation />
-            }
 
         </section>
     )

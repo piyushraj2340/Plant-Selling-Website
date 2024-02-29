@@ -1,10 +1,12 @@
+// importing from library
 import { Route, Routes, } from "react-router-dom";
-import React, { createContext, useEffect, useReducer, useState } from "react";
+import React, { createContext, useEffect, useReducer } from "react";
+import { message } from "antd";
 
-// styling  
+// importing form styling[sass]  
 import "./Asset/Style/Style.scss"
 
-// Components 
+// importing Components 
 import Home from "./Components/Home";
 import Navigation from "./Components/Navigation";
 import Products from "./Components/Products";
@@ -28,20 +30,18 @@ import ContactUs from "./Components/ContactUs";
 import SetAddress from "./Components/SetAddress";
 import Address from "./Components/Address";
 import EditAddress from "./Components/EditAddress";
-
-
-import { initialState, reducer } from './reducer/Reducer';
 import ChooseTemplate from "./Components/Shared/ChooseTemplate";
-import Checkout from "./Components/Checkout";
+import EditPlants from "./Components/EditPlants";
 import Shipping from "./Components/Shipping";
 import Confirm from "./Components/Confirm";
-import EditPlants from "./Components/EditPlants";
-import { message } from "antd";
-import handelDataFetch from "./Controller/handelDataFetch";
+import Checkout from "./Components/Checkout";
 import ScrollToTop from "./Components/ScrollToTop";
 
+// importing form the reducer 
+import { initialState, reducer } from './reducer/Reducer';
 
-
+// importing form utils 
+import handelDataFetch from "./utils/handelDataFetch";
 
 export const UserContext = createContext();
 
@@ -85,8 +85,7 @@ const Routing = () => {
 function App() {
   const [isUserLogin, setIsUserLogin] = useReducer(reducer, initialState);
   const [cartLength, setCartLength] = useReducer(reducer, initialState);
-
-  const [showAnimation, setShowAnimation] = useState(false);
+  const [showAnimation, setShowAnimation] = useReducer(reducer, initialState);
 
   // global configuration antd to alert the message to users
   message.config({
@@ -134,7 +133,7 @@ function App() {
 
   return (
     <>
-      <UserContext.Provider value={{ isUserLogin, setIsUserLogin, cartLength, setCartLength }}>
+      <UserContext.Provider value={{ isUserLogin, setIsUserLogin, cartLength, setCartLength, setShowAnimation }}>
         <Navigation />
         <ScrollToTop />
         <div style={{ marginTop: "70px" }}>

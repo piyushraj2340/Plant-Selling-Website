@@ -1,19 +1,22 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useContext } from 'react'
+import { UserContext } from '../App';
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Payment from './Payment'
-import handelDataFetch from '../Controller/handelDataFetch';
-import Animation from './Shared/Animation';
+import handelDataFetch from '../utils/handelDataFetch';
 import { useNavigate } from 'react-router-dom';
 import { Steps, message } from 'antd';
 
 
 const Checkout = () => {
+  document.title = "Complete Your Payment";
+
+  const { setShowAnimation } = useContext(UserContext);
+
   const [clientKey, setClientKey] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [amount, setAmount] = useState(null);
-  const [showAnimation, setShowAnimation] = useState(false);
-  const [activeStep, setActiveStep] = useState(2);
+  const activeStep = 2;
 
   const navigate = useNavigate();
 
@@ -96,7 +99,7 @@ const Checkout = () => {
 
             </Elements>
             :
-            
+
             // loading animation while waiting to Loading the payment Element.
             <div className='d-flex h-50 justify-content-center align-items-center'>
               <div className="spinner-grow text-primary" role="status">
@@ -123,11 +126,6 @@ const Checkout = () => {
             </div>
         }
       </div>
-
-      {
-        showAnimation && <Animation />
-      }
-
     </section>
   )
 }

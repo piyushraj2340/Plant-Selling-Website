@@ -1,19 +1,21 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useContext } from 'react'
+import { UserContext } from '../App';
 import { useNavigate, Link } from 'react-router-dom';
 import cover from '../Asset/img/cover.jpg';
 import FullScreenImageView from './Shared/FullScreenImageView';
-import Animation from './Shared/Animation';
-import handelDataFetch from '../Controller/handelDataFetch';
+import handelDataFetch from '../utils/handelDataFetch';
 import Info from './Shared/nurseryTab/Info';
 import ChooseTemplate from './Shared/ChooseTemplate';
-import { completeSection, twoSection, fourSection, twoSectionAndRightVertical, twoSectionAndRightFour, twoSectionAndLeftVertical, twoSectionAndLeftFour } from '../Controller/template';
+import { completeSection, twoSection, fourSection, twoSectionAndRightVertical, twoSectionAndRightFour, twoSectionAndLeftVertical, twoSectionAndLeftFour } from '../utils/template';
 import TabsViewEditing from './Shared/nurseryTab/TabsViewEditing';
 import TabsViewSaved from './Shared/nurseryTab/TabsViewSaved';
 
 
 function NurseryProfile() {
-    document.title = "Manage Your Nursery"
-
+    // Page title is after the nursery useState hooks
+    
+    const { setShowAnimation } = useContext(UserContext);
+    
     const [nursery, setNursery] = useState({
         user: "",
         nurseryOwnerName: "",
@@ -43,14 +45,14 @@ function NurseryProfile() {
         ]
     });
 
+    document.title = nursery.nurseryName ||  "Manage Your Nursery";
+
     const [tabs, setTabs] = useState("Add new section");
 
     const [contents, setContents] = useState([]);
 
     const [isChooseModeOpen, setIsChooseModeOpen] = useState(false);
     const [atIndex, setAtIndex] = useState(null);
-
-    const [showAnimation, setShowAnimation] = useState(false);
 
     const [isCollapseSideNav, setIsCollapseSideNav] = useState(false);
 
@@ -526,7 +528,6 @@ function NurseryProfile() {
                     </div>
                 </div>
             </section>
-            {showAnimation && <Animation />}
             {isChooseModeOpen && <ChooseTemplate setIsChooseModeOpen={setIsChooseModeOpen} handelSelectedTemplate={handelSelectedTemplate} />}
         </>
 

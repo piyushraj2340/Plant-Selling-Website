@@ -9,5 +9,9 @@ export const reducer = (state,action) => {
         return action.length;
     }
 
+    if(action.type === "ANIMATION") {
+        return action.showAnimation;
+    }
+
     return state;
 }

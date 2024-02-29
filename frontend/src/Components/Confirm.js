@@ -1,21 +1,23 @@
-import React, { useEffect, useState } from 'react'
-import handelDataFetch from '../Controller/handelDataFetch';
-import Animation from './Shared/Animation';
+import React, { useEffect, useState, useContext } from 'react'
+import { UserContext } from '../App';
+import handelDataFetch from '../utils/handelDataFetch';
 import { Link, useNavigate } from 'react-router-dom';
 import { Steps, message } from 'antd';
 
 
 
 const Confirm = () => {
-    const [showAnimation, setShowAnimation] = useState(false);
-    const [activeStep, setActiveStep] = useState(1);
+    document.title = "Confirm Your Order"
+
+    const { setShowAnimation } = useContext(UserContext);
+    const activeStep = 1;
     const [selectedAddress, setSelectedAddress] = useState(null);
     const [checkoutCart, setCheckoutCart] = useState(null);
     const [pricing, setPricing] = useState(null);
 
     const navigate = useNavigate();
 
-    const handelGetOrderData = async (req, res) => {
+    const handelGetOrderData = async () => {
         try {
             const response = await handelDataFetch({ path: "/api/v2/checkout/confirm", method: "GET" }, setShowAnimation);
 
@@ -195,7 +197,7 @@ const Confirm = () => {
                                     <small>Total : </small>
                                     <span>₹<b>{pricing && pricing.totalPrice}</b></span>
                                 </p>
-                                
+
                             </div>
                             <div className="d-flex flex-row-reverse p-3">
                                 <p className="h5">Total: <sup>₹</sup>{pricing && pricing.totalPrice}</p>
@@ -207,10 +209,6 @@ const Confirm = () => {
                     </div>
                 </div>
             </div>
-            {
-                showAnimation && <Animation />
-            }
-
         </section>
     )
 }

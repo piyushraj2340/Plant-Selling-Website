@@ -1,6 +1,7 @@
 import React from 'react'
 
 const ContactUs = () => {
+    document.title = "Contact Us"
     return (
         <section className='bg-section'>
             <div className="container p-2">

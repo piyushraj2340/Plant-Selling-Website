@@ -26,7 +26,7 @@ router.post("/", async (req, res) => {
 
         
         if (!resultCartOrProducts || !expireCartOrProducts || !resultShippingInfo || !expireShippingInfo || !resultPricing || !expirePricing) { throw new Error("Unable to create session!.") }
-        
+
         const token = jwt.sign({ userId: userId.toString() }, process.env.SECRET_KEY, { expiresIn: "30m" });
 
         res.cookie('orderSession', token, {
@@ -118,7 +118,7 @@ router.route('/shipping').post(async (req, res) => {
 }).get(async (req, res) => {
     try {
         const userId = req.orderUser;
-        
+
         const result = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
 
         if (result) {
@@ -149,7 +149,7 @@ router.route('/shipping').post(async (req, res) => {
 router.get('/confirm', async (req, res) => {
     try {
         const userId = req.orderUser;
-        
+
         const cartOrProductInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:cartOrProducts`);
         const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
         const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`);
@@ -183,7 +183,7 @@ router.get('/confirm', async (req, res) => {
 router.post('/payments', async (req, res) => {
     try {
         const userId = req.orderUser
-        
+
         const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
         const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`);
 

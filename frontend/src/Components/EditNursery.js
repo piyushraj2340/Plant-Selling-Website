@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useContext } from 'react';
+import { UserContext } from '../App';
 import { useParams, useNavigate } from 'react-router-dom';
-import Animation from './Shared/Animation';
-import handelDataFetch from '../Controller/handelDataFetch';
+import handelDataFetch from '../utils/handelDataFetch';
 
 function AddNursery() {
     document.title = "Update Your Nursery Data.";
+
+    const { setShowAnimation } = useContext(UserContext);
+
 
     const [nursery, setNursery] = useState({
         user: "",
@@ -19,7 +22,6 @@ function AddNursery() {
         state: ""
     });
 
-    const [showAnimation, setShowAnimation] = useState(false);
 
     const { id } = useParams();
 
@@ -71,7 +73,6 @@ function AddNursery() {
 
 
     return (
-        <>
             <div className="container my-5 d-flex justify-content-center" >
                 <div className="col-sm-12 col-md-9 border py-3 mt-5">
                     <h3 className='h3 mb-3 text-center'>
@@ -115,9 +116,6 @@ function AddNursery() {
                     </div>
                 </div>
             </div>
-
-            {showAnimation && <Animation />}
-        </>
 
     )
 }
