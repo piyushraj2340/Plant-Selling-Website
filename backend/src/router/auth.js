@@ -12,6 +12,11 @@ router.post('/sign-up', async (req, res) => {
         const token = await newUser.generateAuthToken();
         await newUser.save();
 
+        const userInfo = { ...newUser._doc };
+        delete userInfo.password;
+        delete userInfo.tokens;
+        delete userInfo.__v;
+
         res.cookie('auth', token, {
             expires: new Date(Date.now() + 50000000),
             httpOnly: true,
@@ -22,6 +27,7 @@ router.post('/sign-up', async (req, res) => {
         const info = {
             status: true,
             message: "User Registration Successful",
+            result: userInfo
         }
 
         res.status(201).send(info);
@@ -53,6 +59,11 @@ router.post('/sign-in', async (req, res) => {
                 // generate the jwt token 
                 const token = await result.generateAuthToken();
 
+                const userInfo = { ...result._doc };
+                delete userInfo.password;
+                delete userInfo.tokens;
+                delete userInfo.__v;
+
                 // adding cookie into the database 
                 res.cookie('auth', token, {
                     expires: new Date(Date.now() + 50000000),
@@ -64,6 +75,7 @@ router.post('/sign-in', async (req, res) => {
                 const info = {
                     status: true,
                     message: "Login Successful",
+                    result: userInfo
                 }
 
                 res.status(200).send(info);
@@ -90,43 +102,6 @@ router.post('/sign-in', async (req, res) => {
             message: error.message
         }
 
-        console.log(error);
-        res.status(500).send(info);
-    }
-});
-
-router.get('/', auth, async (req, res) => {
-    try {
-        if (req.user) {
-            const result = await userModel.findOne({ _id: req.user });
-            if (result) {
-                const info = {
-                    status: true,
-                    message: "Authentication Successfully.",
-                }
-
-                res.status(200).send(info);
-            } else {
-                const info = {
-                    status: false,
-                    message: "Authentication failed",
-                }
-
-                res.status(401).send(info);
-            }
-        } else {
-            const info = {
-                status: false,
-                message: "Authentication failed",
-            }
-
-            res.status(401).send(info);
-        }
-    } catch (error) {
-        const info = {
-            status: false,
-            message: error.message
-        }
         console.log(error);
         res.status(500).send(info);
     }
