@@ -107,7 +107,7 @@ router.post('/sign-in', async (req, res) => {
     }
 });
 
-router.post('/logout', auth, async (req, res) => {
+router.get('/logout', auth, async (req, res) => {
     try {
         if (req.user) {
 
