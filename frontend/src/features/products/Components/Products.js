@@ -1,53 +1,21 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../App';
+import React, { useEffect } from 'react';
 import { Rating } from 'react-simple-star-rating'
-import noPlantsImage from '../Asset/img/noDataFound.jpg';
 import { Link } from 'react-router-dom'
-import handelDataFetch from '../utils/handelDataFetch';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllProductsAsync, getProductsByCategoryAsync } from '../productsSlice';
+import Animation from '../../../Components/Shared/Animation';
 
 
 const Products = () => {
-    document.title = "Plant Selling Website";
-    
-    const { setShowAnimation } = useContext(UserContext);
+    const products = useSelector((state) => state.products.products);
+    const isLoading = useSelector((state) => state.products.isLoading);
+    const dispatch = useDispatch();
 
-    const [products, setProducts] = useState([]);
-
-    const getProductsData = async () => {
-        try {
-            const result = await handelDataFetch({ path: '/api/v2/products/plants', method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setProducts(result.result);
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-    }
-
-    const getProductsDataByCategory = async (category) => {
-        try {
-            const result = await handelDataFetch({ path: `/api/v2/products/plantsByCategory/${category}`, method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setProducts(result.result);
-            } else {
-                throw new Error(result.message)
-            }
-        } catch (error) {
-            console.error(error);
-        }
-
-    }
+    const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/Static%20PlantSeller%20Project%20Images/no-data-found";
 
     useEffect(() => {
-        getProductsData();
+        dispatch(getAllProductsAsync());
     }, []);
-
-
 
     return (
         <div className="container product-container mb-4 mb-md-5">
@@ -55,12 +23,11 @@ const Products = () => {
                 <h1 className='text-center p-2'>Available Plants for Sell</h1>
             </div>
             <div className="p-2 d-flex flex-wrap justify-content-center align-item-center">
-                <button onClick={getProductsData} className="btn btn-secondary m-1">All</button>
-
-                <button onClick={() => getProductsDataByCategory("flowering-plants")} className="btn btn-secondary m-1">Flowering Plants</button>
-                <button onClick={() => getProductsDataByCategory("medicinal-plants")} className="btn btn-secondary m-1">Medicinal Plants</button>
-                <button onClick={() => getProductsDataByCategory("ornamental-plants")} className="btn btn-secondary m-1">Ornamental Plants</button>
-                <button onClick={() => getProductsDataByCategory("indoor-plants")} className="btn btn-secondary m-1">Indoor Plants</button>
+                <button onClick={() => dispatch(getAllProductsAsync())} className="btn btn-secondary m-1">All</button>
+                <button onClick={() => dispatch(getProductsByCategoryAsync("flowering-plants"))} className="btn btn-secondary m-1">Flowering Plants</button>
+                <button onClick={() => dispatch(getProductsByCategoryAsync("medicinal-plants"))} className="btn btn-secondary m-1">Medicinal Plants</button>
+                <button onClick={() => dispatch(getProductsByCategoryAsync("ornamental-plants"))} className="btn btn-secondary m-1">Ornamental Plants</button>
+                <button onClick={() => dispatch(getProductsByCategoryAsync("indoor-plants"))} className="btn btn-secondary m-1">Indoor Plants</button>
             </div>
             <div className="product-content px-2">
                 {
@@ -112,6 +79,10 @@ const Products = () => {
                     </div>
                 }
             </div>
+            {
+                isLoading && <Animation />
+            }
+
         </div>
     )
 }
