@@ -5,6 +5,7 @@ import { message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { userLoginAsync } from '../authSlice';
 import { setCart } from '../../cart/cartSlice'; // TODO: IMPLEMENTATION: CART FUNCTIONALITY
+import { handelUserLoginStatus } from './utils/authHelper';
 
 
 function Login() {
@@ -12,23 +13,8 @@ function Login() {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
-    const handelUserLoginStatus = () => {
-        if (userLoggedInStatus && userLoggedInStatus.status) {
-            message.success(userLoggedInStatus.message);
-
-            const [redirect, to] = window.location.search && window.location.search.split("=");
-            navigate(redirect === "?redirect" ? to : "/profile");
-
-            return;
-        } else if (userLoggedInStatus && !userLoggedInStatus.status) {
-            message.error(userLoggedInStatus.message);
-
-            return;
-        }
-    }
-
     useEffect(() => {
-        handelUserLoginStatus();
+        handelUserLoginStatus(userLoggedInStatus, message, navigate);
     }, [dispatch, userLoggedInStatus]);
 
     const [userFormData, setUserFormData] = useState({
