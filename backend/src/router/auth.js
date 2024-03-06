@@ -107,7 +107,9 @@ router.post('/sign-in', async (req, res) => {
     }
 });
 
-router.get('/logout', auth, async (req, res) => {
+router.use(auth);
+
+router.get('/logout', async (req, res) => {
     try {
         if (req.user) {
 
@@ -159,6 +161,38 @@ router.get('/logout', auth, async (req, res) => {
         res.status(500).send(info);
     }
 });
+
+router.get('/checkUser', async (req, res) => {
+    try {
+        const result = await userModel.findOne({ _id: req.user });
+
+        if (result) {
+            const info = {
+                status: true,
+                message: "User Check Passed.",
+            }
+
+            res.status(200).send(info);
+        } else {
+            const info = {
+                status: false,
+                message: "Authentication Failed"
+            }
+            res.status(401).send(info);
+        }
+
+    } catch (error) {
+        const info = {
+            status: false,
+            message: error.message
+        }
+        console.log(error);
+        res.status(500).send(info);
+    }
+});
+
+
+
 
 
 module.exports = router;
