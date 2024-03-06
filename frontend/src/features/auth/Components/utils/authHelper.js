@@ -1,14 +1,9 @@
-export const handelUserLoginStatus = (userLoggedInStatus, message, navigate) => {
-    if (userLoggedInStatus && userLoggedInStatus.status) {
-        message.success(userLoggedInStatus.message);
+// export const handelAuthStatus = (asyncStatus, message, reducer, clearLogStatus) => {
+//     if (asyncStatus && asyncStatus.status) {
+//         message.success(asyncStatus.message);
+//     } else if (asyncStatus && !asyncStatus.status) {
+//         message.error(asyncStatus.message);
+//     } 
 
-        const [redirect, to] = window.location.search && window.location.search.split("=");
-        navigate(redirect === "?redirect" ? to : "/profile");
-
-        return;
-    } else if (userLoggedInStatus && !userLoggedInStatus.status) {
-        message.error(userLoggedInStatus.message);
-
-        return;
-    }
-}
+//     reducer(clearLogStatus());
+// }
