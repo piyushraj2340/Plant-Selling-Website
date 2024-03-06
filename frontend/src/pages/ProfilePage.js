@@ -16,8 +16,15 @@ const ProfilePage = () => {
 
     const navigate = useNavigate();
 
+    const handelProfilePage = () => {
+        dispatch(userProfileAsync());
+        if(!user) {
+            navigate("/login");
+        }
+    }
+    
     useEffect(() => {
-        !user && dispatch(userProfileAsync());
+        handelProfilePage();
     }, []);
 
     return (
