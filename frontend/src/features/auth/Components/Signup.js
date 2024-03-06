@@ -1,19 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { message } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { userSignupAsync } from '../authSlice';
-import { handelUserLoginStatus } from './utils/authHelper';
 
 
 function Signup() {
-    const userLoggedInStatus = useSelector(state => state.auth.userLoggedInStatus);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        handelUserLoginStatus(userLoggedInStatus, message, navigate);
-    }, [dispatch, userLoggedInStatus]);
 
     const [userFormData, setUserFormData] = useState({
         name: "",
@@ -32,8 +25,6 @@ function Signup() {
 
         setUserFormData({ ...userFormData, [name]: value });
     }
-
-
 
     const handleUserSignUp = async (e) => {
         e.preventDefault();

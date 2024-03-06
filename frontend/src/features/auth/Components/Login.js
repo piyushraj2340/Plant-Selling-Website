@@ -1,21 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import { message } from 'antd';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { userLoginAsync } from '../authSlice';
-import { setCart } from '../../cart/cartSlice'; // TODO: IMPLEMENTATION: CART FUNCTIONALITY
-import { handelUserLoginStatus } from './utils/authHelper';
+import { message } from 'antd';
+// import { setCart } from '../../cart/cartSlice'; // TODO: IMPLEMENTATION: CART FUNCTIONALITY
 
 
 function Login() {
-    const userLoggedInStatus = useSelector(state => state.auth.userLoggedInStatus);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
-
-    useEffect(() => {
-        handelUserLoginStatus(userLoggedInStatus, message, navigate);
-    }, [dispatch, userLoggedInStatus]);
 
     const [userFormData, setUserFormData] = useState({
         email: "",
@@ -32,7 +24,7 @@ function Login() {
 
     const handleUserLogin = async (e) => {
         e.preventDefault();
-        if (userFormData.email === "" || userFormData.password === "") { // if one of the empty fields.
+        if (userFormData.email === "" || userFormData.password === "") { //* VALIDATE: if one of the empty fields.
             message.error("Please enter your credentials.")
             return;
         }
