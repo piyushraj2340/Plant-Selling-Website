@@ -13,7 +13,7 @@ const SignupPage = () => {
     const navigate = useNavigate();
 
     const handleGetUserData = async () => {
-        dispatch(userProfileAsync());
+        !user && dispatch(userProfileAsync());
         if (user) {
             const [redirect, to] = window.location.search && window.location.search.split("=");
             navigate(redirect === "?redirect" ? to : "/profile");
