@@ -17,7 +17,8 @@ router.route('/store')
                 if (newNurseryStoreSection) {
                     const info = {
                         status: true,
-                        message: "New Section of Store is added successfully."
+                        message: "New Section of Store is added successfully.",
+                        result: newNurseryStoreSection
                     }
 
                     res.status(201).send(info);
@@ -182,8 +183,6 @@ router.route('/store/:id')
                 const _id = req.params.id;
                 const result = await nurseryStore.findOneAndDelete({ _id, nursery: req.nursery, user: req.user });
 
-
-
                 if (result) {
 
                     await deleteResourcesByPrefix(`PlantSeller/user/${req.user}/nursery/${req.nursery}/store/${_id}`, {
@@ -196,7 +195,8 @@ router.route('/store/:id')
 
                     const info = {
                         status: true,
-                        message: "Deleted Nursery Store Section Data."
+                        message: "Deleted Nursery Store Section Data.",
+                        result
                     }
 
                     res.status(200).send(info);
@@ -235,17 +235,19 @@ router.post('/store/images/:id', auth, async (req, res) => {
                 const _id = req.params.id;
                 const image = req.files[_id];
 
-                const {tabId, rendersId} = req.body;
+                const { tabId, rendersId } = req.body;
 
                 const upload = await uploadImage(image, {
                     folder: `PlantSeller/user/${req.user}/nursery/${req.nursery}/store/${tabId}/${rendersId}`,
                 });
 
-                const { public_id, url } = upload;
+                const { public_id, secure_url } = upload;
+
+                console.log(upload);
 
                 const result = await nurseryStore.updateOne({ "renders.images._id": _id }, {
                     $set: {
-                        "renders.$[outer].images.$[inner]": { public_id, url },
+                        "renders.$[outer].images.$[inner]": { public_id, url: secure_url },
                     }
                 }, {
                     arrayFilters: [
@@ -258,6 +260,15 @@ router.post('/store/images/:id', auth, async (req, res) => {
                     const info = {
                         status: true,
                         message: "Image updated successfully.",
+                        result: {
+                            tabId,
+                            rendersId,
+                            imageId: _id,
+                            image: {
+                                public_id,
+                                url: secure_url
+                            }
+                        }
                     }
 
                     res.status(200).send(info);
