@@ -1,7 +1,6 @@
 import React from 'react'
 
 const TemplateCompleteSection = ({ content, index, handelDeleteRendersUpload, handleImageUploadNurseryStore }) => {
-
     return (
         <div>
             {

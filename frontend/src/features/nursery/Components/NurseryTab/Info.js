@@ -1,6 +1,9 @@
 import React from 'react'
+import { useSelector } from 'react-redux'
 
-const Info = ({nursery}) => {
+const Info = () => {
+    const nursery = useSelector(state => state.nursery.nursery);
+    
     return (
         <div className="p-2 p-md-3">
             <div className="row">
