@@ -17,15 +17,18 @@ const ProfilePage = () => {
     const navigate = useNavigate();
 
     const handelProfilePage = () => {
-        dispatch(userProfileAsync());
-        if(!user) {
+        if (!user) {
             navigate("/login");
         }
     }
-    
+
+    useEffect(() => {
+        !user && dispatch(userProfileAsync());
+    }, [dispatch])
+
     useEffect(() => {
         handelProfilePage();
-    }, []);
+    }, [dispatch, user]);
 
     return (
         // TODO: add the customizations avatar images based on the gender.
