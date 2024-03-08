@@ -1,27 +1,32 @@
-import React, { useState, useEffect, useContext } from 'react'
-import { UserContext } from '../App';
+import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom';
-import handelDataFetch from '../utils/handelDataFetch';
 import { message } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { updateAddressAsync } from '../../addressSlice';
 
 
 
 function EditAddress() {
-    document.title = "Update Your Address";
+    const { id } = useParams();
 
-    const { setShowAnimation } = useContext(UserContext);
+    const address = useSelector(state => state.address.addressList);
+    const dispatch = useDispatch();
+
+    const filterCurrentAddress = address.filter(address => address._id === id)[0];
+
+    console.log(filterCurrentAddress);
 
     // storing the data 
-    const [address, setAddress] = useState({
-        user: "",
-        name: "",
-        phone: "",
-        pinCode: "",
-        address: "",
-        landmark: "",
-        city: "",
-        state: "",
-        setAsDefault: false
+    const [addressData, setAddressData] = useState({
+        user: filterCurrentAddress && filterCurrentAddress.user,
+        name: filterCurrentAddress && filterCurrentAddress.name,
+        phone: filterCurrentAddress && filterCurrentAddress.phone,
+        pinCode: filterCurrentAddress && filterCurrentAddress.pinCode,
+        address: filterCurrentAddress && filterCurrentAddress.address,
+        landmark: filterCurrentAddress && filterCurrentAddress.landmark,
+        city: filterCurrentAddress && filterCurrentAddress.city,
+        state: filterCurrentAddress && filterCurrentAddress.state,
+        setAsDefault: filterCurrentAddress && filterCurrentAddress.setAsDefault
     });
 
     // validating the input fields and have there error messages associated with them
@@ -62,46 +67,9 @@ function EditAddress() {
             target: ""
         },
     });
-
-    // decide the role for this components add new address or update the existing address 
-    const { id } = useParams();
+    
 
     const navigate = useNavigate();
-
-
-    const handelProfileData = async () => {
-        try {
-            const result = await handelDataFetch({ path: "/api/v2/user/profile", method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setAddress({ ...address, user: result.result._id });
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            console.error(error);
-            navigate('/login');
-        }
-    }
-
-    const handelAddressData = async () => {
-        try {
-            const result = await handelDataFetch({ path: `/api/v2/user/address/${id}`, method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setAddress(result.result);
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-
-
-    useEffect(() => {
-        handelProfileData();
-        handelAddressData();
-    }, [])
 
     let name, value;
     const handleInputs = (e) => {
@@ -109,7 +77,7 @@ function EditAddress() {
         value = e.target.value;
 
         if (name === "setAsDefault") {
-            setAddress({ ...address, [name]: e.target.checked });
+            setAddressData({ ...addressData, [name]: e.target.checked });
         } else {
             if (value === "") {
                 setErrorMessage({ ...errorMessage, [name]: { status: true, message: `${name} is required.`, target: e.target } });
@@ -123,37 +91,38 @@ function EditAddress() {
                 setErrorMessage({ ...errorMessage, [name]: { status: false, message: "", target: "" } });
             }
 
-            setAddress({ ...address, [name]: value });
+            setAddressData({ ...addressData, [name]: value });
         }
     }
 
     const handlePostData = async (e) => {
-        try {
-            e.preventDefault();
+        e.preventDefault();
 
-            for (const key in errorMessage) {
-                if (errorMessage[key].status) {
-                    errorMessage[key].target.focus();
-                    return;
-                }
+        for (const key in errorMessage) {
+            if (errorMessage[key].status) {
+                errorMessage[key].target.focus();
+                return;
             }
-
-            if (address.name !== "" && address.phone !== "" && address.pinCode !== "" && address.address !== "" && address.city !== "" && address.state !== "") {
-
-                const result = await handelDataFetch({ path: `/api/v2/user/address/${id}`, method: "PATCH", body: address }, setShowAnimation);
-
-                if (result.status) {
-                    const [redirect, to] = window.location.search && window.location.search.split("=");
-                    navigate(redirect === "?redirect" ? to : "/address");
-                } else {
-                    throw new Error(result.message);
-                }
-            } else {
-                message.warning("Input should not be empty.")
-            }
-        } catch (error) {
-            console.error(error);
         }
+
+        for (const key in addressData) {
+            if (key === "landmark" || key === "setAsDefault") continue;
+
+            if (!addressData[key]) {
+                message.error(key + " is required field!");
+                return;
+            }
+        }
+        const [redirect, to] = window.location.search && window.location.search.split("=");
+
+        const data = {
+            _id: filterCurrentAddress._id,
+            address: addressData,
+            redirect: redirect === "?redirect" ? to : "/address",
+            navigate
+        }
+
+        dispatch(updateAddressAsync(data));
     }
 
     return (
@@ -166,21 +135,21 @@ function EditAddress() {
                     <form method="POST">
                         <div className="form-outline mb-4">
                             <label htmlFor="name" className='form-label'>Full Name: <span className="text-danger small">*</span></label>
-                            <input type="text" name='name' id="name" className="form-control" placeholder='Enter Full Name' onChange={handleInputs} value={address.name} />
+                            <input type="text" name='name' id="name" className="form-control" placeholder='Enter Full Name' onChange={handleInputs} value={addressData.name} />
                             {errorMessage.name.status &&
                                 <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.name.message}</p>
                             }
                         </div>
                         <div className="form-outline mb-4">
                             <label htmlFor="phone" className="form-label">Mobile Number: <span className="text-danger small">*</span></label>
-                            <input type="number" name='phone' id="phone" className="form-control" placeholder='Enter Mobile Number' onChange={handleInputs} maxLength={10} value={address.phone} />
+                            <input type="number" name='phone' id="phone" className="form-control" placeholder='Enter Mobile Number' onChange={handleInputs} maxLength={10} value={addressData.phone} />
                             {errorMessage.phone.status &&
                                 <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.phone.message}</p>
                             }
                         </div>
                         <div className="form-outline mb-4">
                             <label htmlFor="address" className="form-label">Address: <span className="text-danger small">*</span></label>
-                            <textarea className="form-control" rows="5" id="address" name="address" placeholder='Enter Address' onChange={handleInputs} value={address.address}></textarea>
+                            <textarea className="form-control" rows="5" id="address" name="address" placeholder='Enter Address' onChange={handleInputs} value={addressData.address}></textarea>
                             {errorMessage.address.status &&
                                 <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.address.message}</p>
                             }
@@ -188,11 +157,11 @@ function EditAddress() {
                         <div className="d-md-flex justify-content-between mb-md-4">
                             <div className="form-outline col-md-6 mb-4 mb-md-0 pe-md-2">
                                 <label htmlFor="landmark" className="form-label">Landmark (Optional): </label>
-                                <input type="text" name='landmark' id="landmark" className="form-control" placeholder='Enter Landmark (optional)' onChange={handleInputs} value={address.landmark} />
+                                <input type="text" name='landmark' id="landmark" className="form-control" placeholder='Enter Landmark (optional)' onChange={handleInputs} value={addressData.landmark} />
                             </div>
                             <div className="form-outline col-md-6 mb-4 mb-md-0 ps-md-2">
                                 <label htmlFor="pinCode" className="form-label">Pin Code: <span className="text-danger small">*</span></label>
-                                <input type="number" name='pinCode' id="pinCode" className="form-control" placeholder='Enter Pin Code' onChange={handleInputs} maxLength={6} value={address.pinCode} />
+                                <input type="number" name='pinCode' id="pinCode" className="form-control" placeholder='Enter Pin Code' onChange={handleInputs} maxLength={6} value={addressData.pinCode} />
                                 {errorMessage.pinCode.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.pinCode.message}</p>
                                 }
@@ -201,14 +170,14 @@ function EditAddress() {
                         <div className="d-md-flex justify-content-between mb-md-4">
                             <div className="form-outline col-md-6 mb-4 mb-md-0 pe-md-2">
                                 <label htmlFor="city" className="form-label">City: <span className="text-danger small">*</span></label>
-                                <input type="text" name='city' id="city" className="form-control" placeholder='Enter City' onChange={handleInputs} value={address.city} />
+                                <input type="text" name='city' id="city" className="form-control" placeholder='Enter City' onChange={handleInputs} value={addressData.city} />
                                 {errorMessage.city.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.city.message}</p>
                                 }
                             </div>
                             <div className="form-outline col-md-6 mb-4 mb-md-0 ps-md-2">
                                 <label htmlFor="state" className="form-label">State: <span className="text-danger small">*</span></label>
-                                <input type="text" name='state' id="state" className="form-control" placeholder='Enter State' onChange={handleInputs} value={address.state} />
+                                <input type="text" name='state' id="state" className="form-control" placeholder='Enter State' onChange={handleInputs} value={addressData.state} />
                                 {errorMessage.state.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.state.message}</p>
                                 }
@@ -216,7 +185,7 @@ function EditAddress() {
                         </div>
                         <div className="form-outline mb-5">
                             <label className='form-check-label' htmlFor="setAsDefault">
-                                <input type="checkbox" className='form-check-input' name='setAsDefault' id="setAsDefault" onChange={handleInputs} checked={address.setAsDefault} /> Set As Default
+                                <input type="checkbox" className='form-check-input' name='setAsDefault' id="setAsDefault" onChange={handleInputs} checked={addressData.setAsDefault} /> Set As Default
                             </label>
                         </div>
 
