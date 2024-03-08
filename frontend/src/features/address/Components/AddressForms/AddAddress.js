@@ -1,18 +1,17 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../App';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import handelDataFetch from '../utils/handelDataFetch';
 import { message } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { addNewAddressAsync } from '../../addressSlice';
 
 
 function AddAddress() {
-    document.title = "Add Your Address";
-
-    const { setShowAnimation } = useContext(UserContext);
+    const user = useSelector(state => state.user.user);
+    const dispatch = useDispatch();
 
     // storing the data 
     const [address, setAddress] = useState({
-        user: "",
+        user: user._id,
         name: "",
         phone: "",
         pinCode: "",
@@ -88,52 +87,33 @@ function AddAddress() {
         }
     }
 
-    const handelProfileData = async () => {
-        try {
-            const result = await handelDataFetch({ path: "/api/v2/user/profile", method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setAddress({ ...address, user: result.result._id });
-            } else {
-                throw new Error(result.message);
-            }
-        } catch (error) {
-            console.error(error);
-            navigate('/login');
-        }
-    }
-
-    useEffect(() => {
-        handelProfileData();
-    }, [])
-
     const handleAddNewAddress = async (e) => {
-        try {
-            e.preventDefault();
+        e.preventDefault();
 
-            for (const key in errorMessage) {
-                if (errorMessage[key].status) {
-                    errorMessage[key].target.focus();
-                    return;
-                }
+        for (const key in errorMessage) {
+            if (errorMessage[key].status) {
+                errorMessage[key].target.focus();
+                return;
             }
-
-            if (address.name !== "" && address.phone !== "" && address.pinCode !== "" && address.address !== "" && address.city !== "" && address.state !== "") {
-
-                const result = await handelDataFetch({ path: '/api/v2/user/address', method: "POST", body: address }, setShowAnimation);
-
-                if (result.status) {
-                    const [redirect, to] = window.location.search && window.location.search.split("=");
-                    navigate(redirect === "?redirect" ? to : "/address");
-                } else {
-                    throw new Error(result.message);
-                }
-            } else {
-                message.warning("Input should not be empty.")
-            }
-        } catch (error) {
-            console.error(error);
         }
+
+        for (const key in address) {
+            if (key === "landmark" || key === "setAsDefault") continue;
+
+            if (!address[key]) {
+                message.error(key + " is required field!");
+                return;
+            }
+        }
+        const [redirect, to] = window.location.search && window.location.search.split("=");
+
+        const data = {
+            address,
+            redirect: redirect === "?redirect" ? to : "/address",
+            navigate
+        }
+
+        dispatch(addNewAddressAsync(data))
     }
 
     return (
