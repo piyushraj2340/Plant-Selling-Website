@@ -30,6 +30,7 @@ router.route('/address')
                 const info = {
                     status: true,
                     message: "New Address Added Successfully",
+                    result: newAddress
                 }
 
                 res.status(200).send(info);
@@ -201,6 +202,7 @@ router.route('/address/:id')
                     const info = {
                         status: true,
                         message: "Address Deleted successfully",
+                        result
                     }
                     res.status(200).send(info);
                 } else {

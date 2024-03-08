@@ -37,6 +37,7 @@ router.route('/profile')
                     const info = {
                         status: true,
                         message: "Nursery Listed Successfully.",
+                        result: addNursery
                     }
 
                     res.status(200).send(info);
