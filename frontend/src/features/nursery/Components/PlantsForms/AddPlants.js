@@ -1,17 +1,16 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../App';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import handelDataFetch from '../utils/handelDataFetch';
-
+import { message } from "antd";
+import { useDispatch, useSelector } from 'react-redux';
+import { addNewPlantsToNurseryAsync } from '../../nurserySlice';
 
 function AddPlants() {
-    document.title = "Add Plant to Nursery";
-
-    const { setShowAnimation } = useContext(UserContext);
+    const nursery = useSelector(state => state.nursery.nursery);
+    const dispatch = useDispatch();
 
     const [plant, setPlants] = useState({
-        user: "",
-        nursery: "",
+        user: nursery.user,
+        nursery: nursery._id,
         plantName: "",
         price: "",
         stock: "",
@@ -54,12 +53,6 @@ function AddPlants() {
         },
     });
 
-    const [message, setMessage] = useState({
-        status: "",
-        message: ""
-    });
-
-
 
     const navigate = useNavigate();
 
@@ -88,100 +81,49 @@ function AddPlants() {
         }
     }
 
-    const handelNurseryData = async () => {
-        try {
-            const result = await handelDataFetch({ path: "/api/v2/nursery/profile", method: "GET" }, setShowAnimation);
-
-            if (result.status) {
-                setPlants({ ...plant, user: result.result.user, nursery: result.result._id })
-            } else {
-                navigate('/profile');
-            }
-        } catch (err) {
-            navigate('/login');
-            console.log("Something Went Wrong.");
-        }
-    }
-
-    useEffect(() => {
-        handelNurseryData();
-    }, []);
-
-
     const handelPostData = async (e) => {
-        setMessage({
-            status: "",
-            message: ""
-        });
-        try {
-            setShowAnimation(true);
-            e.preventDefault();
+        e.preventDefault();
 
-            for (const key in errorMessage) {
-                if (errorMessage[key].status) {
-                    errorMessage[key].target.focus();
-                    return;
-                }
-            }
-
-            if (plant.images.length === 0) {
-                setMessage({
-                    status: false,
-                    message: "You need to upload at least one image."
-                });
+        for (const key in errorMessage) {
+            if (errorMessage[key].status) {
+                errorMessage[key].target.focus();
                 return;
-            } else if (plant.user !== "" && plant.nursery !== "" && plant.plantName !== "" && plant.price !== "" && plant.stock !== "" && plant.discount !== "" && plant.category !== "" && plant.description !== "") {
-                const data = new FormData();
-                data.append("user", plant.user);
-                data.append("nursery", plant.nursery);
-                data.append("plantName", plant.plantName);
-                data.append("price", plant.price);
-                data.append("stock", plant.stock);
-                data.append("discount", plant.discount);
-                data.append("category", plant.category);
-                data.append("description", plant.description);
-
-                plant.images.forEach((image, index) => {
-                    data.append(`image_${index}`, image);
-                });
-
-                const res = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}/api/v2/nursery/plants`, {
-                    method: "POST",
-                    body: data,
-                    credentials: 'include'
-                });
-
-                const result = await res.json();
-
-                if (result.status) {
-                    setMessage({
-                        status: true,
-                        message: result.message
-                    });
-                    setTimeout(() => {
-                        navigate('/nursery');
-                    }, 1000);
-                } else {
-                    throw new Error(result.message);
-                }
-            } else {
-                setMessage({
-                    status: false,
-                    message: "Input should not be empty."
-                });
             }
-        } catch (error) {
-            console.error(error);
-            setMessage({
-                status: false,
-                message: error
-            });
-            setTimeout(() => {
-                navigate('/login');
-            }, 1000);
-        } finally {
-            setShowAnimation(false);
         }
+
+        for (const key in plant) {
+            if (!plant[key]) {
+                message.error(key + " is required field!");
+                return;
+            }
+        }
+
+        if (plant.images.length === 0) {
+            message.error("You need to upload at least one image.")
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("user", plant.user);
+        formData.append("nursery", plant.nursery);
+        formData.append("plantName", plant.plantName);
+        formData.append("price", plant.price);
+        formData.append("stock", plant.stock);
+        formData.append("discount", plant.discount);
+        formData.append("category", plant.category);
+        formData.append("description", plant.description);
+
+        plant.images.forEach((image, index) => {
+            formData.append(`image_${index}`, image);
+        })
+
+        const data = {
+            data: formData,
+            redirect: "/nursery",
+            navigate
+        }
+
+        dispatch(addNewPlantsToNurseryAsync(data));
     }
 
 
@@ -199,7 +141,7 @@ function AddPlants() {
                 }
 
                 <div className="row p-4">
-                    <form method="POST">
+                    <form method="POST" onSubmit={handelPostData}>
                         <div className="form-outline mb-md-4">
                             <label htmlFor="plantsName" className='ps-1 my-2'>Plant Name: <span className="text-danger small">*</span></label>
                             <input type="text" name='plantName' id="plantsName" className="form-control" placeholder='Plants Name' onChange={handleInputs} value={plant.plantName} />
@@ -282,7 +224,7 @@ function AddPlants() {
                             }
                         </div>
 
-                        <button onClick={handelPostData} type="submit" className="btn btn-primary btn-block mb-4">Add Plants to Nursery</button>
+                        <button type="submit" className="btn btn-primary btn-block mb-4">Add Plants to Nursery</button>
                     </form>
                 </div>
             </div>
