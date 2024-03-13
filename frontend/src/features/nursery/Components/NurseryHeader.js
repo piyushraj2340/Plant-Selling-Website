@@ -67,7 +67,7 @@ const NurseryHeader = () => {
                                 <Link to={'/nursery/plant/new'} className="btn btn-sm btn-light border-dark"><i className="fas fa-plus"></i> Plants</Link>
                             </div>
                             <div className="mx-1 my-1">
-                                <Link to={`/nursery/update/${nursery._id}`} className="btn btn-sm btn-light border-dark"><i className="fas fa-pen"></i> Nursery</Link>
+                                <Link to={`/nursery/update`} className="btn btn-sm btn-light border-dark"><i className="fas fa-pen"></i> Nursery</Link>
                             </div>
                             <div className="mx-1 my-1">
                                 <Link to={`/nursery/store/view/${nursery._id}`} className="btn btn-sm btn-light border-dark d-flex align-items-center"><i className="material-symbols-outlined me-1" style={{ fontSize: "20px" }}>public</i> Public</Link>
@@ -83,7 +83,7 @@ const NurseryHeader = () => {
                                     <Link to={'/nursery/plant/new'}><i className="fas fa-plus"></i> Plants</Link>
                                 </div>
                                 <div className="p-2 border-bottom">
-                                    <Link to={`/nursery/update/${nursery._id}`}><i className="fas fa-pen"></i> Nursery</Link>
+                                    <Link to={`/nursery/update`}><i className="fas fa-pen"></i> Nursery</Link>
                                 </div>
                                 <div className="p-2 border-bottom">
                                     <Link to={`/nursery/store/view/${nursery._id}`} className="d-flex align-items-center"><i className="material-symbols-outlined me-1" style={{ fontSize: "20px" }}>public</i> Public</Link>
