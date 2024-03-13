@@ -1,8 +1,9 @@
 import React from 'react'
-import noPlantsImage from '../../Asset/img/noDataFound.jpg';
 import { Link } from 'react-router-dom';
 
-function AddressList({ addressList, setSelectedAddress, setViewAddressList, viewAddressList, redirect }) {
+function AddressList({ addressList, handelSelectedAddress, setViewAddressList, viewAddressList, redirect }) {
+
+    const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found"
 
     return (
         <div className="address-list-container-open p-2 p-md-4 position-fixed d-flex justify-content-center align-items-center">
@@ -35,7 +36,7 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
 
                         addressList.map((elem, index) => {
                             return (
-                                <div key={index} onClick={() => setSelectedAddress(elem._id)} className='m-3 p-3 border rounded select-address'>
+                                <div key={index} onClick={() => handelSelectedAddress(elem._id)} className='m-3 p-3 border rounded select-address'>
                                     <p className='m-0 h6'>{elem.name}</p>
                                     <p className='m-0'>{elem.address}</p>
                                     <p className='m-0'>{elem.city} {elem.state} {elem.pinCode}</p>
@@ -46,7 +47,7 @@ function AddressList({ addressList, setSelectedAddress, setViewAddressList, view
                     }
 
                     {
-                        !addressList &&
+                        !addressList.length &&
 
                         <div className="container">
                             <div className="row">

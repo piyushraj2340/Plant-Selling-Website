@@ -1,11 +1,11 @@
 import React from 'react'
 import { Link } from 'react-router-dom';
-import AnimationSVG from '../../Components/Shared/AnimationSVG';
+import AnimationSVG from './AnimationSVG';
 
 
 const Headers = () => {
 
-    const headerImg = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/Static%20PlantSeller%20Project%20Images/header-images";
+    const headerImg = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/header-images";
 
     return (
         <div className="home-header bg-light text-dark p-md-2 p-lg-4">
