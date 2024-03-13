@@ -1,9 +1,23 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux'
 import { Link } from 'react-router-dom';
+import { addressListDataFetchAsync } from '../../address/addressSlice';
 
 const ProfileAddress = () => {
-    const address = useSelector(state => state.address);
+    const addressList = useSelector(state => state.address.addressList);
+    const dispatch = useDispatch();
+    
+    const [address, setAddress] = useState(null);
+
+    useEffect(() => {
+        !addressList.length && dispatch(addressListDataFetchAsync());
+        
+        if(addressList.length) {
+            setAddress(addressList[0]);
+        }
+
+    }, [addressList])
+
     return (
         <div className="col-md-6">
             <div className="card mb-4 mb-md-0">
