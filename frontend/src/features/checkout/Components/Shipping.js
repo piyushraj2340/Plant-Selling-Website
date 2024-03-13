@@ -1,20 +1,23 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { UserContext } from '../App';
-import handelDataFetch from '../utils/handelDataFetch';
+import React, { useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Steps, message } from 'antd';
-import noPlantsImage from '../Asset/img/noDataFound.jpg';
+import { useDispatch, useSelector } from 'react-redux';
+import { addressListDataFetchAsync } from '../../address/addressSlice';
+import { getSelectedShippingAsync, updateSelectedShippingAsync, getValidateCheckoutAsync } from '../checkoutSlice';
 
 
 
 const Shipping = () => {
-    document.title = "Shipping Information";
 
-    const { setShowAnimation } = useContext(UserContext);
+    const addressList = useSelector(state => state.address.addressList);
+    const selectedAddress = useSelector(state => state.checkout.shipping);
+    const isSessionError = useSelector(state => state.checkout.isSessionError);
+
+    const dispatch = useDispatch();
+
+    const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
     const activeStep = 0;
-    const [addressList, setAddressList] = useState([]);
-    const [selectedAddress, setSelectedAddress] = useState(null);
 
     const navigate = useNavigate();
 
@@ -32,76 +35,36 @@ const Shipping = () => {
         }
     }
 
-    const handelGetListOfAddress = async () => {
-        try {
-            const result = await handelDataFetch({ path: "/api/v2/user/address", method: "GET" }, setShowAnimation);
-
-            if (result) {
-                setAddressList(result.result);
-            } else {
-                navigate("/");
-                throw new Error(result.message)
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    const handelValidateOrder = async () => {
-        try {
-            const data = await handelDataFetch({ path: "/api/v2/checkout", method: "GET" }, setShowAnimation);
-            if (!data.status) {
-                message.error("Invalid Order Session!.")
-                navigate("/");
-            }
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     const handelChangeAddress = async (_id) => {
-        try {
-            const address = addressList.find((address) => address._id === _id);
-            const response = await handelDataFetch({ path: "/api/v2/checkout/shipping", method: "POST", body: address }, setShowAnimation);
+        const address = addressList.find((address) => address._id === _id);
 
-            if (response.status) {
-                navigate('/checkout/confirm')
-            } else {
-                message.config({
-                    top: 100,
-                    maxCount: 3,
-                    CSSProperties: {
-                        backgroundColor: "#000",
-                        color: "#fff"
-                    }
-                })
-
-                message.error("Invalid Order Session.");
-                navigate('/')
-            }
-        } catch (error) {
-            console.error(error);
+        const data = {
+            address,
+            navigate
         }
+
+        dispatch(updateSelectedShippingAsync(data))
     }
 
     const handelGetSelectedAddress = async () => {
-        try {
-            const data = await handelDataFetch({ path: "/api/v2/checkout/shipping", method: "GET" }, setShowAnimation);
-
-            if (data.status) {
-                setSelectedAddress(data.result);
-            }
-
-        } catch (error) {
-            console.error(error);
-        }
+        dispatch(getSelectedShippingAsync());
     }
 
     useEffect(() => {
-        handelGetListOfAddress();
-        handelValidateOrder();
-        handelGetSelectedAddress();
-    }, [])
+        dispatch(getValidateCheckoutAsync());
+        if(isSessionError) {
+            message.error(isSessionError.message);
+            navigate("/");
+        }
+    }, [isSessionError]);
+
+    useEffect(() => {
+        !addressList.length && dispatch(addressListDataFetchAsync());
+    }, [addressList]);
+
+    useEffect(() =>{
+        !selectedAddress && handelGetSelectedAddress();
+    }, [selectedAddress]);
 
     const stepsOptions = [
         {
@@ -115,7 +78,7 @@ const Shipping = () => {
         {
             title: 'Payment',
             icon: <span className='fas fa-university'></span>,
-        },];
+        }];
 
     return (
         <section className='position-fixed w-100 h-100 top-0 section-checkout p-1'>
@@ -145,7 +108,7 @@ const Shipping = () => {
                     }
 
                     {
-                        !addressList &&
+                        !addressList.length &&
                         <div className="container">
                             <div className="row">
                                 <div className="img d-flex justify-content-center">

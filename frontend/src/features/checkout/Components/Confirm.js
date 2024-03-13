@@ -1,72 +1,39 @@
-import React, { useEffect, useState, useContext } from 'react'
-import { UserContext } from '../App';
-import handelDataFetch from '../utils/handelDataFetch';
+import React, { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
 import { Steps, message } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { getConfirmOrderDataAsync, getSelectedShippingAsync, getValidateCheckoutAsync } from '../checkoutSlice';
 
 
 
 const Confirm = () => {
-    document.title = "Confirm Your Order"
+    const isSessionError = useSelector(state => state.checkout.isSessionError);
+    const selectedAddress = useSelector(state => state.checkout.shipping);
+    const pricing = useSelector(state => state.checkout.pricing);
+    const checkoutCart = useSelector(state => state.checkout.carts);
+    
+    const dispatch = useDispatch();
 
-    const { setShowAnimation } = useContext(UserContext);
     const activeStep = 1;
-    const [selectedAddress, setSelectedAddress] = useState(null);
-    const [checkoutCart, setCheckoutCart] = useState(null);
-    const [pricing, setPricing] = useState(null);
 
     const navigate = useNavigate();
 
-    const handelGetOrderData = async () => {
-        try {
-            const response = await handelDataFetch({ path: "/api/v2/checkout/confirm", method: "GET" }, setShowAnimation);
-
-            if (response.status) {
-                setSelectedAddress(response.result.address);
-                setCheckoutCart(response.result.cartOrProducts);
-                setPricing(response.result.pricing);
-            } else {
-                message.config({
-                    top: 100,
-                    maxCount: 3,
-                    CSSProperties: {
-                        backgroundColor: "#000",
-                        color: "#fff"
-                    }
-                })
-                message.error("Invalid Order Session");
-                navigate("/");
-            }
-
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
     const handelValidateOrder = async () => {
-        try {
-            const data = await handelDataFetch({ path: "/api/v2/checkout", method: "GET" }, setShowAnimation);
-            if (!data.status) {
-                message.config({
-                    top: 100,
-                    maxCount: 3,
-                    CSSProperties: {
-                        backgroundColor: "#000",
-                        color: "#fff"
-                    }
-                })
-                message.error("Invalid Order Session!.")
-                navigate("/");
-            }
-        } catch (error) {
-            console.error(error);
+        dispatch(getValidateCheckoutAsync());
+        if(isSessionError) {
+            message.error(isSessionError.message);
+            navigate("/");
         }
     }
 
     useEffect(() => {
-        handelGetOrderData();
         handelValidateOrder();
-    }, [])
+    }, [isSessionError])
+
+    useEffect(() => {
+        !checkoutCart.length && dispatch(getConfirmOrderDataAsync());
+    }, [checkoutCart])
+    
 
     const handelChangeActiveStep = (step) => {
         if (step > activeStep) return;
