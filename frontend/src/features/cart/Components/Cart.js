@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../../Components/Shared/AddressList';
-import { message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing } from '../cartSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
+import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 
 function Cart() {
-
+  const user = useSelector(state => state.user.user);
   const cart = useSelector(state => state.cart.carts);
   const addressList = useSelector(state => state.address.addressList);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
@@ -22,10 +22,23 @@ function Cart() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    !cart.length && dispatch(cartDataFetchAsync());
-    !addressList.length && dispatch(addressListDataFetchAsync());
-    dispatch(setCartPricing());
+    dispatch(clearIsSessionError());
+  }, [])
+
+  useEffect(() => {
+    if (user) {
+      dispatch(addressListDataFetchAsync());
+    }
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    cart.length && dispatch(setCartPricing(cart));
   }, [dispatch, cart]);
+
+  useEffect(() => {
+    addressList.length && dispatch(setSelectedAddress(addressList[0]));
+  }, [dispatch, addressList])
+
 
   const handelSelectedAddress = (_id) => {
     let address = addressList.filter((elem) => {
@@ -41,43 +54,21 @@ function Cart() {
   }
 
   const handleUpdateCart = async (cartId, quantity) => {
-    dispatch(cartDataUpdateQuantityAsync({cartId, quantity}))
+    dispatch(cartDataUpdateQuantityAsync({ cartId, quantity }))
   }
 
   const handelBuyProduct = async () => {
-    // try {
-    //   const data = {
-    //     cartOrProducts: cart,
-    //     pricing,
-    //     shippingInfo: address
-    //   }
 
-    //   const result = await handelDataFetch({ path: "/api/v2/checkout", method: "POST", body: data }, setShowAnimation);
+    const data = {
+      data: {
+        cartOrProducts: cart,
+        pricing: cartPriceDetails,
+        shippingInfo: selectedAddress
+      },
+      navigate
+    }
 
-    //   message.config({
-    //     top: 100,
-    //     maxCount: 3,
-    //     CSSProperties: {
-    //       backgroundColor: "#000",
-    //       color: "#fff"
-    //     }
-    //   })
-
-    //   if (result.status) {
-
-    //     if (address) {
-    //       navigate("/checkout/confirm");
-    //     } else {
-    //       navigate("/checkout/shipping");
-    //     }
-    //   } else {
-
-    //     message.error("An error occurred during order processing");
-    //   }
-
-    // } catch (error) {
-    //   console.log(error);
-    // }
+    dispatch(initCheckoutProcessAsync(data));
   }
 
   return (
@@ -195,7 +186,7 @@ function Cart() {
                     <small>ITEMS {(cart ?? 0) && Number(cart.length)}</small>
                     <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount}</b></span>
                   </p>
-                  <p className="text-muted small link-underline-hover" onClick={() => {setViewAddressList(!viewAddressList) }}>
+                  <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }}>
                     <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : "Select delivery location"}</small>
                   </p>
                   <p className="text-muted mb-0">
