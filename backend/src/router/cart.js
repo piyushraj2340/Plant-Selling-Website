@@ -16,8 +16,8 @@ router.route('/carts')
                 const cart = req.body;
                 cart.user = req.user; // update this after making the center data storage of user using redux
 
-                const newCart = new cartModel(cart);
-                const result = await newCart.save();
+                const newCart = new cartModel(cart)
+                const result = await newCart.save().then(t => t.populate(["plant", "nursery"])).then(t => t);
 
                 const info = {
                     status: true,
@@ -84,7 +84,7 @@ router.route('/carts/:id')
         try {
             if (req.user) {
                 const _id = req.params.id;
-                const result = await cartModel.findOne({ _id });
+                const result = await cartModel.findOne({ _id }).populate('plant').populate('nursery');
 
                 if (result) {
                     const info = {
@@ -122,7 +122,7 @@ router.route('/carts/:id')
 
                 const result = await cartModel.findByIdAndUpdate(_id, req.body, {
                     new: true
-                });
+                }).populate('plant').populate('nursery');
 
                 if (result) {
                     const info = {
@@ -164,6 +164,7 @@ router.route('/carts/:id')
                     const info = {
                         status: true,
                         message: "Cart Deleted successfully",
+                        result
                     }
                     res.status(200).send(info);
                 } else {
