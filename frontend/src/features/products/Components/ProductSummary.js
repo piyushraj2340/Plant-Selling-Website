@@ -1,27 +1,50 @@
-import { Popover } from 'antd';
+import { Popover, message } from 'antd';
 import React, { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../../Components/Shared/AddressList';
 import { handelCalculatePricing } from './utils/productHelper';
 import { calculateProductPricing } from '../productsSlice';
 import { useSelector, useDispatch } from 'react-redux';
+import { setSelectedAddress, addressListDataFetchAsync } from '../../address/addressSlice';
+import { addToCartAsync, cartDataUpdateQuantityAsync, setSelectedCart } from '../../cart/cartSlice';
+import { initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 
 const ProductSummary = () => {
     const product = useSelector((state) => state.products.product);
     const pricing = useSelector((state) => state.products.productPricing);
-    const user = useSelector((state) => state.user);
-    const addressList = useSelector((state) => state.address);
-    const cart = useSelector((state) => state.cart);
-    
+    const user = useSelector((state) => state.user.user);
+    const addressList = useSelector((state) => state.address.addressList);
+    const selectedAddress = useSelector((state) => state.address.selectedAddress);
+    const cartsList = useSelector((state) => state.cart.carts);
+    const cart = useSelector((state) => state.cart.selectedCart);
+
     const dispatch = useDispatch();
-    
-    const [cartQuantity, setCartQuantity] = useState(1);
+
+    const [cartQuantity, setCartQuantity] = useState(cart ? cart.quantity : 1);
     const [viewAddressList, setViewAddressList] = useState(false);
-    
-    useEffect( () => {
+
+    const navigate = useNavigate();
+
+    useEffect(() => {
         const pricing = handelCalculatePricing(cartQuantity, product);
         dispatch(calculateProductPricing(pricing));
-    }, [])
+    }, [cartQuantity])
+
+    useEffect(() => {
+        if (user) {
+            !addressList.length && dispatch(addressListDataFetchAsync());
+        }
+    }, [dispatch, user])
+
+    useEffect(() => {
+        addressList.length && dispatch(setSelectedAddress(addressList[0]));
+    }, [dispatch, addressList])
+
+    useEffect(() => {
+        const findCart = cartsList.find(cart => cart.plant._id === product._id);
+        dispatch(setSelectedCart(findCart));
+        setCartQuantity(findCart ? findCart.quantity : 1);
+    }, [dispatch, product, cartsList])
 
     const handelChangeQuantity = (e) => {
         const quantity = e.target.value;
@@ -29,22 +52,67 @@ const ProductSummary = () => {
         dispatch(calculateProductPricing(pricing));
         setCartQuantity(quantity);
     }
+
     const handelOpenAddressList = () => {
         if (!user) return;
         setViewAddressList(!viewAddressList);
     }
-    const address = null;
-    
-    const handleAddToCart = () => { }
-    const handelBuyProduct = () => { }
-    const handleUpdateCart = () => { }
 
-    const setSelectedAddress = (_id) => {
-        let address = addressList.filter((elem) => {
+    const handleAddToCart = () => {
+        const data = {
+            user: user._id,
+            nursery: product.nursery._id,
+            plant: product._id,
+            quantity: cartQuantity,
+            pricing: {
+                priceWithoutDiscount: pricing.totalPriceWithoutDiscount,
+                priceAfterDiscount: pricing.actualPriceAfterDiscount,
+                discount: product.discount,
+                discountPrice: (Number(pricing.totalPriceWithoutDiscount) - Number(pricing.actualPriceAfterDiscount)).toFixed(2)
+            }
+        }
+        dispatch(addToCartAsync(data));
+    }
+    const handelBuyProduct = () => {
+        const data = {
+            data: {
+                cartOrProducts: [
+                    {
+                        plant: {
+                            _id: product._id,
+                            plantName: product.plantName,
+                            images: product.images,
+                            discount: product.discount,
+                            price: product.price,
+                        },
+                        nursery: product.nursery,
+                        quantity: cartQuantity
+                    }
+                ],
+                pricing,
+                shippingInfo: selectedAddress
+            },
+            navigate
+        }
+
+        dispatch(initCheckoutProcessAsync(data));
+    }
+
+    const handleUpdateCart = () => {
+        if (cart) {
+            console.log("cart " + cart);
+            dispatch(cartDataUpdateQuantityAsync({ cartId: cart._id, quantity: cartQuantity }));
+        } else {
+            message.error("Plant not added into the cart.")
+        }
+    }
+
+    const handelSelectedAddress = (_id) => {
+        let address = addressList.find((elem) => {
             return elem._id === _id;
         });
-        // setAddress(address[0]);
-        setViewAddressList(!viewAddressList);
+        dispatch(setSelectedAddress(address));
+        setViewAddressList(!viewAddressList)
     }
 
     const loginAlertUI = (
@@ -74,7 +142,7 @@ const ProductSummary = () => {
                 <p className="text-muted small link-underline-hover" onClick={handelOpenAddressList}>
                     {
                         user ?
-                            <small><i className="fas fa-map-marker-alt"></i> {address ? `Deliver to ${address.name.substring(0, address.name.indexOf(" "))} - ${address.city} ${address.pinCode}` : <span>Select delivery location</span>}</small>
+                            <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : <span>Select delivery location</span>}</small>
                             :
 
                             alert("Sign in to see your addresses", <p><i className="fas fa-map-marker-alt"></i> Select delivery location</p>)
@@ -132,7 +200,7 @@ const ProductSummary = () => {
             {
                 viewAddressList
                 &&
-                <AddressList addressList={addressList} setSelectedAddress={setSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} redirect={`/${product && '?redirect=/product/' + product._id}`} />
+                <AddressList addressList={addressList} handelSelectedAddress={handelSelectedAddress} setViewAddressList={setViewAddressList} viewAddressList={viewAddressList} redirect={`/${product && '?redirect=/product/' + product._id}`} />
             }
         </>
 

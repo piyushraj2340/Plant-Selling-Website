@@ -11,7 +11,7 @@ const Products = () => {
     const isLoading = useSelector((state) => state.products.isLoading);
     const dispatch = useDispatch();
 
-    const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/Static%20PlantSeller%20Project%20Images/no-data-found";
+    const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
     useEffect(() => {
         dispatch(getAllProductsAsync());
