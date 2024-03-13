@@ -27,10 +27,10 @@ const ProfileSideNav = () => {
                             <p className="mb-0">Manage Your Address</p>
                         </li>
                     </Link>
-                    <Link to={user.role.find(role => role === "seller") ? "/nursery" : "/nursery/create"}>
+                    <Link to={user.role.includes("seller") ? "/nursery" : "/nursery/create"}>
                         <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                             <i className="fas fa-tree fa-lg text-warning"></i>
-                            <p className="mb-0">{user.role.find(role => role === "seller") ? "Manage Your Nursery" : "Add Your Nursery"}</p>
+                            <p className="mb-0">{user.role.includes("seller") ? "Manage Your Nursery" : "Add Your Nursery"}</p>
                         </li>
                     </Link>
                     <Link to={"/settings"}>
