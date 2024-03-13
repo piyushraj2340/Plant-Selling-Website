@@ -1,81 +1,81 @@
 // importing from library
 import { Route, Routes, } from "react-router-dom";
-import React, { createContext, useEffect, useReducer } from "react";
+import React, { createContext, useEffect } from "react";
 import { message } from "antd";
 
 // importing form styling[sass]  
 import "./Asset/Style/Style.scss"
 
-// importing Components 
-import Home from "./Components/Home";
-import Navigation from "./Components/Navigation";
-import Products from "./Components/Products";
-import Product from "./Components/Product";
-import PageNotFound from "./Components/Error404";
-import Success from "./Components/Success";
-import Cancel from "./Components/Cancel";
-import Footer from "./Components/Footer";
-import Login from "./Components/Login";
-import Signup from "./Components/Signup";
-import Logout from "./Components/Logout";
-import Profile from "./Components/Profile";
-import NurseryProfile from "./Components/NurseryProfile";
-import NurseryStoreView from "./Components/NurseryStoreView";
-import SetNursery from "./Components/SetNursery";
-import EditNursery from "./Components/EditNursery";
-import SetPlants from "./Components/SetPlants";
-import Cart from "./Components/Cart";
-import Animation from "./Components/Shared/Animation";
-import ContactUs from "./Components/ContactUs";
-import SetAddress from "./Components/SetAddress";
-import Address from "./Components/Address";
-import EditAddress from "./Components/EditAddress";
-import ChooseTemplate from "./Components/Shared/ChooseTemplate";
-import EditPlants from "./Components/EditPlants";
-import Shipping from "./Components/Shipping";
-import Confirm from "./Components/Confirm";
-import Checkout from "./Components/Checkout";
-import ScrollToTop from "./Components/ScrollToTop";
+// importing pages 
+import HomePage from "./pages/HomePage";
+import ProductsPage from "./pages/ProductsPage";
+import ProductPage from "./pages/ProductPage";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import LogoutPage from "./pages/LogoutPage";
+import ProfilePage from "./pages/ProfilePage";
+import NurseryProfilePage from "./pages/NurseryProfilePage";
+//TODO: ADD NURSERY PUBLIC PROFILE PAGE HERE
+import CreateNurseryPage from "./pages/CreateNurseryPage";
+import EditNurseryPage from "./pages/EditNurseryPage";
+import AddNewPlants from "./pages/AddNewPlants";
+import EditPlantsPage from "./pages/EditPlantsPage";
+import AddressPage from "./pages/AddressPage";
+import AddNewAddressPage from "./pages/AddNewAddressPage";
+import EditAddressPage from "./pages/EditAddressPage";
+import ContactUsPage from "./pages/ContactUsPage";
+import CartPage from "./pages/CartPage";
+import CheckoutShippingPage from "./pages/CheckoutShippingPage";
+import CheckoutConfirmPage from "./pages/CheckoutConfirmPage";
+import CheckoutPaymentPage from "./pages/CheckoutPaymentPage";
 
-// importing form the reducer 
-import { initialState, reducer } from './reducer/Reducer';
+import PageNotFound from "./pages/Error404Page";
 
-// importing form utils 
-import handelDataFetch from "./utils/handelDataFetch";
+import Navigation from "./features/common/Navigation";
+import Success from "./features/common/Success";
+import Footer from "./features/common/Footer";
+import ScrollToTop from "./features/common/ScrollToTop";
+import { useDispatch, useSelector } from "react-redux";
+import { userAuthCheckAsync } from "./features/auth/authSlice";
+import { userProfileAsync } from "./features/user/userSlice";
+import { nurseryProfileAsync } from "./features/nursery/nurserySlice";
+import { cartDataFetchAsync } from "./features/cart/cartSlice";
+import NurseryPublicStorePage from "./pages/NurseryPublicStorePage";
 
-export const UserContext = createContext();
+
+
+export const UserContext = createContext(); // TODO: REMOVE AFTER REFACTOR ALL THE CODE.
+
 
 const Routing = () => {
   return (
     <Routes>
-      <Route exact path="/" element={<Home />} />
-      <Route exact path="/home" element={<Home />} />
-      <Route exact path="/products" element={<Products />} />
-      <Route exact path="/product/:id" element={<Product />} />
-      <Route exact path="/login" element={<Login />} />
-      <Route exact path="/signup" element={<Signup />} />
-      <Route exact path="/logout" element={<Logout />} />
-      <Route exact path="/profile" element={<Profile />} />
-      <Route exact path="/nursery" element={<NurseryProfile />} />
-      <Route exact path="/nursery/store/view/:id" element={<NurseryStoreView />} />
-      <Route exact path="/nursery/create" element={<SetNursery />} />
-      <Route exact path="/nursery/update/:id" element={<EditNursery />} />
-      <Route exact path="/nursery/plant/new" element={<SetPlants />} />
-      <Route exact path="/nursery/plant/update/:id" element={<EditPlants />} />
-      <Route exact path="/address" element={<Address />} />
-      <Route exact path="/address/new" element={<SetAddress />} />
-      <Route exact path="/address/update/:id" element={<EditAddress />} />
-      <Route exact path="/contact-us" element={<ContactUs />} />
-      <Route path="/cart" element={<Cart />} />
+      <Route exact path="/" element={<HomePage />} />
+      <Route exact path="/home" element={<HomePage />} />
+      <Route exact path="/products" element={<ProductsPage />} />
+      <Route exact path="/product/:id" element={<ProductPage />} />
+      <Route exact path="/login" element={<LoginPage />} />
+      <Route exact path="/signup" element={<SignupPage />} />
+      <Route exact path="/logout" element={<LogoutPage />} />
+      <Route exact path="/profile" element={<ProfilePage />} />
+      <Route exact path="/nursery" element={<NurseryProfilePage />} />
+      <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
+      <Route exact path="/nursery/create" element={<CreateNurseryPage />} />
+      <Route exact path="/nursery/update" element={<EditNurseryPage />} />
+      <Route exact path="/nursery/plant/new" element={<AddNewPlants />} />
+      <Route exact path="/nursery/plant/update/:id" element={<EditPlantsPage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
+      <Route exact path="/address" element={<AddressPage />} />
+      <Route exact path="/address/new" element={<AddNewAddressPage />} />
+      <Route exact path="/address/update/:id" element={<EditAddressPage />} />
+      <Route exact path="/contact-us" element={<ContactUsPage />} />
 
-      <Route path="/checkout/shipping" element={<Shipping />} />
-      <Route path="/checkout/confirm" element={<Confirm />} />
-      <Route path="/checkout/payment" element={<Checkout />} />
+      <Route path="/cart" element={<CartPage />} />
 
-      <Route exact path="/choose/template" element={<ChooseTemplate />} /> {/* Choose template view for testing */}
+      <Route path="/checkout/shipping" element={<CheckoutShippingPage />} />
+      <Route path="/checkout/confirm" element={<CheckoutConfirmPage />} />
+      <Route path="/checkout/payment" element={<CheckoutPaymentPage />} />
+
       <Route exact path="/success" element={<Success />} /> {/*create a dynamic store page*/}
-      <Route exact path="/cancel" element={<Cancel />} /> {/*create a dynamic store page*/}
-      <Route exact path="/ani" element={<Animation />} /> {/*need to remove this route*/}
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
@@ -83,9 +83,31 @@ const Routing = () => {
 }
 
 function App() {
-  const [user, setUser] = useReducer(reducer, initialState);
-  const [cartLength, setCartLength] = useReducer(reducer, initialState);
-  const [showAnimation, setShowAnimation] = useReducer(reducer, initialState);
+  const user = useSelector(state => state.user.user);
+  const userAuthCheck = useSelector(state => state.auth.userAuthCheck);
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(userAuthCheckAsync());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (userAuthCheck) {
+      dispatch(userProfileAsync());
+    }
+  }, [dispatch, userAuthCheck]);
+
+  useEffect(() => {
+    if (user && user.role.includes("seller")) {
+      dispatch(nurseryProfileAsync());
+    }
+  }, [dispatch, user]);
+
+  useEffect(() => {
+    if (user) {
+      dispatch(cartDataFetchAsync());
+    }
+  }, [dispatch, user])
 
   // global configuration antd to alert the message to users
   message.config({
@@ -95,54 +117,15 @@ function App() {
       backgroundColor: "#000",
       color: "#fff"
     }
-  })
-
-  const handleGetAddedCart = async () => {
-    try {
-      const result = await handelDataFetch({ path: '/api/v2/checkout/carts', method: "GET" }, setShowAnimation);
-
-      if (result.status) {
-        setCartLength({ type: "CART", length: result.result.length });
-      } else {
-        setCartLength({ type: "CART", length: null });
-      }
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  const handleGetUserData = async () => {
-    try {
-      const result = await handelDataFetch({ path: '/api/v2/user/profile', method: 'GET' }, setShowAnimation);
-
-      if (result.status) {
-        handleGetAddedCart();
-        setUser({ type: "USER", user: result.result });
-      } else {
-        setUser({ type: "USER", user: null });
-        setCartLength({ type: "CART", length: null });
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  }
-
-  useEffect(() => {
-    handleGetUserData();
-  }, []);
+  });
 
   return (
     <>
-      <UserContext.Provider value={{ user, setUser, cartLength, setCartLength, setShowAnimation }}>
-        <Navigation />
-        <ScrollToTop />
-        <div style={{ marginTop: "70px" }}>
-          <Routing />
-        </div>
-        {
-          showAnimation && <Animation />
-        }
-      </UserContext.Provider>
+      <Navigation />
+      <ScrollToTop />
+      <div style={{ marginTop: "70px" }}>
+        <Routing />
+      </div>
       <Footer />
     </>
 
