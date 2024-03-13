@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import logoImg from '../Asset/img/plant_seller_remove_bg.png';
-
 
 const Footer = () => {
+    const logoImg = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/plant_seller_bg_none";
+
     return (
         <footer className="text-light bg-dark p-4 p-md-5 footer-container">
             <div className="container">
