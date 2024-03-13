@@ -3,7 +3,7 @@ import { Rating } from 'react-simple-star-rating'
 import { Link } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllProductsAsync, getProductsByCategoryAsync } from '../productsSlice';
-import Animation from '../../../Components/Shared/Animation';
+import Animation from '../../common/Animation';
 
 
 const Products = () => {

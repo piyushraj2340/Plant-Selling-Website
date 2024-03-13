@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import AddressList from '../../../Components/Shared/AddressList';
+import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
-import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing } from '../cartSlice';
+import { cartDataDeleteAsync, cartDataUpdateQuantityAsync, setCartPricing } from '../cartSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 

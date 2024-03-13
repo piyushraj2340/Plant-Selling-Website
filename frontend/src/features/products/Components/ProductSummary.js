@@ -1,7 +1,7 @@
 import { Popover, message } from 'antd';
 import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom';
-import AddressList from '../../../Components/Shared/AddressList';
+import AddressList from '../../common/AddressList';
 import { handelCalculatePricing } from './utils/productHelper';
 import { calculateProductPricing } from '../productsSlice';
 import { useSelector, useDispatch } from 'react-redux';

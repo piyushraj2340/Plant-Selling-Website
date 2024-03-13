@@ -10,7 +10,7 @@ const ProductInfo = () => {
         <div className="col-lg-5 ps-4 mt-3">
             <div className="row">
                 <h3 className='h3 mb-0'>{product.plantName}</h3>
-                <small style={{ position: "relative", top: "5px", left: "3px" }}><Link to={`/nursery/public/view/${product.nursery._id}`} className='small link-secondary'><i className="fas fa-store"></i> {product.nursery.nurseryName}</Link></small>
+                <small style={{ position: "relative", top: "5px", left: "3px" }}><Link to={`/nursery/store/view/${product.nursery._id}`} className='small link-secondary'><i className="fas fa-store"></i> {product.nursery.nurseryName}</Link></small>
                 <p className="card-text">
                     <Rating initialValue={3 + Math.random() * 2} readonly={true} size={20} allowFraction={true} />
                     <small className='ps-2 pe-2' style={{ position: "relative", top: "4px" }}>

@@ -6,8 +6,7 @@ import ProductImages from '../features/products/Components/ProductImages';
 import ProductInfo from '../features/products/Components/ProductInfo';
 import ProductSummary from '../features/products/Components/ProductSummary';
 import NoDataFound from '../features/common/NoDataFound';
-import Animation from '../Components/Shared/Animation';
-
+import Animation from '../features/common/Animation';
 
 const ProductPage = () => {
   const product = useSelector(state => state.products.product);
