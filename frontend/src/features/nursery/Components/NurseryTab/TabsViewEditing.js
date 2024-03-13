@@ -9,7 +9,7 @@ import TemplateTwoSectionAndLeftFour from '../Templates/TemplateTwoSectionAndLef
 import { completeSection, fourSection, twoSection, twoSectionAndLeftFour, twoSectionAndLeftVertical, twoSectionAndRightFour, twoSectionAndRightVertical } from '../utils/templatesAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { addTemplateToStoreAsync, changeTemplateRenderPositionAsync, deleteTabSectionAsync, deleteTemplateFromSectionAsync, nurseryStoreImagesUpload } from '../../nurserySlice';
-import ChooseTemplate from '../../../../Components/Shared/ChooseTemplate';
+import ChooseTemplate from '../../../common/ChooseTemplate';
 
 const TabsViewEditing = ({ content }) => {
 
