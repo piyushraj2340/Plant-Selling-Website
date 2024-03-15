@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
-import { cartDataDeleteAsync, cartDataUpdateQuantityAsync, setCartPricing } from '../cartSlice';
+import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing } from '../cartSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
+import handelShareProduct from '../../../utils/handelShareProduct';
+import { message } from 'antd';
 
 function Cart() {
   const user = useSelector(state => state.user.user);
@@ -23,6 +25,7 @@ function Cart() {
 
   useEffect(() => {
     dispatch(clearIsSessionError());
+    dispatch(cartDataFetchAsync());
   }, [])
 
   useEffect(() => {
@@ -85,6 +88,13 @@ function Cart() {
                 cart && cart.length !== 0
                   ?
                   cart.map((elem) => {
+
+                    const productData = {
+                      title: "Share " + elem.plantName + " Plants",
+                      text: elem.description,
+                      url: window.location.origin + `/product/${elem.plant._id}`,
+                    }
+
                     return (
                       <div key={elem._id} className="item mt-4 pt-2 pb-2 border-bottom">
                         <div className="row">
@@ -135,7 +145,7 @@ function Cart() {
                                   <i className='fas fa-bookmark p-2'></i>
                                   <span className='menu-text p-1 center'>Save for later</span>
                                 </p>
-                                <p className="m-0 menu p-2">
+                                <p className="m-0 menu p-2" onClick={() => handelShareProduct(productData, message)}>
                                   <i className='fas fa-share-alt p-2'></i>
                                   <span className='menu-text p-1 center'>Share</span>
                                 </p>
