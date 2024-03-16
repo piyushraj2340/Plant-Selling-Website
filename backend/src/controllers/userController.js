@@ -35,10 +35,7 @@ exports.updateUserProfile = async (req, res, next) => {
     try {
 
         //* role can't be changed directly 
-
-        const role = req.body.role || [];
-        const rolesString = role.join(',');
-        if (rolesString.toLowerCase().includes('seller')) {
+        if (req.body.role) {
             const error = new Error("You are not allowed to update role fields.");
             error.statusCode = 403;
             throw error;
