@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const nurseryStore = require('../model/nurseryStore');
-const { uploadImage, deleteResourcesByPrefix, deleteFolder } = require('../cloudinary/uploadImages');
+const { uploadImage, deleteResourcesByPrefix, deleteFolder } = require('../utils/uploadImages');
 const auth = require('../middleware/auth');
 
 

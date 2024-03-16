@@ -1,5 +1,5 @@
 const express = require('express');
-const { uploadImages, deleteFolder, deleteResourcesByPrefix } = require('../cloudinary/uploadImages');
+const { uploadImages, deleteFolder, deleteResourcesByPrefix } = require('../utils/uploadImages');
 
 const plantsModel = require('../model/plants');
 const auth = require('../middleware/auth');

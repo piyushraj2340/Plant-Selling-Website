@@ -1,5 +1,5 @@
 require('dotenv').config();
-require('./src/db/db');
+require('./src/config/database/db');
 
 const express = require('express');
 const cors = require('cors');
@@ -52,7 +52,8 @@ app.use("/api/v2/checkout", orderRoute, cart, payment);
 // public routes
 app.use("/api/v2/products", products);
 
-
+// Error handling middleware
+const errorHandlerMiddleware = require('./src/middleware/errorMiddleware');
 
 // if (process.env.NODE_ENV == 'production') {
 //     app.use(express.static(path.resolve(__dirname, 'client', 'build')));
@@ -71,6 +72,8 @@ app.use("/api/v2/products", products);
 app.get('*', (req, res) => {
     res.status(200).send("Welcome to Plant Selling Website." + "<br />" + "Frontend App: " + `<a href="${process.env.FRONTEND_URL}" target="_blank">${process.env.FRONTEND_URL}</a>`);
 });
+
+app.use(errorHandlerMiddleware);
 
 app.listen(port, () => {
     console.log("listening to port 8000");

@@ -4,7 +4,6 @@ const bcryptjs = require('bcryptjs');
 const auth = require('../middleware/auth');
 const userModel = require('../model/user');
 
-
 router.post('/sign-up', async (req, res) => {
     try {
         const newUser = new userModel(req.body);
