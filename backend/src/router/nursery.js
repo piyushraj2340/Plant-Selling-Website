@@ -6,7 +6,7 @@ const nurseryModel = require('../model/nursery');
 const userModel = require('../model/user');
 const plantModel = require('../model/plants');
 
-const { uploadImage, deleteFolder, deleteResourcesByPrefix } = require('../cloudinary/uploadImages');
+const { uploadImage, deleteFolder, deleteResourcesByPrefix } = require('../utils/uploadImages');
 
 const auth = require('../middleware/auth');
 const { default: mongoose } = require('mongoose');
