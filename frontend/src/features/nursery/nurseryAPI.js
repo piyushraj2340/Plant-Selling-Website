@@ -12,11 +12,11 @@ export function handelImageUploadNurseryHeader(image) {
                 resolve({ data })
             } else {
                 const error = new Error(data.message);
-                error.status = data.status;
+                error.statusCode = data.status;
                 rejected(error);
             }
         } catch (error) {
-            error.status = false;
+            error.statusCode = false;
             rejected(error);
         }
     }
@@ -37,11 +37,11 @@ export function handelImageUploadNurseryStore(imageId, body) {
                 resolve({ data })
             } else {
                 const error = new Error(data.message);
-                error.status = data.status;
+                error.statusCode = data.status;
                 rejected(error);
             }
         } catch (error) {
-            error.status = false;
+            error.statusCode = false;
             rejected(error);
         }
     }
@@ -62,11 +62,11 @@ export function handelAddNewPlantToNursery(body) {
                 resolve({ data })
             } else {
                 const error = new Error(data.message);
-                error.status = data.status;
+                error.statusCode = data.status;
                 rejected(error);
             }
         } catch (error) {
-            error.status = false;
+            error.statusCode = false;
             rejected(error);
         }
     }
