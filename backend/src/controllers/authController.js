@@ -45,7 +45,7 @@ exports.signIn = async (req, res, next) => {
         //! If Email is not found
         if (!result) {
             const error = new Error("Login Failed");
-            error.status = 401;
+            error.statusCode = 401;
             throw error;
         }
 
@@ -55,7 +55,7 @@ exports.signIn = async (req, res, next) => {
         //! Password not matched
         if (!isPassMatch) {
             const error = new Error("Login Failed");
-            error.status = 401;
+            error.statusCode = 401;
             throw error;
         }
 
@@ -104,7 +104,7 @@ exports.logout = async (req, res, next) => {
         //! if the user not found 
         if (!result) {
             const error = new Error("Logout failed");
-            error.status = 400;
+            error.statusCode = 400;
             throw error;
         }
 
@@ -137,7 +137,7 @@ exports.checkUser = async (req, res, next) => {
 
         if (!result) {
             const error = new Error("Authentication Failed");
-            error.status = 401;
+            error.statusCode = 401;
             throw error;
         }
 
