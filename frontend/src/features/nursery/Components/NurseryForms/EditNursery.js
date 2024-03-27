@@ -4,7 +4,7 @@ import { nurseryUpdateAsync } from '../../nurserySlice';
 import { message } from 'antd';
 import { useNavigate } from 'react-router-dom';
 
-function AddNursery() {
+function EditNursery() {
     const nursery = useSelector(state => state.nursery.nursery);
     const dispatch = useDispatch();
 
@@ -30,7 +30,13 @@ function AddNursery() {
             }
         }
 
-        dispatch(nurseryUpdateAsync({nurseryData, navigate}));
+        const data = {...nurseryData};
+
+        delete data.nurseryEmail;
+        delete data.nurseryOwnerName;
+        delete data.nurseryPhone;
+
+        dispatch(nurseryUpdateAsync({nurseryData: data, navigate}));
     }
 
     return (
@@ -81,4 +87,4 @@ function AddNursery() {
     )
 }
 
-export default AddNursery
+export default EditNursery
