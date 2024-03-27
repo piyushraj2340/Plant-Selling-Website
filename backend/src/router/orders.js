@@ -3,160 +3,17 @@ const ordersModel = require('../model/orders');
 const router = express.Router();
 
 const auth = require('../middleware/auth');
+const { createOrder, getOrderHistory, getOrderById, updateOrder } = require('../controllers/orderController');
 
 router.use(auth);
 
 router.route('/orders')
-    .post(async (req, res) => {
-        try {
-            if (req.user) {
-                const newOrder = new ordersModel(req.body)
-                const result = await newOrder.save();
-    
-                if(result) {
-                    const info = {
-                        status: true,
-                        message: "Successfully created your order.",
-                        result
-                    }
-                    res.status(200).send(info);
-                } else {
-                    const info = {
-                        status: false,
-                        message: "Failed to create your new order."
-                    }
-                    res.status(400).send(info);
-                }
-            } else {
-                const info = {
-                    status: false,
-                    message: "Authentication Failed"
-                }
-                res.status(401).send(info);
-            }
-        } catch (error) {
-            const info = {
-                status: false,
-                message: error.message
-            }
-            console.log(error);
-            res.status(500).send(info);
-        }
-    }).get(async (req, res) => {
-        try {
-            if (req.user) {
-                const result = await ordersModel.find({user: req.user});
+    .post(createOrder)
+    .get(getOrderHistory);
 
-                if(result) {
-                    const info = {
-                        status: true,
-                        message: "Your Order History.",
-                        result
-                    }
-                    res.status(200).send(info);
-                } else {
-                    const info = {
-                        status: false,
-                        message: "Order not found."
-                    }
-                    res.status(404).send(info);
-                }
-
-            } else {
-                const info = {
-                    status: false,
-                    message: "Authentication Failed"
-                }
-                res.status(401).send(info);
-            }
-        } catch (error) {
-            const info = {
-                status: false,
-                message: error.message
-            }
-            console.log(error);
-            res.status(500).send(info);
-        }
-    });
-
-router.route('/orders/:id').get(async (req, res) => {
-    try {
-        const _id = req.params.id;
-        if (req.user) {
-            const result = await ordersModel.findOne({_id, user: req.user});
-
-            if(result) {
-                const info = {
-                    status: true,
-                    message: "Your Order Details.",
-                    result
-                }
-                res.status(200).send(info);
-            } else {
-                const info = {
-                    status: false,
-                    message: "Order not found."
-                }
-                res.status(404).send(info);
-            }
-
-        } else {
-            const info = {
-                status: false,
-                message: "Authentication Failed"
-            }
-            res.status(401).send(info);
-        }
-
-
-    } catch (error) {
-        const info = {
-            status: false,
-            message: error.message
-        }
-        console.log(error);
-        res.status(500).send(info);
-    }
-}).patch(async (req, res) => {
-    try {
-        const _id = req.par
-        if (req.user) {
-            const result = await ordersModel.findOneAndUpdate({_id, user: req.user}, req.body, {
-                new: true
-            });
-
-            if(result) {
-                const info = {
-                    status: true,
-                    message: "Successfully Updated Your order.",
-                    result
-                }
-                res.status(200).send(info);
-            } else {
-                const info = {
-                    status: false,
-                    message: "Order not Found."
-                }
-                res.status(404).send(info);
-            }
-
-        } else {
-            const info = {
-                status: false,
-                message: "Authentication Failed"
-            }
-            res.status(401).send(info);
-        }
-
-    } catch (error) {
-        const info = {
-            status: false,
-            message: error.message
-        }
-        console.log(error);
-        res.status(500).send(info);
-    }
-});
+router.route('/orders/:id')
+    .get(getOrderById)
+    .patch(updateOrder);
 
 module.exports = router;
 
