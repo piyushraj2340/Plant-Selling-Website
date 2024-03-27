@@ -21,8 +21,8 @@ export const nurseryCreateAsync = createAsyncThunk('/nursery/create', async (dat
 });
 
 //? NURSERY_UPDATE
-export const nurseryUpdateAsync = createAsyncThunk('/nursery/update', async ({data, navigate}) => {
-    const response = await handelDataFetch('/api/v2/nursery/profile', 'PATCH', data);
+export const nurseryUpdateAsync = createAsyncThunk('/nursery/update', async ({nurseryData, navigate}) => {
+    const response = await handelDataFetch('/api/v2/nursery/profile', 'PATCH', nurseryData);
     return {result: response.data, navigate};
 });
 
@@ -105,7 +105,6 @@ export const nurserySlice = createSlice({
             .addCase(nurseryCreateAsync.pending, (state) => {
                 //^ PENDING: NURSERY_CREATE
 
-                state.nursery = null;
                 state.isLoading = true;
                 state.error = null;
 
@@ -122,7 +121,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_CREATE
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.error = action.error;
 
                 message.error(action.error.message);
@@ -149,7 +147,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_UPDATE
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.error = action.error;
 
                 message.error(action.error.message);
@@ -157,7 +154,6 @@ export const nurserySlice = createSlice({
             }).addCase(nurseryProfileAsync.pending, (state) => {
                 //^ PENDING: NURSERY_PROFILE
 
-                state.nursery = null;
                 state.isLoading = true;
                 state.error = null;
 
@@ -172,13 +168,11 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_PROFILE
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.error = action.error;
 
             }).addCase(userLogoutAsync.fulfilled, (state) => {
                 //* FULFILLED: USER_LOGOUT
 
-                state.nursery = null;
                 state.nurseryStore = [];
                 state.isLoading = false;
                 state.error = null;
@@ -206,7 +200,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_HEADERS_IMAGES_UPLOAD
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.error = action.error;
 
                 message.error(action.error.message);
@@ -251,7 +244,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_DATA
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = [];
                 state.error = action.error;
 
@@ -279,7 +271,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_ADD_TEMPLATE
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = null;
                 state.error = action.error;
 
@@ -301,7 +292,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_ADD_NEW_TAB_SECTION
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = null;
                 state.error = action.error;
 
@@ -330,7 +320,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_DELETE_TAB_SECTION
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = null;
                 state.error = action.error;
 
@@ -378,7 +367,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_IMAGE_UPLOADING_TAB_SECTION
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = null;
                 state.error = action.error;
 
@@ -408,7 +396,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_DELETE_TEMPLATE_FORM_TAB_SECTION
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = null;
                 state.error = action.error;
             }).addCase(changeTemplateRenderPositionAsync.pending, (state) => {
@@ -435,7 +422,6 @@ export const nurserySlice = createSlice({
                 //! REJECTED: NURSERY_STORE_CHANGE_RENDER_POSITION
 
                 state.isLoading = false;
-                state.nursery = null;
                 state.nurseryStore = null;
                 state.error = action.error;
 
