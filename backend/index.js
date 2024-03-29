@@ -45,9 +45,9 @@ const payment = require("./src/router/payment");
 
 // secured routes 
 app.use('/api/v2/auth', authRoute);
-app.use('/api/v2/user', user, address);
+app.use('/api/v2/user', user, cart, orderRoute, address);
 app.use("/api/v2/nursery", nurseryRoute, nurseryStoreRoute, plantsRoute);
-app.use("/api/v2/checkout", orderRoute, cart, payment);
+app.use("/api/v2/checkout", payment);
 
 // public routes
 app.use("/api/v2/products", products);
