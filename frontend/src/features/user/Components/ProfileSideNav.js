@@ -15,7 +15,7 @@ const ProfileSideNav = () => {
                             <p className="mb-0">Orders History</p>
                         </li>
                     </Link>
-                    <Link to={"/track-orders"}>
+                    <Link to="/orders/history">
                         <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                             <i className="fas fa-truck fa-lg text-warning"></i>
                             <p className="mb-0">Track Your Orders</p>

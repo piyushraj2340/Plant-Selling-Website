@@ -42,12 +42,14 @@ const ProfilePage = () => {
                             <ProfileSideNav />
                         </div>
                         <div className="col-lg-8">
-                            <div className="card mb-4">
+                            <div className="card mb-2">
                                 <ProfileInfo />
                             </div>
-                            <div className="row">
-                                <ProfileOrder />
+                            <div className="row mb-2">
                                 <ProfileAddress />
+                            </div>
+                            <div className="row mb-2">
+                                <ProfileOrder />
                             </div>
                         </div>
                     </div>
