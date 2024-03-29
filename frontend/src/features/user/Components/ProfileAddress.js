@@ -19,7 +19,7 @@ const ProfileAddress = () => {
     }, [addressList])
 
     return (
-        <div className="col-md-6">
+        <div className="col-md-12">
             <div className="card mb-4 mb-md-0">
                 <div className="card-header">
                     <p className="m-1"><span className="text-primary font-italic me-1 h6">Manage Your Address</span></p>
