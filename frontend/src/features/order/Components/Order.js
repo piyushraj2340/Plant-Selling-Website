@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { getOrderHistoryAsync } from '../orderSlice';
+import formatTimestamp from '../../../utils/formatTimestamp';
 
 const Order = () => {
     const [activeTabs, setActiveTabs] = useState('order');
@@ -15,21 +16,6 @@ const Order = () => {
     useEffect(() => {
         dispatch(getOrderHistoryAsync());
     }, [])
-
-    //move to utils
-
-    function formatTimestamp(timestamp) {
-        const date = new Date(timestamp);
-
-        // Format time in 12-hour format with minutes and AM/PM indication
-        const time = date.toLocaleString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
-
-        // Format date
-        const options = { year: 'numeric', month: 'long', day: 'numeric' };
-        const formattedDate = date.toLocaleDateString('en-IN', options);
-
-        return `${time}, ${formattedDate}`;
-    }
 
     return (
         <section className="bg-section">
