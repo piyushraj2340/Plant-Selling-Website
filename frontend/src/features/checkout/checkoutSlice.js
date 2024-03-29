@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import handelDataFetch from "../../utils/handelDataFetch";
 import { message } from "antd";
 import { getProductAsync } from "../products/productsSlice";
+import { userLogoutAsync } from "../auth/authSlice";
 
 const initialState = {
     shipping: null,
@@ -48,6 +49,13 @@ export const checkoutSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(userLogoutAsync.fulfilled, () => {
+                //* CLEANUP: TASK
+                //? LOGOUT_CLEANUP_TASK:: REMOVE ALL THE CART INFORMATION AFTER LOGOUT
+
+                return initialState;
+
+            })
             .addCase(getProductAsync.fulfilled, (state) => {
                 state.isSessionError = null;
             })

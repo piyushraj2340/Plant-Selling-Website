@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import handelDataFetch from "../../utils/handelDataFetch";
 import { message } from "antd";
+import { userLogoutAsync } from "../auth/authSlice";
 
 const initialState = {
     addressList: [],
@@ -45,6 +46,13 @@ export const addressSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(userLogoutAsync.fulfilled, () => {
+                //* CLEANUP: TASK
+                //? LOGOUT_CLEANUP_TASK:: REMOVE ALL THE CART INFORMATION AFTER LOGOUT
+
+                return initialState;
+
+            })
             .addCase(addressListDataFetchAsync.pending, (state) => {
                 //^ PENDING: ADDRESS_DATA_FETCHING
 
