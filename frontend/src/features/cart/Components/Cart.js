@@ -35,7 +35,7 @@ function Cart() {
   }, [dispatch, user]);
 
   useEffect(() => {
-    cart.length && dispatch(setCartPricing(cart));
+    dispatch(setCartPricing(cart));
   }, [dispatch, cart]);
 
   useEffect(() => {
