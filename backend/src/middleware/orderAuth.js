@@ -40,6 +40,7 @@ const orderAuth = async (req, res, next) => {
         }
 
         req.orderUser = verifyToken.userId;
+        req.orderToken = token;
 
         next();
 

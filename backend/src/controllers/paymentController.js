@@ -7,23 +7,25 @@ exports.createOrderSession = async (req, res) => {
         const userId = req.user;
         const { cartOrProducts, shippingInfo, pricing } = req.body;
 
-        // Store cart or product information in Redis
-        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:cartOrProducts`, "$", JSON.stringify(cartOrProducts));
-        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:cartOrProducts`, 1800);
-
-        // Store shipping information in Redis
-        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`, "$", JSON.stringify(shippingInfo));
-        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`, 1800);
-
-        // Store pricing information in Redis
-        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`, "$", JSON.stringify(pricing));
-        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`, 1800);
-
-        //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PAYMENT_INFORMATION
-        await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`);
-
         // Generate JWT token with user ID
         const token = jwt.sign({ userId: userId.toString() }, process.env.SECRET_KEY, { expiresIn: "30m" });
+
+        // Store cart or product information in Redis
+        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:cartOrProducts`, "$", JSON.stringify(cartOrProducts));
+        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:cartOrProducts`, 1800);
+
+        // Store shipping information in Redis
+        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:shipping`, "$", JSON.stringify(shippingInfo));
+        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:shipping`, 1800);
+
+        // Store pricing information in Redis
+        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:pricing`, "$", JSON.stringify(pricing));
+        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:pricing`, 1800);
+
+        //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PAYMENT_INFORMATION
+        await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${token}:payment`);
+
+        
 
         // Set cookie with JWT token
         res.cookie('orderSession', token, {
@@ -66,8 +68,8 @@ exports.addShippingInfo = async (req, res, next) => {
         const shipping = req.body;
 
         // Store shipping information in Redis
-        const result = await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`, "$", JSON.stringify(shipping));
-        const expire = await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`, 1800);
+        const result = await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:shipping`, "$", JSON.stringify(shipping));
+        const expire = await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:shipping`, 1800);
 
         // Create response object
         const info = {
@@ -92,7 +94,7 @@ exports.getShippingInfo = async (req, res, next) => {
         const userId = req.orderUser;
 
         // Retrieve shipping information from Redis
-        const result = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
+        const result = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:shipping`);
 
         if (!result) {
             const error = new Error("Order Session is expired! Please try again.");
@@ -120,9 +122,9 @@ exports.confirmOrder = async (req, res, next) => {
         const userId = req.orderUser;
 
         // Retrieve cart or product information, shipping information, and pricing from Redis
-        const cartOrProductInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:cartOrProducts`);
-        const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
-        const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`);
+        const cartOrProductInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:cartOrProducts`);
+        const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:shipping`);
+        const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:pricing`);
 
         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PAYMENT_INFORMATION
         await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${req.user}:payment`);
@@ -158,9 +160,9 @@ exports.processPayment = async (req, res, next) => {
         const userId = req.orderUser;
 
         // Retrieve shipping information and pricing from Redis
-        const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
-        const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`);
-        const paymentInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`);
+        const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:shipping`);
+        const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:pricing`);
+        const paymentInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:payment`);
 
         // Check if shipping info and pricing exist
         if (!shippingInfo || !pricing) {
@@ -207,8 +209,8 @@ exports.processPayment = async (req, res, next) => {
             paymentMethods: myPayment.payment_method_types[0]
         }
 
-        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`, "$", JSON.stringify(paymentData));
-        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`, 1800);
+        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:payment`, "$", JSON.stringify(paymentData));
+        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:${req.orderToken}:payment`, 1800);
 
         // Send payment response
         if (myPayment) {
