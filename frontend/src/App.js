@@ -32,7 +32,6 @@ import CheckoutPaymentPage from "./pages/CheckoutPaymentPage";
 import PageNotFound from "./pages/Error404Page";
 
 import Navigation from "./features/common/Navigation";
-import Success from "./features/common/Success";
 import Footer from "./features/common/Footer";
 import ScrollToTop from "./features/common/ScrollToTop";
 import { useDispatch, useSelector } from "react-redux";
@@ -41,6 +40,8 @@ import { userProfileAsync } from "./features/user/userSlice";
 import { nurseryProfileAsync } from "./features/nursery/nurserySlice";
 import { cartDataFetchAsync } from "./features/cart/cartSlice";
 import NurseryPublicStorePage from "./pages/NurseryPublicStorePage";
+import OrderHistoryPages from "./pages/OrderHistoryPages";
+import SuccessPage from "./pages/SuccessPage";
 
 
 
@@ -75,7 +76,9 @@ const Routing = () => {
       <Route path="/checkout/confirm" element={<CheckoutConfirmPage />} />
       <Route path="/checkout/payment" element={<CheckoutPaymentPage />} />
 
-      <Route exact path="/success" element={<Success />} /> {/*create a dynamic store page*/}
+      <Route exact path="/success" element={<SuccessPage />} /> 
+
+      <Route path="/orders/history" element={<OrderHistoryPages />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
