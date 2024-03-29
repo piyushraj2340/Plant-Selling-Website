@@ -26,11 +26,6 @@ const ProductSummary = () => {
     const navigate = useNavigate();
 
     useEffect(() => {
-        const pricing = handelCalculatePricing(cartQuantity, product);
-        dispatch(calculateProductPricing(pricing));
-    }, [cartQuantity])
-
-    useEffect(() => {
         if (user) {
             !addressList.length && dispatch(addressListDataFetchAsync());
         }
@@ -45,6 +40,11 @@ const ProductSummary = () => {
         dispatch(setSelectedCart(findCart));
         setCartQuantity(findCart ? findCart.quantity : 1);
     }, [dispatch, product, cartsList])
+
+    useEffect(() => {
+        const pricing = handelCalculatePricing(cartQuantity, product);
+        dispatch(calculateProductPricing(pricing));
+    }, [product, cartQuantity])
 
     const handelChangeQuantity = (e) => {
         const quantity = e.target.value;
