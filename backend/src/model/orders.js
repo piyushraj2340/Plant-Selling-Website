@@ -62,6 +62,14 @@ const orderSchema = new mongoose.Schema({
                 type: Number,
                 required: [true, "Quantity is required."],
             },
+            orderStatus: {
+                status: String,
+                message: String,
+                statusAt: {
+                    type: Date,
+                    default: Date.now
+                }
+            },
         }
     ],
     shippingInfo: {
@@ -125,34 +133,35 @@ const orderSchema = new mongoose.Schema({
             required: [true, "Total Price is required."]
         },
     },
-    orderStatus: {
-        status: {
-            type: String
-        },
-        message: {
-            type: String
-        }
-    },
-    orderAd: {
+    orderAt: {
         type: Date,
         default: Date.now,
         required: true,
     },
     payment: {
-        id: {
+        paymentId: {
             type: String,
-            required: true
+            required: true,
+            unique: true
         },
         status: {
             type: String,
-            required: true
+            required: true,
+            default: "pending"
+        },
+        message: {
+            type: String,
+            default: "Waiting for payment confirmation!"
+        },
+        paymentMethods: {
+            type: String,
+            required: true,
         }
     },
     delivery: {
         delivery: {
             type: mongoose.Schema.ObjectId,
             ref: "delivery",
-            required: true,
         },
         deliveryPersonName: String,
         deliveredAt: Date,

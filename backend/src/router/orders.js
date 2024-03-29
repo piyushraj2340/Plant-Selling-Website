@@ -1,19 +1,19 @@
 const express = require('express');
-const ordersModel = require('../model/orders');
 const router = express.Router();
 
 const auth = require('../middleware/auth');
-const { createOrder, getOrderHistory, getOrderById, updateOrder } = require('../controllers/orderController');
+const { createOrder, getOrderHistory, getOrderById, confirmOrderPayment } = require('../controllers/orderController');
 
 router.use(auth);
 
 router.route('/orders')
     .post(createOrder)
-    .get(getOrderHistory);
+    .get(getOrderHistory)
+    .patch(confirmOrderPayment); //? This route is only accessible when payments are confirmed 
 
 router.route('/orders/:id')
     .get(getOrderById)
-    .patch(updateOrder);
+    
 
 module.exports = router;
 

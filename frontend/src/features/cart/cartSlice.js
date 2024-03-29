@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import handelDataFetch from '../../utils/handelDataFetch';
 import { userLogoutAsync } from '../auth/authSlice';
+import { updateOrderAfterConfirmPaymentAsync } from '../order/orderSlice';
 
 const initialState = {
     carts: [],
@@ -12,24 +13,24 @@ const initialState = {
 }
 
 export const addToCartAsync = createAsyncThunk('/cart/details/add', async (data) => {
-    const response = await handelDataFetch('/api/v2/checkout/carts', 'POST', data);
+    const response = await handelDataFetch('/api/v2/user/carts', 'POST', data);
     return response.data;
 });
 
 
 export const cartDataFetchAsync = createAsyncThunk('/cart/details/fetch', async () => {
-    const response = await handelDataFetch('/api/v2/checkout/carts', 'GET');
+    const response = await handelDataFetch('/api/v2/user/carts', 'GET');
     return response.data;
 });
 
 export const cartDataDeleteAsync = createAsyncThunk('/cart/details/delete', async (cartId) => {
-    const response = await handelDataFetch(`/api/v2/checkout/carts/${cartId}`, 'DELETE');
+    const response = await handelDataFetch(`/api/v2/user/carts/${cartId}`, 'DELETE');
     return response.data;
 });
 
 export const cartDataUpdateQuantityAsync = createAsyncThunk('/cart/details/update', async ({ cartId, quantity }) => {
     console.log(cartId);
-    const response = await handelDataFetch(`/api/v2/checkout/carts/${cartId}`, 'PATCH', { quantity });
+    const response = await handelDataFetch(`/api/v2/user/carts/${cartId}`, 'PATCH', { quantity });
     return response.data;
 });
 
@@ -62,7 +63,18 @@ export const cartSlice = createSlice({
     extraReducers: (builder) => {
         builder
             .addCase(userLogoutAsync.fulfilled, () => {
+                //* CLEANUP: TASK
+                //? LOGOUT_CLEANUP_TASK:: REMOVE ALL THE CART INFORMATION AFTER LOGOUT
+
                 return initialState;
+
+            })
+            .addCase(updateOrderAfterConfirmPaymentAsync.fulfilled, () => {
+                //* CLEANUP: TASK
+                //? CART_CLEANUP_TASK:: REMOVE THE CART INFORMATION AFTER SUCCEEDED PAYMENT
+
+                return initialState;
+
             })
             .addCase(addToCartAsync.pending, (state) => {
                 //^ FETCH_CART_DETAILS
