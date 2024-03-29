@@ -5,12 +5,22 @@ import Payment from './Payment'
 import { useNavigate } from 'react-router-dom';
 import { Steps, message } from 'antd';
 import handelDataFetchCheckout from '../checkoutAPI';
+import { useDispatch, useSelector } from 'react-redux';
+import { createOrderHistoryAsync } from '../../order/orderSlice';
 
 
 const Checkout = () => {
   const [clientKey, setClientKey] = useState("");
   const [clientSecret, setClientSecret] = useState("");
   const [amount, setAmount] = useState(0);
+
+  const selectedAddress = useSelector(state => state.checkout.shipping);
+  const pricing = useSelector(state => state.checkout.pricing);
+  const checkoutCart = useSelector(state => state.checkout.carts);
+  const user = useSelector(state => state.user.user);
+
+  const dispatch = useDispatch();
+
   const activeStep = 2;
 
   const navigate = useNavigate();
@@ -32,6 +42,26 @@ const Checkout = () => {
     },];
 
 
+    const handelInitOrder = (payment) => {
+      const orderData = {
+          user: user && user._id,
+          orderItems: checkoutCart.map(cart => ({
+              plant: cart.plant._id,
+              nursery: cart.nursery._id,
+              nurseryName: cart.nursery.nurseryName,
+              plantName: cart.plant.plantName,
+              images: cart.plant.images[0],
+              price: cart.plant.price,
+              discount: cart.plant.discount,
+              quantity: cart.quantity,
+          })),
+          shippingInfo: selectedAddress,
+          pricing,
+          payment: payment,
+      }
+
+      dispatch(createOrderHistoryAsync(orderData));
+  }
 
 
   const handelGetClientKey = async () => {
@@ -56,6 +86,10 @@ const Checkout = () => {
       if (result.status) {
         setClientSecret(result.result.client_secret);
         setAmount(result.result.amount);
+
+        //* creating the order init
+        handelInitOrder(result.result);
+
       } else {
         message.error("Invalid Payment Session!.")
         throw new Error(result.message);
