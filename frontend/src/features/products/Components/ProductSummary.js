@@ -74,7 +74,7 @@ const ProductSummary = () => {
         dispatch(addToCartAsync(data));
     }
     const handelBuyProduct = () => {
-        handleAddToCart();
+        !cart && handleAddToCart();
         const data = {
             data: {
                 cartOrProducts: [

@@ -69,11 +69,16 @@ export const cartSlice = createSlice({
                 return initialState;
 
             })
-            .addCase(updateOrderAfterConfirmPaymentAsync.fulfilled, () => {
+            .addCase(updateOrderAfterConfirmPaymentAsync.fulfilled, (state, action) => {
                 //* CLEANUP: TASK
                 //? CART_CLEANUP_TASK:: REMOVE THE CART INFORMATION AFTER SUCCEEDED PAYMENT
 
-                return initialState;
+                action.payload.result.result.orderItems.forEach(items => {
+                    const index = state.carts.findIndex(cart => cart.plant._id === items.plant);
+
+                    state.carts.splice(index, 1);
+                    state.cartLength = state.carts.length;
+                })
 
             })
             .addCase(addToCartAsync.pending, (state) => {
