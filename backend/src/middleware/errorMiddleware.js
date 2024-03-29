@@ -19,6 +19,11 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         statusCode = 400;
     }
 
+    if(err.name === "MongoServerError") {
+        message = "Error On Server";
+        statusCode = 500;
+    }
+
     //TODO: Add All the cases of error such as:.
 
     const info = {
