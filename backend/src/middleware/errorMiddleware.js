@@ -7,9 +7,19 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     if(err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
         message = "Authentication Failed";
         statusCode = 401;
-    } 
+    }
 
-    //TODO: Add All the cases of error such as: mongodb, jwt, and all.
+    if(err.name === "ValidationError") {
+        message = `These ${Object.keys(err.errors)} all fields are required.`;
+        statusCode = 400;
+    }
+
+    if(err.code === 11000) {
+        message = `Duplicate ${Object.keys(err.keyValue)} Entered`;
+        statusCode = 400;
+    }
+
+    //TODO: Add All the cases of error such as:.
 
     const info = {
         status: false,
