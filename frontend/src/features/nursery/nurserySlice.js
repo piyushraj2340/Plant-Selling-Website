@@ -21,9 +21,9 @@ export const nurseryCreateAsync = createAsyncThunk('/nursery/create', async (dat
 });
 
 //? NURSERY_UPDATE
-export const nurseryUpdateAsync = createAsyncThunk('/nursery/update', async ({nurseryData, navigate}) => {
+export const nurseryUpdateAsync = createAsyncThunk('/nursery/update', async ({ nurseryData, navigate }) => {
     const response = await handelDataFetch('/api/v2/nursery/profile', 'PATCH', nurseryData);
-    return {result: response.data, navigate};
+    return { result: response.data, navigate };
 });
 
 //? NURSERY_PROFILE_DATA
@@ -43,7 +43,7 @@ export const nurseryProfileImagesUpload = createAsyncThunk('/nursery/images/prof
 export const addNewPlantsToNurseryAsync = createAsyncThunk('/nursery/plants/add', async (data) => {
     const response = await handelAddNewPlantToNursery(data.data);
     console.log(data);
-    return {result: response.data, redirect: data.redirect, navigate: data.navigate};
+    return { result: response.data, redirect: data.redirect, navigate: data.navigate };
 });
 
 
@@ -102,6 +102,13 @@ export const nurserySlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
+            .addCase(userLogoutAsync.fulfilled, () => {
+                //* CLEANUP: TASK
+                //? LOGOUT_CLEANUP_TASK:: REMOVE ALL THE CART INFORMATION AFTER LOGOUT
+
+                return initialState;
+
+            })
             .addCase(nurseryCreateAsync.pending, (state) => {
                 //^ PENDING: NURSERY_CREATE
 
@@ -169,13 +176,6 @@ export const nurserySlice = createSlice({
 
                 state.isLoading = false;
                 state.error = action.error;
-
-            }).addCase(userLogoutAsync.fulfilled, (state) => {
-                //* FULFILLED: USER_LOGOUT
-
-                state.nurseryStore = [];
-                state.isLoading = false;
-                state.error = null;
 
             }).addCase(nurseryProfileImagesUpload.pending, (state) => {
                 //^ PENDING: NURSERY_HEADERS_IMAGES_UPLOAD
