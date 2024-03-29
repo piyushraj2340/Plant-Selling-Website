@@ -124,10 +124,10 @@ exports.confirmOrderPayment = async (req, res, next) => {
 
         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA
         const redisKeys = [
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:cartOrProducts`,
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:shipping`,
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:pricing`,
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:payment`
+            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:cartOrProducts`,
+            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:shipping`,
+            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:pricing`,
+            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:payment`
         ];
 
         const deleteRedisPromises = redisKeys.map(async (key) => {
