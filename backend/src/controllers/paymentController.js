@@ -19,6 +19,9 @@ exports.createOrderSession = async (req, res) => {
         await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`, "$", JSON.stringify(pricing));
         await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`, 1800);
 
+        //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PAYMENT_INFORMATION
+        await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`);
+
         // Generate JWT token with user ID
         const token = jwt.sign({ userId: userId.toString() }, process.env.SECRET_KEY, { expiresIn: "30m" });
 
@@ -43,22 +46,10 @@ exports.createOrderSession = async (req, res) => {
 
 exports.getOrderSession = async (req, res, next) => {
     try {
-        const userId = req.orderUser;
-
-        // Retrieve cart or product information from Redis
-        const result = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:cartOrProducts`);
-
-        if (!result) {
-            const error = new Error("Order Session is expired! Please try again.");
-            error.statusCode = 400;
-            throw error;
-        }
-
         // Send success response if order session is active
         const info = {
             status: true,
             message: "Order Session is active!",
-            result
         };
         res.status(200).send(info);
 
@@ -105,7 +96,7 @@ exports.getShippingInfo = async (req, res, next) => {
 
         if (!result) {
             const error = new Error("Order Session is expired! Please try again.");
-            error.statusCode = 400;
+            error.statusCode = 401;
             throw error;
         }
 
@@ -133,10 +124,13 @@ exports.confirmOrder = async (req, res, next) => {
         const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
         const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`);
 
+        //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PAYMENT_INFORMATION
+        await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${req.user}:payment`);
+
         // Check if any of the required data is missing
         if (!cartOrProductInfo || !shippingInfo || !pricing) {
             const error = new Error("Order Session is expired! Please try again.");
-            error.statusCode = 400;
+            error.statusCode = 401;
             throw error;
         }
 
@@ -166,10 +160,23 @@ exports.processPayment = async (req, res, next) => {
         // Retrieve shipping information and pricing from Redis
         const shippingInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:shipping`);
         const pricing = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:pricing`);
+        const paymentInfo = await kv.json.get(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`);
 
         // Check if shipping info and pricing exist
         if (!shippingInfo || !pricing) {
-            throw new Error("Invalid Order Session.");
+            const error = new Error("Invalid Order Session.");
+            error.statusCode = 401;
+            throw error;
+        }
+
+        if (paymentInfo) {
+            const info = {
+                status: true,
+                message: "Payment already created.",
+                result: paymentInfo
+            }
+            res.status(200).send(info);
+            return;
         }
 
         // Create payment intent with shipping info and pricing
@@ -193,15 +200,23 @@ exports.processPayment = async (req, res, next) => {
             }
         });
 
+        const paymentData = {
+            paymentId: myPayment.id,
+            client_secret: myPayment.client_secret,
+            amount: pricing.totalPrice * 100,
+            paymentMethods: myPayment.payment_method_types[0]
+        }
+
+        await kv.json.set(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`, "$", JSON.stringify(paymentData));
+        await kv.expire(`${process.env.REDIS_VERCEL_KV_DB}:${userId}:payment`, 1800);
+
         // Send payment response
         if (myPayment) {
             const info = {
                 status: true,
                 message: "Payment intents created.",
-                result: {
-                    client_secret: myPayment.client_secret,
-                    amount: pricing.totalPrice * 100
-                }
+                result: paymentData
+                
             }
             res.status(200).send(info);
         } else {
