@@ -5,12 +5,14 @@ import { userLogoutAsync } from "../auth/authSlice";
 
 const initialState = {
     orderHistory: [],
+    totalData: null,
+    orderDetails: null,
     error: null,
     isLoading: false,
 }
 
-export const getOrderHistoryAsync = createAsyncThunk('/order/history/get', async () => {
-    const response = await handelDataFetch('/api/v2/user/orders', 'GET');
+export const getOrderHistoryAsync = createAsyncThunk('/order/history/get', async (data) => {
+    const response = await handelDataFetch(`/api/v2/user/orders/?page=${data.page}&limit=${data.limit}&endDate=${data.endDate}`, 'GET');
     return response.data;
 });
 
@@ -22,6 +24,11 @@ export const createOrderHistoryAsync = createAsyncThunk('/order/history/create',
 export const updateOrderAfterConfirmPaymentAsync = createAsyncThunk('/order/history/confirm/payment', async (data) => {
     const response = await handelDataFetch('/api/v2/user/orders', 'PATCH', data.paymentInfo);
     return { result: response.data, navigate: data.navigate };
+});
+
+export const getOrderDetailsByIdAsync = createAsyncThunk('/order/details/get', async (id) => {
+    const response = await handelDataFetch(`/api/v2/user/orders/${id}`, 'get');
+    return response.data;
 });
 
 export const orderSlice = createSlice({
@@ -41,6 +48,7 @@ export const orderSlice = createSlice({
 
                 state.error = null;
                 state.isLoading = true;
+                state.totalData = null;
 
             }).addCase(getOrderHistoryAsync.fulfilled, (state, action) => {
                 //* FULFILLED: GET_ORDER_HISTORY
@@ -48,12 +56,14 @@ export const orderSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 state.orderHistory = action.payload.result;
+                state.totalData = action.payload.total;
 
             }).addCase(getOrderHistoryAsync.rejected, (state, action) => {
                 //! REJECTED: GET_ORDER_HISTORY
 
                 state.error = action.error;
                 state.isLoading = false;
+                state.totalData = null;
 
                 message.error(action.error.message);
 
@@ -69,6 +79,7 @@ export const orderSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 state.orderHistory = action.payload.result;
+                state.totalData = action.payload.total;
 
             }).addCase(createOrderHistoryAsync.rejected, (state, action) => {
                 //! REJECTED: Create_ORDER_HISTORY
@@ -100,6 +111,27 @@ export const orderSlice = createSlice({
 
                 message.error(action.error.message);
 
+            }).addCase(getOrderDetailsByIdAsync.pending, (state) => {
+                //^ PENDING: Create_ORDER_HISTORY
+
+                state.error = null;
+                state.isLoading = true; 
+                state.orderDetails = null; 
+
+            }).addCase(getOrderDetailsByIdAsync.fulfilled, (state, action) => {
+                //* FULFILLED: Create_ORDER_HISTORY
+
+                state.error = null;
+                state.isLoading = false;
+                state.orderDetails = action.payload.result;
+
+            }).addCase(getOrderDetailsByIdAsync.rejected, (state, action) => {
+                //! REJECTED: Create_ORDER_HISTORY
+
+                state.error = action.error;
+                state.isLoading = false;
+
+                message.error(action.error.message);
             })
     }
 });
