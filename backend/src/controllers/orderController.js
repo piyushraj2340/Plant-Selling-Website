@@ -14,10 +14,13 @@ exports.createOrder = async (req, res, next) => {
             throw error;
         }
 
+        const total = await ordersModel.countDocuments({user: req.user, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) }});
+
         const info = {
             status: true,
             message: "Successfully created your order.",
-            result
+            result,
+            total
         };
 
         res.status(200).send(info);
@@ -26,10 +29,18 @@ exports.createOrder = async (req, res, next) => {
     }
 };
 
-
+//? GET /api/products?page=1&limit=10
 exports.getOrderHistory = async (req, res, next) => {
     try {
-        const result = await ordersModel.find({ user: req.user }).select('-payment.paymentId -delivery').sort({ _id: -1 });
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const endDate  = parseInt(req.query.endDate);
+
+        const skipData = (page - 1) * limit;
+
+        const total = await ordersModel.countDocuments({ user: req.user, orderAt: { $gte: endDate } });
+
+        const result = await ordersModel.find({ user: req.user, orderAt: { $gte: endDate } }).limit(limit).skip(skipData).select('-payment.paymentId -delivery').sort({ _id: -1 });
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -40,7 +51,8 @@ exports.getOrderHistory = async (req, res, next) => {
         const info = {
             status: true,
             message: "Your Order History.",
-            result
+            result,
+            total
         };
 
         res.status(200).send(info);
