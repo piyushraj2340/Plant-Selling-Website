@@ -14,7 +14,7 @@ exports.createOrder = async (req, res, next) => {
             throw error;
         }
 
-        const total = await ordersModel.countDocuments({user: req.user, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) }});
+        const total = await ordersModel.countDocuments({ user: req.user, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) } });
 
         const info = {
             status: true,
@@ -34,13 +34,32 @@ exports.getOrderHistory = async (req, res, next) => {
     try {
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
-        const endDate  = parseInt(req.query.endDate);
+        const endDate = parseInt(req.query.endDate);
+        const orderSearch = req.query.orderSearch && req.query.orderSearch.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
         const skipData = (page - 1) * limit;
 
-        const total = await ordersModel.countDocuments({ user: req.user, orderAt: { $gte: endDate } });
+        const total = await ordersModel.countDocuments({
+            user: req.user, orderAt: { $gte: endDate }, $or: [
+                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
+                { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
+                { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
+                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
+                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
+                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
+            ]
+        });
 
-        const result = await ordersModel.find({ user: req.user, orderAt: { $gte: endDate } }).limit(limit).skip(skipData).select('-payment.paymentId -delivery').sort({ _id: -1 });
+        const result = await ordersModel.find({
+            user: req.user, orderAt: { $gte: endDate }, $or: [
+                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
+                { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
+                { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
+                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
+                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
+                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
+            ]
+        }).limit(limit).skip(skipData).select('-payment.paymentId -delivery -shippingInfo -pricing').sort({ _id: -1 });
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -169,80 +188,3 @@ exports.confirmOrderPayment = async (req, res, next) => {
         await session.endSession();
     }
 };
-
-
-// exports.confirmOrderPayment = async (req, res, next) => {
-//     const session = await mongoose.startSession();
-//     try {
-//         session.startTransaction();
-
-//         const { paymentId, status } = req.body;
-
-//         if (!paymentId || !status || status !== 'succeeded') {
-//             const error = new Error("You Are not allowed to access this route.");
-//             error.statusCode = 403;
-//             throw error;
-//         }
-
-//         const result = await ordersModel.findOneAndUpdate({ "payment.paymentId": paymentId, user: req.user }, {
-//             $set: {
-//                 "payment.status": status,
-//                 "payment.message": "Payment Succeeded"
-//             }
-//         }, {
-//             new: true,
-//             session
-//         }).select('-payment.paymentId -delivery');
-
-
-//         if (!result) {
-//             const error = new Error("Order not Found.");
-//             error.statusCode = 404;
-//             throw error;
-//         }
-
-
-//         //* CLEANUP_TASK:: REMOVE ALL THE MATCHING THE CART DATA FROM THE DB
-//         result.orderItems.forEach(async (items) => {
-//             const deleteCartInfo = await cartModel.findOneAndDelete({ plant: items.plant, user: req.user }, { session });
-
-//             if (!deleteCartInfo) {
-//                 const error = new Error("cart not Found.");
-//                 error.statusCode = 404;
-//                 throw error;
-//             }
-//         });
-
-//         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: CART_INFORMATION
-//         await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${req.user}:cartOrProducts`);
-
-//         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: SHIPPING_INFORMATION
-//         await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${req.user}:shipping`);
-
-//         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PRICING_INFORMATION
-//         await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${req.user}:pricing`);
-
-//         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA :: PAYMENT_INFORMATION
-//         await kv.json.del(`${process.env.REDIS_VERCEL_KV_DB}:${req.user}:payment`);
-
-//         //* CLEANUP_TASK:: REMOVE THE ORDER_SESSION
-//         //? remove the order auth session
-//         res.clearCookie('orderSession', {
-//             sameSite: 'none',
-//             secure: true
-//         });
-
-//         await session.commitTransaction();
-//         const info = {
-//             status: true,
-//             message: "Payment Succeeded",
-//             result
-//         };
-//         res.status(200).send(info);
-//     } catch (error) {
-//         await session.abortTransaction();
-//         next(error);
-//     } finally {
-//         await session.endSession();
-//     }
-// };
