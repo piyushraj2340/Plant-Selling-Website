@@ -42,6 +42,7 @@ import { cartDataFetchAsync } from "./features/cart/cartSlice";
 import NurseryPublicStorePage from "./pages/NurseryPublicStorePage";
 import OrderHistoryPages from "./pages/OrderHistoryPages";
 import SuccessPage from "./pages/SuccessPage";
+import OrderDetailsPages from "./pages/OrderDetailsPages";
 
 
 
@@ -79,6 +80,7 @@ const Routing = () => {
       <Route exact path="/success" element={<SuccessPage />} /> 
 
       <Route path="/orders/history" element={<OrderHistoryPages />} />
+      <Route path="/orders/details/:id" element={<OrderDetailsPages />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
