@@ -12,7 +12,7 @@ const initialState = {
 }
 
 export const getOrderHistoryAsync = createAsyncThunk('/order/history/get', async (data) => {
-    const response = await handelDataFetch(`/api/v2/user/orders/?page=${data.page}&limit=${data.limit}&endDate=${data.endDate}`, 'GET');
+    const response = await handelDataFetch(`/api/v2/user/orders/?page=${data.page}&limit=${data.limit}&endDate=${data.endDate}&orderSearch=${data.orderSearch || ''}`, 'GET');
     return response.data;
 });
 
@@ -52,6 +52,8 @@ export const orderSlice = createSlice({
 
             }).addCase(getOrderHistoryAsync.fulfilled, (state, action) => {
                 //* FULFILLED: GET_ORDER_HISTORY
+
+                console.log(action.payload);
 
                 state.error = null;
                 state.isLoading = false;

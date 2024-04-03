@@ -1,15 +1,19 @@
-import { Pagination, Steps } from 'antd';
+import { Pagination, Steps, message } from 'antd';
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { getOrderHistoryAsync } from '../orderSlice';
 import formatTimestamp from '../../../utils/formatTimestamp';
 
 const Order = () => {
 
-    const [page, number] = window.location.search && window.location.search.split('=');
+    const location = useLocation();
+    const searchParams = new URLSearchParams(location.search);
+    const page = searchParams.get('page');
+    const orderSearch = searchParams.get('orderSearch');
+    const [searchQuery, setSearchQuery] = useState('');
 
-    const [orderPage, setOrderPage] = useState(page === "?page" ? (number || 1) : 1);
+    const [orderPage, setOrderPage] = useState(page || 1);
     const [orderFilterByDate, setOrderFilterByDate] = useState(Date.now() - (3 * 30 * 24 * 60 * 60 * 1000)); //? Calculate milliseconds for the last 3 months
     const [activeTabs, setActiveTabs] = useState('order');
     const orderHistory = useSelector(state => state.order.orderHistory);
@@ -24,7 +28,8 @@ const Order = () => {
         const data = {
             page: orderPage,
             limit: 10,
-            endDate: orderFilterByDate
+            endDate: orderFilterByDate,
+            orderSearch
         }
 
         dispatch(getOrderHistoryAsync(data));
@@ -44,12 +49,19 @@ const Order = () => {
         const data = {
             page: orderPage,
             limit: 10,
-            endDate: orderFilterByDate
+            endDate: orderFilterByDate,
+            orderSearch
         }
         window.scrollTo(0, 0);
         setOrderPage(page);
         dispatch(getOrderHistoryAsync(data));
-        navigate(`/orders/history/?page=${page}`);
+
+        if (orderSearch) {
+            navigate(`/orders/history/?page=${page}&orderSearch=${orderSearch}`);
+        } else {
+            navigate(`/orders/history/?page=${page}`);
+        }
+
     }
 
     const handelFilterOrderHistoryByDate = (e) => {
@@ -70,24 +82,33 @@ const Order = () => {
         }
     }
 
-
-    //^TESTING: 
-    const [searchQuery, setSearchQuery] = useState('');
-    const [showSuggestions, setShowSuggestions] = useState(false);
-
-    // Mocked suggestions, replace with your actual suggestion data
-    const suggestions = ['Order 1', 'Order 2', 'Order 3'];
-
     const handleInputChange = (e) => {
-        const query = e.target.value;
-        setSearchQuery(query);
-        setShowSuggestions(query !== ''); // Show suggestions only if query is not empty
+        setSearchQuery(e.target.value);
     };
 
-    const handleSuggestionClick = (suggestion) => {
-        setSearchQuery(suggestion);
-        setShowSuggestions(false);
-    };
+    const handelOrderSearch = () => {
+        if (searchQuery === "") {
+            message.error("Search input must be specified");
+            return;
+        }
+        const data = {
+            page: 1,
+            limit: 10,
+            endDate: orderFilterByDate,
+            orderSearch: searchQuery
+        }
+
+        window.scrollTo(0, 0);
+        setOrderPage(1);
+        dispatch(getOrderHistoryAsync(data));
+        navigate(`/orders/history/?orderSearch=${searchQuery}`);
+    }
+
+    const handleKeyDown = (event) => {
+        if (event.key === 'Enter') {
+            handelOrderSearch();
+        }
+      };
 
     return (
         <section className="bg-section">
@@ -112,27 +133,10 @@ const Order = () => {
                                     placeholder='Search your Order'
                                     value={searchQuery}
                                     onChange={handleInputChange}
+                                    onKeyDown={handleKeyDown}
                                 />
-                                <button className='btn btn-info'><span className="fas fa-search"></span> Search</button>
+                                <button className='btn btn-info' onClick={handelOrderSearch}><span className="fas fa-search"></span> Search</button>
                             </div>
-                            {showSuggestions && (
-                                <ul className="position-absolute bg-dark text-white p-0" style={{ minWidth: "100%" }}>
-                                    {suggestions.map((suggestion, index) => (
-                                        <li key={index} className="dropdown-item p-0">
-                                            <button
-                                                type="button"
-                                                className="btn w-100 text-white ps-4 link-underline-hov" 
-                                                style={{
-                                                    textAlign: 'left'
-                                                }}
-                                                onClick={() => handleSuggestionClick(suggestion)}
-                                            >
-                                                {suggestion}
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
                         </div>
                     </div>
                     <div className="d-flex border-bottom mb-2">
