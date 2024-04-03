@@ -1,33 +1,138 @@
-import { Steps } from 'antd';
+import { Pagination, Steps } from 'antd';
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getOrderHistoryAsync } from '../orderSlice';
 import formatTimestamp from '../../../utils/formatTimestamp';
 
 const Order = () => {
+
+    const [page, number] = window.location.search && window.location.search.split('=');
+
+    const [orderPage, setOrderPage] = useState(page === "?page" ? (number || 1) : 1);
+    const [orderFilterByDate, setOrderFilterByDate] = useState(Date.now() - (3 * 30 * 24 * 60 * 60 * 1000)); //? Calculate milliseconds for the last 3 months
     const [activeTabs, setActiveTabs] = useState('order');
     const orderHistory = useSelector(state => state.order.orderHistory);
+    const total = useSelector(state => state.order.totalData);
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found"
 
     useEffect(() => {
-        dispatch(getOrderHistoryAsync());
+        const data = {
+            page: orderPage,
+            limit: 10,
+            endDate: orderFilterByDate
+        }
+
+        dispatch(getOrderHistoryAsync(data));
     }, [])
+
+    const itemRender = (_, type, originalElement) => {
+        if (type === 'prev') {
+            return <Link>Previous</Link>;
+        }
+        if (type === 'next') {
+            return <Link>Next</Link>;
+        }
+        return originalElement;
+    };
+
+    const handelChangeOrderPage = (page) => {
+        const data = {
+            page: orderPage,
+            limit: 10,
+            endDate: orderFilterByDate
+        }
+        window.scrollTo(0, 0);
+        setOrderPage(page);
+        dispatch(getOrderHistoryAsync(data));
+        navigate(`/orders/history/?page=${page}`);
+    }
+
+    const handelFilterOrderHistoryByDate = (e) => {
+        switch (e.target.value) {
+            case 'last6Months':
+                setOrderFilterByDate(Date.now() - (6 * 30 * 24 * 60 * 60 * 1000));
+                break;
+            case 'last1Year':
+                setOrderFilterByDate(Date.now() - (365 * 24 * 60 * 60 * 1000));
+                break;
+            case 'last2Years':
+                setOrderFilterByDate(Date.now() - (2 * 365 * 24 * 60 * 60 * 1000));
+                break;
+            default:
+                // Default case: Retrieve data for the last 3 months
+                setOrderFilterByDate(Date.now() - (3 * 30 * 24 * 60 * 60 * 1000));
+                break;
+        }
+    }
+
+
+    //^TESTING: 
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showSuggestions, setShowSuggestions] = useState(false);
+
+    // Mocked suggestions, replace with your actual suggestion data
+    const suggestions = ['Order 1', 'Order 2', 'Order 3'];
+
+    const handleInputChange = (e) => {
+        const query = e.target.value;
+        setSearchQuery(query);
+        setShowSuggestions(query !== ''); // Show suggestions only if query is not empty
+    };
+
+    const handleSuggestionClick = (suggestion) => {
+        setSearchQuery(suggestion);
+        setShowSuggestions(false);
+    };
 
     return (
         <section className="bg-section">
             <div className="container p-2 p-md-3 p-lg-4">
+                <nav aria-label="breadcrumb">
+                    <ol className="breadcrumb">
+                        <li className="breadcrumb-item"><Link to="/profile" className='link-underline-hover'>Profile</Link></li>
+                        <li className="breadcrumb-item " aria-current="page">Your Orders</li>
+                    </ol>
+                </nav>
                 <div className="row border-bottom my-2 pb-2">
                     <div className="d-flex flex-column flex-md-row p-2 justify-content-between py-2">
                         <h2 className='h2 px-2'>Your Orders</h2>
-                        <div className="d-flex">
+                        <div className="position-relative">
                             <div className="input-group position-relative">
-                                <input type="search" name="order-search" className='form-control border-none p-2' style={{ boxShadow: "none" }} id="order-search" placeholder='Search your Order' />
+                                <input
+                                    type="search"
+                                    name="order-search"
+                                    className='form-control border-none p-2'
+                                    style={{ boxShadow: "none" }}
+                                    id="order-search"
+                                    placeholder='Search your Order'
+                                    value={searchQuery}
+                                    onChange={handleInputChange}
+                                />
                                 <button className='btn btn-info'><span className="fas fa-search"></span> Search</button>
                             </div>
+                            {showSuggestions && (
+                                <ul className="position-absolute bg-dark text-white p-0" style={{ minWidth: "100%" }}>
+                                    {suggestions.map((suggestion, index) => (
+                                        <li key={index} className="dropdown-item p-0">
+                                            <button
+                                                type="button"
+                                                className="btn w-100 text-white ps-4 link-underline-hov" 
+                                                style={{
+                                                    textAlign: 'left'
+                                                }}
+                                                onClick={() => handleSuggestionClick(suggestion)}
+                                            >
+                                                {suggestion}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
                         </div>
                     </div>
                     <div className="d-flex border-bottom mb-2">
@@ -38,7 +143,7 @@ const Order = () => {
                         </div>
                         <div style={{ transform: "translateY(1px)" }} >
                             <button className={`p-2 ${activeTabs === 'buy-again' ? 'border-bottom border-0 border-bottom-3 border-warning' : "border-0"}`} onClick={() => setActiveTabs('buy-again')}>
-                                Buy Again
+                                Incomplete Orders
                             </button>
                         </div>
                         <div style={{ transform: "translateY(1px)" }} >
@@ -48,15 +153,16 @@ const Order = () => {
                         </div>
                     </div>
                     <div className="d-flex align-items-center">
-                        <p className='p-2 m-0'>Total Order: <b>{orderHistory.length}</b></p>
-                        <select name="filter-order" id="filter-order" className='p-1'>
-                            <option value="last 3 months">Last 3 months</option>
-                            <option value="last 6 months">Last 6 months</option>
-                            <option value="2024">2024</option>
+                        <p className='p-2 m-0'>Total Order: <b>{total}</b></p>
+                        <select name="filter-order" id="filter-order" className='p-1' onChange={(e) => handelFilterOrderHistoryByDate(e)}>
+                            <option value="last3Months">Last 3 months</option>
+                            <option value="last6Months">Last 6 months</option>
+                            <option value="last1Year">Last 1 Years</option>
+                            <option value="last2Year">Last 2 Years</option>
                         </select>
                     </div>
                 </div>
-                <div className="row d-flex justify-content-center align-items-center">
+                <div className="row d-flex justify-content-center align-items-center mb-4">
                     {orderHistory.length ?
                         orderHistory.map(order => {
                             return (
@@ -68,7 +174,7 @@ const Order = () => {
                                                 <p className="text-muted mb-0"> Place On <span className="fw-bold text-body">{formatTimestamp(order.orderAt)}</span> </p>
                                             </div>
                                             <div className='mt-2 mt-md-0'>
-                                                <h6 className="mb-0"> <Link to="#">View Details </Link> </h6>
+                                                <h6 className="mb-0"> <Link to={`/orders/details/${order._id}`}>View Details </Link> </h6>
                                             </div>
                                         </div>
                                     </div>
@@ -96,9 +202,9 @@ const Order = () => {
 
                                                 let activeStep = 0;
 
-                                                if(items.orderStatus.status === 'delivered') {
+                                                if (items.orderStatus.status === 'delivered') {
                                                     activeStep = 2;
-                                                } else if(items.orderStatus.status === 'shipped') {
+                                                } else if (items.orderStatus.status === 'shipped') {
                                                     activeStep = 1;
                                                 } else {
                                                     activeStep = 0;
@@ -126,13 +232,13 @@ const Order = () => {
                                     <div className="card-footer p-4">
                                         <div className="d-flex justify-content-between">
                                             <h5 className="fw-normal mb-0"><Link to={"#"}>Cancel</Link></h5>
-                                            <h5 className="fw-normal mb-0"><Link to={"#"}>Pre-pay</Link></h5>
+                                            <h5 className="fw-normal mb-0"><Link to={"#"}>Track Order</Link></h5>
                                         </div>
                                     </div>
                                 </div>
                             )
                         })
-                        : 
+                        :
                         <div className="container bg-white pb-3">
                             <div className="row">
                                 <div className="d-flex justify-content-center">
@@ -147,6 +253,10 @@ const Order = () => {
                             </div>
                         </div>
                     }
+                </div>
+
+                <div className="d-flex justify-content-center">
+                    <Pagination defaultCurrent={1} total={total} current={orderPage} itemRender={itemRender} responsive={true} showSizeChanger={false} onChange={(page) => handelChangeOrderPage(page)} />
                 </div>
             </div>
         </section>
