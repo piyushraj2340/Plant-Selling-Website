@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const auth = require('../middleware/auth');
-const { createOrder, getOrderHistory, getOrderById, confirmOrderPayment } = require('../controllers/orderController');
+const { createOrder, getOrderHistory, getOrderById, confirmOrderPayment, getLastOrder } = require('../controllers/orderController');
 
 router.use(auth);
 
@@ -12,8 +12,11 @@ router.route('/orders')
     .patch(confirmOrderPayment); //? This route is only accessible when payments are confirmed 
 
 router.route('/orders/:id')
-    .get(getOrderById)
-    
+    .get(getOrderById);
+
+router.route('/last/order')
+    .get(getLastOrder);
+
 
 module.exports = router;
 
