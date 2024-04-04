@@ -27,7 +27,12 @@ export const updateOrderAfterConfirmPaymentAsync = createAsyncThunk('/order/hist
 });
 
 export const getOrderDetailsByIdAsync = createAsyncThunk('/order/details/get', async (id) => {
-    const response = await handelDataFetch(`/api/v2/user/orders/${id}`, 'get');
+    const response = await handelDataFetch(`/api/v2/user/orders/${id}`, 'GET');
+    return response.data;
+});
+
+export const getLastOrderAsync = createAsyncThunk('/get/last/order', async () => {
+    const response = await handelDataFetch(`/api/v2/user/last/order`, 'GET');
     return response.data;
 });
 
@@ -92,13 +97,13 @@ export const orderSlice = createSlice({
                 message.error(action.error.message);
 
             }).addCase(updateOrderAfterConfirmPaymentAsync.pending, (state) => {
-                //^ PENDING: Create_ORDER_HISTORY
+                //^ PENDING: CONFIRM_ORDER_AFTER_PAYMENT_SUCCESSFUL
 
                 state.error = null;
                 state.isLoading = true;
 
             }).addCase(updateOrderAfterConfirmPaymentAsync.fulfilled, (state, action) => {
-                //* FULFILLED: Create_ORDER_HISTORY
+                //* FULFILLED: CONFIRM_ORDER_AFTER_PAYMENT_SUCCESSFUL
 
                 state.error = null;
                 state.isLoading = false;
@@ -106,7 +111,7 @@ export const orderSlice = createSlice({
                 action.payload.navigate("/orders/history");
 
             }).addCase(updateOrderAfterConfirmPaymentAsync.rejected, (state, action) => {
-                //! REJECTED: Create_ORDER_HISTORY
+                //! REJECTED: CONFIRM_ORDER_AFTER_PAYMENT_SUCCESSFUL
 
                 state.error = action.error;
                 state.isLoading = false;
@@ -114,21 +119,42 @@ export const orderSlice = createSlice({
                 message.error(action.error.message);
 
             }).addCase(getOrderDetailsByIdAsync.pending, (state) => {
-                //^ PENDING: Create_ORDER_HISTORY
+                //^ PENDING: GET_ORDER_DETAILS
 
                 state.error = null;
                 state.isLoading = true; 
                 state.orderDetails = null; 
 
             }).addCase(getOrderDetailsByIdAsync.fulfilled, (state, action) => {
-                //* FULFILLED: Create_ORDER_HISTORY
+                //* FULFILLED: GET_ORDER_DETAILS
 
                 state.error = null;
                 state.isLoading = false;
                 state.orderDetails = action.payload.result;
 
             }).addCase(getOrderDetailsByIdAsync.rejected, (state, action) => {
-                //! REJECTED: Create_ORDER_HISTORY
+                //! REJECTED: GET_ORDER_DETAILS
+
+                state.error = action.error;
+                state.isLoading = false;
+
+                message.error(action.error.message);
+            }).addCase(getLastOrderAsync.pending, (state) => {
+                //^ PENDING: GET_LAST_ORDER
+
+                state.error = null;
+                state.isLoading = true; 
+                state.orderDetails = null; 
+
+            }).addCase(getLastOrderAsync.fulfilled, (state, action) => {
+                //* FULFILLED: GET_LAST_ORDER
+
+                state.error = null;
+                state.isLoading = false;
+                state.orderHistory = action.payload.result;
+
+            }).addCase(getLastOrderAsync.rejected, (state, action) => {
+                //! REJECTED: GET_LAST_ORDER
 
                 state.error = action.error;
                 state.isLoading = false;

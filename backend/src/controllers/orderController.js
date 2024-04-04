@@ -44,8 +44,8 @@ exports.getOrderHistory = async (req, res, next) => {
                 { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
                 { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
                 { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
-                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
+                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
+                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
                 { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
             ]
         });
@@ -55,8 +55,8 @@ exports.getOrderHistory = async (req, res, next) => {
                 { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
                 { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
                 { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
-                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null  }, //? Search by plant name (case-insensitive)
+                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
+                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
                 { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
             ]
         }).limit(limit).skip(skipData).select('-payment.paymentId -delivery -shippingInfo -pricing').sort({ _id: -1 });
@@ -188,3 +188,25 @@ exports.confirmOrderPayment = async (req, res, next) => {
         await session.endSession();
     }
 };
+
+exports.getLastOrder = async (req, res, next) => {
+    try {
+        const result = await ordersModel.find({ user: req.user }).sort({ _id: -1 }).limit(1).select('-payment.paymentId -delivery -shippingInfo -pricing');
+
+        if (!result) {
+            const error = new Error("Order not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const info = {
+            status: true,
+            message: "Your Last Order.",
+            result
+        };
+
+        res.status(200).send(info);
+    } catch (error) {
+        next(error);
+    }
+}
