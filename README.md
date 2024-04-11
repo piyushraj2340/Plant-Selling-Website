@@ -14,11 +14,13 @@ Let's grow together!
 
 **Folder Structure:**
 
+```
 plant-seller/
 ├── frontend/
-│ ├── (frontend files and directories)
+│   ├── (frontend files and directories)
 ├── backend/
-│ ├── (backend files and directories)
+│   ├── (backend files and directories)
+```
 
 **Frontend:**
 - Framework: React.js
