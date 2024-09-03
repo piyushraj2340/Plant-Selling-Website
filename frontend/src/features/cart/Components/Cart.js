@@ -61,6 +61,10 @@ function Cart() {
   }
 
   const handelBuyProduct = async () => {
+    if(!cart || cart.length === 0) {
+      message.error("Your Cart is Empty!");
+      return;
+    }
 
     const data = {
       data: {

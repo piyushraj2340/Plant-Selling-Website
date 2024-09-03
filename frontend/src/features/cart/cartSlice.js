@@ -41,17 +41,20 @@ export const cartSlice = createSlice({
         setCartPricing: (state, action) => {
             const products = action.payload;
 
-            const totalPriceWithoutDiscount = (products.reduce((total, curObj) => total + (curObj.pricing.priceWithoutDiscount * curObj.quantity), 0).toFixed(2));
-            const actualPriceAfterDiscount = (products.reduce((total, curObj) => total + (curObj.pricing.priceAfterDiscount * curObj.quantity), 0)).toFixed(2);
-            const discountPrice = (products.reduce((total, curObj) => total + (curObj.pricing.discountPrice * curObj.quantity), 0)).toFixed(2);
-            const deliveryPrice = (actualPriceAfterDiscount < 500 ? 90 : 0).toFixed(2)
+            const pricing = {};
 
-            const pricing = {
-                totalPriceWithoutDiscount,
-                actualPriceAfterDiscount,
-                discountPrice,
-                deliveryPrice, // calculate the delivery price dynamic
-                totalPrice: (Number(actualPriceAfterDiscount) + Number(deliveryPrice)).toFixed(2)
+            if(products.length > 0) { 
+                pricing.totalPriceWithoutDiscount = (products.reduce((total, curObj) => total + (curObj.pricing.priceWithoutDiscount * curObj.quantity), 0).toFixed(2));
+                pricing.actualPriceAfterDiscount = (products.reduce((total, curObj) => total + (curObj.pricing.priceAfterDiscount * curObj.quantity), 0)).toFixed(2);
+                pricing.discountPrice = (products.reduce((total, curObj) => total + (curObj.pricing.discountPrice * curObj.quantity), 0)).toFixed(2);
+                pricing.deliveryPrice = (pricing.actualPriceAfterDiscount < 500 ? 90 : 0).toFixed(2)
+                pricing.totalPrice = (Number(pricing.actualPriceAfterDiscount) + Number(pricing.deliveryPrice)).toFixed(2)
+            } else {
+                pricing.totalPriceWithoutDiscount = 0;
+                pricing.actualPriceAfterDiscount = 0;
+                pricing.discountPrice = 0;
+                pricing.deliveryPrice = 0;
+                pricing.totalPrice = 0;
             }
 
             state.cartPriceDetails = pricing;
