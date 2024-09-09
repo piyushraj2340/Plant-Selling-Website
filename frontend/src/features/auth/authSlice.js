@@ -4,6 +4,8 @@ import { message } from 'antd';
 
 const initialState = {
     userAuthCheck: false,
+    isUserVerificationNeeded: false,
+    email: '',
     isLoading: false,
     error: null,
 }
@@ -31,7 +33,15 @@ export const userLogoutAsync = createAsyncThunk('/auth/logoutUser', async () => 
 export const authSlice = createSlice({
     name: "auth",
     initialState,
-    reducers: {},
+    reducers: {
+        resetState: (state) => {
+            state.userAuthCheck = false;
+            state.isUserVerificationNeeded = false;
+            state.email = '';
+            state.isLoading = false;
+            state.error = null;
+        }
+    },
     extraReducers: (builder) => {
         builder
             .addCase(userAuthCheckAsync.pending, (state) => {
@@ -66,14 +76,22 @@ export const authSlice = createSlice({
             }).addCase(userLoginAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGIN
 
+                state.userAuthCheck = true;
                 state.isLoading = false;
                 state.error = null;
-                state.userAuthCheck = true;
 
                 message.success(action.payload.message)
 
             }).addCase(userLoginAsync.rejected, (state, action) => {
                 //! REJECTED: USER_LOGIN
+
+                console.log(action);
+                
+
+                if(action.error.message === 'You need to verify your account') {
+                    state.isUserVerificationNeeded = true;
+                    state.email = action.meta.arg.email;
+                }
 
                 state.isLoading = false;
                 state.error = action.error;
@@ -138,5 +156,5 @@ export const authSlice = createSlice({
     }
 });
 
-// export const {  } = authSlice.actions;
+export const { resetState } = authSlice.actions;
 export default authSlice.reducer;
