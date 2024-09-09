@@ -1149,3 +1149,29 @@ a:hover {
         }
     }
 }
+
+
+// Email Verification css code 
+.verification-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+.verification-plant-theme {
+    background-color: #e6f5ea;
+    border-color: #98c1a2;
+}
+.verification h1 {
+    color: #2d6a4f;
+}
+.verification p {
+    color: #3a5a40;
+}
+.verification .highlight {
+    color: #40916c;
+    font-weight: bold;
+}

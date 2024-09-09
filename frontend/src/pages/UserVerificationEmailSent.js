@@ -1,0 +1,35 @@
+import React from 'react'
+import { message } from 'antd';
+import { useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+
+
+
+const UserVerificationEmailSent = () => {
+    <title>Account Verification</title>
+
+    const navigate = useNavigate();
+    const query = new URLSearchParams(useLocation().search);
+
+    const email = query.get('email');
+
+    if (!email) {
+        message.error("Email Query Parameters are missing or invalid")
+        navigate('/');
+        return;
+    }
+
+    return (
+        <div className='container verification-container verification-plant-theme verification d-flex justify-content-center py-2 px-2 mb-4 mb-md-5'>
+            <div className='shadow border rounded px-2 py-2 p-md-5'>
+                <div className="container verification-container verification-plant-theme verification">
+                    <h1>Hello, <span className="highlight">User</span>!</h1>
+                    <p>We’ve sent a verification email to <span className="highlight">{email}</span>. Please check your inbox and complete the verification process.</p>
+                    <p><strong>Note:</strong> The verification link is valid for only 15 minutes.</p>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+export default UserVerificationEmailSent
