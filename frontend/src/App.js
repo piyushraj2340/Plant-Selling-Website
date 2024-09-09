@@ -43,6 +43,7 @@ import NurseryPublicStorePage from "./pages/NurseryPublicStorePage";
 import OrderHistoryPages from "./pages/OrderHistoryPages";
 import SuccessPage from "./pages/SuccessPage";
 import OrderDetailsPages from "./pages/OrderDetailsPages";
+import ForgotPassword from "./pages/ForgotPassword";
 
 
 
@@ -59,6 +60,7 @@ const Routing = () => {
       <Route exact path="/login" element={<LoginPage />} />
       <Route exact path="/signup" element={<SignupPage />} />
       <Route exact path="/logout" element={<LogoutPage />} />
+      <Route exact path="/forgot-password" element={<ForgotPassword />} />
       <Route exact path="/profile" element={<ProfilePage />} />
       <Route exact path="/nursery" element={<NurseryProfilePage />} />
       <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
