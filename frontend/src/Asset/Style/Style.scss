@@ -1175,3 +1175,102 @@ a:hover {
     color: #40916c;
     font-weight: bold;
 }
+
+
+// Verification Confirmation
+
+.confirmation-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+.confirmation-plant-theme {
+    background-color: #e6f5ea;
+    border-color: #98c1a2;
+}
+.confirmation h1 {
+    color: #2d6a4f;
+}
+.confirmation p {
+    color: #3a5a40;
+}
+.confirmation .highlight {
+    color: #40916c;
+    font-weight: bold;
+}
+.confirmation .btn-confirm {
+    background-color: #40916c;
+    color: white;
+}
+.confirmation .btn-confirm:hover {
+    background-color: #2d6a4f;
+}
+
+
+// Invalid Verification tokens
+
+.container-invalid-token {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    background-color: #e6f5ea; /* Plant theme background */
+    margin-top: 80px;
+}
+
+.invalid-token-heading {
+    color: #d9534f; /* Error color */
+    text-align: center;
+}
+
+.invalid-token-message {
+    color: #a94442; /* Lighter color for error message text */
+    text-align: center;
+}
+
+.btn-invalid-token {
+    background-color: #d9534f; /* Button color for error */
+    color: white;
+}
+
+.btn-invalid-token:hover {
+    background-color: #c9302c; /* Darker shade on hover */
+}
+
+
+// account verification completed 
+
+.container-confirmation {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+.plant-theme {
+    background-color: #e6f5ea;
+    border-color: #98c1a2;
+}
+.confirmation-heading {
+    color: #2d6a4f;
+    text-align: center;
+}
+.confirmation-message {
+    color: #3a5a40;
+    text-align: center;
+}
+.btn-confirmation {
+    background-color: #40916c;
+    color: white;
+}
+.btn-confirmation:hover {
+    background-color: #2d6a4f;
+}
