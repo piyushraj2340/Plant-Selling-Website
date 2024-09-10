@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Account Confirmation</title>
+</head>
+<body style="background-color: #f8f9fa; font-family: Arial, sans-serif; margin: 0; padding: 0;">
+    <div style="max-width: 600px; margin: 50px auto; background-color: #fff; border-radius: 5px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+        <div style="background-color: #007bff; color: #fff; text-align: center; padding: 20px; border-top-left-radius: 5px; border-top-right-radius: 5px;">
+            <h3 style="margin: 0;">Confirm Your Account</h3>
+        </div>
+        <!-- Image Placeholder Section -->
+        <div style="text-align: center; padding: 20px;">
+            <img src="https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/plant_seller_bg_none" alt="Account Confirmation Image" style="max-width: 80%; height: auto; display: block; margin: 0 auto;">
+        </div>
+        <div style="padding: 20px;">
+            <p>Hello <strong><%= userName %></strong>,</p>
+            <p>Thank you for signing up. Please confirm your email address by clicking the button below:</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="<%= confirmationLink %>" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Confirm Account</a>
+            </div>
+            <p>If the button above doesn't work, please click on the link below:</p>
+            <div style="text-align: center; margin: 20px 0;">
+                <a href="<%= confirmationLink %>" style="color: #007bff; word-wrap: break-word;"><%= confirmationLink %></a>
+            </div>
+
+            <!-- Expiry Message Section -->
+            <p style="color: #dc3545; font-weight: bold;">This link will be valid for <%= expirationTime %> minutes and will expire after that.</p>
+
+            <p>If you didn't create this account, you can ignore this email.</p>
+            <p>Best regards,<br>The <%= companyName %> Team</p>
+        </div>
+        <div style="background-color: #f1f1f1; color: #666; text-align: center; padding: 10px; border-bottom-left-radius: 5px; border-bottom-right-radius: 5px;">
+            <small>&copy; 2024 <%= companyName %>. All rights reserved.</small>
+        </div>
+    </div>
+</body>
+</html>
