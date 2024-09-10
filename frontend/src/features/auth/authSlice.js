@@ -1,11 +1,14 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import handelDataFetch from '../../utils/handelDataFetch';
 import { message } from 'antd';
+import { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore } from './Components/utils/authHelper';
 
 const initialState = {
     userAuthCheck: false,
     isUserVerificationNeeded: false,
     email: '',
+    isValidToken: false,
+    verificationCompleted: false,
     isLoading: false,
     error: null,
 }
@@ -30,16 +33,22 @@ export const userLogoutAsync = createAsyncThunk('/auth/logoutUser', async () => 
     return response.data;
 })
 
+export const userAccountVerificationAsync = createAsyncThunk('/auth/userAccountVerification', async (body) => {
+    const response = await handelDataFetch(`/api/v2/user/verification/${body.token}`, 'POST', body);
+    return response.data;
+})
+
+export const validateVerificationTokenAsync = createAsyncThunk('/auth/validateVerificationToken', async (token) => {
+    const response = await handelDataFetch(`/api/v2/user/validateVerificationToken/${token}`, 'POST');
+    return response.data;
+})
+
 export const authSlice = createSlice({
     name: "auth",
     initialState,
     reducers: {
         resetState: (state) => {
-            state.userAuthCheck = false;
-            state.isUserVerificationNeeded = false;
-            state.email = '';
-            state.isLoading = false;
-            state.error = null;
+            resetToDefaultAuthStore(state);
         }
     },
     extraReducers: (builder) => {
@@ -47,81 +56,58 @@ export const authSlice = createSlice({
             .addCase(userAuthCheckAsync.pending, (state) => {
                 //^ PENDING: USER_AUTH_CHECK 
 
-                state.isLoading = true;
-                state.error = null;
-                state.userAuthCheck = false;
+                loadingRestAuthStore(state);
 
             }).addCase(userAuthCheckAsync.fulfilled, (state) => {
                 //* FULFILLED: USER_AUTH_CHECK 
 
-                state.isLoading = false;
-                state.error = null;
-                state.userAuthCheck = true;
+                trueAuthCheckResetAuthStore(state);
 
             }).addCase(userAuthCheckAsync.rejected, (state, action) => {
                 //! REJECTED: USER_AUTH_CHECK 
 
-                state.isLoading = false;
-                state.error = action.error;
-                state.userAuthCheck = false;
-
+                resetToDefaultAuthStore(state);
             })
             .addCase(userLoginAsync.pending, (state) => {
                 //^ PENDING: USER_LOGIN
 
-                state.isLoading = true;
-                state.error = null;
-                state.userAuthCheck = false;
+                loadingRestAuthStore(state);
 
             }).addCase(userLoginAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGIN
 
-                state.userAuthCheck = true;
-                state.isLoading = false;
-                state.error = null;
+                trueAuthCheckResetAuthStore(state);
 
                 message.success(action.payload.message)
 
             }).addCase(userLoginAsync.rejected, (state, action) => {
                 //! REJECTED: USER_LOGIN
 
-                console.log(action);
-                
+                resetToDefaultAuthStore(state);
 
-                if(action.error.message === 'You need to verify your account') {
+                if (action.error.message === 'You need to verify your account') {
                     state.isUserVerificationNeeded = true;
                     state.email = action.meta.arg.email;
                 }
-
-                state.isLoading = false;
-                state.error = action.error;
-                state.userAuthCheck = false;
 
                 message.error(action.error.message);
 
             }).addCase(userSignupAsync.pending, (state) => {
                 //^ PENDING: USER_SIGN-UP
 
-                state.isLoading = true;
-                state.error = null;
-                state.userAuthCheck = false;
-
+                loadingRestAuthStore(state);
 
             }).addCase(userSignupAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_SIGN-UP
 
-                state.isLoading = false;
-                state.error = null;
-                state.userAuthCheck = true;
+                trueAuthCheckResetAuthStore(state);
 
                 message.success(action.payload.message);
 
             }).addCase(userSignupAsync.rejected, (state, action) => {
                 //! REJECTED: USER_SIGN-UP
 
-                state.isLoading = false;
-                state.error = action.error;
-                state.userAuthCheck = false;
+                resetToDefaultAuthStore(state);
 
                 message.error(action.error.message);
 
@@ -129,26 +115,60 @@ export const authSlice = createSlice({
             .addCase(userLogoutAsync.pending, (state) => {
                 //^ PENDING: USER_LOGOUT
 
-                state.isLoading = true;
-                state.error = null;
-                state.userAuthCheck = false;
+                loadingRestAuthStore(state);
 
 
             }).addCase(userLogoutAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGOUT
 
-                state.isLoading = false;
-                state.error = null;
-                state.userAuthCheck = false;
+                resetToDefaultAuthStore(state);
 
                 message.success(action.payload.message);
 
             }).addCase(userLogoutAsync.rejected, (state, action) => {
                 //! REJECTED: USER_LOGOUT
 
-                state.isLoading = false;
-                state.error = action.error;
-                state.userAuthCheck = false;
+                resetToDefaultAuthStore(state);
+
+                message.error(action.error.message);
+
+            })
+            .addCase(userAccountVerificationAsync.pending, (state) => {
+                //^ PENDING: USER_LOGOUT
+
+                loadingRestAuthStore(state);
+
+
+            }).addCase(userAccountVerificationAsync.fulfilled, (state, action) => {
+                //* FULFILLED: USER_LOGOUT
+
+                userAccountVerificationAuthStore(state);
+
+                message.success(action.payload.message);
+
+            }).addCase(userAccountVerificationAsync.rejected, (state, action) => {
+                //! REJECTED: USER_LOGOUT
+
+                resetToDefaultAuthStore(state);
+
+                message.error(action.error.message);
+
+            })
+            .addCase(validateVerificationTokenAsync.pending, (state) => {
+                //^ PENDING: USER_LOGOUT
+
+                loadingRestAuthStore(state);
+
+
+            }).addCase(validateVerificationTokenAsync.fulfilled, (state, action) => {
+                //* FULFILLED: USER_LOGOUT
+
+                validateVerificationTokenAuthStore(state);
+
+            }).addCase(validateVerificationTokenAsync.rejected, (state, action) => {
+                //! REJECTED: USER_LOGOUT
+
+                resetToDefaultAuthStore(state);
 
                 message.error(action.error.message);
 
