@@ -22,11 +22,18 @@ const auth = async (req, res, next) => {
         const verifyUser = jwt.verify(token, process.env.SECRET_KEY);
 
         //? find the right user from the database 
-        const user = await userModel.findOne({ _id: verifyUser._id }).select({ _id: 1, role: 1 });
+        const user = await userModel.findOne({ _id: verifyUser._id }).select({ _id: 1, role: 1, isUserVerified: 1 });
 
         //! if user not found
         if (!user) {
             const error = new Error("Authentication failed");
+            error.statusCode = 401;
+            throw error;
+        }
+
+        //! if user is not verified
+        if (!user.isUserVerified) {
+            const error = new Error("Your Account is not verified please login and verify your account");
             error.statusCode = 401;
             throw error;
         }

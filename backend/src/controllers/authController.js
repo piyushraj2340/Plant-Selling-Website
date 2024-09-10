@@ -1,5 +1,8 @@
 const userModel = require('../model/user');
 const bcryptjs = require('bcryptjs');
+const { generateUniqueLinkWithToken } = require('../utils/generateToken');
+const { setData } = require('../utils/redisVercelKv');
+const { confirmAccountSendEmail } = require('./smtp/emailController');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
@@ -57,6 +60,33 @@ exports.signIn = async (req, res, next) => {
             const error = new Error("Login Failed");
             error.statusCode = 401;
             throw error;
+        }
+
+        //! if User is not verified 
+        if (!result.isUserVerified) {
+
+            //* Generate unique token and link for email verification
+            const { token, link } = generateUniqueLinkWithToken("account/verificationConfirmation");
+
+            //* Save the token in redis database with expire time 15 min.
+            await setData('root', token, 'verifyUser', { userId: result.id }, 900);
+
+            //* Send Email with smtp to activate user account
+            const isEmailSent = await confirmAccountSendEmail(result.email, result.name, link );
+
+            if (!isEmailSent) {
+                const error = new Error("Failed to send email verification");
+                error.statusCode = 500;
+                throw error;
+            }
+
+
+            const info = {
+                status: false,
+                message: "You need to verify your account",
+            }
+
+            return res.status(401).send(info);
         }
 
         //* Generate Auth Token
