@@ -18,7 +18,11 @@ const UserVerificationConfirmAccount = () => {
 
   useEffect(() => {
     dispatch(validateVerificationTokenAsync(token));
-  }, []);
+  }, [dispatch]);
+
+  if(isValidToken === null && verificationCompleted === null) {
+    return null;
+  }
 
   if (verificationCompleted) {
     return <AccountVerificationCompleted />;

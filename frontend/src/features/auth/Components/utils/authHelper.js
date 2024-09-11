@@ -8,11 +8,11 @@ const loadingRestAuthStore = (state) => {
     }
 
     //^ Reset the other values 
-    state.userAuthCheck = false;
-    state.isUserVerificationNeeded = false;
+    state.userAuthCheck = null;
+    state.isUserVerificationNeeded = null;
     state.email = '';
-    state.isValidToken = false;
-    state.verificationCompleted = false;
+    state.isValidToken = null;
+    state.verificationCompleted = null;
     state.error = null;
 
     //* Only set the loading state 
@@ -47,13 +47,13 @@ const resetToDefaultAuthStore = (state) => {
     }
 
     //^ Reset all the values 
-    state.isUserVerificationNeeded = false;
+    state.isUserVerificationNeeded = null;
     state.email = '';
-    state.isValidToken = false;
-    state.verificationCompleted = false;
+    state.isValidToken = null;
+    state.verificationCompleted = null;
     state.error = null;
-    state.isLoading = false;
-    state.userAuthCheck = false;
+    state.isLoading = null;
+    state.userAuthCheck = null;
 }
 
 const userAccountVerificationAuthStore = (state) => {

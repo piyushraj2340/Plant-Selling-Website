@@ -187,13 +187,17 @@ exports.verifyUser = async (req, res, next) => {
 
         //* Getting Data from the form body
         const { isUserVerified } = req.body;
-        
+
 
         //^ Checking if the user exists in the mongodb database
         const user = await userModel.findById(userData.userId);
 
         //! If User does not exist 
         if (!user || !isUserVerified || userData.userId !== user.id) {
+
+            //* Deleting the token from the redis database
+            await deleteData('root', token, 'verifyUser');
+
             const error = new Error("You are not verified, you may need to re-try");
             error.statusCode = 401;
             throw error;
