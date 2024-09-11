@@ -4,12 +4,12 @@ import { message } from 'antd';
 import { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore } from './Components/utils/authHelper';
 
 const initialState = {
-    userAuthCheck: false,
-    isUserVerificationNeeded: false,
+    userAuthCheck: null,
+    isUserVerificationNeeded: null,
     email: '',
-    isValidToken: false,
-    verificationCompleted: false,
-    isLoading: false,
+    isValidToken: null,
+    verificationCompleted: null,
+    isLoading: null,
     error: null,
 }
 
@@ -151,6 +151,8 @@ export const authSlice = createSlice({
 
                 resetToDefaultAuthStore(state);
 
+                state.verificationCompleted = false;
+
                 message.error(action.error.message);
 
             })
@@ -169,6 +171,8 @@ export const authSlice = createSlice({
                 //! REJECTED: USER_LOGOUT
 
                 resetToDefaultAuthStore(state);
+
+                state.isValidToken = false;
 
                 message.error(action.error.message);
 

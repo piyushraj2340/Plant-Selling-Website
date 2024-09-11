@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { message } from 'antd';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
@@ -13,10 +13,16 @@ const UserVerificationEmailSent = () => {
 
     const email = query.get('email');
 
+    useEffect(() => {
+        if (!email) {
+            message.error("Email Query Parameters are missing or invalid");
+            navigate('/');
+        }
+    }, [email, navigate]);
+
+    // Only render the content if the email is present
     if (!email) {
-        message.error("Email Query Parameters are missing or invalid")
-        navigate('/');
-        return;
+        return null; // Return nothing if there's no email, navigate will handle redirection
     }
 
     return (
