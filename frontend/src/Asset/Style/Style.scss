@@ -1274,3 +1274,227 @@ a:hover {
 .btn-confirmation:hover {
     background-color: #2d6a4f;
 }
+
+
+
+/* ChangePassword.css */
+
+/* Plant-themed styles */
+/* ResetPassword.css */
+
+/* Plant-themed styles with reset-password prefix */
+.reset-password-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+
+/* Heading styles */
+.reset-password-title {
+    color: #2d6a4f; /* Deep green heading */
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+/* Label styles */
+.reset-password-label {
+    color: #2d6a4f;
+}
+
+/* Custom button style */
+.reset-password-btn {
+    background-color: #40916c; /* Plant-themed green button */
+    color: white;
+    border-radius: 5px;
+    border: none;
+}
+
+.reset-password-btn:hover {
+    background-color: #2d6a4f; /* Darker green on hover */
+}
+
+/* Input styling */
+.reset-password-input {
+    border-radius: 0; /* Rectangular inputs */
+    border-color: #98c1a2; /* Greenish border */
+}
+
+/* Invalid/valid feedback */
+.reset-password-error {
+    color: #d9534f; /* Red feedback for invalid input */
+}
+
+/* Validation states */
+.is-invalid {
+    border-color: #d9534f; /* Red border on invalid input */
+}
+
+.is-valid {
+    border-color: #28a745; /* Green border on valid input */
+}
+
+
+
+/* PasswordResetInvalid.css */
+
+/* Container styles */
+.reset-password-invalid-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+
+/* Box styles */
+.reset-password-invalid-box {
+    background-color: #e6f5ea; /* Light green background */
+    border: 1px solid #98c1a2; /* Plant-like border */
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Title styles */
+.reset-password-invalid-title {
+    font-family: 'Arial', sans-serif;
+    color: #2d6a4f; /* Dark green */
+    margin-bottom: 20px;
+}
+
+/* Message styles */
+.reset-password-invalid-message {
+    color: #2d6a4f;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+/* Button styles */
+.reset-password-invalid-btn {
+    background-color: #40916c; /* Green themed button */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+}
+
+.reset-password-invalid-btn:hover {
+    background-color: #2d6a4f; /* Darker green on hover */
+}
+
+
+/* Container styles */
+.password-reset-success-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+
+/* Box styles */
+.password-reset-success-box {
+    background-color: #e6f5ea; /* Light green background */
+    border: 1px solid #98c1a2; /* Plant-like border */
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Title styles */
+.password-reset-success-title {
+    font-family: 'Arial', sans-serif;
+    color: #2d6a4f; /* Dark green */
+    margin-bottom: 20px;
+}
+
+/* Message styles */
+.password-reset-success-message {
+    color: #2d6a4f;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+/* Button styles */
+.password-reset-success-btn {
+    background-color: #40916c; /* Green themed button */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+}
+
+.password-reset-success-btn:hover {
+    background-color: #2d6a4f; /* Darker green on hover */
+}
+
+
+/* Container styles */
+.password-reset-email-sent-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+
+/* Box styles */
+.password-reset-email-sent-box {
+    background-color: #e6f5ea; /* Light green background */
+    border: 1px solid #98c1a2; /* Plant-like border */
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Title styles */
+.password-reset-email-sent-title {
+    font-family: 'Arial', sans-serif;
+    color: #2d6a4f; /* Dark green */
+    margin-bottom: 20px;
+}
+
+/* Message styles */
+.password-reset-email-sent-message {
+    color: #2d6a4f;
+    margin-bottom: 20px;
+    font-size: 1.2em;
+}
+
+/* Button styles */
+.password-reset-email-sent-btn {
+    background-color: #40916c; /* Green themed button */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    border: none;
+}
+
+.password-reset-email-sent-btn:hover {
+    background-color: #2d6a4f; /* Darker green on hover */
+}
+
+.password-reset-email-sent-container .highlight {
+    color: #40916c;
+    font-weight: bold;
+}

@@ -13,6 +13,8 @@ const loadingRestAuthStore = (state) => {
     state.email = '';
     state.isValidToken = null;
     state.verificationCompleted = null;
+    state.isValidTokenPassword = null;
+    state.passwordChangeSuccessful = null;
     state.error = null;
 
     //* Only set the loading state 
@@ -31,6 +33,8 @@ const trueAuthCheckResetAuthStore = (state) => {
     state.email = '';
     state.isValidToken = false;
     state.verificationCompleted = false;
+    state.isValidTokenPassword = false;
+    state.passwordChangeSuccessful = false;
     state.error = null;
     state.isLoading = false;
     
@@ -51,6 +55,8 @@ const resetToDefaultAuthStore = (state) => {
     state.email = '';
     state.isValidToken = null;
     state.verificationCompleted = null;
+    state.isValidTokenPassword = null;
+    state.passwordChangeSuccessful = null;
     state.error = null;
     state.isLoading = null;
     state.userAuthCheck = null;
@@ -67,6 +73,8 @@ const userAccountVerificationAuthStore = (state) => {
     state.isUserVerificationNeeded = false;
     state.email = '';
     state.isValidToken = false;
+    state.isValidTokenPassword = false;
+    state.passwordChangeSuccessful = false;
     state.error = null;
     state.userAuthCheck = false;
     state.isLoading = false;
@@ -89,6 +97,8 @@ const validateVerificationTokenAuthStore = (state) => {
     state.error = null;
     state.userAuthCheck = false;
     state.verificationCompleted = false;
+    state.passwordChangeSuccessful = false;
+    state.isValidTokenPassword = false;
     state.isLoading = false;
     
     //* Only set the isValidToken state true  
@@ -96,4 +106,47 @@ const validateVerificationTokenAuthStore = (state) => {
 }
 
 
-export { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore }
+const validatePasswordResetTokenAuthStore = (state) => {
+    //! Checking for invalid state or state is null 
+    if (!state) {
+        message.error("Invalid State information for authSlice");
+        return;
+    }
+
+    //^ Reset the other values 
+    state.isUserVerificationNeeded = false;
+    state.email = '';
+    state.error = null;
+    state.userAuthCheck = false;
+    state.verificationCompleted = false;
+    state.passwordChangeSuccessful = false;
+    state.isValidToken = false;
+    state.isLoading = false;
+    
+    //* Only set the isValidTokenPassword state true  
+    state.isValidTokenPassword = true;
+}
+
+const validatePasswordResetAuthStore = (state) => {
+    //! Checking for invalid state or state is null 
+    if (!state) {
+        message.error("Invalid State information for authSlice");
+        return;
+    }
+
+    //^ Reset the other values 
+    state.isUserVerificationNeeded = false;
+    state.email = '';
+    state.error = null;
+    state.userAuthCheck = false;
+    state.isValidToken = false;
+    state.isLoading = false;
+    state.isValidTokenPassword = false;
+    state.verificationCompleted = false;
+    
+    //* Only set the passwordChangeSuccessful state true  
+    state.passwordChangeSuccessful = true;
+}
+
+
+export { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore, validatePasswordResetTokenAuthStore, validatePasswordResetAuthStore }
