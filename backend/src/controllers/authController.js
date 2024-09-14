@@ -1,8 +1,8 @@
 const userModel = require('../model/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken } = require('../utils/generateToken');
-const { setData } = require('../utils/redisVercelKv');
-const { confirmAccountSendEmail } = require('./smtp/emailController');
+const { setData, deleteData } = require('../utils/redisVercelKv');
+const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
@@ -75,6 +75,10 @@ exports.signIn = async (req, res, next) => {
             const isEmailSent = await confirmAccountSendEmail(result.email, result.name, link );
 
             if (!isEmailSent) {
+
+                //* Deleting the token from the redis database
+                await deleteData('root', token, 'verifyUser');
+
                 const error = new Error("Failed to send email verification");
                 error.statusCode = 500;
                 throw error;
@@ -181,3 +185,56 @@ exports.checkUser = async (req, res, next) => {
         next(error); //! Pass the error to the global error middleware
     }
 };
+
+
+exports.resetUserPassword = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+
+        //! Check if the email parameter is valid
+        if (!email) {
+            const error = new Error("Email is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        //^ Find the user based on the email
+        const user = await userModel.findOne({ email });
+
+        if (!user) {
+            const error = new Error("Email is not valid");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        //* Generate unique token and link for email verification
+        const { token, link } = generateUniqueLinkWithToken("account/ResetYourPassword");
+
+        //* Save the token in redis database with expire time 15 min.
+        await setData('root', token, 'resetPassword', { userId: user.id }, 900);
+
+        //* Send Email with smtp to activate user account
+        const isEmailSent = await resetPasswordSendEmail(user.email, user.name, link);
+
+        if (!isEmailSent) {
+
+            //* Deleting the token from the redis database
+            await deleteData('root', token, 'resetPassword');
+
+            const error = new Error("Failed to send email verification");
+            error.statusCode = 500;
+            throw error;
+        }
+
+
+        const info = {
+            status: true,
+            message: "Password Reset Email Sent Successfully",
+        }
+
+        return res.status(200).send(info);
+
+    } catch (error) {
+        next(error); //! Pass the error to the global error middleware
+    }
+}
