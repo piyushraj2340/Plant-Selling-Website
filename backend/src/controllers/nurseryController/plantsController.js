@@ -1,5 +1,5 @@
-const { uploadImages, deleteResourcesByPrefix, deleteFolder } = require('../utils/uploadImages');
-const plantsModel = require('../model/plants');
+const { uploadImages, deleteResourcesByPrefix, deleteFolder } = require('../../utils/uploadImages');
+const plantsModel = require('../../model/nurseryModel/plants');
 const { default: mongoose } = require('mongoose');
 
 exports.addNewPlant = async (req, res, next) => {

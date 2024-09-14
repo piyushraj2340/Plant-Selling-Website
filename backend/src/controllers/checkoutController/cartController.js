@@ -1,4 +1,4 @@
-const cartModel = require('../model/cart');
+const cartModel = require('../../model/checkoutModel/cart');
 
 exports.addToCart = async (req, res, next) => {
     try {

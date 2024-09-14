@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const auth = require('../middleware/auth');
+const auth = require('../../middleware/auth');
 
-const { addAddress, getAddressList, getAddressById, updateAddress, deleteAddress, getDefaultAddress } = require('../controllers/addressController');
+const { addAddress, getAddressList, getAddressById, updateAddress, deleteAddress, getDefaultAddress } = require('../../controllers/userController/addressController');
 
 router.use(auth); //* Auth middleware
 

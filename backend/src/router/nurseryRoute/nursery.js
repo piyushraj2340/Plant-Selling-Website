@@ -2,9 +2,9 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middleware/auth');
+const auth = require('../../middleware/auth');
 
-const { createNurseryProfile, getNurseryDetail, updateNurseryDetail, deleteNurseryDetail, uploadNurseryImage, deleteNurseryImage, updateNurseryImages, getNurseryImages } = require('../controllers/nurseryController');
+const { createNurseryProfile, getNurseryDetail, updateNurseryDetail, deleteNurseryDetail, uploadNurseryImage, deleteNurseryImage, updateNurseryImages, getNurseryImages } = require('../../controllers/nurseryController/nurseryController');
 
 router.use(auth);
 

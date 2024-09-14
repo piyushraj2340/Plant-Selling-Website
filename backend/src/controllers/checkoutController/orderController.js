@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
-const ordersModel = require('../model/orders');
-const cartModel = require('../model/cart');
+const ordersModel = require('../../model/checkoutModel/orders');
+const cartModel = require('../../model/checkoutModel/cart');
 const { kv } = require('@vercel/kv'); //? Import the appropriate Redis client library :: TO REMOVE THE KV: DATA AFTER PAYMENT SUCCEEDED
 
 exports.createOrder = async (req, res, next) => {

@@ -1,13 +1,13 @@
 const { default: mongoose } = require('mongoose');
-const { deleteResourcesByPrefix, deleteFolder } = require('../utils/uploadImages');
+const { deleteResourcesByPrefix, deleteFolder } = require('../../utils/uploadImages');
 
-const userModel = require('../model/user');
-const nurseryStores = require('../model/nurseryStore');
-const plantModel = require('../model/plants');
-const nurseryModel = require('../model/nursery');
-const addressModel = require('../model/address');
-const cartModel = require('../model/cart');
-const { getData, deleteData } = require('../utils/redisVercelKv');
+const userModel = require('../../model/userModel/user');
+const nurseryStores = require('../../model/nurseryModel/nurseryStore');
+const plantModel = require('../../model/nurseryModel/plants');
+const nurseryModel = require('../../model/nurseryModel/nursery');
+const addressModel = require('../../model/userModel/address');
+const cartModel = require('../../model/checkoutModel/cart');
+const { getData, deleteData } = require('../../utils/redisVercelKv');
 
 exports.getUserProfile = async (req, res, next) => {
     try {

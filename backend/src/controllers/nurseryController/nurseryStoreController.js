@@ -1,5 +1,5 @@
-const nurseryStore = require('../model/nurseryStore');
-const { deleteResourcesByPrefix, deleteFolder, uploadImage } = require('../utils/uploadImages');
+const nurseryStore = require('../../model/nurseryModel/nurseryStore');
+const { deleteResourcesByPrefix, deleteFolder, uploadImage } = require('../../utils/uploadImages');
 
 exports.addNurseryStoreSection = async (req, res) => {
     try {
