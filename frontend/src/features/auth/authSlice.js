@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import handelDataFetch from '../../utils/handelDataFetch';
 import { message } from 'antd';
-import { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore } from './Components/utils/authHelper';
+import { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore, validatePasswordResetTokenAuthStore, validatePasswordResetAuthStore } from './Components/utils/authHelper';
 
 const initialState = {
     userAuthCheck: null,
@@ -9,6 +9,8 @@ const initialState = {
     email: '',
     isValidToken: null,
     verificationCompleted: null,
+    isValidTokenPassword: null,
+    passwordChangeSuccessful: null,
     isLoading: null,
     error: null,
 }
@@ -40,6 +42,19 @@ export const userAccountVerificationAsync = createAsyncThunk('/auth/userAccountV
 
 export const validateVerificationTokenAsync = createAsyncThunk('/auth/validateVerificationToken', async (token) => {
     const response = await handelDataFetch(`/api/v2/user/validateVerificationToken/${token}`, 'POST');
+    return response.data;
+})
+
+export const validatePasswordResetTokenAsync = createAsyncThunk('/auth/validatePasswordResetToken', async (token) => {
+    const response = await handelDataFetch(`/api/v2/user/validatePasswordResetToken/${token}`, 'POST');
+    return response.data;
+})
+
+
+export const validatePasswordResetAsync = createAsyncThunk('/auth/validatePasswordReset', async (body) => {
+    console.log(body);
+    
+    const response = await handelDataFetch(`/api/v2/user/resetPassword/${body.token}`, 'POST', body.data);
     return response.data;
 })
 
@@ -173,6 +188,48 @@ export const authSlice = createSlice({
                 resetToDefaultAuthStore(state);
 
                 state.isValidToken = false;
+
+                message.error(action.error.message);
+
+            })
+            .addCase(validatePasswordResetTokenAsync.pending, (state) => {
+                //^ PENDING: USER_LOGOUT
+
+                loadingRestAuthStore(state);
+
+
+            }).addCase(validatePasswordResetTokenAsync.fulfilled, (state, action) => {
+                //* FULFILLED: USER_LOGOUT
+
+                validatePasswordResetTokenAuthStore(state);
+
+            }).addCase(validatePasswordResetTokenAsync.rejected, (state, action) => {
+                //! REJECTED: USER_LOGOUT
+
+                resetToDefaultAuthStore(state);
+
+                state.isValidTokenPassword = false;
+
+                message.error(action.error.message);
+
+            })
+            .addCase(validatePasswordResetAsync.pending, (state) => {
+                //^ PENDING: USER_LOGOUT
+
+                loadingRestAuthStore(state);
+
+
+            }).addCase(validatePasswordResetAsync.fulfilled, (state, action) => {
+                //* FULFILLED: USER_LOGOUT
+
+                validatePasswordResetAuthStore(state);
+
+            }).addCase(validatePasswordResetAsync.rejected, (state, action) => {
+                //! REJECTED: USER_LOGOUT
+
+                resetToDefaultAuthStore(state);
+
+                state.passwordChangeSuccessful = false;
 
                 message.error(action.error.message);
 
