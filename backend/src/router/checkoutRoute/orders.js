@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middleware/auth');
-const { createOrder, getOrderHistory, getOrderById, confirmOrderPayment, getLastOrder } = require('../controllers/orderController');
+const auth = require('../../middleware/auth');
+const { createOrder, getOrderHistory, getOrderById, confirmOrderPayment, getLastOrder } = require('../../controllers/checkoutController/orderController');
 
 router.use(auth);
 

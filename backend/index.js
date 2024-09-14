@@ -31,15 +31,15 @@ app.use(express.urlencoded({ extended: false }));
 
 // route 
 const authRoute = require("./src/router/auth");
-const nurseryRoute = require("./src/router/nursery");
-const nurseryStoreRoute = require("./src/router/nurseryStore");
-const plantsRoute = require("./src/router/plants");
+const nurseryRoute = require("./src/router/nurseryRoute/nursery");
+const nurseryStoreRoute = require("./src/router/nurseryRoute/nurseryStore");
+const plantsRoute = require("./src/router/nurseryRoute/plants");
 const products = require("./src/router/products");
-const orderRoute = require("./src/router/orders");
-const user = require("./src/router/user");
-const cart = require("./src/router/cart");
-const address = require("./src/router/address");
-const payment = require("./src/router/payment");
+const orderRoute = require("./src/router/checkoutRoute/orders");
+const user = require("./src/router/userRoute/user");
+const cart = require("./src/router/checkoutRoute/cart");
+const address = require("./src/router/userRoute/address");
+const payment = require("./src/router/checkoutRoute/payment");
 
 // route middleware
 

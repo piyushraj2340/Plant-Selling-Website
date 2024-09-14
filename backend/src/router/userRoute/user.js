@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middleware/auth');
-const { getUserProfile, updateUserProfile, deleteUserProfile, verifyUser, validateVerificationToken, validatePasswordRestToken, ResetPassword } = require('../controllers/userController');
+const auth = require('../../middleware/auth');
+const { getUserProfile, updateUserProfile, deleteUserProfile, verifyUser, validateVerificationToken, validatePasswordRestToken, ResetPassword } = require('../../controllers/userController/userController');
 
 // public routes not required the auth middleware
 router.route('/verification/:token').post(verifyUser);

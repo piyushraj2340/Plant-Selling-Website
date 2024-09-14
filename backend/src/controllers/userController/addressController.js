@@ -1,4 +1,4 @@
-const addressModel = require('../model/address');
+const addressModel = require('../../model/userModel/address');
 const mongoose = require('mongoose');
 
 //* POST API 

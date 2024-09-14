@@ -2,8 +2,8 @@ const express = require("express");
 
 const router = express.Router();
 
-const auth = require('../middleware/auth');
-const { addToCart, getCartItems, getCartItemById, updateCartItemById, deleteCartItemById, isPlantAddedToCart } = require("../controllers/cartController");
+const auth = require('../../middleware/auth');
+const { addToCart, getCartItems, getCartItemById, updateCartItemById, deleteCartItemById, isPlantAddedToCart } = require("../../controllers/checkoutController/cartController");
 
 router.use(auth);
 

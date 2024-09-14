@@ -1,8 +1,8 @@
 const express = require('express');
 
-const auth = require('../middleware/auth');
+const auth = require('../../middleware/auth');
 
-const { addNewPlant, getAllPlantsOfNursery, getPlantById, updatePlantById, deletePlantById } = require('../controllers/plantsController');
+const { addNewPlant, getAllPlantsOfNursery, getPlantById, updatePlantById, deletePlantById } = require('../../controllers/nurseryController/plantsController');
 
 const router = express.Router();
 

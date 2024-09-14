@@ -1,9 +1,9 @@
 const mongoose = require('mongoose');
-const userModel = require('../model/user');
-const nurseryModel = require('../model/nursery');
-const plantModel = require('../model/plants');
-const nurseryStores = require('../model/nurseryStore');
-const { deleteFolder, deleteResourcesByPrefix, uploadImage } = require('../utils/uploadImages');
+const userModel = require('../../model/userModel/user');
+const nurseryModel = require('../../model/nurseryModel/nursery');
+const plantModel = require('../../model/nurseryModel/plants');
+const nurseryStores = require('../../model/nurseryModel/nurseryStore');
+const { deleteFolder, deleteResourcesByPrefix, uploadImage } = require('../../utils/uploadImages');
 
 exports.createNurseryProfile = async (req, res, next) => {
     const session = await mongoose.startSession();

@@ -1,8 +1,8 @@
 const router = require('express').Router();
 
-const auth = require('../middleware/auth');
-const orderAuth = require('../middleware/orderAuth');
-const { createOrderSession, getOrderSession, addShippingInfo, getShippingInfo, confirmOrder, processPayment, getStripePublicKey } = require('../controllers/paymentController');
+const auth = require('../../middleware/auth');
+const orderAuth = require('../../middleware/orderAuth');
+const { createOrderSession, getOrderSession, addShippingInfo, getShippingInfo, confirmOrder, processPayment, getStripePublicKey } = require('../../controllers/checkoutController/paymentController');
 
 router.use(auth);
 

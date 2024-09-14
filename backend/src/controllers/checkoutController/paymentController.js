@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const { kv } = require('@vercel/kv'); // Import the appropriate Redis client library
-const { setData, deleteData, getData } = require('../utils/redisVercelKv');
+const { setData, deleteData, getData } = require('../../utils/redisVercelKv');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY); // Import Stripe library
 
 exports.createOrderSession = async (req, res, next) => {

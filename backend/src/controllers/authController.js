@@ -1,4 +1,4 @@
-const userModel = require('../model/user');
+const userModel = require('../model/userModel/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken } = require('../utils/generateToken');
 const { setData, deleteData } = require('../utils/redisVercelKv');

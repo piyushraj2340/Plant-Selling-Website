@@ -1,8 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
-const auth = require('../middleware/auth');
-const { addNurseryStoreSection, getAllNurseryStoreData, getNurseryStoreSectionById, updateNurseryStoreSection, deleteNurseryStoreSection, uploadNurseryStoreImage } = require('../controllers/nurseryStoreController');
+const auth = require('../../middleware/auth');
+const { addNurseryStoreSection, getAllNurseryStoreData, getNurseryStoreSectionById, updateNurseryStoreSection, deleteNurseryStoreSection, uploadNurseryStoreImage } = require('../../controllers/nurseryController/nurseryStoreController');
 
 router.use(auth);
 
