@@ -2,35 +2,44 @@ const userModel = require('../model/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken } = require('../utils/generateToken');
 const { setData, deleteData } = require('../utils/redisVercelKv');
-const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
+// const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
     try {
         const newUser = new userModel(req.body);
-
-        const token = await newUser.generateAuthToken();
         await newUser.save();
 
-        const userInfo = { ...newUser._doc };
-        delete userInfo.password;
-        delete userInfo.tokens;
-        delete userInfo.__v;
+        //* Generate unique token and link for email verification
+        const { token, link } = generateUniqueLinkWithToken("account/verificationConfirmation");
 
-        res.cookie('auth', token, {
-            expires: new Date(Date.now() + 50000000),
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
+        console.log(link);
+
+        //* Save the token in redis database with expire time 15 min.
+        await setData('root', token, 'verifyUser', { userId: newUser.id }, 900);
+
+        //* Send Email with smtp to activate user account
+        // const isEmailSent = await confirmAccountSendEmail(newUser.email, newUser.name, link);
+
+        // if (!isEmailSent) {
+
+        //     //* Deleting the token from the redis database
+        //     await deleteData('root', token, 'verifyUser');
+
+        //     const error = new Error("Failed to send email verification");
+        //     error.statusCode = 500;
+        //     throw error;
+        // }
 
         const info = {
             status: true,
-            message: "User Registration Successful",
-            result: userInfo
+            message: "User Account successfully created, and need to verify you email address",
+            result: {
+                email : newUser.email
+            }
         }
 
-        res.status(201).send(info);
+        return res.status(201).send(info);
 
     } catch (err) {
         next(err); //! Pass the error to the global error middleware
@@ -72,7 +81,7 @@ exports.signIn = async (req, res, next) => {
             await setData('root', token, 'verifyUser', { userId: result.id }, 900);
 
             //* Send Email with smtp to activate user account
-            const isEmailSent = await confirmAccountSendEmail(result.email, result.name, link );
+            const isEmailSent = await confirmAccountSendEmail(result.email, result.name, link);
 
             if (!isEmailSent) {
 

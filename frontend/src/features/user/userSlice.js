@@ -50,12 +50,6 @@ export const userSlice = createSlice({
                 state.user = action.payload.result;
                 state.error = null;
 
-            }).addCase(userSignupAsync.fulfilled, (state, action) => {
-                //* FULFILLED: USER_SIGN-UP
-
-                state.user = action.payload.result;
-                state.error = null;
-
             }).addCase(userLogoutAsync.fulfilled, (state) => {
                 //* FULFILLED: USER_LOGOUT
 

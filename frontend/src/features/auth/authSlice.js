@@ -53,7 +53,7 @@ export const validatePasswordResetTokenAsync = createAsyncThunk('/auth/validateP
 
 export const validatePasswordResetAsync = createAsyncThunk('/auth/validatePasswordReset', async (body) => {
     console.log(body);
-    
+
     const response = await handelDataFetch(`/api/v2/user/resetPassword/${body.token}`, 'POST', body.data);
     return response.data;
 })
@@ -115,7 +115,10 @@ export const authSlice = createSlice({
             }).addCase(userSignupAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_SIGN-UP
 
-                trueAuthCheckResetAuthStore(state);
+                resetToDefaultAuthStore(state);
+
+                state.isUserVerificationNeeded = true;
+                state.email = action.payload.result.email;
 
                 message.success(action.payload.message);
 
