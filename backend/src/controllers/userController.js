@@ -150,6 +150,15 @@ exports.validateVerificationToken = async (req, res, next) => {
             throw error;
         }
 
+        const user = await userModel.findById(userData.userId);
+
+        //! User does not exist in the actual database
+        if(!user) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 405;
+            throw error;
+        }
+
 
         const info = {
             status: true,
@@ -159,6 +168,119 @@ exports.validateVerificationToken = async (req, res, next) => {
         res.status(200).send(info);
 
 
+    } catch (error) {
+        next(error); //! Pass the error to the error handling middleware
+    }
+}
+
+
+exports.validatePasswordRestToken = async (req, res, next) => {
+    const { token } = req.params;
+
+    try {
+        //! Token does not exist
+        if (!token) {
+            const error = new Error("Invalid Token Parameters");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //^ Get data form the redis database
+        const userData = await getData('root', token, 'resetPassword');
+
+        //! User does not exist in the redis db or the user token got expired after few minutes 
+        if (!userData) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const user = await userModel.findById(userData.userId);
+        
+        //! User does not exist in the actual database
+        if(!user) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const info = {
+            status: true,
+            message: "Token is valid",
+        }
+
+        res.status(200).send(info);
+
+    } catch (error) {
+        next(error); //! Pass the error to the error handling middleware
+    }
+}
+
+
+
+exports.ResetPassword = async (req, res, next) => {
+    const { token } = req.params;
+    try {
+
+        //! Token does not exist
+        if (!token) {
+            const error = new Error("Invalid Token Parameters");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //^ Get data form the redis database
+        const userData = await getData('root', token, 'resetPassword'); 
+
+        //! User does not exist in the redis db or the user token got expired after few minutes 
+        if (!userData) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //* Getting Data from the form body
+        const { password, confirmPassword } = req.body;
+
+        if(!password || !confirmPassword) {
+            const error = new Error("Password Parameter Missing");
+            error.statusCode = 405;
+            throw error;
+        }
+
+        if(password !== confirmPassword) {
+            const error = new Error("Password and Confirm Password does not match");
+            error.statusCode = 405;
+            throw error;
+        }
+
+        //^ Checking if the user exists in the mongodb database
+        const user = await userModel.findById(userData.userId);
+
+        //! If User does not exist 
+        if (!user || userData.userId !== user.id) {
+
+            //* Deleting the token from the redis database
+            await deleteData('root', token, 'resetPassword');
+
+            const error = new Error("You are not verified, you may need to re-try");
+            error.statusCode = 401;
+            throw error;
+        }
+
+        //* Updating the user's verification status
+        user.password = password;
+        await user.save();
+
+        //* Deleting the token from the redis database
+        await deleteData('root', token, 'resetPassword');
+
+        const info = {
+            status: true,
+            message: "Password Changed successfully",
+        }
+
+        res.status(200).send(info);
     } catch (error) {
         next(error); //! Pass the error to the error handling middleware
     }
@@ -213,10 +335,6 @@ exports.verifyUser = async (req, res, next) => {
         const info = {
             status: true,
             message: "User Verification completed!",
-            result: {
-                email: user.email,
-                verified: true
-            }
         }
 
         res.status(200).send(info);

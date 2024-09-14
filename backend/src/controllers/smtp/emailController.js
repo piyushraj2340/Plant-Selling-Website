@@ -41,30 +41,29 @@ exports.confirmAccountSendEmail = async (to, userName, confirmationLink) => {
 };
 
 
-exports.resetPasswordSendEmail = async (req, res) => {
-  const { to, subject, userName, confirmationLink  } = req.body;
+exports.resetPasswordSendEmail = async (to, userName, resetLink) => {
+  
 
   try {
     // Render the email template
     const emailTemplate = await ejs.renderFile(
       path.join(__dirname, '../../views/resetPasswordLinkEmailTemplate.ejs'),
-      { userName, resetLink : "https://google.com", companyName: 'PlantSeller', expirationTime: "15" }
+      { userName, resetLink, companyName: 'PlantSeller', expirationTime: "15" }
     );
 
     const mailOptions = {
       from: `"Plant Seller" <${smtpConfig.auth.user}>`, // Sender address
       to, // List of receivers
-      subject, // Subject line
+      subject: "Reset Your Password", // Subject line
       html: emailTemplate, // HTML body
     };
 
     // Send email
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ message: 'Email sent successfully' });
+    return true
   } catch (error) {
     console.error('Error sending email:', error);
-    res.status(500).json({ error: 'Error sending email' });
   }
 };
 
