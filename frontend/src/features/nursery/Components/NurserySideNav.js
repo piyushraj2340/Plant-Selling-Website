@@ -1,7 +1,14 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import localStorageUtil from '../../../utils/localStorage';
 
 const NurserySideNav = ({ isCollapseSideNav, setIsCollapseSideNav }) => {
+
+
+    const handelSetIsCollapseSide = () => {
+        setIsCollapseSideNav(!isCollapseSideNav);
+        localStorageUtil.setData("isCollapseSideNav", !isCollapseSideNav);
+    }
 
     return (
         <div className="bg-white p-0 rounded d-none d-lg-block position-relative nursery-side-nav" style={isCollapseSideNav ? { width: '58px' } : { width: '25%' }}>
@@ -47,11 +54,11 @@ const NurserySideNav = ({ isCollapseSideNav, setIsCollapseSideNav }) => {
                     </div>
                 </div>
             </div>
-            <div className={`nursery-collapse-side p-1 open ${!isCollapseSideNav && 'd-none'}`} data-toggle="tooltip" data-bs-placement="right" title='Open Slider' onClick={() => setIsCollapseSideNav(!isCollapseSideNav)}>
+            <div className={`nursery-collapse-side p-1 open ${!isCollapseSideNav && 'd-none'}`} data-toggle="tooltip" data-bs-placement="right" title='Open Slider' onClick={handelSetIsCollapseSide}>
                 <div className="bar bar1"></div>
                 <div className="bar bar2"></div>
             </div>
-            <div className={`nursery-collapse-side p-1 close ${isCollapseSideNav && 'd-none'}`} data-toggle="tooltip" data-bs-placement="right" title='Close Slider' onClick={() => setIsCollapseSideNav(!isCollapseSideNav)}>
+            <div className={`nursery-collapse-side p-1 close ${isCollapseSideNav && 'd-none'}`} data-toggle="tooltip" data-bs-placement="right" title='Close Slider' onClick={handelSetIsCollapseSide}>
                 <div className="bar bar1"></div>
                 <div className="bar bar2"></div>
             </div>
