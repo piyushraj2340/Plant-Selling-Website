@@ -13,23 +13,21 @@ exports.signUp = async (req, res, next) => {
         //* Generate unique token and link for email verification
         const { token, link } = generateUniqueLinkWithToken("account/verificationConfirmation");
 
-        console.log(link);
-
         //* Save the token in redis database with expire time 15 min.
         await setData('root', token, 'verifyUser', { userId: newUser.id }, 900);
 
         //* Send Email with smtp to activate user account
-        // const isEmailSent = await confirmAccountSendEmail(newUser.email, newUser.name, link);
+        const isEmailSent = await confirmAccountSendEmail(newUser.email, newUser.name, link);
 
-        // if (!isEmailSent) {
+        if (!isEmailSent) {
 
-        //     //* Deleting the token from the redis database
-        //     await deleteData('root', token, 'verifyUser');
+            //* Deleting the token from the redis database
+            await deleteData('root', token, 'verifyUser');
 
-        //     const error = new Error("Failed to send email verification");
-        //     error.statusCode = 500;
-        //     throw error;
-        // }
+            const error = new Error("Failed to send email verification");
+            error.statusCode = 500;
+            throw error;
+        }
 
         const info = {
             status: true,
