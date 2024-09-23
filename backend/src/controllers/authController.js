@@ -2,7 +2,7 @@ const userModel = require('../model/userModel/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken } = require('../utils/generateToken');
 const { setData, deleteData } = require('../utils/redisVercelKv');
-// const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
+const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
