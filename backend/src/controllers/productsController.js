@@ -19,7 +19,10 @@ exports.getAllPlants = async (req, res, next) => {
 exports.getPlantById = async (req, res, next) => {
     try {
         const _id = req.params.id;
-        const result = await plantsModel.findOne({ _id }).populate("nursery"); // Populate nursery details
+        const result = await plantsModel.findOne({ _id }).populate({
+            path: "nursery",
+            select: "nurseryName _id"  // Select only the fields you need
+        }).select("-user"); // Populate nursery details
 
         // Assuming there's a method increaseVisit() defined in the plant model
         await result.increaseVisit();
