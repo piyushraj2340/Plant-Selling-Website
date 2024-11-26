@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const userModel = require('../../model/userModel/user');
 const nurseryModel = require('../../model/nurseryModel/nursery');
 const plantModel = require('../../model/nurseryModel/plants');
-const nurseryStores = require('../../model/nurseryModel/nurseryStore');
+const nurseryStoresTabs = require('../../model/nurseryModel/nurseryStoreTabs');
 const { deleteFolder, deleteResourcesByPrefix, uploadImage } = require('../../utils/uploadImages');
 
 exports.createNurseryProfile = async (req, res, next) => {
@@ -97,7 +97,7 @@ exports.updateNurseryDetail = async (req, res, next) => {
         });
 
         if (!result) {
-            const error = new Error("Nursery detail not found.");
+            const error = new Error("Nursery detail not found.");b
             error.statusCode = 404;
             throw error;
         }
@@ -148,8 +148,9 @@ exports.deleteNurseryDetail = async (req, res, next) => {
             throw error;
         }
 
+        //TODO: Need to see all the delete and update in the transitions query 
         const deleteAllPlants = await plantModel.deleteMany({ user: req.user, nursery: req.nursery }, { session });
-        const deleteNurseryStore = await nurseryStores.deleteMany({ user: req.user, nursery: req.nursery }, { session });
+        const deleteNurseryStore = await nurseryStoresTabs.deleteMany({ user: req.user, nursery: req.nursery }, { session });
 
         if (!deleteAllPlants || !deleteNurseryStore) {
             const error = new Error("Nursery deleted failed.");

@@ -2,7 +2,7 @@ const { default: mongoose } = require('mongoose');
 const { deleteResourcesByPrefix, deleteFolder } = require('../../utils/uploadImages');
 
 const userModel = require('../../model/userModel/user');
-const nurseryStores = require('../../model/nurseryModel/nurseryStore');
+const nurseryStores = require('../../model/nurseryModel/nurseryStoreTabs');
 const plantModel = require('../../model/nurseryModel/plants');
 const nurseryModel = require('../../model/nurseryModel/nursery');
 const addressModel = require('../../model/userModel/address');
