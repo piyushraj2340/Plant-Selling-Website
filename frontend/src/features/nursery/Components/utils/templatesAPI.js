@@ -137,6 +137,31 @@ const twoSectionAndLeftFour = {
 
 export {completeSection, twoSection, fourSection, twoSectionAndRightVertical, twoSectionAndRightFour, twoSectionAndLeftVertical, twoSectionAndLeftFour};
 
+// [
+//     {
+//         _id: "TabId",
+//         tabName: "TabName",
+//         index: 0,
+//         renders: [
+//             {
+//                 _id: "TemplateId",
+//                 templateName: "TemplateName",
+//                 index: 0,
+//                 blocks: [
+//                     {
+//                         index: 0,
+//                         image: {
+//                             public_id: "abcdefghijklmnopqrstuvwxyz",
+//                             url: "http://gist.github.com/",
+//                         },
+//                         url: "localhost:3000",
+//                         title: "testing...."
+//                     }
+//                 ]
+//             }
+//         ]
+//     }
+// ]
 
 
 // {

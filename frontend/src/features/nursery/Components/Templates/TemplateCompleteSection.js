@@ -1,36 +1,58 @@
-import React from 'react'
+import React from 'react';
+import { Tooltip } from 'antd';
+import { useDispatch } from 'react-redux';
+import { nurseryStoreBlockDeleteAsync } from '../../nurserySlice';
 
-const TemplateCompleteSection = ({ content, index, handelDeleteRendersUpload, handleImageUploadNurseryStore }) => {
+const TemplateCompleteSection = ({ content, mergedArrow, setIsModelOpen, setAtBlockIndex, setIsCurrentTemplates, isCurrentTemplates, setIsModelOpenEdit, setIsCurrentBlock }) => {
+
+    const dispatch = useDispatch();
+
+    const handelOpenEditModel = (id) => {
+        setIsModelOpenEdit(true);
+        setIsCurrentTemplates(isCurrentTemplates);
+        setIsCurrentBlock(id);
+    }
+
+    const handelDeleteBlock = (id) => {
+        dispatch(nurseryStoreBlockDeleteAsync(id));
+    }
+
     return (
-        <div>
+
+        <div className='col-12 col-md-11 px-2 px-md-0'>
             {
-                content.images[0].url !== "" ?
+                content.length && content[0].image.url !== "" ?
                     <div className='p-0 template template-images rounded position-relative'>
                         <div className="hover-images w-100 h-100">
-                            <img src={content.images[0].url} className='w-100 img-fluid rounded' alt="template images" />
+                            <a href={content[0].url} target="_blank" rel="noopener noreferrer">
+                                <img src={content[0].image.url} className='w-100 img-fluid rounded' alt={content[0].title} />
+                            </a>
                             <div className="position-absolute images-options">
-                                <span className="fas fa-pen text-primary p-2"></span>
-                                <span className="fas fa-trash text-danger p-2"></span>
+                                <Tooltip placement="bottomRight" title={'Re-Upload Image'} arrow={mergedArrow} onClick={() => {handelOpenEditModel(content[0]._id)}}>
+                                    <span className="fas fa-pen text-primary p-2"></span>
+                                </Tooltip>
+                                <Tooltip placement="bottomRight" title={'Delete Image'} arrow={mergedArrow} onClick={() => handelDeleteBlock(content[0]._id)}>
+                                    <span className="fas fa-trash text-danger p-2"></span>
+                                </Tooltip>
                             </div>
                         </div>
                     </div>
+
                     :
 
 
-                    <div className="template template-header rounded position-relative d-flex justify-content-center align-items-center hover-images">
-                        <label htmlFor={content.images[0]._id} className='cursor-pointer m-0 p-0 w-full h-100 d-flex justify-content-center align-items-center'>
-                            <div className="template-header-complete rounded">
-                                <p><i className='fas fa-images'></i> Upload Images</p>
-                            </div>
-                        </label>
-                        <input type="file" name={content.images[0]._id} id={content.images[0]._id} onChange={(e) => handleImageUploadNurseryStore(e, content._id, content.images[0]._id)} accept="image/png, image/jpeg" hidden />
-                        <div className="position-absolute images-options">
-                            <span className="fas fa-trash text-danger p-2" onClick={() => handelDeleteRendersUpload(index)}></span>
+                    <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
+                        <div className="template template-header-complete rounded bg-secondary w-100">
+                            <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
                         </div>
                     </div>
 
             }
         </div>
+
+
+
+
     )
 }
 

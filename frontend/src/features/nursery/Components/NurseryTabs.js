@@ -1,10 +1,11 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
-import { addNewTabSectionAsync, setIsCurrentTab } from '../nurserySlice';
+import { addNewTabSectionAsync, nurseryStoreBlockGetAllByTabIdAsync, nurseryStoreTemplatesGetAllByTabsIdAsync, setIsCurrentTab } from '../nurserySlice';
+import { message } from 'antd';
 
 const NurseryTabs = () => {
     const nursery = useSelector(state => state.nursery.nursery);
-    const nurseryStore = useSelector(state => state.nursery.nurseryStore);
+    const nurseryStoreRenderTabs = useSelector(state => state.nursery.nurseryStoreTabs);
     const isCurrentTab = useSelector(state => state.nursery.isCurrentTab);
     const dispatch = useDispatch();
 
@@ -31,23 +32,29 @@ const NurseryTabs = () => {
 
     const [tabs, setTabs] = useState("Add new section");
 
-    const handelAddNewSection = async () => {
+    const handelAddNewSection = () => {
         const contentInit = {
             user: nursery.user,
             nursery: nursery._id,
-            tabName: tabs,
-            renders: []
+            tabName: tabs.toString().trim(),
+            index: nurseryStoreRenderTabs.length
         }
 
         if (tabs !== "") {
-            if (nurseryStore.some(content => content.tabName.toLocaleLowerCase() === tabs.toLocaleLowerCase())) {
-                alert("New Section is already exist.");
+            if (nurseryStoreRenderTabs.some(content => content._id.toLocaleLowerCase() === tabs.toLocaleLowerCase())) {
+                message.warning("New Section is already exist.");
             } else {
                 dispatch(addNewTabSectionAsync(contentInit))
             }
         } else {
-            alert("New Section is required.");
+            message.warning("New Section is required.");
         }
+    }
+
+    const handelChangeCurrentTab = (id) => {
+        dispatch(setIsCurrentTab(id));
+        dispatch(nurseryStoreTemplatesGetAllByTabsIdAsync(id));
+        dispatch(nurseryStoreBlockGetAllByTabIdAsync(id));
     }
 
 
@@ -63,8 +70,8 @@ const NurseryTabs = () => {
             <button className={`btn btn-tab bg-light mt-2 ${isCurrentTab === "info" && "viewing border-black"}`} onClick={() => { dispatch(setIsCurrentTab("info")) }}>Nursery Info</button>
 
             {
-                nurseryStore.map((content, index) => {
-                    return <button key={index} className={`btn btn-tab bg-light mt-2 ${isCurrentTab === content.tabName && "viewing border-black"}`} onClick={() => dispatch(setIsCurrentTab(content.tabName))}>{content.tabName}</button>
+                nurseryStoreRenderTabs.map((content, index) => {
+                    return <button key={index} className={`btn btn-tab bg-light mt-2 ${isCurrentTab === content._id && "viewing border-black"}`} onClick={() => handelChangeCurrentTab(content._id)}>{content.tabName}</button>
                 })
             }
 

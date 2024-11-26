@@ -72,3 +72,30 @@ export function handelAddNewPlantToNursery(body) {
     }
     );
 }
+
+
+export function handelFetchDataWithImages(url, method, body) {
+    
+    return new Promise(async (resolve, rejected) => {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}${url}`, {
+                method,
+                body,
+                credentials: 'include'
+            });
+            const data = await response.json();
+
+            if (data.status) {
+                resolve({ data })
+            } else {
+                const error = new Error(data.message);
+                error.statusCode = data.status;
+                rejected(error);
+            }
+        } catch (error) {
+            error.statusCode = false;
+            rejected(error);
+        }
+    }
+    );
+}
