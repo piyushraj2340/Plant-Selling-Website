@@ -1,7 +1,7 @@
 // importing from library
 import { Route, Routes, } from "react-router-dom";
 import React, { createContext, useEffect } from "react";
-import { message } from "antd";
+import { ConfigProvider, message } from "antd";
 
 // importing form styling[sass]  
 import "./Asset/Style/Style.scss"
@@ -139,7 +139,17 @@ function App() {
       <Navigation />
       <ScrollToTop />
       <div style={{ marginTop: "70px" }}>
-        <Routing />
+        <ConfigProvider
+          button={{
+            style: {
+              width: 80,
+              margin: 4,
+            },
+          }}
+        >
+
+          <Routing />
+        </ConfigProvider>
       </div>
       <Footer />
     </>

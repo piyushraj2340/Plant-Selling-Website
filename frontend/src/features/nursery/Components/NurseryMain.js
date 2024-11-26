@@ -3,24 +3,29 @@ import { useDispatch, useSelector } from 'react-redux';
 import TabsViewEditing from './NurseryTab/TabsViewEditing';
 import TabsViewSaved from './NurseryTab/TabsViewSaved';
 import Info from './NurseryTab/Info';
-import { nurseryProfileAsync, nurseryStoreDataAsync } from '../nurserySlice';
+import { nurseryProfileAsync, nurseryStoreDataAsync, nurseryStoreTabsGetAllAsync, nurseryStoreTemplatesGetAllAsync, nurseryStoreBlocksGetAllAsync } from '../nurserySlice';
 import NurseryTabs from './NurseryTabs';
 
 const NurseryMain = ({ isCollapseSideNav }) => {
 
     const nursery = useSelector(state => state.nursery.nursery);
-    const nurseryStore = useSelector(state => state.nursery.nurseryStore);
+    const nurseryStoreTabs = useSelector(state => state.nursery.nurseryStoreTabs);
+    const nurseryStoreTemplates = useSelector(state => state.nursery.nurseryStoreTemplates);
+    const nurseryStoreBlocks = useSelector(state => state.nursery.nurseryStoreBlocks);
     const isCurrentTab = useSelector(state => state.nursery.isCurrentTab);
 
     const dispatch = useDispatch();
 
     useEffect(() => {
         !nursery && dispatch(nurseryProfileAsync());
-        nursery && dispatch(nurseryStoreDataAsync());
+        nursery && dispatch(nurseryStoreTabsGetAllAsync());
     }, []);
 
+    const [nurseryStoreTabsSelected] = nurseryStoreTabs && nurseryStoreTabs.filter(elem => elem._id.toLocaleLowerCase() === isCurrentTab.toLocaleLowerCase());
 
-    const [content] = nurseryStore && nurseryStore.filter(elem => elem.tabName.toLocaleLowerCase() === isCurrentTab.toLocaleLowerCase());
+    //? FILTER_OUT_TEMPLATES_WITH_TABS_ID
+    const content = nurseryStoreTemplates.filter(data => data.nurseryStoreTabs.toLocaleLowerCase() === isCurrentTab.toLocaleLowerCase()).sort((obj1, obj2) => obj1.index - obj2.index);
+
 
     return (
         <div className='nursery-main-content' style={isCollapseSideNav ? { width: 'calc(100% - 58px)' } : { width: '75%' }}>
@@ -30,12 +35,12 @@ const NurseryMain = ({ isCollapseSideNav }) => {
                     <div className="content">
                         {
 
-                            content ?
-                                content.status.toLocaleLowerCase() === "draft" ?
-                                    <TabsViewEditing content={content} />
+                            nurseryStoreTabsSelected ?
+                                nurseryStoreTabsSelected.status.toLocaleLowerCase() === "draft" ?
+                                    <TabsViewEditing content={content} status={nurseryStoreTabsSelected.status} />
                                     :
 
-                                    <TabsViewSaved content={content} />
+                                    <TabsViewSaved content={content} status={nurseryStoreTabsSelected.status} />
                                 :
 
                                 <Info />
