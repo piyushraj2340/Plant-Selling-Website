@@ -67,3 +67,43 @@ exports.resetPasswordSendEmail = async (to, userName, resetLink) => {
   }
 };
 
+
+
+exports.getInTouch = async (to, recipientName, userMessage) => {
+  
+
+  try {
+    // Render the email template
+    const thankyouForContactingUs = await ejs.renderFile(
+      path.join(__dirname, '../../views/thankyouForContactingUs.ejs'),
+      { recipientName }
+    );
+
+    const youHaveNewContactUsMessage = await ejs.renderFile(
+      path.join(__dirname, '../../views/youHaveNewContactUsMessage.ejs'),
+      { recipientName, userEmail: to, userMessage }
+    );
+
+    const thankyouForContactingUsOptions = {
+      from: `"Plant Seller" <${smtpConfig.auth.user}>`, // Sender address
+      to, // List of receivers
+      subject: "Thank you for reaching out to us.", // Subject line
+      html: thankyouForContactingUs, // HTML body
+    };
+
+    const youHaveNewContactUsMessageOptions = {
+      from: `"Plant Seller" <${smtpConfig.auth.user}>`, // Sender address
+      to: "piyushraj2340@gmail.com", // List of receivers
+      subject: "New message from PlantSeller", // Subject line
+      html: youHaveNewContactUsMessage, // HTML body
+    };
+
+    // Send email
+    await transporter.sendMail(thankyouForContactingUsOptions);
+    await transporter.sendMail(youHaveNewContactUsMessageOptions);
+
+    return true
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+};
