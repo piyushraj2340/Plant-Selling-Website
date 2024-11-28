@@ -1502,3 +1502,13 @@ a:hover {
     color: #40916c;
     font-weight: bold;
 }
+
+// contact us form 
+
+.contact-us .rounded-corner {
+    border-radius: 0px;
+
+    @media screen and (min-width: $small) { 
+        border-radius: 6px;
+    }
+}

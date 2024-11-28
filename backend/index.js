@@ -40,6 +40,7 @@ const user = require("./src/router/userRoute/user");
 const cart = require("./src/router/checkoutRoute/cart");
 const address = require("./src/router/userRoute/address");
 const payment = require("./src/router/checkoutRoute/payment");
+const contactUs = require("./src/router/contact");
 
 // route middleware
 
@@ -51,6 +52,7 @@ app.use("/api/v2/checkout", payment);
 
 // public routes
 app.use("/api/v2/products", products);
+app.use("/api/v2", contactUs);
 
 // Error handling middleware
 const errorHandlerMiddleware = require('./src/middleware/errorMiddleware');
