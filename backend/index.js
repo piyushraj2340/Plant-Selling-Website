@@ -44,6 +44,7 @@ const cart = require("./src/router/checkoutRoute/cart");
 const address = require("./src/router/userRoute/address");
 const payment = require("./src/router/checkoutRoute/payment");
 const contactUs = require("./src/router/contact");
+const nurseryPublicStore = require('./src/router/nurseryRoute/nurseryPublicStore');
 
 // route middleware
 
@@ -56,6 +57,7 @@ app.use("/api/v2/checkout", payment);
 // public routes
 app.use("/api/v2/products", products);
 app.use("/api/v2", contactUs);
+app.use("/api/v2/public/nursery", nurseryPublicStore);
 
 // Error handling middleware
 const errorHandlerMiddleware = require('./src/middleware/errorMiddleware');
