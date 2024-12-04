@@ -20,8 +20,8 @@ const LoginPage = () => {
     const handleGetUserData = async () => {
         !user && dispatch(userProfileAsync());
         if (user) {
-            const [redirect, to] = window.location.search && window.location.search.split("=");
-            navigate(redirect === "?redirect" ? to : "/profile");
+            const [redirect, ...to] = window.location.search && window.location.search.split("=");
+            navigate(redirect === "?redirect" ? to.join("=") : "/profile");
             return;
         }
     }
