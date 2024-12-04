@@ -7,6 +7,7 @@ import addressReducer from '../features/address/addressSlice';
 import nurseryReducer from '../features/nursery/nurserySlice';
 import orderReducer from '../features/order/orderSlice';
 import checkoutReducer from '../features/checkout/checkoutSlice';
+import nurseryPublicStoreSlice  from '../features/nursery/nurseryPublicStoreSlice';
 
 export default configureStore({
     reducer: {
@@ -16,6 +17,7 @@ export default configureStore({
         products: productsReducer,
         address: addressReducer,
         nursery: nurseryReducer,
+        nurseryPublicStore: nurseryPublicStoreSlice,
         checkout: checkoutReducer,
         order: orderReducer,
     },
