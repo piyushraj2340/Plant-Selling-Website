@@ -2,7 +2,10 @@ const plantsModel = require('../model/nurseryModel/plants');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
-        const result = await plantsModel.find();
+        const result = await plantsModel.find().populate({
+            path: "nursery",
+            select: "nurseryName _id"  // Select only the fields you need
+        }).select("-user"); // Populate nursery details
 
         const info = {
             status: true,
@@ -42,7 +45,10 @@ exports.getPlantById = async (req, res, next) => {
 exports.getPlantsByCategory = async (req, res, next) => {
     try {
         const category = req.params.id;
-        const result = await plantsModel.find({ category });
+        const result = await plantsModel.find({ category }).populate({
+            path: "nursery",
+            select: "nurseryName _id"  // Select only the fields you need
+        }).select("-user"); // Populate nursery details
 
         const info = {
             status: true,
