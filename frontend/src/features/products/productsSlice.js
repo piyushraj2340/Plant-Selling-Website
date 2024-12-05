@@ -26,6 +26,11 @@ export const getProductAsync = createAsyncThunk('products/fetchProduct', async (
     return response.data;
 });
 
+export const searchProductsAsync = createAsyncThunk('products/search', async ({search, category}) => {
+    const response = await handelDataFetch(`/api/v2/products/search/plants/?search=${search}&category=${(typeof category === 'string' && category.length > 0) ? category: 'all'}`, 'GET');
+    return response.data;
+});
+
 export const productsSlice = createSlice({
     name: 'products',
     initialState,
@@ -58,6 +63,14 @@ export const productsSlice = createSlice({
                 state.isLoading = false;
                 state.product = action.payload.result;
             }).addCase(getProductAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(searchProductsAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(searchProductsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.products = action.payload.result;
+            }).addCase(searchProductsAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             })
