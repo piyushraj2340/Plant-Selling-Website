@@ -1,8 +1,55 @@
-import React from 'react';
+import { message } from 'antd';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
     const logoImg = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/plant_seller_bg_none";
+
+    const [email, setEmail] = useState("");
+
+    // Handle form submission
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+
+        // Check if the email is empty
+        if (email.trim() === "") {
+            message.error('Email address is required.');
+            return;
+        }
+
+        // Optional: You can also check if the email format is valid using regex
+        const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+        if (!emailRegex.test(email)) {
+            message.error('Please enter a valid email address.');
+            return;
+        }
+
+        // Show loading message
+        message.info('Sending...');
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}/api/v2/subscriber-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ email }),
+            });
+
+            if (response.ok) {
+                setEmail(""); // Clear the input field after success
+                const responseData = await response.json();
+                message.success(responseData.message || 'Subscribed successfully!');
+            } else {
+                const errorData = await response.json();
+                console.error(errorData);
+                message.error(errorData.message || 'Unable to add your email to the newsletter.');
+            }
+        } catch (error) {
+            console.error(error);
+            message.error(`Error: ${error.message}`);
+        }
+    };
 
     return (
         <footer className="text-light bg-dark p-4 p-md-5 footer-container">
@@ -28,16 +75,16 @@ const Footer = () => {
                                         Plants
                                     </h6>
                                     <p>
-                                        <Link to="#" className="text-reset">Flowering</Link>
+                                        <Link to="/products/?category=flowering-plants" className="text-reset">Flowering</Link>
                                     </p>
                                     <p>
-                                        <Link to="#" className="text-reset">Medicinal</Link>
+                                        <Link to="/products/?category=medicinal-plants" className="text-reset">Medicinal</Link>
                                     </p>
                                     <p>
-                                        <Link to="#" className="text-reset">Ornamental</Link>
+                                        <Link to="/products/?category=ornamental-plants" className="text-reset">Ornamental</Link>
                                     </p>
                                     <p>
-                                        <Link to="#" className="text-reset">Indoor</Link>
+                                        <Link to="/products/?category=indoor-plants" className="text-reset">Indoor</Link>
                                     </p>
                                 </div>
                                 <div className="d-flex flex-column align-items-start pe-3">
@@ -45,22 +92,22 @@ const Footer = () => {
                                         Useful links
                                     </h6>
                                     <p>
-                                        <Link to="#" className="text-reset">Nursery</Link>
+                                        <Link to="/privacy-policy" className="text-reset">Privacy</Link>
                                     </p>
                                     <p>
-                                        <Link to="#" className="text-reset">Settings</Link>
+                                        <Link to="/FAQ" className="text-reset">FAQ</Link>
                                     </p>
                                     <p>
-                                        <Link to="#" className="text-reset">Orders</Link>
+                                        <Link to="/help" className="text-reset">Help</Link>
                                     </p>
                                     <p>
-                                        <Link to="#" className="text-reset">Help</Link>
+                                        <Link to="/contact-us" className="text-reset">Contact</Link>
                                     </p>
                                 </div>
                                 <div className="d-flex flex-column align-items-start pe-3">
 
                                     <h6 className="text-uppercase fw-bold mb-4">Contact Us</h6>
-                                    <p><i className="far fa-address-card me-3 text-secondary"></i> Mohali, Punjab, India.</p>
+                                    <p><i className="far fa-address-card me-3 text-secondary"></i>Aurangabad, Bihar, India.</p>
                                     <p>
                                         <Link to="mailto:piyushraj2340@gmail.com" className='text-light'>
                                             <i className="fas fa-envelope me-3 text-secondary"></i>
@@ -81,22 +128,29 @@ const Footer = () => {
                 </section>
 
                 <section className="">
-                    <form>
-                        <div className="d-flex flex-column">
-                            <div className="mt-3">
-                                <p className='m-0'>Subscribe to our newsletter</p>
+                    <form onSubmit={handleSubmit}>
+                        <div className='row g-0'>
+                            <div className="mb-2 col-xs-12 col-sm-10 pe-1">
+                                <input
+                                    type="email"
+                                    id="sub-email"
+                                    className="form-control"
+                                    placeholder="Email address"
+                                    value={email} // Bind email input to state
+                                    onChange={(e) => setEmail(e.target.value)} // Update email state on change
+                                    required // Optional but can be used for front-end validation
+                                />
                             </div>
-                            <div className="mb-2">
-                                <input type="email" id="sub-email" className="form-control" placeholder='Email address' />
-                            </div>
-                            <div className="mb-2">
-                                <button type="submit" className="btn btn-success mb-4">Subscribe</button>
+                            <div className="mb-2 col-xs-12 col-sm-2">
+                                <button type="submit" className="btn btn-success mb-4 w-100">
+                                    Subscribe
+                                </button>
                             </div>
                         </div>
                     </form>
                 </section>
 
-                <section className="d-flex flex-column justify-content-center justify-content-lg-between">
+                <section className="d-flex flex-column justify-content-center justify-content-lg-between mb-2">
                     <div className="mb-2">
                         <span>connected with us on social networks:</span>
                     </div>
@@ -118,9 +172,12 @@ const Footer = () => {
                         </Link>
                     </div>
                 </section>
-                <div className="text-center p-4" style={{ backgroundColor: "rgba(0, 0, 0, 0.025)" }}>
-                    © 2021 Copyright:
-                    <Link className="text-reset fw-bold" to="/"> https://plantseller.vercel.app</Link>
+                <div className="text-center" style={{ backgroundColor: "rgba(0, 0, 0, 0.025)" }}>
+                    <p className='text-left'>
+                        <span>&copy; 2021-2024</span>
+                        <Link className="text-reset fw-bold" to="/"> PlantSeller</Link>
+                        <span> All rights reserved.</span>
+                    </p>
                 </div>
             </div>
         </footer>
