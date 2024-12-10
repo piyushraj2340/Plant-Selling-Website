@@ -3,6 +3,7 @@ import { Rating } from 'react-simple-star-rating';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllProductsAsync, getProductsByCategoryAsync, searchProductsAsync } from '../productsSlice';
+import { transformImageUrl } from '../../../utils/imageUtils';
 
 const Products = () => {
     const products = useSelector((state) => state.products.products);
@@ -74,7 +75,7 @@ const Products = () => {
                             <div key={elem._id} className="px-1 d-flex center-text overflow-hidden">
                                 <Link className='text-dark' style={{ textDecoration: "none" }} to={`/product/${elem._id}`}>
                                     <div className="card my-1">
-                                        <img className="img-fluid" src={elem.images[0].url} alt="Card plants" />
+                                        <img className="img-fluid" src={transformImageUrl(elem.images[0].url)} alt="Card plants" />
                                         <div className="card-body">
                                             <h4 className="card-title">{elem.plantName}</h4>
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>price</p>
