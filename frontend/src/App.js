@@ -48,6 +48,9 @@ import UserVerificationEmailSent from "./pages/UserVerificationEmailSent";
 import UserVerificationConfirmAccount from "./pages/UserVerificationConfirmAccount";
 import ResetYourPasswordPage from "./pages/ResetYourPasswordPage";
 import PasswordResetEmailSentPage from "./pages/PasswordResetEmailSentPage";
+import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
+import FAQPage from "./pages/FAQPage";
+import HelpPage from "./pages/HelpPage";
 
 
 
@@ -91,6 +94,10 @@ const Routing = () => {
 
       <Route path="/orders/history" element={<OrderHistoryPages />} />
       <Route path="/orders/details/:id" element={<OrderDetailsPages />} />
+
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/FAQ" element={<FAQPage />} />
+      <Route path="/help" element={<HelpPage />} />
 
       <Route path="*" element={<PageNotFound />} />
     </Routes>
