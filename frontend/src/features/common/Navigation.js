@@ -76,6 +76,7 @@ const Navigation = () => {
         const categoryString = selectedCategories.join(',') || 'all';
         const query = `/products/?search=${encodeURIComponent(searchKeyword)}&category=${encodeURIComponent(categoryString)}`;
         if (searchKeyword.trim()) {
+            setNavBarToggle(false);
             navigate(query);
         } else {
             message.error('Empty search keyword');
