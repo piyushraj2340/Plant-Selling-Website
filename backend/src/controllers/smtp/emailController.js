@@ -107,3 +107,39 @@ exports.getInTouch = async (to, recipientName, userMessage) => {
     console.error('Error sending email:', error);
   }
 };
+
+
+exports.emailSubscriber = async (to) => {
+  try {
+    // Render the email template
+    const thankyouForSubscribingUs = await ejs.renderFile(
+      path.join(__dirname, '../../views/thankyouForSubscribingUs.ejs'));
+
+    const youHaveNewSubscriber = await ejs.renderFile(
+      path.join(__dirname, '../../views/youHaveNewSubscriber.ejs'),
+      { subscriberEmail : to }
+    );
+
+    const thankyouForSubscribingUsOptions = {
+      from: `"Plant Seller" <${smtpConfig.auth.user}>`, // Sender address
+      to, // List of receivers
+      subject: "Thank You for Subscribing!", // Subject line
+      html: thankyouForSubscribingUs, // HTML body
+    };
+
+    const youHaveNewSubscriberOptions = {
+      from: `"Plant Seller" <${smtpConfig.auth.user}>`, // Sender address
+      to: "piyushraj2340@gmail.com", // List of receivers
+      subject: "New subscriber from PlantSeller", // Subject line
+      html: youHaveNewSubscriber, // HTML body
+    };
+
+    // Send email
+    await transporter.sendMail(thankyouForSubscribingUsOptions);
+    await transporter.sendMail(youHaveNewSubscriberOptions);
+
+    return true
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+};
