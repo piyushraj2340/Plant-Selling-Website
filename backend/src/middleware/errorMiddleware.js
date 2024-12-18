@@ -4,9 +4,14 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     let statusCode = err.statusCode || 500;
     let message = err.message || 'Internal Server Error';
 
-    if(err.name === "TokenExpiredError" || err.name === "JsonWebTokenError") {
+    if(err.name === "TokenExpiredError") {
         message = "Authentication Failed";
         statusCode = 401;
+    }
+
+    if(err.name === "JsonWebTokenError") {
+        message = "Authentication Failed";
+        statusCode = 403;
     }
 
     if(err.name === "ValidationError") {
@@ -29,6 +34,10 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     const info = {
         status: false,
         message
+    }
+
+    if(statusCode === 401) {
+        info.code = 'TOKEN_EXPIRED';
     }
 
     res.status(statusCode).json(info);

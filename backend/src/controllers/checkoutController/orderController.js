@@ -169,10 +169,11 @@ exports.confirmOrderPayment = async (req, res, next) => {
 
         //* CLEANUP_TASK:: REMOVE THE ORDER_SESSION
         //? remove the order auth session
-        res.clearCookie('orderSession', {
-            sameSite: 'none',
-            secure: true
-        });
+        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
+        // res.clearCookie('orderSession', {
+        //     sameSite: 'none',
+        //     secure: true
+        // });
 
         await session.commitTransaction();
         const info = {
