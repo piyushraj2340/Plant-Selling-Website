@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import handelDataFetch from '../../utils/handelDataFetch';
 import { message } from 'antd';
 import { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthStore, userAccountVerificationAuthStore, validateVerificationTokenAuthStore, validatePasswordResetTokenAuthStore, validatePasswordResetAuthStore } from './Components/utils/authHelper';
+import localStorageUtil from '../../utils/localStorage';
 
 const initialState = {
     userAuthCheck: null,
@@ -93,6 +94,9 @@ export const authSlice = createSlice({
 
                 trueAuthCheckResetAuthStore(state);
 
+                localStorageUtil.setData("accessToken", action.payload.token.accessToken);
+                localStorageUtil.setData("refreshToken", action.payload.token.refreshToken);
+
                 message.success(action.payload.message)
 
             }).addCase(userLoginAsync.rejected, (state, action) => {
@@ -140,6 +144,10 @@ export const authSlice = createSlice({
                 //* FULFILLED: USER_LOGOUT
 
                 resetToDefaultAuthStore(state);
+
+                localStorageUtil.removeData("refreshToken");
+                localStorageUtil.removeData("accessToken");
+                localStorageUtil.removeData("orderToken");
 
                 message.success(action.payload.message);
 

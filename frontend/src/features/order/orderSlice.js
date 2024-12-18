@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { message } from "antd";
 import handelDataFetch from "../../utils/handelDataFetch";
 import { userLogoutAsync } from "../auth/authSlice";
+import localStorageUtil from "../../utils/localStorage";
 
 const initialState = {
     orderHistory: [],
@@ -107,6 +108,8 @@ export const orderSlice = createSlice({
 
                 state.error = null;
                 state.isLoading = false;
+
+                localStorageUtil.removeData("orderToken");
 
                 action.payload.navigate("/orders/history");
 

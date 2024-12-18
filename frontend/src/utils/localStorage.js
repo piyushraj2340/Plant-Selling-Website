@@ -24,6 +24,17 @@ const localStorageUtil = {
 
         // If data exists, parse it and return the object, otherwise return null
         return storedData ? JSON.parse(storedData) : null;
+    },
+    
+    // Remove data from localStorage
+    removeData(key) {
+        if (!key || typeof key !== 'string') {
+            console.error('Invalid key provided');
+            return;
+        }
+
+        // Remove item from localStorage
+        localStorage.removeItem(key);
     }
 };
 
