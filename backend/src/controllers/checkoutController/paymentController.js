@@ -23,17 +23,18 @@ exports.createOrderSession = async (req, res, next) => {
         
 
         // Set cookie with JWT token
-        res.cookie('orderSession', token, {
-            expires: new Date(Date.now() + 1000 * 60 * 30), // 30 minutes
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
+        // res.cookie('orderSession', token, {
+        //     expires: new Date(Date.now() + 1000 * 60 * 30), // 30 minutes
+        //     httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'none'
+        // });
 
         // Send success response
         const info = {
             status: true,
-            message: "Successfully added the cart or product info."
+            message: "Successfully added the cart or product info.",
+            orderToken: token
         };
         res.status(200).send(info);
     } catch (error) {

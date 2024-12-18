@@ -5,6 +5,7 @@ const bcryptjs = require('bcryptjs');
 const validator = require('validator');
 
 const jwt = require('jsonwebtoken');
+const { encryptMessage } = require('../../utils/cryptoUtil');
 
 
 const userSchema = new mongoose.Schema({
@@ -85,10 +86,15 @@ const userSchema = new mongoose.Schema({
 // generating the JWT Tokens 
 userSchema.methods.generateAuthToken = async function () {
     try {
-        const token = jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY, { expiresIn: "6h" });
-        this.tokens = this.tokens.concat({ token });
+        // generate the access token
+        const accessToken = jwt.sign({_id: this._id.toString()}, process.env.ACCESS_SECRET_KEY, { expiresIn: "15m" });
+
+        // generate the refresh token 
+        const refreshToken = jwt.sign({ _id: this._id.toString() }, process.env.REFRESH_SECRET_KEY, { expiresIn: "7d" });
+        this.tokens = this.tokens.concat({ token: refreshToken });
         await this.save();
-        return token;
+
+        return { refreshToken: encryptMessage(refreshToken), accessToken};
     } catch (err) {
         console.log(err);
     }

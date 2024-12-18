@@ -1,8 +1,10 @@
 const userModel = require('../model/userModel/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken } = require('../utils/generateToken');
-const { setData, deleteData } = require('../utils/redisVercelKv');
+const { setData, deleteData, getData } = require('../utils/redisVercelKv');
 const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
+const jwt = require('jsonwebtoken');
+const { decryptMessage } = require('../utils/cryptoUtil');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
@@ -33,7 +35,7 @@ exports.signUp = async (req, res, next) => {
             status: true,
             message: "User Account successfully created, and need to verify you email address",
             result: {
-                email : newUser.email
+                email: newUser.email
             }
         }
 
@@ -103,6 +105,17 @@ exports.signIn = async (req, res, next) => {
         //* Generate Auth Token
         const token = await result.generateAuthToken();
 
+        const { encryptedMessage, iv } = token.refreshToken;
+
+        if (!encryptedMessage || !iv) {
+            const error = new Error("Failed to generate refresh token");
+            error.statusCode = 500;
+            throw error;
+        }
+
+        //* Save the IV in redis database with expire time 7.
+        await setData('authentication', encryptedMessage, 'refreshToken', { iv }, 604800); // 7d = 7 * 24 * 60 * 60
+
         //* extracting data from result
         const userInfo = { ...result._doc };
 
@@ -112,17 +125,22 @@ exports.signIn = async (req, res, next) => {
         delete userInfo.__v;
 
         //* setting the cookie into the browser 
-        res.cookie('auth', token, {
-            expires: new Date(Date.now() + 50000000),
-            httpOnly: true,
-            secure: true,
-            sameSite: 'none'
-        });
+        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
+        // res.cookie('auth', token, {
+        //     expires: new Date(Date.now() + 50000000),
+        //     httpOnly: true,
+        //     secure: true,
+        //     sameSite: 'none'
+        // });
 
         const info = {
             status: true,
             message: "Login Successful",
-            result: userInfo
+            result: userInfo,
+            token: {
+                accessToken: token.accessToken,
+                refreshToken: encryptedMessage
+            }
         }
 
         res.status(200).send(info);
@@ -137,7 +155,7 @@ exports.logout = async (req, res, next) => {
         const result = await userModel.findByIdAndUpdate(req.user, {
             $pull: {
                 tokens: {
-                    token: req.token
+                    token: req.token //? Remove the refresh token so that it get invalid after that...
                 }
             }
         });
@@ -150,16 +168,18 @@ exports.logout = async (req, res, next) => {
         }
 
         //* remove the auth session cookie
-        res.clearCookie('auth', {
-            sameSite: 'none',
-            secure: true
-        });
+        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
+        // res.clearCookie('auth', {
+        //     sameSite: 'none',
+        //     secure: true
+        // });
 
         //* remove the order auth session
-        res.clearCookie('orderSession', {
-            sameSite: 'none',
-            secure: true
-        });
+        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
+        // res.clearCookie('orderSession', {
+        //     sameSite: 'none',
+        //     secure: true
+        // });
 
         const info = {
             status: true,
@@ -243,5 +263,84 @@ exports.resetUserPassword = async (req, res, next) => {
 
     } catch (error) {
         next(error); //! Pass the error to the global error middleware
+    }
+}
+
+
+exports.refreshToken = async (req, res, next) => {
+    try {
+        const { refreshToken } = req.body;
+
+        if (!refreshToken) {
+            const error = new Error("Authentication failed!");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const getIv = await getData("authentication", refreshToken, "refreshToken");
+
+        if (!getIv) {
+            const error = new Error("Authentication failed!");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const decryptedToken = decryptMessage(refreshToken, getIv.iv);
+
+        await deleteData("authentication", refreshToken, "refreshToken");
+
+        if (!decryptedToken) {
+            const error = new Error("Authentication failed!");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const verifyUser = jwt.verify(decryptedToken, process.env.REFRESH_SECRET_KEY);
+
+        if (!verifyUser) {
+            const error = new Error("Authentication failed!");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const user = await userModel.findOne({ _id: verifyUser._id }).select({ tokens: 1 });
+
+        if (!user) {
+            const error = new Error("Authentication failed!");
+            error.statusCode = 403;
+            throw error;
+        }
+
+
+        //* Match the token with the database...
+        if (!user.tokens.some(t => t.token === decryptedToken)) {
+            const error = new Error("Authentication failed!");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        user.tokens = user.tokens.filter(t => t.token !== decryptedToken);
+        
+
+        //* Generate Auth Token
+        const token = await user.generateAuthToken();
+
+        const { encryptedMessage, iv } = token.refreshToken;
+
+        await setData("authentication", encryptedMessage, "refreshToken", { iv }, 604800); // 7d = 7 * 24 * 60 * 60
+
+        const info = {
+            status: true,
+            message: "New Token Generated!",
+            token: {
+                accessToken: token.accessToken,
+                refreshToken: encryptedMessage
+            }
+        }
+
+        return res.status(200).send(info);
+
+    } catch (error) {
+        next(error); //! Pass the error to the
     }
 }
