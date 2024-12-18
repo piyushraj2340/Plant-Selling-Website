@@ -3,6 +3,7 @@ import handelDataFetch from "../../utils/handelDataFetch";
 import { message } from "antd";
 import { getProductAsync } from "../products/productsSlice";
 import { userLogoutAsync } from "../auth/authSlice";
+import localStorageUtil from "../../utils/localStorage";
 
 const initialState = {
     shipping: null,
@@ -70,6 +71,12 @@ export const checkoutSlice = createSlice({
 
                 state.error = null;
                 state.isLoading = false;
+
+                localStorageUtil.setData("orderToken", action.payload.result.orderToken)
+
+                console.log(action);
+                
+                
 
                 state.shipping = action.payload.data.shippingInfo;
                 action.payload.navigate(action.payload.redirect);
