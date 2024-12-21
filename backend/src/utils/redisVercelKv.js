@@ -6,7 +6,7 @@ async function getData(userId, orderToken, key) {
 
         if (!result) {
             const error = new Error(`Data from redis not found: key - ${key}`);
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 

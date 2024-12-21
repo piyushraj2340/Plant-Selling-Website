@@ -89,7 +89,7 @@ exports.getShippingInfo = async (req, res, next) => {
 
         if (!result) {
             const error = new Error("Order Session is expired! Please try again.");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -124,7 +124,7 @@ exports.confirmOrder = async (req, res, next) => {
         // Check if any of the required data is missing
         if (!cartOrProductInfo || !shippingInfo || !pricing) {
             const error = new Error("Order Session is expired! Please try again.");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -159,7 +159,7 @@ exports.processPayment = async (req, res, next) => {
         // Check if shipping info and pricing exist
         if (!shippingInfo || !pricing) {
             const error = new Error("Invalid Order Session.");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -242,7 +242,7 @@ exports.getStripePublicKey = async (req, res, next) => {
                 status: false,
                 message: "Authentication Failed"
             }
-            res.status(401).send(info);
+            res.status(403).send(info);
         }
     } catch (error) {
         // Pass error to error handling middleware

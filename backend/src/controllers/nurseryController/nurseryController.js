@@ -54,7 +54,7 @@ exports.getNurseryDetail = async (req, res, next) => {
     try {
         if (!req.nursery || !req.role.includes('seller')) {
             const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -82,7 +82,7 @@ exports.updateNurseryDetail = async (req, res, next) => {
     try {
         if (!req.nursery || !req.role.includes('seller')) {
             const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -121,7 +121,7 @@ exports.deleteNurseryDetail = async (req, res, next) => {
 
         if (!req.role.includes("seller") || !req.nursery) {
             const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -186,7 +186,7 @@ exports.uploadNurseryImage = async (req, res, next) => {
     try {
         if (!req.role.includes("seller") || !req.nursery) {
             const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -253,7 +253,7 @@ exports.getNurseryImages = async (req, res, next) => {
     try {
         if (!req.role.includes("seller") || !req.nursery) {
             const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -282,7 +282,7 @@ exports.updateNurseryImages = async (req, res, next) => {
     try {
         if (!req.role.includes("seller") || !req.nursery) {
             const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -324,7 +324,7 @@ exports.deleteNurseryImage = async (req, res, next) => {
     try {
         if (!req.role.includes("seller") || !req.nursery) {
             const error = new Error("You are not allowed to access this route");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 

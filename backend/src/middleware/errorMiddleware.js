@@ -36,7 +36,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
         message
     }
 
-    if(statusCode === 401) {
+    if(err.name === "TokenExpiredError" || statusCode === 401) {
         info.code = 'TOKEN_EXPIRED';
     }
 

@@ -34,7 +34,7 @@ export function handelImageUploadNurseryHeader(image) {
             });
             const data = await response.json();
 
-            if (response.status === 401 && data.code === 'TOKEN_EXPIRED') {
+            if (data.code === 'TOKEN_EXPIRED' || response.status === 401) {
                 console.warn("Access token expired. Attempting to refresh...");
 
                 // If a refresh is already in progress, queue this request
@@ -109,7 +109,7 @@ export function handelImageUploadNurseryStore(imageId, body) {
             });
             const data = await response.json();
 
-            if (response.status === 401 && data.code === 'TOKEN_EXPIRED') {
+            if (data.code === 'TOKEN_EXPIRED' || response.status === 401) {
                 console.warn("Access token expired. Attempting to refresh...");
 
                 // If a refresh is already in progress, queue this request
@@ -182,7 +182,7 @@ export function handelAddNewPlantToNursery(body) {
             });
             const data = await response.json();
 
-            if (response.status === 401 && data.code === 'TOKEN_EXPIRED') {
+            if (data.code === 'TOKEN_EXPIRED' || response.status === 401) {
                 console.warn("Access token expired. Attempting to refresh...");
 
                 // If a refresh is already in progress, queue this request
@@ -257,7 +257,7 @@ export function handelFetchDataWithImages(url, method, body) {
             });
             const data = await response.json();
 
-            if (response.status === 401 && data.code === 'TOKEN_EXPIRED') {
+            if (data.code === 'TOKEN_EXPIRED' || response.status === 401) {
                 console.warn("Access token expired. Attempting to refresh...");
 
                 // If a refresh is already in progress, queue this request

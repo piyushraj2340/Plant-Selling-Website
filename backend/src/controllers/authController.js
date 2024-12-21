@@ -57,7 +57,7 @@ exports.signIn = async (req, res, next) => {
         //! If Email is not found
         if (!result) {
             const error = new Error("Login Failed");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -67,7 +67,7 @@ exports.signIn = async (req, res, next) => {
         //! Password not matched
         if (!isPassMatch) {
             const error = new Error("Login Failed");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -99,7 +99,7 @@ exports.signIn = async (req, res, next) => {
                 message: "You need to verify your account",
             }
 
-            return res.status(401).send(info);
+            return res.status(403).send(info);
         }
 
         //* Generate Auth Token
@@ -198,7 +198,7 @@ exports.checkUser = async (req, res, next) => {
 
         if (!result) {
             const error = new Error("Authentication Failed");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
