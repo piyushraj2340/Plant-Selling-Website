@@ -45,7 +45,7 @@ const handelDataFetchCheckout = async (path, method, body) => { // callback func
         const data = await res.json();
 
         // Handle Token Expiry
-        if (res.status === 401 && data.code === 'TOKEN_EXPIRED') {
+        if (data.code === 'TOKEN_EXPIRED' || res.status === 401) {
             console.warn("Access token expired. Attempting to refresh...");
 
             // If a refresh is already in progress, queue this request

@@ -16,7 +16,7 @@ exports.getUserProfile = async (req, res, next) => {
         //! If the user does not exist
         if (!result) {
             const error = new Error("Authentication Failed");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -264,7 +264,7 @@ exports.ResetPassword = async (req, res, next) => {
             await deleteData('root', token, 'resetPassword');
 
             const error = new Error("You are not verified, you may need to re-try");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
@@ -321,7 +321,7 @@ exports.verifyUser = async (req, res, next) => {
             await deleteData('root', token, 'verifyUser');
 
             const error = new Error("You are not verified, you may need to re-try");
-            error.statusCode = 401;
+            error.statusCode = 403;
             throw error;
         }
 
