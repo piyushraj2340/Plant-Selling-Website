@@ -1,10 +1,11 @@
 const userModel = require('../model/userModel/user');
 const bcryptjs = require('bcryptjs');
-const { generateUniqueLinkWithToken } = require('../utils/generateToken');
+const { generateUniqueLinkWithToken, generateToken, generateSecureOTP } = require('../utils/generateToken');
 const { setData, deleteData, getData } = require('../utils/redisVercelKv');
-const { confirmAccountSendEmail, resetPasswordSendEmail } = require('./smtp/emailController');
+const { confirmAccountSendEmail, resetPasswordSendEmail, sendOTP } = require('./smtp/emailController');
 const jwt = require('jsonwebtoken');
 const { decryptMessage } = require('../utils/cryptoUtil');
+const user = require('../model/userModel/user');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
@@ -78,7 +79,7 @@ exports.signIn = async (req, res, next) => {
             const { token, link } = generateUniqueLinkWithToken("account/verificationConfirmation");
 
             //* Save the token in redis database with expire time 15 min.
-            await setData('root', token, 'verifyUser', { userId: result.id }, 900);
+            await setData('root', token, 'verifyUser', { userId: result.id }, 900); // 60sec * 15min = 900sec
 
             //* Send Email with smtp to activate user account
             const isEmailSent = await confirmAccountSendEmail(result.email, result.name, link);
@@ -97,6 +98,40 @@ exports.signIn = async (req, res, next) => {
             const info = {
                 status: false,
                 message: "You need to verify your account",
+                code: "VerifyUser",
+            }
+
+            return res.status(403).send(info);
+        }
+
+        if (result.isTwoFactorAuthEnabled) {
+            //* Generate unique token and link for email verification
+            const token = generateToken();
+
+            const otp = generateSecureOTP();
+
+            //* Save the token in redis database with expire time 15 min.
+            await setData('root', token, 'TwoFactorAuthEnabled', { otp, userId: result._id }, 120); // 60sec * 15min = 900sec
+
+            //* Send Email with smtp to activate user account
+            const isEmailSent = await sendOTP(result.email, result.name, otp);
+
+            if (!isEmailSent) {
+
+                //* Deleting the token from the redis database
+                await deleteData('root', token, 'TwoFactorAuthEnabled');
+
+                const error = new Error("Failed to send otp email verification");
+                error.statusCode = 500;
+                throw error;
+            }
+
+
+            const info = {
+                status: false,
+                message: "two factor authentication needed",
+                code: "TwoFactorAuth",
+                token
             }
 
             return res.status(403).send(info);
@@ -320,7 +355,7 @@ exports.refreshToken = async (req, res, next) => {
         }
 
         user.tokens = user.tokens.filter(t => t.token !== decryptedToken);
-        
+
 
         //* Generate Auth Token
         const token = await user.generateAuthToken();
@@ -342,5 +377,193 @@ exports.refreshToken = async (req, res, next) => {
 
     } catch (error) {
         next(error); //! Pass the error to the
+    }
+}
+
+
+exports.validateOtp = async (req, res, next) => {
+    const { token } = req.params;
+
+    try {
+
+        //! Token does not exist
+        if (!token) {
+            const error = new Error("Invalid Token Parameters");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //^ Get data form the redis database
+        const otpData = await getData('root', token, 'TwoFactorAuthEnabled');
+
+        //! User does not exist in the redis db or the user token got expired after few minutes 
+        if (!otpData) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //* Getting Data from the form body
+        const { otp } = req.body;
+
+        if (!otp) {
+            const error = new Error("Otp Parameter Missing");
+            error.statusCode = 405;
+            throw error;
+        }
+
+        if (otp.toString() !== otpData.otp.toString()) {
+            const error = new Error("Otp does not match");
+            error.statusCode = 405;
+            throw error;
+        }
+
+        //^ Checking if the user exists in the mongodb database
+        const user = await userModel.findOne({ _id: otpData.userId });
+        // const user = await userModel.findOne({_id: otpData.userId}).select({ password: 0, tokens: 0, __v: 0 });
+
+        //! If User does not exist 
+        if (!user) {
+
+            //* Deleting the token from the redis database
+            await deleteData('root', token, 'TwoFactorAuthEnabled');
+
+            const error = new Error("You are not verified, you may need to re-try");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        //* extracting data from result
+        const userInfo = { ...user._doc };
+
+        //! deleting the confidential data  before sending
+        delete userInfo.password;
+        delete userInfo.tokens;
+        delete userInfo.__v;
+
+        //* Deleting the token from the redis database
+        await deleteData('root', token, 'TwoFactorAuthEnabled');
+
+        //* Generate Auth Token
+        const authToken = await user.generateAuthToken();
+
+        console.log("authToken", authToken);
+
+
+        const { encryptedMessage, iv } = authToken.refreshToken;
+
+        if (!encryptedMessage || !iv) {
+            const error = new Error("Failed to generate refresh token");
+            error.statusCode = 500;
+            throw error;
+        }
+
+        //* Save the IV in redis database with expire time 7.
+        await setData('authentication', encryptedMessage, 'refreshToken', { iv }, 604800); // 7d = 7 * 24 * 60 * 60
+
+        const info = {
+            status: true,
+            message: "Verification Completed successfully",
+            result: userInfo,
+            token: {
+                accessToken: authToken.accessToken,
+                refreshToken: encryptedMessage
+            }
+        }
+
+        res.status(200).send(info);
+    } catch (error) {
+        next(error); //! Pass the error to the error handling middleware
+    }
+}
+
+
+exports.validateOtpToken = async (req, res, next) => {
+    const { token } = req.params;
+
+    try {
+
+        //! Token does not exist
+        if (!token) {
+            const error = new Error("Invalid Token Parameters");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //^ Get data form the redis database
+        const otpData = await getData('root', token, 'TwoFactorAuthEnabled');
+
+        //! User does not exist in the redis db or the user token got expired after few minutes 
+        if (!otpData) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const info = {
+            status: true,
+            message: "Valid TwoFactor Authentication Token",
+        }
+
+        res.status(200).send(info);
+    } catch (error) {
+        next(error); //! Pass the error to the error handling middleware
+    }
+}
+
+
+exports.resendOtp = async (req, res, next) => {
+    const { token } = req.params;
+
+    try {
+        //! Token does not exist
+        if (!token) {
+            const error = new Error("Invalid Token Parameters");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        //^ Get data form the redis database
+        const otpData = await getData('root', token, 'TwoFactorAuthEnabled');
+
+        //! User does not exist in the redis db or the user token got expired after few minutes 
+        if (!otpData) {
+            const error = new Error("Token Expired or does not exist");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const result = await user.findById(otpData.userId);
+
+        const otp = generateSecureOTP();
+
+        //* Save the token in redis database with expire time 15 min.
+        await setData('root', token, 'TwoFactorAuthEnabled', { otp, userId: result._id }, 120); // 60sec * 15min = 900sec
+
+        //* Send Email with smtp to activate user account
+        const isEmailSent = await sendOTP(result.email, result.name, otp);
+
+        if (!isEmailSent) {
+
+            //* Deleting the token from the redis database
+            await deleteData('root', token, 'TwoFactorAuthEnabled');
+
+            const error = new Error("Failed to send otp email verification");
+            error.statusCode = 500;
+            throw error;
+        }
+
+
+        const info = {
+            status: false,
+            message: "Otp Resend Successfully",
+            code: "TwoFactorAuth",
+            token
+        }
+
+        return res.status(200).send(info);
+
+    } catch (error) {
+        next(error); //! Pass the error to the error handling middleware
     }
 }

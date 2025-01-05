@@ -46,6 +46,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isTwoFactorAuthEnabled: {
+        type: Boolean,
+        default: false
+    },
     avatar: {
         public_id: {
             type: String,

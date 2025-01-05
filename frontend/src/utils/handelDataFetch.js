@@ -94,7 +94,7 @@ const handelDataFetch = async (path, method, body) => {
 
                 let bearer = `Bearer ${accessToken}`;
 
-                if(path.startsWith("/api/v2/checkout") || orderToken) {
+                if (path.startsWith("/api/v2/checkout") || orderToken) {
                     bearer = `Bearer ${accessToken} orderToken ${orderToken}`;
                 }
 
@@ -156,6 +156,10 @@ const handelDataFetch = async (path, method, body) => {
                         isRefreshing = false;
                         throw error; // Handle token refresh failure (e.g., redirect to login)
                     }
+                }
+
+                if (data.code) {
+                    return resolve({ data });
                 }
 
                 if (data.status) {

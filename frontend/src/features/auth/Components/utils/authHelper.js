@@ -10,6 +10,10 @@ const loadingRestAuthStore = (state) => {
     //^ Reset the other values 
     state.userAuthCheck = null;
     state.isUserVerificationNeeded = null;
+    state.isUserTwoFactorAuthNeeded = null;
+    state.twoFactorAuthNeededToken= null;
+    state.isValidTokenTwoFactor= null;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.isValidToken = null;
     state.verificationCompleted = null;
@@ -30,6 +34,10 @@ const trueAuthCheckResetAuthStore = (state) => {
 
     //^ Reset the other values 
     state.isUserVerificationNeeded = false;
+    state.isUserTwoFactorAuthNeeded= false;
+    state.twoFactorAuthNeededToken= false;
+    state.isValidTokenTwoFactor= false;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.isValidToken = false;
     state.verificationCompleted = false;
@@ -52,6 +60,10 @@ const resetToDefaultAuthStore = (state) => {
 
     //^ Reset all the values 
     state.isUserVerificationNeeded = null;
+    state.isUserTwoFactorAuthNeeded= null;
+    state.twoFactorAuthNeededToken= null;
+    state.isValidTokenTwoFactor= null;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.isValidToken = null;
     state.verificationCompleted = null;
@@ -71,6 +83,10 @@ const userAccountVerificationAuthStore = (state) => {
 
     //^ Reset the other values 
     state.isUserVerificationNeeded = false;
+    state.isUserTwoFactorAuthNeeded= false;
+    state.twoFactorAuthNeededToken= false;
+    state.isValidTokenTwoFactor= false;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.isValidToken = false;
     state.isValidTokenPassword = false;
@@ -93,6 +109,10 @@ const validateVerificationTokenAuthStore = (state) => {
 
     //^ Reset the other values 
     state.isUserVerificationNeeded = false;
+    state.isUserTwoFactorAuthNeeded= false;
+    state.twoFactorAuthNeededToken= false;
+    state.isValidTokenTwoFactor= false;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.error = null;
     state.userAuthCheck = false;
@@ -115,6 +135,10 @@ const validatePasswordResetTokenAuthStore = (state) => {
 
     //^ Reset the other values 
     state.isUserVerificationNeeded = false;
+    state.isUserTwoFactorAuthNeeded= false;
+    state.twoFactorAuthNeededToken= false;
+    state.isValidTokenTwoFactor= false;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.error = null;
     state.userAuthCheck = false;
@@ -136,6 +160,10 @@ const validatePasswordResetAuthStore = (state) => {
 
     //^ Reset the other values 
     state.isUserVerificationNeeded = false;
+    state.isUserTwoFactorAuthNeeded= false;
+    state.twoFactorAuthNeededToken= false;
+    state.isValidTokenTwoFactor= false;
+    state.isOtpValidationDone = null;
     state.email = '';
     state.error = null;
     state.userAuthCheck = false;

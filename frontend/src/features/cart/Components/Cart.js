@@ -29,9 +29,7 @@ function Cart() {
   }, [])
 
   useEffect(() => {
-    if (user) {
-      dispatch(addressListDataFetchAsync());
-    }
+       user && (addressList ?? dispatch(addressListDataFetchAsync()))
   }, [dispatch, user]);
 
   useEffect(() => {
@@ -39,7 +37,7 @@ function Cart() {
   }, [dispatch, cart]);
 
   useEffect(() => {
-    addressList.length && dispatch(setSelectedAddress(addressList[0]));
+    addressList?.length && dispatch(setSelectedAddress(addressList[0]));
   }, [dispatch, addressList])
 
 

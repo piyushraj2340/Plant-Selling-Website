@@ -1512,3 +1512,91 @@ a:hover {
         border-radius: 6px;
     }
 }
+
+
+/* TwoFactorAuth.css */
+
+/* Container styles */
+.two-factor-auth-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #f9f9f9;
+    margin-top: 80px;
+}
+
+/* Box styles */
+.two-factor-auth-box {
+    background-color: #e6f5ea; /* Light green background */
+    border: 1px solid #98c1a2; /* Plant-like border */
+    padding: 30px;
+    border-radius: 10px;
+    max-width: 500px;
+    text-align: center;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Title styles */
+.two-factor-auth-title {
+    font-family: 'Arial', sans-serif;
+    color: #2d6a4f; /* Dark green */
+    margin-bottom: 20px;
+}
+
+/* Message styles */
+.two-factor-auth-message {
+    color: #2d6a4f;
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+/* Label styles */
+.two-factor-auth-label {
+    color: #2d6a4f;
+    font-weight: bold;
+    text-align: left;
+}
+
+/* Input styles */
+.two-factor-auth-input {
+    border-radius: 0; /* Rectangular inputs */
+    border-color: #98c1a2; /* Greenish border */
+}
+
+/* Button styles */
+.two-factor-auth-submit-btn {
+    background-color: #40916c; /* Green themed button */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    border: none;
+}
+
+.two-factor-auth-submit-btn:hover {
+    background-color: #2d6a4f; /* Darker green on hover */
+}
+
+.two-factor-auth-resend-btn {
+    background-color: #51b588; /* Lighter green for resend */
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    border: none;
+}
+
+.two-factor-auth-resend-btn:hover {
+    background-color: #5aa986; /* Lighter green for resend */
+}
+
+.two-factor-auth-resend-btn:disabled {
+    background-color: #c8e1d7; /* Disabled lighter green */
+    cursor: not-allowed;
+}
+
+/* Timer styles */
+.two-factor-auth-timer {
+    color: #2d6a4f;
+    font-size: 0.9em;
+}

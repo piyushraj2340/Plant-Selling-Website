@@ -9,7 +9,7 @@ const LoginPage = () => {
     document.title = "Login";
 
     const user = useSelector(state => state.user.user);
-    const {isUserVerificationNeeded, email} = useSelector(state => state.auth);
+    const {isUserVerificationNeeded, email, isUserTwoFactorAuthNeeded, twoFactorAuthNeededToken} = useSelector(state => state.auth);
 
     const dispatch = useDispatch();
 
@@ -32,7 +32,14 @@ const LoginPage = () => {
             dispatch(resetState());
             return;
         }
-    }, [dispatch, isUserVerificationNeeded])
+
+        if(isUserTwoFactorAuthNeeded && twoFactorAuthNeededToken) {
+            navigate(`/account/twoFactorAuthentication/${twoFactorAuthNeededToken}`);
+            dispatch(resetState());
+            return;
+        }
+
+    }, [dispatch, isUserVerificationNeeded, isUserTwoFactorAuthNeeded])
 
     useEffect(() => {
         handleGetUserData();
