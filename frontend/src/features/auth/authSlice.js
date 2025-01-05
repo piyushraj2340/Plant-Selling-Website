@@ -13,6 +13,10 @@ const initialState = {
     isValidTokenPassword: null,
     passwordChangeSuccessful: null,
     isLoading: null,
+    isUserTwoFactorAuthNeeded: null,
+    twoFactorAuthNeededToken: null,
+    isValidTokenTwoFactor: null,
+    isOtpValidationDone: null,
     error: null,
 }
 
@@ -53,9 +57,23 @@ export const validatePasswordResetTokenAsync = createAsyncThunk('/auth/validateP
 
 
 export const validatePasswordResetAsync = createAsyncThunk('/auth/validatePasswordReset', async (body) => {
-    console.log(body);
-
     const response = await handelDataFetch(`/api/v2/user/resetPassword/${body.token}`, 'POST', body.data);
+    return response.data;
+})
+
+export const validateTwoFactorAuthTokenAsync = createAsyncThunk('/auth/validateTwoFactorAuthToken', async (token) => {
+    const response = await handelDataFetch(`/api/v2/auth/validateOtp/${token}`, 'GET');
+    return response.data;
+})
+
+
+export const validateTwoFactorAuthAsync = createAsyncThunk('/auth/validateTwoFactorAuth', async (data) => {
+    const response = await handelDataFetch(`/api/v2/auth//validateOtp/${data.token}`, 'POST', {otp: data.otp});
+    return response.data;
+})
+
+export const resendOtpTwoFactorAuthAsync = createAsyncThunk('/auth/resendOtpTwoFactorAuth', async (token) => {
+    const response = await handelDataFetch(`/api/v2/auth//resendOtp/${token}`, 'POST');
     return response.data;
 })
 
@@ -92,6 +110,25 @@ export const authSlice = createSlice({
             }).addCase(userLoginAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGIN
 
+
+                resetToDefaultAuthStore(state);
+
+                if(action.payload.code) {
+
+                    if (action.payload.code === 'VerifyUser') {
+                        state.isUserVerificationNeeded = true;
+                        state.email = action.meta.arg.email;
+                    } else if(action.payload.code === 'TwoFactorAuth') {
+                        state.isUserTwoFactorAuthNeeded = true;
+                        state.twoFactorAuthNeededToken = action.payload.token;
+                    }
+
+                    message.error(action.payload.message || "You need to verify your account first.");
+
+                    return;
+                }
+                
+
                 trueAuthCheckResetAuthStore(state);
 
                 localStorageUtil.setData("accessToken", action.payload.token.accessToken);
@@ -103,11 +140,6 @@ export const authSlice = createSlice({
                 //! REJECTED: USER_LOGIN
 
                 resetToDefaultAuthStore(state);
-
-                if (action.error.message === 'You need to verify your account') {
-                    state.isUserVerificationNeeded = true;
-                    state.email = action.meta.arg.email;
-                }
 
                 message.error(action.error.message);
 
@@ -225,24 +257,107 @@ export const authSlice = createSlice({
 
             })
             .addCase(validatePasswordResetAsync.pending, (state) => {
-                //^ PENDING: USER_LOGOUT
+                //^ PENDING: PASSWORD_RESET
 
                 loadingRestAuthStore(state);
 
 
             }).addCase(validatePasswordResetAsync.fulfilled, (state, action) => {
-                //* FULFILLED: USER_LOGOUT
+                //* FULFILLED: PASSWORD_RESET
 
                 validatePasswordResetAuthStore(state);
 
             }).addCase(validatePasswordResetAsync.rejected, (state, action) => {
-                //! REJECTED: USER_LOGOUT
+                //! REJECTED: PASSWORD_RESET
 
                 resetToDefaultAuthStore(state);
 
                 state.passwordChangeSuccessful = false;
 
                 message.error(action.error.message);
+
+            })
+            .addCase(validateTwoFactorAuthTokenAsync.pending, (state) => {
+                //^ PENDING: TWO_FACTOR_AUTH_TOKEN
+
+                loadingRestAuthStore(state);
+
+
+            }).addCase(validateTwoFactorAuthTokenAsync.fulfilled, (state, action) => {
+                //* FULFILLED: TWO_FACTOR_AUTH_TOKEN
+
+                resetToDefaultAuthStore(state);
+                state.isValidTokenTwoFactor = true;
+
+            }).addCase(validateTwoFactorAuthTokenAsync.rejected, (state, action) => {
+                //! REJECTED: TWO_FACTOR_AUTH_TOKEN
+
+                resetToDefaultAuthStore(state);
+
+                state.isValidTokenTwoFactor = false;
+                state.twoFactorAuthNeededToken = null;
+                state.isUserTwoFactorAuthNeeded = null;
+
+
+                message.error(action.error.message || "Your OTP Session is expired!.");
+
+            })
+            .addCase(validateTwoFactorAuthAsync.pending, (state) => {
+                //^ PENDING: VALIDATE_TWO_FACTOR_AUTH
+
+                loadingRestAuthStore(state);
+            }).addCase(validateTwoFactorAuthAsync.fulfilled, (state, action) => {
+                //* FULFILLED: VALIDATE_TWO_FACTOR_AUTH
+
+                trueAuthCheckResetAuthStore(state);
+
+                state.isOtpValidationDone = true;
+
+                localStorageUtil.setData("accessToken", action.payload.token.accessToken);
+                localStorageUtil.setData("refreshToken", action.payload.token.refreshToken);
+                
+                message.success(action.payload.message);
+
+            }).addCase(validateTwoFactorAuthAsync.rejected, (state, action) => {
+                //! REJECTED: VALIDATE_TWO_FACTOR_AUTH
+
+                resetToDefaultAuthStore(state);
+
+                state.isValidTokenTwoFactor = null;
+                state.twoFactorAuthNeededToken = null;
+                state.isUserTwoFactorAuthNeeded = null;
+
+                state.isOtpValidationDone = false;
+
+                message.error(action.error.message || "Your OTP is invalid.");
+
+            })
+            
+            .addCase(resendOtpTwoFactorAuthAsync.pending, (state) => {
+                //^ PENDING: VALIDATE_TWO_FACTOR_AUTH
+
+                loadingRestAuthStore(state);
+            }).addCase(resendOtpTwoFactorAuthAsync.fulfilled, (state, action) => {
+                //* FULFILLED: VALIDATE_TWO_FACTOR_AUTH
+
+                trueAuthCheckResetAuthStore(state);
+
+                state.isValidTokenTwoFactor = true;
+                
+                message.success(action.payload.message);
+
+            }).addCase(resendOtpTwoFactorAuthAsync.rejected, (state, action) => {
+                //! REJECTED: VALIDATE_TWO_FACTOR_AUTH
+
+                resetToDefaultAuthStore(state);
+
+                state.isValidTokenTwoFactor = false;
+                state.twoFactorAuthNeededToken = null;
+                state.isUserTwoFactorAuthNeeded = false;
+
+                state.isOtpValidationDone = false;
+
+                message.error(action.error.message || "Your OTP is invalid.");
 
             })
     }

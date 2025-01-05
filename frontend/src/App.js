@@ -51,6 +51,9 @@ import PasswordResetEmailSentPage from "./pages/PasswordResetEmailSentPage";
 import PrivacyPolicyPage from "./pages/PrivacyPolicyPage";
 import FAQPage from "./pages/FAQPage";
 import HelpPage from "./pages/HelpPage";
+import ProfileSettings from "./features/user/Components/ProfileSettings";
+import UserProfile from "./features/user/Components/UserProfile";
+import TwoFactorAuthenticationPage from "./pages/TwoFactorAuthenticationPage";
 
 
 
@@ -68,11 +71,15 @@ const Routing = () => {
       <Route exact path="/signup" element={<SignupPage />} />
       <Route exact path="/logout" element={<LogoutPage />} />
       <Route exact path="/forgot-password" element={<ForgotPasswordPage />} />
-      <Route exact path="/profile" element={<ProfilePage />} />
+      <Route exact path="/profile" element={<ProfilePage />} >
+        <Route index element={<UserProfile />} />
+        <Route exact path="settings" element={<ProfileSettings />} />
+      </Route>
       <Route exact path="/account/verificationEmail" element={<UserVerificationEmailSent />} />
       <Route exact path="/account/passwordResetEmail" element={<PasswordResetEmailSentPage />} />
       <Route exact path="/account/verificationConfirmation/:token" element={<UserVerificationConfirmAccount />} />
       <Route exact path="/account/ResetYourPassword/:token" element={<ResetYourPasswordPage />} />
+      <Route exact path="/account/twoFactorAuthentication/:token" element={<TwoFactorAuthenticationPage />} />
       <Route exact path="/nursery" element={<NurseryProfilePage />} />
       <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
       <Route exact path="/nursery/create" element={<CreateNurseryPage />} />

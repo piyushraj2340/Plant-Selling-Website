@@ -143,3 +143,28 @@ exports.emailSubscriber = async (to) => {
     console.error('Error sending email:', error);
   }
 };
+
+
+exports.sendOTP = async (to, userName, otpCode) => {
+  try {
+    // Render the email template
+    const emailTemplate = await ejs.renderFile(
+      path.join(__dirname, '../../views/yourOTPVerificationCode.ejs'),
+      { userName, otpCode }
+    );
+
+    const mailOptions = {
+      from: `"Plant Seller" <${smtpConfig.auth.user}>`, // Sender address
+      to, // List of receivers
+      subject: "Your OTP Verification Code", // Subject line
+      html: emailTemplate, // HTML body
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+  }
+}

@@ -11,4 +11,9 @@ const generateUniqueLinkWithToken  = (path)  => {
     return {token, link};
 }
 
-module.exports = { generateToken, generateUniqueLinkWithToken };
+const generateSecureOTP = () => {
+    const otp = crypto.randomInt(100000, 1000000); // Generates a number between 100000 and 999999
+    return otp.toString();
+};
+
+module.exports = { generateToken, generateUniqueLinkWithToken, generateSecureOTP };

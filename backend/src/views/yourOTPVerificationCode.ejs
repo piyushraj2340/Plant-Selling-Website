@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+</head>
+
+<body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f9f9f9;">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" style="padding: 20px; background-color: #f9f9f9;">
+        <tr>
+            <td align="center">
+                <table border="0" cellpadding="0" cellspacing="0" width="600"
+                    style="background-color: #ffffff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+                    <!-- Header Section -->
+                    <tr>
+                        <td align="center" style="background-color: #4CAF50; padding: 20px;">
+                            <h1 style="margin: 0; color: #ffffff; font-size: 24px;">Your OTP Verification Code</h1>
+                        </td>
+                    </tr>
+                    <!-- Content Section -->
+                    <tr>
+                        <td style="padding: 20px 30px; color: #555555;">
+                            <p style="font-size: 16px; line-height: 1.6; margin: 0;">
+                                Hello <strong>
+                                    <%= userName %>
+                                </strong>,
+                            </p>
+                            <p style="font-size: 16px; line-height: 1.6;">
+                                We received a request to verify your email address. Use the OTP below to complete the
+                                verification process. The code will expire in 15 minutes.
+                            </p>
+                            <div style="margin: 20px 0; text-align: center;">
+                                <span
+                                    style="font-size: 28px; font-weight: bold; color: #4CAF50; padding: 10px 20px; background-color: #f2f2f2; border-radius: 5px; display: inline-block;">
+                                    <%= otpCode %>
+                                </span>
+                            </div>
+                            <p style="font-size: 16px; line-height: 1.6;">
+                                If you didn’t request this email, you can safely ignore it.
+                            </p>
+                            <p style="font-size: 16px; line-height: 1.6; margin-top: 20px;">
+                                Thank you for choosing <strong><a href="https://plantseller.vercel.app"
+                                        style="text-decoration: none; color: #4CAF50;">PlantSeller</a></strong>!
+                            </p>
+                        </td>
+                    </tr>
+                    <!-- Footer Section -->
+                    <tr>
+                        <td align="center"
+                            style="padding: 20px; background-color: #f4f4f4; color: #777777; font-size: 14px;">
+                            <p style="margin: 0;">This is an automated message from <a
+                                    href="https://plantseller.vercel.app"
+                                    style="text-decoration: none; color: #4CAF50;">PlantSeller</a>.</p>
+                            <p style="margin: 0;">© 2024 <a href="https://plantseller.vercel.app"
+                                    style="text-decoration: none; color: #4CAF50;">PlantSeller</a>. All Rights Reserved.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>
