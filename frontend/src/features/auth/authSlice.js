@@ -17,6 +17,7 @@ const initialState = {
     twoFactorAuthNeededToken: null,
     isValidTokenTwoFactor: null,
     isOtpValidationDone: null,
+    isOtpResendSuccessful: null,
     error: null,
 }
 
@@ -68,12 +69,12 @@ export const validateTwoFactorAuthTokenAsync = createAsyncThunk('/auth/validateT
 
 
 export const validateTwoFactorAuthAsync = createAsyncThunk('/auth/validateTwoFactorAuth', async (data) => {
-    const response = await handelDataFetch(`/api/v2/auth//validateOtp/${data.token}`, 'POST', {otp: data.otp});
+    const response = await handelDataFetch(`/api/v2/auth/validateOtp/${data.token}`, 'POST', {otp: data.otp});
     return response.data;
 })
 
 export const resendOtpTwoFactorAuthAsync = createAsyncThunk('/auth/resendOtpTwoFactorAuth', async (token) => {
-    const response = await handelDataFetch(`/api/v2/auth//resendOtp/${token}`, 'POST');
+    const response = await handelDataFetch(`/api/v2/auth/resendOtp/${token}`, 'POST');
     return response.data;
 })
 
@@ -343,6 +344,7 @@ export const authSlice = createSlice({
                 trueAuthCheckResetAuthStore(state);
 
                 state.isValidTokenTwoFactor = true;
+                state.isOtpResendSuccessful = true;
                 
                 message.success(action.payload.message);
 
@@ -354,6 +356,7 @@ export const authSlice = createSlice({
                 state.isValidTokenTwoFactor = false;
                 state.twoFactorAuthNeededToken = null;
                 state.isUserTwoFactorAuthNeeded = false;
+                state.isOtpResendSuccessful = false;
 
                 state.isOtpValidationDone = false;
 
