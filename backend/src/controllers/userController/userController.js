@@ -361,11 +361,6 @@ exports.verifyUser = async (req, res, next) => {
 
 exports.uploadProfileImage = async (req, res, next) => {
     try {
-        if (!req.role.includes("seller") || !req.nursery) {
-            const error = new Error("You Are Not Allowed to access this route");
-            error.statusCode = 403;
-            throw error;
-        }
 
         if (!req.files) {
             const error = new Error("Invalid Images to upload.");

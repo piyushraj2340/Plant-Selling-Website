@@ -111,7 +111,7 @@ exports.signIn = async (req, res, next) => {
             const otp = generateSecureOTP();
 
             //* Save the token in redis database with expire time 15 min.
-            await setData('root', token, 'TwoFactorAuthEnabled', { otp, userId: result._id }, 120); // 60sec * 15min = 900sec
+            await setData('root', token, 'TwoFactorAuthEnabled', { otp, userId: result._id }, 900); // 60sec * 15min = 900sec
 
             //* Send Email with smtp to activate user account
             const isEmailSent = await sendOTP(result.email, result.name, otp);
@@ -447,9 +447,6 @@ exports.validateOtp = async (req, res, next) => {
         //* Generate Auth Token
         const authToken = await user.generateAuthToken();
 
-        console.log("authToken", authToken);
-
-
         const { encryptedMessage, iv } = authToken.refreshToken;
 
         if (!encryptedMessage || !iv) {
@@ -538,7 +535,7 @@ exports.resendOtp = async (req, res, next) => {
         const otp = generateSecureOTP();
 
         //* Save the token in redis database with expire time 15 min.
-        await setData('root', token, 'TwoFactorAuthEnabled', { otp, userId: result._id }, 120); // 60sec * 15min = 900sec
+        await setData('root', token, 'TwoFactorAuthEnabled', { otp, userId: result._id }, 900); // 60sec * 15min = 900sec
 
         //* Send Email with smtp to activate user account
         const isEmailSent = await sendOTP(result.email, result.name, otp);

@@ -7,7 +7,7 @@ const TwoFactorAuthenticationPage = () => {
     const { token } = useParams();
     document.title = "Two Factor Authentication";
 
-    const { isValidTokenTwoFactor, isOtpValidationDone } = useSelector((state) => state.auth);
+    const { isValidTokenTwoFactor, isOtpValidationDone, isOtpResendSuccessful } = useSelector((state) => state.auth);
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -15,6 +15,7 @@ const TwoFactorAuthenticationPage = () => {
     const [otp, setOtp] = useState(""); // Stores the user's input for OTP
     const [resendTimer, setResendTimer] = useState(60); // 1-minute countdown for resend button
     const [resendDisabled, setResendDisabled] = useState(true); // Disable resend initially
+    const [isResendingOtp, setIsResendingOtp] = useState(false); // Resend OTP status
 
     // Handle OTP input change
     const handleOtpChange = (e) => {
@@ -23,10 +24,9 @@ const TwoFactorAuthenticationPage = () => {
 
     // Resend OTP function
     const handleResendOtp = () => {
-        dispatch(resendOtpTwoFactorAuthAsync(token)); // Resend OTP
-        setResendTimer(60); // Reset the resend timer
+        setIsResendingOtp(true); // Set status to true
         setResendDisabled(true); // Disable button again
-        setOtp(""); // Clear the OTP input
+        dispatch(resendOtpTwoFactorAuthAsync(token)); // Resend OTP
     };
 
     // Submit OTP function
@@ -58,16 +58,22 @@ const TwoFactorAuthenticationPage = () => {
 
     useEffect(() => {
 
+        if (isOtpResendSuccessful && typeof isOtpResendSuccessful === "boolean") {
+            setIsResendingOtp(false); // Reset status
+            setResendTimer(60); // Reset the resend timer
+            setOtp(""); // Clear the OTP input
+            setResendDisabled(true); // Disable button again
+        }
+
         let validateTokenInterval = setTimeout(() => {
             dispatch(validateTwoFactorAuthTokenAsync(token));
-        }, 15000);
+        }, 60000);
 
-        if(!isValidTokenTwoFactor && typeof isValidTokenTwoFactor === "boolean") {
-            console.log("isValidTokenTwoFactor", isValidTokenTwoFactor);
+        if (!isValidTokenTwoFactor && typeof isValidTokenTwoFactor === "boolean") {
             navigate("/login");
         }
 
-        if(isOtpValidationDone) {
+        if (isOtpValidationDone) {
             navigate("/profile");
         }
 
@@ -75,7 +81,7 @@ const TwoFactorAuthenticationPage = () => {
 
         return () => clearTimeout(validateTokenInterval);
 
-    }, [isValidTokenTwoFactor, isOtpValidationDone]);
+    }, [isValidTokenTwoFactor, isOtpValidationDone, isOtpResendSuccessful]);
 
     return (
         <div className="container two-factor-auth-container d-flex justify-content-center py-2 px-2 mb-4 mb-md-5">
@@ -83,7 +89,7 @@ const TwoFactorAuthenticationPage = () => {
                 <div className="two-factor-auth-box">
                     <h2 className="two-factor-auth-title">Two-Factor Authentication</h2>
                     <p className="two-factor-auth-message">
-                        We have sent a one-time password to your email. Your OTP will expire in <strong>5 minutes</strong>.
+                        We have sent a one-time password to your email. Your OTP will expire in <strong>15 minutes</strong>.
                     </p>
                     <form onSubmit={handleSubmitOtp}>
                         <div className="mb-3 text-start">
@@ -110,10 +116,21 @@ const TwoFactorAuthenticationPage = () => {
                             >
                                 Resend Code
                             </button>
-                            <span className="two-factor-auth-timer">
-                                Resend available in:{" "}
-                                {resendDisabled ? `${resendTimer}s` : "Now"}
-                            </span>
+                            {
+                                isResendingOtp ?
+                                    (
+                                        <span className="two-factor-auth-resend-timer">
+                                            Resending OTP Please Wait...
+                                        </span>
+                                    )
+                                    :
+                                    (
+                                        <span className="two-factor-auth-timer">
+                                            Resend available in:{" "}
+                                            {resendDisabled ? `${resendTimer}s` : "Now"}
+                                        </span>
+                                    )
+                            }
                         </div>
                         <button
                             type="submit"

@@ -14,6 +14,7 @@ const loadingRestAuthStore = (state) => {
     state.twoFactorAuthNeededToken= null;
     state.isValidTokenTwoFactor= null;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.isValidToken = null;
     state.verificationCompleted = null;
@@ -38,6 +39,7 @@ const trueAuthCheckResetAuthStore = (state) => {
     state.twoFactorAuthNeededToken= false;
     state.isValidTokenTwoFactor= false;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.isValidToken = false;
     state.verificationCompleted = false;
@@ -64,6 +66,7 @@ const resetToDefaultAuthStore = (state) => {
     state.twoFactorAuthNeededToken= null;
     state.isValidTokenTwoFactor= null;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.isValidToken = null;
     state.verificationCompleted = null;
@@ -87,6 +90,7 @@ const userAccountVerificationAuthStore = (state) => {
     state.twoFactorAuthNeededToken= false;
     state.isValidTokenTwoFactor= false;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.isValidToken = false;
     state.isValidTokenPassword = false;
@@ -113,6 +117,7 @@ const validateVerificationTokenAuthStore = (state) => {
     state.twoFactorAuthNeededToken= false;
     state.isValidTokenTwoFactor= false;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.error = null;
     state.userAuthCheck = false;
@@ -139,6 +144,7 @@ const validatePasswordResetTokenAuthStore = (state) => {
     state.twoFactorAuthNeededToken= false;
     state.isValidTokenTwoFactor= false;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.error = null;
     state.userAuthCheck = false;
@@ -164,6 +170,7 @@ const validatePasswordResetAuthStore = (state) => {
     state.twoFactorAuthNeededToken= false;
     state.isValidTokenTwoFactor= false;
     state.isOtpValidationDone = null;
+    state.isOtpResendSuccessful = null;
     state.email = '';
     state.error = null;
     state.userAuthCheck = false;
