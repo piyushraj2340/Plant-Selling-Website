@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux'
 import { addressDeleteAsync, addressListDataFetchAsync, setDefaultAddressAsync } from '../addressSlice';
+import BreadCrumb from '../../common/BreadCrumb';
 
 function Address() {
   const addressList = useSelector(state => state.address.addressList);
@@ -16,10 +17,10 @@ function Address() {
   }
 
   const addressSetAsDefault = async (_id) => {
-      dispatch(setDefaultAddressAsync(_id));
+    dispatch(setDefaultAddressAsync(_id));
   }
 
-  let list = addressList.map((elem, index) => {
+  let list = addressList?.map((elem, index) => {
     return (
       <div key={index} className="col-sm-12 col-md-6 col-lg-4 my-2">
         <div className='border border-2 border-primary rounded address-list address-default'>
@@ -53,9 +54,24 @@ function Address() {
     )
   })
 
+  const breadCrumbItems = [
+    {
+      path: './',
+      title: 'Home',
+    },
+    {
+      path: '../profile',
+      title: 'Profile'
+    },
+    {
+      title: 'Address'
+    }
+  ]
+
   return (
     <section className='bg-section address p-md-3'>
       <div className="container p-md-2">
+        <BreadCrumb items={breadCrumbItems} />
         <div className="row p-3 p-md-0">
           <h4 className='h4 border-bottom pb-2'>Your Saved Address</h4>
         </div>
