@@ -1,6 +1,6 @@
 class ObjectArraySet {
-    constructor() {
-        this.items = []; // We'll use an array to store the objects
+    constructor(list) {
+        this.items = list? list: []; // We'll use an array to store the objects
     }
 
     // Method to add or update an object by its _id
@@ -62,6 +62,25 @@ class ObjectArraySet {
     clear() {
         this.items = [];
     }
+}
+
+export function deleteFromObjectArraySet(list, id) {
+    const objectArraySet = new ObjectArraySet(list);
+    objectArraySet.delete(id);
+
+    return objectArraySet.items;
+}
+
+export function AddOrUpdateObjectArraySet(list, object) {
+    const objectArraySet = new ObjectArraySet(list);
+    objectArraySet.add(object);
+
+    return objectArraySet.items;
+}
+
+export function GetFromObjectArraySet(list, id) {
+    const objectArraySet = new ObjectArraySet(list);
+    return objectArraySet.get(id);
 }
 
 export default ObjectArraySet;
