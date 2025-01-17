@@ -10,12 +10,8 @@ const ProfileAddress = () => {
     const [address, setAddress] = useState(null);
 
     useEffect(() => {
-        !addressList.length && dispatch(addressListDataFetchAsync());
-        
-        if(addressList.length) {
-            setAddress(addressList[0]);
-        }
-
+        addressList ?? dispatch(addressListDataFetchAsync());
+        addressList?.length && setAddress(addressList[0]);
     }, [addressList])
 
     return (
@@ -27,7 +23,7 @@ const ProfileAddress = () => {
                 <div className="card-body">
                     <div className="row">
                         <div className="d-flex justify-content-between">
-                            <span className='text-primary small'>{address !== null ? address.setAsDefault ? "Default Address" : "" : ""}</span>
+                            <span className='text-primary small'>{address?.setAsDefault ? "Default Address" : ""}</span>
                             <Link to={address ? `/address/update/${address._id}` : "#"}> {address ? <i className="fas fa-edit"></i> : ""}</Link>
                         </div>
                     </div>

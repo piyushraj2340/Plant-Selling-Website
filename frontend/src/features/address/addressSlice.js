@@ -2,13 +2,15 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import handelDataFetch from "../../utils/handelDataFetch";
 import { message } from "antd";
 import { userLogoutAsync } from "../auth/authSlice";
+import { errorState, fulfilledState, loadingState } from "./Utils/addressHelper";
+import { AddOrUpdateObjectArraySet, deleteFromObjectArraySet } from "../../utils/ObjectArraySet ";
 
 const initialState = {
-    addressList: [],
+    addressList: null,
     selectedAddress: null,
-    addressesLength: 0,
     error: null,
     isLoading: false,
+    isRedirectAllowed: null,
 }
 
 export const addressListDataFetchAsync = createAsyncThunk('/address/data/fetch', async () => {
@@ -23,7 +25,7 @@ export const addressDeleteAsync = createAsyncThunk('/address/data/delete', async
 
 export const addNewAddressAsync = createAsyncThunk('/address/data/add', async (data) => {
     const response = await handelDataFetch('/api/v2/user/address/', 'POST', data.address);
-    return { result: response.data, redirect: data.redirect, navigate: data.navigate };
+    return response.data;
 });
 
 export const setDefaultAddressAsync = createAsyncThunk('/address/data/set/default', async (_id) => {
@@ -33,7 +35,12 @@ export const setDefaultAddressAsync = createAsyncThunk('/address/data/set/defaul
 
 export const updateAddressAsync = createAsyncThunk('/address/data/update', async (data) => {
     const response = await handelDataFetch(`/api/v2/user/address/${data._id}`, 'PATCH', data.address);
-    return { result: response.data, redirect: data.redirect, navigate: data.navigate };
+    return response.data;
+});
+
+export const getAddressByIdAsync = createAsyncThunk('/address/data/get', async (id) => {
+    const response = await handelDataFetch(`/api/v2/user/address/${id}`, 'GET');
+    return response.data;
 });
 
 export const addressSlice = createSlice({
@@ -42,10 +49,16 @@ export const addressSlice = createSlice({
     reducers: {
         setSelectedAddress: (state, action) => {
             state.selectedAddress = action.payload;
+        },
+        addressResetApiState: (state) => {
+            state.isLoading = false;
+            state.error = null;
+            state.isRedirectAllowed = null;
         }
     },
     extraReducers: (builder) => {
         builder
+
             .addCase(userLogoutAsync.fulfilled, () => {
                 //* CLEANUP: TASK
                 //? LOGOUT_CLEANUP_TASK:: REMOVE ALL THE CART INFORMATION AFTER LOGOUT
@@ -53,143 +66,192 @@ export const addressSlice = createSlice({
                 return initialState;
 
             })
+
+
             .addCase(addressListDataFetchAsync.pending, (state) => {
                 //^ PENDING: ADDRESS_DATA_FETCHING
 
-                state.isLoading = true;
-                state.error = null;
+                loadingState(state);
 
-            }).addCase(addressListDataFetchAsync.fulfilled, (state, action) => {
+            })
+            .addCase(addressListDataFetchAsync.fulfilled, (state, action) => {
                 //* FULFILLED: ADDRESS_DATA_FETCHING
 
-                state.isLoading = false;
                 state.addressList = action.payload.result;
-                state.addressesLength = action.payload.result.length;
-                state.error = null;
 
-            }).addCase(addressListDataFetchAsync.rejected, (state, action) => {
+                fulfilledState(state, false);
+
+            })
+            .addCase(addressListDataFetchAsync.rejected, (state, action) => {
                 //! REJECTED: ADDRESS_DATA_FETCHING
 
-                state.isLoading = false;
-                state.error = action.error;
-
-            }).addCase(addressDeleteAsync.pending, (state) => {
-                //^ PENDING: ADDRESS_DATA_DELETING
-
-                state.isLoading = true;
-                state.error = null;
-
-            }).addCase(addressDeleteAsync.fulfilled, (state, action) => {
-                //* FULFILLED: ADDRESS_DATA_DELETING
-
-                state.isLoading = false;
-
-                //? STEPS TO DELETE DATA FROM ADDRESS_LIST:
-                const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
-                state.addressList.splice(addressIndex, 1);
-                state.addressesLength = state.addressList.length;
-
-                state.error = null;
-
-            }).addCase(addressDeleteAsync.rejected, (state, action) => {
-                //! REJECTED: ADDRESS_DATA_DELETING
-
-                state.isLoading = false;
-                state.error = action.error;
-
-            }).addCase(addNewAddressAsync.pending, (state) => {
-                //^ PENDING: ADDRESS_ADD_NEW_DATA
-
-                state.isLoading = true;
-                state.error = null;
-
-            }).addCase(addNewAddressAsync.fulfilled, (state, action) => {
-                //* FULFILLED: ADDRESS_ADD_NEW_DATA
-
-                state.isLoading = false;
-
-                //? STEPS TO ADD NEW DATA INTO ADDRESS_LIST:
-                state.addressList.concat(action.payload.result.result);
-                state.addressesLength = state.addressList.length;
-
-                message.success(action.payload.result.message);
-
-                action.payload.navigate(action.payload.redirect);
-
-                state.error = null;
-
-            }).addCase(addNewAddressAsync.rejected, (state, action) => {
-                //! REJECTED: ADDRESS_ADD_NEW_DATA
-
-                state.isLoading = false;
-                state.error = action.error;
+                errorState(state, action);
 
                 message.error(action.error.message);
 
-            }).addCase(setDefaultAddressAsync.pending, (state) => {
+            })
+
+
+            .addCase(addressDeleteAsync.pending, (state) => {
+                //^ PENDING: ADDRESS_DATA_DELETING
+
+                loadingState(state);
+
+            })
+            .addCase(addressDeleteAsync.fulfilled, (state, action) => {
+                //* FULFILLED: ADDRESS_DATA_DELETING
+
+                //? STEPS TO DELETE DATA FROM ADDRESS_LIST:
+                // const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
+                // state.addressList.splice(addressIndex, 1);
+
+                if(state.selectedAddress !== null && state.selectedAddress._id === action.payload.result._id) {
+                    state.selectedAddress = null;
+                }
+
+                state.addressList = deleteFromObjectArraySet(state.addressList, action.payload.result._id);
+
+                fulfilledState(state, false);
+            })
+            .addCase(addressDeleteAsync.rejected, (state, action) => {
+                //! REJECTED: ADDRESS_DATA_DELETING
+
+                errorState(state, action);
+
+                message.error(action.error.message);
+
+            })
+
+
+            .addCase(addNewAddressAsync.pending, (state) => {
+                //^ PENDING: ADDRESS_ADD_NEW_DATA
+
+                loadingState(state);
+
+            })
+            .addCase(addNewAddressAsync.fulfilled, (state, action) => {
+                //* FULFILLED: ADDRESS_ADD_NEW_DATA
+
+                //? STEPS TO ADD NEW DATA INTO ADDRESS_LIST:
+                // if (state.addressList != null) {
+                //     state.addressList.concat(action.payload.result);
+                // } else {
+                //     state.addressList = [action.payload.result.result];
+                // }
+
+                state.addressList = AddOrUpdateObjectArraySet(state.addressList, action.payload.result);
+
+                fulfilledState(state, true); // redirect allowed 
+
+                message.success(action.payload.message);
+
+            })
+            .addCase(addNewAddressAsync.rejected, (state, action) => {
+                //! REJECTED: ADDRESS_ADD_NEW_DATA
+
+                errorState(state, action);
+
+                message.error(action.error.message);
+
+            })
+
+
+            .addCase(setDefaultAddressAsync.pending, (state) => {
                 //^ PENDING: ADDRESS_SET_DEFAULT_ADDRESS
 
-                state.isLoading = true;
-                state.error = null;
+                loadingState(state);
 
-            }).addCase(setDefaultAddressAsync.fulfilled, (state, action) => {
+            })
+            .addCase(setDefaultAddressAsync.fulfilled, (state, action) => {
                 //* FULFILLED: ADDRESS_SET_DEFAULT_ADDRESS
-
-                state.isLoading = false;
 
                 //? STEPS TO REPLACE THE OLD ADDRESS:
                 if (state.addressList[0].setAsDefault) state.addressList[0].setAsDefault = false;
 
-                const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
-                state.addressList.splice(addressIndex, 1);
+                // const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
+                // state.addressList.splice(addressIndex, 1);
+                // state.addressList.splice(0, 0, action.payload.result);
+
+                state.addressList = deleteFromObjectArraySet(state.addressList, action.payload.result._id);
                 state.addressList.splice(0, 0, action.payload.result);
 
-                state.error = null;
+                fulfilledState(state, false);
 
-            }).addCase(setDefaultAddressAsync.rejected, (state, action) => {
+            })
+            .addCase(setDefaultAddressAsync.rejected, (state, action) => {
                 //! REJECTED: ADDRESS_SET_DEFAULT_ADDRESS
 
-                state.isLoading = false;
-                state.error = action.error;
-
+                errorState(state, action);
                 message.error(action.error.message);
 
-            }).addCase(updateAddressAsync.pending, (state) => {
+            })
+
+
+            .addCase(updateAddressAsync.pending, (state) => {
                 //^ PENDING: ADDRESS_UPDATE_ADDRESS
 
-                state.isLoading = true;
-                state.error = null;
+                loadingState(state);
 
-            }).addCase(updateAddressAsync.fulfilled, (state, action) => {
+            })
+            .addCase(updateAddressAsync.fulfilled, (state, action) => {
                 //* FULFILLED: ADDRESS_UPDATE_ADDRESS
 
-                state.isLoading = false;
 
                 //? STEPS TO REPLACE THE OLD ADDRESS:
 
-                if (action.payload.result.result.setAsDefault) {
+                if (action.payload.result.setAsDefault) {
                     if (state.addressList[0].setAsDefault) state.addressList[0].setAsDefault = false;
 
-                    const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result.result._id);
-                    state.addressList.splice(addressIndex, 1);
+                    // const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result.result._id);
+                    // state.addressList.splice(addressIndex, 1);
+                    // state.addressList.splice(0, 0, action.payload.result);
+
+                    state.addressList = deleteFromObjectArraySet(state.addressList, action.payload.result._id);
                     state.addressList.splice(0, 0, action.payload.result);
 
                 } else {
-                    const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
-                    state.addressList.splice(addressIndex, 1, action.payload.result.result);
+                    // const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
+                    // state.addressList.splice(addressIndex, 1, action.payload.result.result);
+
+                    state.addressList = AddOrUpdateObjectArraySet(state.addressList, action.payload.result._id);
                 }
 
-                message.success(action.payload.result.message);
+                fulfilledState(state, true); // redirect allowed  
 
-                action.payload.navigate(action.payload.redirect);
+                message.success(action.payload.message);
 
-                state.error = null;
-
-            }).addCase(updateAddressAsync.rejected, (state, action) => {
+            })
+            .addCase(updateAddressAsync.rejected, (state, action) => {
                 //! REJECTED: ADDRESS_UPDATE_ADDRESS
 
-                state.isLoading = false;
-                state.error = action.error;
+                errorState(state, action);
+
+                message.error(action.error.message);
+
+            })
+
+
+            .addCase(getAddressByIdAsync.pending, (state) => {
+                //^ PENDING: ADDRESS_GET_BY_Id_ADDRESS
+
+                loadingState(state);
+
+            })
+            .addCase(getAddressByIdAsync.fulfilled, (state, action) => {
+                //* FULFILLED: ADDRESS_GET_BY_Id_ADDRESS
+
+
+                //? STEPS TO REPLACE THE OLD ADDRESS:
+                state.addressList = AddOrUpdateObjectArraySet(state.addressList, action.payload.result);
+
+
+                fulfilledState(state, false);
+
+            })
+            .addCase(getAddressByIdAsync.rejected, (state, action) => {
+                //! REJECTED: ADDRESS_GET_BY_Id_ADDRESS
+
+                errorState(state, action);
 
                 message.error(action.error.message);
 
@@ -198,5 +260,5 @@ export const addressSlice = createSlice({
 });
 
 
-export const { setSelectedAddress } = addressSlice.actions;
+export const { setSelectedAddress, addressResetApiState } = addressSlice.actions;
 export default addressSlice.reducer; 

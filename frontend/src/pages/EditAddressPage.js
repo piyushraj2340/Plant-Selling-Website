@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import EditAddress from '../features/address/Components/AddressForms/EditAddress';
-import { addressListDataFetchAsync } from '../features/address/addressSlice';
+import {  getAddressByIdAsync, addressResetApiState } from '../features/address/addressSlice';
 
 const EditAddressPage = () => {
   document.title = "Update Your Address";
@@ -19,14 +19,21 @@ const EditAddressPage = () => {
   useEffect(() => {
     if (!user) {
       navigate(`/login?redirect=/address/update/${id}`);
-      return;
     }
 
-    !address.length && dispatch(addressListDataFetchAsync());
-  }, [])
+    address ?? dispatch(getAddressByIdAsync(id));
+
+    if(address && address?.length) {
+      !(address.find(a => a._id === id)) && dispatch(getAddressByIdAsync(id));
+    }
+
+    return () => {
+      dispatch(addressResetApiState());
+    }
+  }, []) 
 
   return (
-    address.length && <EditAddress />
+    address && <EditAddress />
   )
 }
 

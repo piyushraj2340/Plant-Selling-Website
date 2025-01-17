@@ -59,7 +59,7 @@ const Shipping = () => {
     }, [isSessionError]);
 
     useEffect(() => {
-        !addressList.length && dispatch(addressListDataFetchAsync());
+        addressList ?? dispatch(addressListDataFetchAsync());
     }, [addressList]);
 
     useEffect(() =>{
@@ -108,7 +108,7 @@ const Shipping = () => {
                     }
 
                     {
-                        !addressList.length &&
+                        !addressList?.length &&
                         <div className="container">
                             <div className="row">
                                 <div className="img d-flex justify-content-center">

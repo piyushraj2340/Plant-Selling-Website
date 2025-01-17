@@ -27,12 +27,12 @@ const ProductSummary = () => {
 
     useEffect(() => {
         if (user) {
-            !addressList.length && dispatch(addressListDataFetchAsync());
+            addressList ?? dispatch(addressListDataFetchAsync());
         }
     }, [dispatch, user])
 
     useEffect(() => {
-        addressList.length && dispatch(setSelectedAddress(addressList[0]));
+        addressList?.length && dispatch(setSelectedAddress(addressList[0]));
     }, [dispatch, addressList])
 
     useEffect(() => {
@@ -146,7 +146,7 @@ const ProductSummary = () => {
                             <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : <span>Select delivery location</span>}</small>
                             :
 
-                            alert("Sign in to see your addresses", <p><i className="fas fa-map-marker-alt"></i> Select delivery location</p>)
+                            alert("Sign in to see your addresses", <span><i className="fas fa-map-marker-alt"></i> Select delivery location</span>)
                     }
 
                 </p>
