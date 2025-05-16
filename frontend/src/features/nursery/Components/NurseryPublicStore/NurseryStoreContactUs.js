@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
 import AlertPopOver from '../../../common/AlertPopOver';
 import { Link } from 'react-router-dom';
+import useUserData from '../../../../hooks/useUserData';
 
 const NurseryStoreContactUs = ({ nurseryPublicStore }) => {
     document.title = nurseryPublicStore.nurseryName + " - Contact Us";
 
-    const user = useSelector((state) => state.user.user)?._id;
+    const {userData:user} = useUserData();
 
     // State to manage form data
     const [formData, setFormData] = useState({

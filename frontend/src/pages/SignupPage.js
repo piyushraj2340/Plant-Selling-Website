@@ -1,43 +1,43 @@
 import React, { useEffect } from 'react'
 import Signup from '../features/auth/Components/Signup';
 import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import { Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { userProfileAsync } from '../features/user/userSlice';
 import { resetState } from '../features/auth/authSlice'
+import useUserData from '../hooks/useUserData';
+import Animation from '../features/common/Animation';
 
 const SignupPage = () => {
     document.title = "Signup";
 
-    const user = useSelector(state => state.user.user);
-    const {isUserVerificationNeeded, email} = useSelector(state => state.auth);
+    const {userData:user, isLoading, isError, errorData} = useUserData();
+    const location = useLocation();
 
-    console.log(email);
-    
+    const {isUserVerificationNeeded, email} = useSelector(state => state.auth);
 
     const dispatch = useDispatch();
 
-    const navigate = useNavigate();
 
-    const handleGetUserData = async () => {
-        !user && dispatch(userProfileAsync());
-        if (user) {
-            const [redirect, to] = window.location.search && window.location.search.split("=");
-            navigate(redirect === "?redirect" ? to : "/profile");
-            return;
-        }
+    useEffect(() => {
+        return () => dispatch(resetState());
+    },[])
+
+    
+    if(isUserVerificationNeeded) {
+        let navigate = <Navigate to={`/account/verificationEmail?email=${email}`} replace={true}/>;
+        return navigate;
+
     }
 
-    useEffect(() => {
-        if(isUserVerificationNeeded) {
-            navigate(`/account/verificationEmail?email=${email}`);
-            dispatch(resetState());
-            return;
-        }
-    }, [dispatch, isUserVerificationNeeded])
+    if (user) {
+        const queryParams = new URLSearchParams(location.search);
+        const redirect = queryParams.get('redirect');
+        return <Navigate to={`/${redirect?redirect:'profile'}` } replace={true}/>;
+    }
 
-    useEffect(() => {
-        handleGetUserData();
-    }, [dispatch, user]);
+    if ((user === null && !isError && !errorData) || isLoading) {
+        return <Animation />;
+    }
 
     return (
         <Signup />

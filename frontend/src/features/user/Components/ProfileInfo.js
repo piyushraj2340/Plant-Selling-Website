@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { userProfileUpdateAsync } from "../userSlice";
+import useUserData from "../../../hooks/useUserData";
 
 const ProfileInfo = () => {
-    const user = useSelector((state) => state.user.user);
+    const {userData:user} = useUserData();
     const dispatch = useDispatch();
 
     // State to toggle edit mode and store form data

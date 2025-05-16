@@ -2,10 +2,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { message } from 'antd';
+import useUserData from '../../hooks/useUserData';
 
 const Navigation = () => {
     const cartLength = useSelector((state) => state.cart.cartLength);
-    const user = useSelector(state => state.user.user);
+    const {userData:user} = useUserData();
 
     const [viewSearchFilter, setViewSearchFilter] = useState(false);
     const [navBarToggle, setNavBarToggle] = useState(false);
@@ -166,4 +167,4 @@ const Navigation = () => {
     )
 }
 
-export default Navigation;
+export default React.memo(Navigation);

@@ -3,9 +3,10 @@ import React, { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import { userProfileChangePasswordAsync, userProfileChangeTwoFactorAuthenticationStatusAsync, userProfileDeleteAsync } from "../userSlice";
+import useUserData from "../../../hooks/useUserData";
 
 const ProfileSettings = () => {
-    const user = useSelector((state) => state.user.user);
+    const { userData:user, deleteUserData: handleDeleteAccount, changeUserPassword, enableDisableTwoFactorStatus} = useUserData();
     const dispatch = useDispatch();
 
     // State for managing password change
@@ -25,24 +26,18 @@ const ProfileSettings = () => {
             message.error("Passwords do not match!");
             return;
         }
-
         const data = {
             previousPassword, password, confirmPassword
         }
-
-        dispatch(userProfileChangePasswordAsync(data));
-
+        changeUserPassword(data);
         setPreviousPassword("");
         setPassword("");
         setConfirmPassword("");
     };
 
-    const handleDeleteAccount = () => {
-        dispatch(userProfileDeleteAsync());
-    };
 
     const toggleTwoFactorAuthentication = () => {
-        dispatch(userProfileChangeTwoFactorAuthenticationStatusAsync({isTwoFactorAuthEnabled: !isTwoFactorAuthEnabled}));
+        enableDisableTwoFactorStatus({isTwoFactorAuthEnabled: !isTwoFactorAuthEnabled});
         setIsTwoFactorAuthEnabled(!isTwoFactorAuthEnabled);
     };
 

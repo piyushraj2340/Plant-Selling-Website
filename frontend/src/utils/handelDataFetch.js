@@ -62,6 +62,11 @@ export const handelRefreshToken = async () => {
 
 // Function to retry the original request with the new token
 const handelRetryRequest = async (url, method, body, token) => {
+
+    if (!token) {
+        throw new Error("No token provided for retrying the request.");
+    }
+
     const response = await fetch(url, {
         method,
         headers: {
@@ -92,10 +97,10 @@ const handelDataFetch = async (path, method, body) => {
                 const accessToken = localStorageUtil.getData("accessToken");
                 const orderToken = localStorageUtil.getData("orderToken");
 
-                let bearer = `Bearer ${accessToken}`;
+                let bearer = `Bearer ${accessToken?accessToken:''}`;
 
                 if (path.startsWith("/api/v2/checkout") || orderToken) {
-                    bearer = `Bearer ${accessToken} orderToken ${orderToken}`;
+                    bearer = `Bearer ${accessToken?accessToken:''} orderToken ${orderToken?orderToken:''}`;
                 }
 
                 const res = await fetch(apiUrl, {
@@ -113,7 +118,7 @@ const handelDataFetch = async (path, method, body) => {
                 const data = await res.json();
 
                 // Handle Token Expiry
-                if (data.code === 'TOKEN_EXPIRED' || res.status === 401) {
+                if (data?.code === 'TOKEN_EXPIRED' || res?.status === 401) {
                     console.warn("Access token expired. Attempting to refresh...");
 
                     // If a refresh is already in progress, queue this request

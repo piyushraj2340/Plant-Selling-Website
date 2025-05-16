@@ -7,6 +7,7 @@ import { Steps, message } from 'antd';
 import handelDataFetchCheckout from '../checkoutAPI';
 import { useDispatch, useSelector } from 'react-redux';
 import { createOrderHistoryAsync } from '../../order/orderSlice';
+import useUserData from '../../../hooks/useUserData';
 
 
 const Checkout = () => {
@@ -17,7 +18,7 @@ const Checkout = () => {
   const selectedAddress = useSelector(state => state.checkout.shipping);
   const pricing = useSelector(state => state.checkout.pricing);
   const checkoutCart = useSelector(state => state.checkout.carts);
-  const user = useSelector(state => state.user.user);
+  const {userData:user} = useUserData();
 
   const dispatch = useDispatch();
 

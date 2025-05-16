@@ -51,6 +51,9 @@ const Footer = () => {
         }
     };
 
+    console.log("re-rendering footer....");
+    
+
     return (
         <footer className="text-light bg-dark p-4 p-md-5 footer-container">
             <div className="container">
@@ -184,4 +187,4 @@ const Footer = () => {
     )
 }
 
-export default Footer
+export default React.memo(Footer)

@@ -2,9 +2,10 @@ import { message } from 'antd';
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { nurseryCreateAsync } from '../../nurserySlice';
+import useUserData from '../../../../hooks/useUserData';
 
 function SetNursery() {
-    const user = useSelector(state => state.user.user);
+    const {userData:user} = useUserData();
     const dispatch = useDispatch();
 
     const [nurseryData, setNurseryData] = useState({

@@ -4,10 +4,11 @@ import { message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { addNewAddressAsync, addressResetApiState } from '../../addressSlice';
 import BreadCrumb from '../../../common/BreadCrumb';
+import useUserData from '../../../../hooks/useUserData';
 
 
 function AddAddress() {
-    const user = useSelector(state => state.user.user);
+    const {userData:user} = useUserData();
     const isRedirectAllowed = useSelector(state => state.address.isRedirectAllowed);
     const dispatch = useDispatch();
 

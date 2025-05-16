@@ -8,11 +8,12 @@ import { useSelector, useDispatch } from 'react-redux';
 import { setSelectedAddress, addressListDataFetchAsync } from '../../address/addressSlice';
 import { addToCartAsync, cartDataUpdateQuantityAsync, setSelectedCart } from '../../cart/cartSlice';
 import { initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
+import useUserData from '../../../hooks/useUserData';
 
 const ProductSummary = () => {
     const product = useSelector((state) => state.products.product);
     const pricing = useSelector((state) => state.products.productPricing);
-    const user = useSelector((state) => state.user.user);
+    const {userData:user} = useUserData();
     const addressList = useSelector((state) => state.address.addressList);
     const selectedAddress = useSelector((state) => state.address.selectedAddress);
     const cartsList = useSelector((state) => state.cart.carts);

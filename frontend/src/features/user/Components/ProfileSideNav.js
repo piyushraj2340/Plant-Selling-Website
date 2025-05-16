@@ -1,9 +1,10 @@
 import React from 'react'
 import { useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
+import useUserData from '../../../hooks/useUserData';
 
 const ProfileSideNav = () => {
-    const user = useSelector(state => state.user.user);
+    const {userData:user} = useUserData();
 
     return (
         <div className="card mb-4 mb-lg-0">

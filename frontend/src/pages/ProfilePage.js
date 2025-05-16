@@ -1,32 +1,13 @@
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { userProfileAsync } from '../features/user/userSlice';
-import { useNavigate, Outlet } from 'react-router-dom';
+import React from 'react'
 import ProfileAvatar from '../features/user/Components/ProfileAvatar';
 import ProfileSideNav from '../features/user/Components/ProfileSideNav';
+import useUserData from '../hooks/useUserData';
+import { Outlet } from 'react-router-dom';
 
 const ProfilePage = () => {
     document.title = "Profile";
 
-    const user = useSelector(state => state.user.user);
-    const dispatch = useDispatch();
-
-    const navigate = useNavigate();
-
-    const handelProfilePage = () => {
-        if (!user) {
-            navigate("/login");
-        }
-    }
-
-    useEffect(() => {
-        !user && dispatch(userProfileAsync());
-    }, [dispatch])
-
-    useEffect(() => {
-        handelProfilePage();
-    }, [dispatch, user]);
-
+    const {userData:user} = useUserData();
 
     return (
         // TODO: add the customizations avatar images based on the gender.
