@@ -14,6 +14,7 @@ const { getData, deleteData } = require('../../utils/redisVercelKv');
 const orderModel = require('../../model/checkoutModel/orders');
 const nurseryStoreContact = require('../../model/nurseryModel/nurseryStoreContact');
 
+
 exports.getUserProfile = async (req, res, next) => {
     try {
         const result = await userModel.findOne({ _id: req.user }).select({ password: 0, tokens: 0, __v: 0 });
@@ -461,6 +462,12 @@ exports.ChangePassword = async (req, res, next) => {
         //! Check if new password and confirm password match
         if (password !== confirmPassword) {
             const error = new Error("New password and confirm password do not match");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        if (previousPassword === password) {
+            const error = new Error("New password cannot be the same as the previous password");
             error.statusCode = 400;
             throw error;
         }
