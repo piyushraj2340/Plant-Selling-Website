@@ -22,7 +22,7 @@ const auth = async (req, res, next) => {
         const token = authHeader.split(' ')[1];
 
         //! if the token is null
-        if (!token) {
+        if (token === null || token === undefined || token === "" || token === "null" || token === "undefined" || token === "") {
             const error = new Error("Authentication failed");
             error.statusCode = 403;
             throw error;
