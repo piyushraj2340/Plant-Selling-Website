@@ -1,15 +1,16 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import handelDataFetch from '../../utils/handelDataFetch';
-import { userLoginAsync, userSignupAsync, userLogoutAsync } from '../auth/authSlice';
+import { userLoginAsync, userSignupAsync, userLogoutAsync, validateTwoFactorAuthAsync } from '../auth/authSlice';
 import { nurseryCreateAsync } from '../nursery/nurserySlice';
 import { handelImageUploadProfileAvatar } from './userAPI';
 import { message } from 'antd';
 import localStorageUtil from '../../utils/localStorage';
 
 const initialState = {
-    user: null,
+    data: null,
     isLoading: false,
     error: null,
+    IsUserDataFetchedError: false,
 }
 
 // GET User Profile....
@@ -53,30 +54,39 @@ export const userSlice = createSlice({
     initialState,
     reducers: {
         clearUser: (state) => {
-            state.user = null
+            state.data = null
         }
     },
     extraReducers: (builder) => {
         builder
+            // User Login After Two-Factor Authentication
+            .addCase(validateTwoFactorAuthAsync.fulfilled, (state, action) => {
+                //* FULFILLED: VALIDATE_TWO_FACTOR_AUTH
+                state.data = action.payload.result;
+                state.error = null;
+                state.IsUserDataFetchedError = false;
+            })
             .addCase(userProfileAsync.pending, (state) => {
                 //^ PENDING: USER_PROFILE
 
                 state.isLoading = true;
                 state.error = null;
+                state.IsUserDataFetchedError = false;
 
             }).addCase(userProfileAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = action.payload.result;
+                state.data = action.payload.result;
                 state.error = null;
+                state.IsUserDataFetchedError = false;
 
             }).addCase(userProfileAsync.rejected, (state, action) => {
                 //! REJECTED: USER_PROFILE
-
                 state.isLoading = false;
-                state.user = null;
+                state.data = null;
                 state.error = action.error;
+                state.IsUserDataFetchedError = true;
 
             }).addCase(userProfileUpdateAsync.pending, (state) => {
                 //^ PENDING: USER_PROFILE
@@ -90,14 +100,13 @@ export const userSlice = createSlice({
                 //* FULFILLED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = action.payload.result;
+                state.data = action.payload.result;
                 state.error = null;
 
             }).addCase(userProfileUpdateAsync.rejected, (state, action) => {
                 //! REJECTED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = null;
                 state.error = action.error;
 
             })
@@ -113,7 +122,7 @@ export const userSlice = createSlice({
                 //* FULFILLED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = null;
+                state.data = null;
                 state.error = null;
 
                 localStorageUtil.removeData("accessToken");
@@ -126,7 +135,6 @@ export const userSlice = createSlice({
                 //! REJECTED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = null;
                 state.error = action.error;
 
                 message.error(action.error.message || "Error: while deleting user data...");
@@ -143,17 +151,14 @@ export const userSlice = createSlice({
             }).addCase(userProfileChangePasswordAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_PROFILE
 
-                state.isLoading = false;
-                state.user = action.payload.result;
+                state.isLoading = false
                 state.error = null;
 
                 message.success(action.payload.message || "Password changed successfully");
 
             }).addCase(userProfileChangePasswordAsync.rejected, (state, action) => {
                 //! REJECTED: USER_PROFILE
-
                 state.isLoading = false;
-                state.user = null;
                 state.error = action.error;
 
                 message.error(action.error.message || "Error: while changing password!");
@@ -171,7 +176,7 @@ export const userSlice = createSlice({
                 //* FULFILLED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = action.payload.result;
+                state.data = action.payload.result;
                 state.error = null;
 
                 message.success(action.payload.message || "Two-factor authentication status changed successfully");
@@ -180,7 +185,6 @@ export const userSlice = createSlice({
                 //! REJECTED: USER_PROFILE
 
                 state.isLoading = false;
-                state.user = null;
                 state.error = action.error;
 
                 message.error(action.error.message || "Error: while changing status of two-factor authentication!");
@@ -200,7 +204,7 @@ export const userSlice = createSlice({
                 // TODO: make only the changes of the images not all the data
 
                 state.isLoading = false;
-                state.user = action.payload.result;
+                state.data = action.payload.result;
                 state.error = null;
 
                 message.success(action.payload.message);
@@ -215,21 +219,23 @@ export const userSlice = createSlice({
             }).addCase(userLoginAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGIN
 
-                state.user = action.payload.result;
-                state.error = null;
+                if(action.payload.status){
+                    state.data = action.payload.result;
+                    state.error = null;
+                } 
 
             }).addCase(userLogoutAsync.fulfilled, (state) => {
                 //* FULFILLED: USER_LOGOUT
 
-                state.user = null;
+                state.data = null;
                 state.isLoading = false;
                 state.error = null;
 
             }).addCase(nurseryCreateAsync.fulfilled, (state) => {
                 //* FULFILLED: NURSERY_CREATE
 
-                if (!state.user.role.includes("seller")) {
-                    state.user.role.push("seller");
+                if (!state.data.role.includes("seller")) {
+                    state.data.role.push("seller");
                 }
 
                 state.error = null;

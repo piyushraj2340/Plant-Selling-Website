@@ -5,26 +5,20 @@ import { loadingRestAuthStore, trueAuthCheckResetAuthStore, resetToDefaultAuthSt
 import localStorageUtil from '../../utils/localStorage';
 
 const initialState = {
-    userAuthCheck: null,
+    isLoading: false,
+    error: null,
     isUserVerificationNeeded: null,
     email: '',
     isValidToken: null,
     verificationCompleted: null,
     isValidTokenPassword: null,
     passwordChangeSuccessful: null,
-    isLoading: null,
     isUserTwoFactorAuthNeeded: null,
     twoFactorAuthNeededToken: null,
     isValidTokenTwoFactor: null,
     isOtpValidationDone: null,
     isOtpResendSuccessful: null,
-    error: null,
 }
-
-export const userAuthCheckAsync = createAsyncThunk('/auth/authCheck', async () => {
-    const response = await handelDataFetch('/api/v2/auth/checkUser', 'GET');
-    return response.data;
-})
 
 export const userLoginAsync = createAsyncThunk('/auth/loginUser', async (body) => {
     const response = await handelDataFetch('/api/v2/auth/sign-in', 'POST', body);
@@ -88,21 +82,6 @@ export const authSlice = createSlice({
     },
     extraReducers: (builder) => {
         builder
-            .addCase(userAuthCheckAsync.pending, (state) => {
-                //^ PENDING: USER_AUTH_CHECK 
-
-                loadingRestAuthStore(state);
-
-            }).addCase(userAuthCheckAsync.fulfilled, (state) => {
-                //* FULFILLED: USER_AUTH_CHECK 
-
-                trueAuthCheckResetAuthStore(state);
-
-            }).addCase(userAuthCheckAsync.rejected, (state, action) => {
-                //! REJECTED: USER_AUTH_CHECK 
-
-                resetToDefaultAuthStore(state);
-            })
             .addCase(userLoginAsync.pending, (state) => {
                 //^ PENDING: USER_LOGIN
 
@@ -110,9 +89,8 @@ export const authSlice = createSlice({
 
             }).addCase(userLoginAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGIN
-
-
                 resetToDefaultAuthStore(state);
+                trueAuthCheckResetAuthStore(state);
 
                 if(action.payload.code) {
 
@@ -130,8 +108,7 @@ export const authSlice = createSlice({
                 }
                 
 
-                trueAuthCheckResetAuthStore(state);
-
+  
                 localStorageUtil.setData("accessToken", action.payload.token.accessToken);
                 localStorageUtil.setData("refreshToken", action.payload.token.refreshToken);
 
@@ -311,7 +288,6 @@ export const authSlice = createSlice({
                 //* FULFILLED: VALIDATE_TWO_FACTOR_AUTH
 
                 trueAuthCheckResetAuthStore(state);
-
                 state.isOtpValidationDone = true;
 
                 localStorageUtil.setData("accessToken", action.payload.token.accessToken);

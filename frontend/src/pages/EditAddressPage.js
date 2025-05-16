@@ -3,11 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate, useParams } from 'react-router-dom';
 import EditAddress from '../features/address/Components/AddressForms/EditAddress';
 import {  getAddressByIdAsync, addressResetApiState } from '../features/address/addressSlice';
+import useUserData from '../hooks/useUserData';
 
 const EditAddressPage = () => {
   document.title = "Update Your Address";
 
-  const user = useSelector(state => state.user.user);
+  const {userData:user} = useUserData();
   const address = useSelector(state => state.address.addressList);
 
   const dispatch = useDispatch();

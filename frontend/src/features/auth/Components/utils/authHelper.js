@@ -8,7 +8,6 @@ const loadingRestAuthStore = (state) => {
     }
 
     //^ Reset the other values 
-    state.userAuthCheck = null;
     state.isUserVerificationNeeded = null;
     state.isUserTwoFactorAuthNeeded = null;
     state.twoFactorAuthNeededToken= null;
@@ -48,8 +47,6 @@ const trueAuthCheckResetAuthStore = (state) => {
     state.error = null;
     state.isLoading = false;
     
-    //* Only set the user Auth Check state true  
-    state.userAuthCheck = true;
 }
 
 
@@ -74,7 +71,6 @@ const resetToDefaultAuthStore = (state) => {
     state.passwordChangeSuccessful = null;
     state.error = null;
     state.isLoading = null;
-    state.userAuthCheck = null;
 }
 
 const userAccountVerificationAuthStore = (state) => {
@@ -96,7 +92,6 @@ const userAccountVerificationAuthStore = (state) => {
     state.isValidTokenPassword = false;
     state.passwordChangeSuccessful = false;
     state.error = null;
-    state.userAuthCheck = false;
     state.isLoading = false;
     
     //* Only set the verificationCompleted state true  
@@ -120,7 +115,6 @@ const validateVerificationTokenAuthStore = (state) => {
     state.isOtpResendSuccessful = null;
     state.email = '';
     state.error = null;
-    state.userAuthCheck = false;
     state.verificationCompleted = false;
     state.passwordChangeSuccessful = false;
     state.isValidTokenPassword = false;
@@ -147,7 +141,6 @@ const validatePasswordResetTokenAuthStore = (state) => {
     state.isOtpResendSuccessful = null;
     state.email = '';
     state.error = null;
-    state.userAuthCheck = false;
     state.verificationCompleted = false;
     state.passwordChangeSuccessful = false;
     state.isValidToken = false;
@@ -173,7 +166,6 @@ const validatePasswordResetAuthStore = (state) => {
     state.isOtpResendSuccessful = null;
     state.email = '';
     state.error = null;
-    state.userAuthCheck = false;
     state.isValidToken = false;
     state.isLoading = false;
     state.isValidTokenPassword = false;

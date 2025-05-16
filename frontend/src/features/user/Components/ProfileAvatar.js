@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import React from 'react';
 import FullScreenImageView from '../../common/FullScreenImageView';
-import { userProfileImagesUpload } from '../userSlice';
+import useUserData from '../../../hooks/useUserData';
 
 const ProfileAvatar = () => {
-    const user = useSelector(state => state.user.user);
-
-    const dispatch = useDispatch();
+    const {userData:user, avatarImageUpload} = useUserData();
 
     // Handle image upload
     const handleImageUpload = (e) => {
@@ -18,7 +15,7 @@ const ProfileAvatar = () => {
         data.append(e.target.name, e.target.files[0]);
         data.append("user", user._id);
 
-        dispatch(userProfileImagesUpload(data));
+        avatarImageUpload(data);
     };
 
     return (

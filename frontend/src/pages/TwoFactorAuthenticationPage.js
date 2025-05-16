@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 import { resendOtpTwoFactorAuthAsync, validateTwoFactorAuthAsync, validateTwoFactorAuthTokenAsync } from "../features/auth/authSlice";
 
 const TwoFactorAuthenticationPage = () => {
@@ -69,19 +69,22 @@ const TwoFactorAuthenticationPage = () => {
             dispatch(validateTwoFactorAuthTokenAsync(token));
         }, 60000);
 
-        if (!isValidTokenTwoFactor && typeof isValidTokenTwoFactor === "boolean") {
-            navigate("/login");
-        }
-
-        if (isOtpValidationDone) {
-            navigate("/profile");
-        }
-
         isValidTokenTwoFactor ?? dispatch(validateTwoFactorAuthTokenAsync(token));
 
         return () => clearTimeout(validateTokenInterval);
 
     }, [isValidTokenTwoFactor, isOtpValidationDone, isOtpResendSuccessful]);
+
+
+    if (isOtpValidationDone) {
+        return <Navigate to={"/profile"} replace={true} />;
+    }
+
+    if (!isValidTokenTwoFactor && typeof isValidTokenTwoFactor === "boolean") {
+        return <Navigate to={"/login"} replace={true} />;
+    }
+
+    console.log("Two Factor Authentication Page Rendered");
 
     return (
         <div className="container two-factor-auth-container d-flex justify-content-center py-2 px-2 mb-4 mb-md-5">

@@ -1,49 +1,44 @@
 import React, { useEffect } from 'react'
 import Login from '../features/auth/Components/Login';
 import { useSelector, useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { userProfileAsync } from '../features/user/userSlice';
+import { Navigate, useLocation } from 'react-router-dom';
 import { resetState } from '../features/auth/authSlice'
+import useUserData from '../hooks/useUserData';
+import Animation from '../features/common/Animation';
 
 const LoginPage = () => {
     document.title = "Login";
-
-    const user = useSelector(state => state.user.user);
+    const {userData:user, isLoading, isError, errorData} = useUserData();
+    const location = useLocation();
     const {isUserVerificationNeeded, email, isUserTwoFactorAuthNeeded, twoFactorAuthNeededToken} = useSelector(state => state.auth);
 
     const dispatch = useDispatch();
 
-    const navigate = useNavigate();
+    useEffect(() => {
+        return () => dispatch(resetState());
+    },[dispatch, isUserVerificationNeeded, twoFactorAuthNeededToken, isUserTwoFactorAuthNeeded])
 
-    
+    if(isUserVerificationNeeded) {
+        let navigate = <Navigate to={`/account/verificationEmail?email=${email}`} replace={true}/>;
+        return navigate;
 
-    const handleGetUserData = async () => {
-        !user && dispatch(userProfileAsync());
-        if (user) {
-            const [redirect, ...to] = window.location.search && window.location.search.split("=");
-            navigate(redirect === "?redirect" ? to.join("=") : "/profile");
-            return;
-        }
     }
 
-    useEffect(() => {
-        if(isUserVerificationNeeded) {
-            navigate(`/account/verificationEmail?email=${email}`);
-            dispatch(resetState());
-            return;
-        }
+    if(isUserTwoFactorAuthNeeded && twoFactorAuthNeededToken) {
+        let navigate = <Navigate to={`/account/twoFactorAuthentication/${twoFactorAuthNeededToken}` } replace={true}/>;
+        return navigate;
+    }
 
-        if(isUserTwoFactorAuthNeeded && twoFactorAuthNeededToken) {
-            navigate(`/account/twoFactorAuthentication/${twoFactorAuthNeededToken}`);
-            dispatch(resetState());
-            return;
-        }
+    if (user) {
+        const queryParams = new URLSearchParams(location.search);
+        const redirect = queryParams.get('redirect');
+          
+        return <Navigate to={`${redirect?redirect:'profile'}` } replace={true}/>;
+    }
 
-    }, [dispatch, isUserVerificationNeeded, isUserTwoFactorAuthNeeded])
-
-    useEffect(() => {
-        handleGetUserData();
-    }, [dispatch, user]);
+    if ((user === null && !isError && !errorData) || isLoading) {
+        return <Animation />;
+    }
 
     return (
         <Login />

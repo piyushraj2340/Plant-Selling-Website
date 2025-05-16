@@ -7,9 +7,10 @@ import { addressListDataFetchAsync, setSelectedAddress } from '../../address/add
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 import handelShareProduct from '../../../utils/handelShareProduct';
 import { message } from 'antd';
+import useUserData from '../../../hooks/useUserData';
 
 function Cart() {
-  const user = useSelector(state => state.user.user);
+  const {userData:user} = useUserData();
   const cart = useSelector(state => state.cart.carts);
   const addressList = useSelector(state => state.address.addressList);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
