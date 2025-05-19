@@ -4,7 +4,7 @@ import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 
 const PasswordResetEmailSentPage = () => {
-    <title>Password Reset Email Sent</title>
+    document.title = "Password Reset Email Sent";
 
     const navigate = useNavigate();
     const query = new URLSearchParams(useLocation().search);

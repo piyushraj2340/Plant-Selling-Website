@@ -5,9 +5,11 @@ export const validateEmail = (email) => {
 
 
 export const validatePassword = (password) => {
-    const hasNumber = /\d/;
-    const hasLetter = /[a-zA-Z]/;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
     const isLongEnough = password.length >= 8;
 
-    return hasNumber.test(password) && hasLetter.test(password) && isLongEnough;
+    return hasUpperCase && hasLowerCase && hasNumber && hasSpecialChar && isLongEnough;
 };

@@ -2,11 +2,12 @@ import React, { useEffect } from 'react'
 import { message } from 'antd';
 import { useLocation } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
+import Animation from '../features/common/Animation';
 
 
 
 const UserVerificationEmailSent = () => {
-    <title>Account Verification</title>
+    document.title = "Account Verification";
 
     const navigate = useNavigate();
     const query = new URLSearchParams(useLocation().search);
@@ -22,7 +23,7 @@ const UserVerificationEmailSent = () => {
 
     // Only render the content if the email is present
     if (!email) {
-        return null; // Return nothing if there's no email, navigate will handle redirection
+        return <Animation />; // Return nothing if there's no email, navigate will handle redirection
     }
 
     return (

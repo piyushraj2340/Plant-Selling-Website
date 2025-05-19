@@ -1,19 +1,18 @@
-import React, { useEffect } from 'react'
-import { useDispatch } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
-import { userLogoutAsync } from '../authSlice';
+import { Navigate } from 'react-router-dom';
+import useUserLogout from '../../../hooks/auth/useUserLogout';
+import Animation from '../../common/Animation';
 
 const Logout = () => {
-    const navigate = useNavigate();
+    const { isLoading } = useUserLogout();
 
-    const dispatch = useDispatch();
+    if (isLoading) {
+        return <Animation />
+    }
 
-    useEffect(() => {
-        dispatch(userLogoutAsync());
-        setTimeout(() => {
-            navigate("/");
-        }, 500)
-    }, []);
+    const token = localStorage.getItem('accessToken');
+    if (!token) {
+        return <Navigate to='/' replace={true} />
+    }
 
     return (
         <div className='w-100 vh-100 d-flex justify-content-center align-items-center'>

@@ -1,18 +1,30 @@
-import React, { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useDispatch } from 'react-redux';
-import { userLoginAsync } from '../authSlice';
 import { message } from 'antd';
+import useUserLogin from '../../../hooks/auth/useUserLogin';
+import useUserData from '../../../hooks/useUserData';
+import { useDispatch } from 'react-redux';
+import { resetState } from '../authSlice';
 // import { setCart } from '../../cart/cartSlice'; // TODO: IMPLEMENTATION: CART FUNCTIONALITY
 
 
 function Login() {
+    const { isLoading, isError, errorData, userLogin } = useUserLogin();
+
     const dispatch = useDispatch();
 
     const [userFormData, setUserFormData] = useState({
         email: "",
         password: ""
     });
+
+    useEffect(() => {
+        if (isError || errorData) {
+            setUserFormData({ ...userFormData, password: "" })
+        }
+
+        return () => dispatch(resetState());
+    }, [userLogin, errorData, isError]);
 
     let name, value;
     const handleInputs = (e) => {
@@ -28,7 +40,7 @@ function Login() {
             message.error("Please enter your credentials.")
             return;
         }
-        dispatch(userLoginAsync(userFormData));
+        userLogin(userFormData);
     }
 
     return (
@@ -60,8 +72,14 @@ function Login() {
                 <form onSubmit={handleUserLogin}>
                     <div className="d-flex justify-content-center">
                         <div className="col-12">
-                            <input type="email" onChange={handleInputs} className='form-control mb-3' name="email" id="email" placeholder='Enter Email' />
-                            <input type="password" onChange={handleInputs} className='form-control mb-2' name="password" id="password" placeholder='Enter Password' value={userFormData.password} />
+                            <div className="form-floating mb-3">
+                                <input type="email" className="form-control" id="email" name="email" placeholder="Enter Email" onChange={handleInputs} />
+                                <label htmlFor="email">Enter Email</label>
+                            </div>
+                            <div className="form-floating mb-3">
+                                <input type="password" className="form-control" id="password" name="password" placeholder="Enter Password" onChange={handleInputs} value={userFormData.password} />
+                                <label htmlFor="password">Enter Password</label>
+                            </div>
                         </div>
                     </div>
                     <div className="d-flex justify-content-end p-2">
@@ -71,7 +89,17 @@ function Login() {
                     </div>
                     <div className="justify-content-center mt-2">
                         <div className="col-12">
-                            <button className='btn btn-primary w-100' type="submit">Login</button>
+                            <button disabled={isLoading} className='btn btn-primary w-100' type="submit">
+                                {
+                                    isLoading ?
+                                        <>
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            <span className='ms-1'>Verifying...</span>
+                                        </>
+                                        :
+                                        <span>Login</span>
+                                }
+                            </button>
                         </div>
                     </div>
                 </form>

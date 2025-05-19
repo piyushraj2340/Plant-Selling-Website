@@ -1,10 +1,6 @@
-import React from 'react'
-import { useDispatch } from "react-redux";
-import { userAccountVerificationAsync } from '../authSlice';
 
-const VerificationConfirmAccount = ({token}) => {
+const VerificationConfirmAccount = ({token, userAccountVerification}) => {
     document.title = "Confirm Your Account";
-    const dispatch = useDispatch();
 
     return (
         <div className='container confirmation-container confirmation-plant-theme confirmation d-flex justify-content-center py-2 px-2 mb-4 mb-md-5'>
@@ -13,7 +9,7 @@ const VerificationConfirmAccount = ({token}) => {
                     <h1>Hello, <span className="highlight">User</span>!</h1>
                     <p>Please confirm your account by clicking the button below:</p>
                     <div className="text-center mt-4">
-                        <button onClick={() => dispatch(userAccountVerificationAsync({ token, isUserVerified: true }))} className="btn btn-confirm">Confirm Account</button>
+                        <button onClick={() => userAccountVerification({ token, isUserVerified: true })} className="btn btn-confirm">Confirm Account</button>
                     </div>
                 </div>
             </div>

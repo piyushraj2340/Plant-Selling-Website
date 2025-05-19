@@ -421,7 +421,6 @@ exports.uploadProfileImage = async (req, res, next) => {
 
 exports.ChangePassword = async (req, res, next) => {
     try {
-        //* Getting user from the request object (assuming authentication middleware adds user info to `req.user`)
         const userId = req.user;
 
         //! User ID does not exist
@@ -430,26 +429,18 @@ exports.ChangePassword = async (req, res, next) => {
             error.statusCode = 403;
             throw error;
         }
-
         //* Fetch user from the database
         const user = await userModel.findById(userId);
 
         //! If user does not exist
         if (!user) {
-            const error = new Error("User not found");
-            error.statusCode = 404;
+            const error = new Error("Invalid User");
+            error.statusCode = 401;
             throw error;
         }
 
-        //* Extracting passwords from the request body
-        const { previousPassword, password, confirmPassword } = req.body;
-
-        //! Check if all parameters are provided
-        if (!previousPassword || !password || !confirmPassword) {
-            const error = new Error("All password fields are required (previousPassword, password, confirmPassword)");
-            error.statusCode = 400;
-            throw error;
-        }
+                //* Extracting passwords from the request body
+        let { previousPassword, password } = req.body;
 
         //* Verify the previous password matches
         const isMatch = await bcryptjs.compare(previousPassword, user.password); // Assuming `comparePassword` is defined in your user schema
@@ -459,21 +450,8 @@ exports.ChangePassword = async (req, res, next) => {
             throw error;
         }
 
-        //! Check if new password and confirm password match
-        if (password !== confirmPassword) {
-            const error = new Error("New password and confirm password do not match");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        if (previousPassword === password) {
-            const error = new Error("New password cannot be the same as the previous password");
-            error.statusCode = 400;
-            throw error;
-        }
-
         //* Update user's password
-        user.password = password; // Assuming pre-save hooks handle hashing
+        user.password = password;
         await user.save();
 
         //* Respond to the client
@@ -502,14 +480,14 @@ exports.EnableDisableTwoFactorAuthentication = async (req, res, next) => {
 
         const { isTwoFactorAuthEnabled } = req.body;
 
-        if(isTwoFactorAuthEnabled === undefined || isTwoFactorAuthEnabled === null) {
+        if (isTwoFactorAuthEnabled === undefined || isTwoFactorAuthEnabled === null) {
             const error = new Error("Two Factor Authentication Parameter is required");
             error.statusCode = 400;
             throw error;
         }
 
         //* Fetch user from the database
-        const user = await userModel.findOneAndUpdate({_id: userId}, {
+        const user = await userModel.findOneAndUpdate({ _id: userId }, {
             $set: {
                 isTwoFactorAuthEnabled
             }
