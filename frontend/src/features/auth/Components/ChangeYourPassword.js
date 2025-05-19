@@ -1,12 +1,8 @@
-import React, { useState } from "react";
-import { message } from 'antd';
+import  { useState } from "react";
 import { validatePassword } from "../../../utils/validations";
-import { useDispatch } from "react-redux";
-import { validatePasswordResetAsync } from "../authSlice";
 
-const ChangeYourPassword = ({ token }) => {
-    const dispatch = useDispatch();
 
+const ChangeYourPassword = ({ token, validatePasswordReset }) => {
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [validationMessage, setValidationMessage] = useState("");
@@ -23,7 +19,7 @@ const ChangeYourPassword = ({ token }) => {
             setValidationMessage("");
             setIsPasswordValid(true);
         } else {
-            setValidationMessage("Password must be at least 8 characters long and contain a letter and a number.");
+            setValidationMessage("Password must be at least 8 characters long and include uppercase, lowercase, number, and special character.");
             setIsPasswordValid(false);
         }
 
@@ -48,12 +44,7 @@ const ChangeYourPassword = ({ token }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (isPasswordValid && isPasswordMatch) {
-            try {
-                dispatch(validatePasswordResetAsync({ token, data: { password, confirmPassword } }));
-
-            } catch (error) {
-                message.error(error.message);
-            }
+           validatePasswordReset({ token, data: { password, confirmPassword } });
         }
     };
 

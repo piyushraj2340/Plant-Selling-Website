@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema({
     email: {
         type: String,
         required: [true, "Email address is required"],
-        unique: [true, "This email is already in used."],
+        unique: true, 
         validate(email) {
             if (!validator.isEmail(email)) {
                 throw new Error("Invalid Email");
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
     phone: {
         type: String,
         required: [true, "Phone number is required"],
-        unique: [true, "This phone is already in used."],
+        unique: true,
         validate(phone) {
             if (!validator.isMobilePhone(phone, 'en-IN')) {
                 throw new Error("Invalid Phone");

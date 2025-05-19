@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import  { useState, useEffect } from "react";
+import { useDispatch, } from "react-redux";
 import { Navigate, useNavigate, useParams } from "react-router-dom";
-import { resendOtpTwoFactorAuthAsync, validateTwoFactorAuthAsync, validateTwoFactorAuthTokenAsync } from "../features/auth/authSlice";
+import useTwoFactorAuthVerification from "../hooks/auth/useTwoFactorAuthVerification";
+import { message } from "antd";
+import Animation from "../features/common/Animation";
 
 const TwoFactorAuthenticationPage = () => {
     const { token } = useParams();
     document.title = "Two Factor Authentication";
 
-    const { isValidTokenTwoFactor, isOtpValidationDone, isOtpResendSuccessful } = useSelector((state) => state.auth);
+    const { isLoading, isValidTokenTwoFactor, isOtpValidationDone, isOtpResendSuccessful, validateTwoFactorAuthToken, validateTwoFactorAuth, resendOtpTwoFactorAuth } = useTwoFactorAuthVerification(token);
 
-    const dispatch = useDispatch();
     const navigate = useNavigate();
 
     const [otp, setOtp] = useState(""); // Stores the user's input for OTP
@@ -26,7 +27,7 @@ const TwoFactorAuthenticationPage = () => {
     const handleResendOtp = () => {
         setIsResendingOtp(true); // Set status to true
         setResendDisabled(true); // Disable button again
-        dispatch(resendOtpTwoFactorAuthAsync(token)); // Resend OTP
+        resendOtpTwoFactorAuth(token); // Resend OTP
     };
 
     // Submit OTP function
@@ -38,8 +39,9 @@ const TwoFactorAuthenticationPage = () => {
                 otp,
                 navigate
             }
-            dispatch(validateTwoFactorAuthAsync(data));
+            validateTwoFactorAuth(data);
         } else {
+            message.error("Invalid OTP. Please enter a valid 6-digit OTP.");
             console.log("Invalid OTP. Please enter a valid 6-digit OTP.");
         }
     };
@@ -66,10 +68,8 @@ const TwoFactorAuthenticationPage = () => {
         }
 
         let validateTokenInterval = setTimeout(() => {
-            dispatch(validateTwoFactorAuthTokenAsync(token));
+            validateTwoFactorAuthToken(token);
         }, 60000);
-
-        isValidTokenTwoFactor ?? dispatch(validateTwoFactorAuthTokenAsync(token));
 
         return () => clearTimeout(validateTokenInterval);
 
@@ -84,7 +84,9 @@ const TwoFactorAuthenticationPage = () => {
         return <Navigate to={"/login"} replace={true} />;
     }
 
-    console.log("Two Factor Authentication Page Rendered");
+    if(isLoading) {
+        return <Animation />
+    }
 
     return (
         <div className="container two-factor-auth-container d-flex justify-content-center py-2 px-2 mb-4 mb-md-5">

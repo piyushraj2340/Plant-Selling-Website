@@ -26,7 +26,7 @@ function App() {
   return (
     <>
       <Navigation  />
-      <div style={{ marginTop: "70px" }}>
+      <div style={{ marginTop: "70px", minHeight: "calc(70vh)" }}>
         <ConfigProvider
           button={{
             style: {

@@ -117,14 +117,16 @@ export const authSlice = createSlice({
             }).addCase(userLoginAsync.rejected, (state, action) => {
                 //! REJECTED: USER_LOGIN
 
-                resetToDefaultAuthStore(state);
+                state.error = action.error;
+                state.isLoading = false;
 
                 message.error(action.error.message);
 
             }).addCase(userSignupAsync.pending, (state) => {
                 //^ PENDING: USER_SIGN-UP
 
-                loadingRestAuthStore(state);
+                state.isLoading = true;
+                state.error = null;
 
             }).addCase(userSignupAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_SIGN-UP
@@ -139,7 +141,8 @@ export const authSlice = createSlice({
             }).addCase(userSignupAsync.rejected, (state, action) => {
                 //! REJECTED: USER_SIGN-UP
 
-                resetToDefaultAuthStore(state);
+                state.error = action.error;
+                state.isLoading = false;
 
                 message.error(action.error.message);
 
@@ -147,14 +150,16 @@ export const authSlice = createSlice({
             .addCase(userLogoutAsync.pending, (state) => {
                 //^ PENDING: USER_LOGOUT
 
-                loadingRestAuthStore(state);
+                state.isLoading = true;
+                state.error = null;
 
 
             }).addCase(userLogoutAsync.fulfilled, (state, action) => {
                 //* FULFILLED: USER_LOGOUT
 
-                resetToDefaultAuthStore(state);
-
+                state.isLoading = false;
+                state.error = null;
+                
                 localStorageUtil.removeData("refreshToken");
                 localStorageUtil.removeData("accessToken");
                 localStorageUtil.removeData("orderToken");
@@ -164,7 +169,8 @@ export const authSlice = createSlice({
             }).addCase(userLogoutAsync.rejected, (state, action) => {
                 //! REJECTED: USER_LOGOUT
 
-                resetToDefaultAuthStore(state);
+                state.isLoading  = false;
+                state.error = action.error.message;
 
                 message.error(action.error.message);
 

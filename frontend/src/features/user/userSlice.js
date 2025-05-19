@@ -220,6 +220,7 @@ export const userSlice = createSlice({
                 //* FULFILLED: USER_LOGIN
 
                 if(action.payload.status){
+                    state.IsUserDataFetchedError = false;
                     state.data = action.payload.result;
                     state.error = null;
                 } 

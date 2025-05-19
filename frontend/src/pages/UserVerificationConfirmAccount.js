@@ -1,34 +1,27 @@
-import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from "react-redux";
-import { validateVerificationTokenAsync } from '../features/auth/authSlice';
 import InvalidVerificationToken from '../features/auth/Components/InvalidVerificationToken';
 import VerificationConfirmAccount from '../features/auth/Components/VerificationConfirmAccount';
 import AccountVerificationCompleted from '../features/auth/Components/AccountVerificationCompleted';
+import useEmailVerification from '../hooks/auth/useEmailVerification';
+import Animation from '../features/common/Animation';
 
 
 const UserVerificationConfirmAccount = () => {
   document.title = "Confirm Account";
 
-  const { isValidToken, verificationCompleted } = useSelector(state => state.auth);
-
-  const dispatch = useDispatch();
-
   const { token } = useParams();
 
-  useEffect(() => {
-    dispatch(validateVerificationTokenAsync(token));
-  }, [dispatch]);
+  const { isLoading, isValidToken, verificationCompleted, userAccountVerification } = useEmailVerification(token);
 
-  if(isValidToken === null && verificationCompleted === null) {
-    return null;
+  if ((isValidToken === null && verificationCompleted === null) || isLoading) {
+    return <Animation />;
   }
 
   if (verificationCompleted) {
     return <AccountVerificationCompleted />;
   } else {
     return (
-      isValidToken ? <VerificationConfirmAccount token={token} /> : <InvalidVerificationToken />
+      isValidToken ? <VerificationConfirmAccount token={token} userAccountVerification={userAccountVerification} /> : <InvalidVerificationToken />
     )
   }
 }

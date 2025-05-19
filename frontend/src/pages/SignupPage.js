@@ -6,23 +6,17 @@ import { userProfileAsync } from '../features/user/userSlice';
 import { resetState } from '../features/auth/authSlice'
 import useUserData from '../hooks/useUserData';
 import Animation from '../features/common/Animation';
+import useUserSignup from '../hooks/auth/useUserSignup';
 
 const SignupPage = () => {
     document.title = "Signup";
 
     const {userData:user, isLoading, isError, errorData} = useUserData();
+    
     const location = useLocation();
 
-    const {isUserVerificationNeeded, email} = useSelector(state => state.auth);
+    const {isUserVerificationNeeded, email} = useUserSignup();
 
-    const dispatch = useDispatch();
-
-
-    useEffect(() => {
-        return () => dispatch(resetState());
-    },[])
-
-    
     if(isUserVerificationNeeded) {
         let navigate = <Navigate to={`/account/verificationEmail?email=${email}`} replace={true}/>;
         return navigate;

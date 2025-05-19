@@ -13,6 +13,7 @@ const {
     ChangePassword,
     EnableDisableTwoFactorAuthentication
 } = require('../../controllers/userController/userController');
+const validatePasswordChange = require('../../controllers/userController/Validations/validatePasswordChange');
 
 // public routes not required the auth middleware
 router.route('/verification/:token').post(verifyUser);
@@ -28,7 +29,7 @@ router.route('/profile')
     .delete(deleteUserProfile);
 
 router.route('/profile/changePassword')
-    .post(ChangePassword);
+    .post(validatePasswordChange,ChangePassword);
 
 router.route('/profile/two-factor/update')
     .post(EnableDisableTwoFactorAuthentication);

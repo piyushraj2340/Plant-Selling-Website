@@ -6,11 +6,15 @@ const { confirmAccountSendEmail, resetPasswordSendEmail, sendOTP } = require('./
 const jwt = require('jsonwebtoken');
 const { decryptMessage } = require('../utils/cryptoUtil');
 const user = require('../model/userModel/user');
+const validator = require('validator');
 
 //* POST Routes
 exports.signUp = async (req, res, next) => {
     try {
-        const newUser = new userModel(req.body);
+
+        let { name, email, phone, gender, age, password, confirmPassword } = req.body;
+
+        const newUser = new userModel({ name, email, phone, gender, age, password, confirmPassword });
         await newUser.save();
 
         //* Generate unique token and link for email verification
