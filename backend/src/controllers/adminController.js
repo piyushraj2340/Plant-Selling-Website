@@ -180,7 +180,7 @@ const adminController = {
     // Get all orders
     getOrders: async (req, res, next) => {
         try {
-            const orders = await Order.find().populate('user').populate('nursery');
+            const orders = await Order.find().populate('user').populate('orderItems.nursery');
             res.status(200).json({ status: true, message: "Orders fetched successfully", orders });
         } catch (error) {
             next(error);
