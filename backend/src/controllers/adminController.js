@@ -278,6 +278,54 @@ const adminController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // Get all reviews
+    getAllReviews: async (req, res, next) => {
+        try {
+            const Review = require('../model/nurseryModel/review');
+            const reviews = await Review.find().populate('user', 'name email avatar').populate('plant', 'plantName category images').sort({ _id: -1 });
+            res.status(200).json({ status: true, message: "Reviews fetched successfully", reviews });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Update review status
+    updateReviewStatus: async (req, res, next) => {
+        try {
+            const Review = require('../model/nurseryModel/review');
+            const Plant = require('../model/nurseryModel/plants');
+            const { status } = req.body;
+            const reviewId = req.params.id;
+
+            if (!['Approved', 'Rejected'].includes(status)) {
+                const error = new Error("Invalid status");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const review = await Review.findByIdAndUpdate(reviewId, { status }, { new: true });
+            
+            if (!review) {
+                const error = new Error("Review not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            // Recalculate average rating for the plant if it was approved
+            if (status === 'Approved') {
+                const allApproved = await Review.find({ plant: review.plant, status: 'Approved' });
+                const numOfReviews = allApproved.length;
+                const ratings = numOfReviews > 0 ? (allApproved.reduce((acc, curr) => acc + curr.rating, 0) / numOfReviews) : 0;
+                
+                await Plant.findByIdAndUpdate(review.plant, { ratings, numOfReviews });
+            }
+
+            res.status(200).json({ status: true, message: `Review ${status.toLowerCase()} successfully`, review });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

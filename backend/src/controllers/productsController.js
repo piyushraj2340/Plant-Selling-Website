@@ -1,4 +1,6 @@
 const plantsModel = require('../model/nurseryModel/plants');
+const Review = require('../model/nurseryModel/review');
+const Order = require('../model/checkoutModel/orders');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
@@ -144,6 +146,50 @@ exports.searchProducts = async (req, res, next) => {
         // Send the response
         res.status(200).json(info);
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.addReview = async (req, res, next) => {
+    try {
+        const plantId = req.params.id;
+        const userId = req.user;
+        const { rating, reviewText } = req.body;
+
+        const plant = await plantsModel.findById(plantId);
+        if (!plant) {
+            const error = new Error("Plant not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Check if user has bought this plant
+        const order = await Order.findOne({ user: userId, "orderItems.plant": plantId });
+        const isBuyer = !!order;
+
+        const newReview = new Review({
+            user: userId,
+            nursery: plant.nursery,
+            plant: plantId,
+            rating,
+            review: reviewText,
+            isBuyer
+        });
+
+        await newReview.save();
+
+        res.status(201).json({ status: true, message: "Review submitted successfully and is pending approval." });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getReviews = async (req, res, next) => {
+    try {
+        const plantId = req.params.id;
+        const reviews = await Review.find({ plant: plantId, status: 'Approved' }).populate('user', 'name avatar');
+        res.status(200).json({ status: true, message: "Reviews fetched", result: reviews });
     } catch (error) {
         next(error);
     }

@@ -1,58 +1,48 @@
-import React from 'react';
-import { Table, Tag, Space } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { Table, Tag, Space, message, Popconfirm } from 'antd';
 import { Rating } from 'react-simple-star-rating';
+import { adminUpdateReviewStatusAsync } from '../adminSlice';
 
 
 const ReviewsTable = () => {
-    const dataSource = [
-        {
-            key: '1',
-            products: {
-                productName: "PlantRose",
-                description: "lorem ipsum dolor sit amet, consectetur adip",
-                imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-                link: "/rose",
-            },
-            price: `₹${6313.21}`,
-            tags: ["flower", "indore plants"],
-            status: "Published",
-            rating: 4.3,
-            reviews: "I recently added the Monstera Deliciosa to my indoor plant collection, and it's truly a showstopper. The iconic split leaves add a touch of elegance to any room.",
-            action: 'completed',
-        },
-        {
-            key: '2',
-            products: {
-                productName: "PlantLotus",
-                description: "lorem ipsum dolor sit amet, consectetur adip",
-                imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-                link: "/lotus",
-            },
-            sale: 42,
-            price: `₹${2999.82}`,
-            tags: ["flower", "indore plants"],
-            status: "Draft",
-            rating: 4.4,
-            reviews: "I recently added the Monstera Deliciosa to my indoor plant collection, and it's truly a showstopper. The iconic split leaves add a touch of elegance to any room.",
-            action: 'pending',
-        },
-        {
-            key: '3',
-            products: {
-                productName: "PlantSunFlower",
-                description: "lorem ipsum dolor sit amet, consectetur adip",
-                imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-                link: "/sun-flower",
-            },
-            sale: 42,
-            rating: 4.5,
-            tags: ["flower", "indore plants"],
-            status: "ON Hold",
-            price: `₹${2999.82}`,
-            reviews: "I recently added the Monstera Deliciosa to my indoor plant collection, and it's truly a showstopper. The iconic split leaves add a touch of elegance to any room.",
-            action: 'in-transit',
-        },
-    ];
+    const dispatch = useDispatch();
+    const { reviews, isLoading } = useSelector(state => state.admin);
+    const [dataSource, setDataSource] = useState([]);
+
+    useEffect(() => {
+        if (reviews && reviews.length > 0) {
+            const data = reviews.map(review => ({
+                key: review._id,
+                products: {
+                    productName: review.plant?.plantName || 'Unknown Plant',
+                    description: `Reviewed by: ${review.user?.name || 'Unknown User'}`,
+                    imgLink: review.plant?.images?.[0]?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
+                    link: `/product/${review.plant?._id}`,
+                },
+                price: 'N/A', // Assuming price isn't stored in review, or you can populate it
+                tags: review.plant?.category ? [review.plant.category] : [],
+                status: review.status,
+                rating: review.rating,
+                reviews: review.review || 'No text provided.',
+                action: review.status,
+            }));
+            setDataSource(data);
+        } else {
+            setDataSource([]);
+        }
+    }, [reviews]);
+
+    const handleUpdateStatus = async (id, status) => {
+        try {
+            const res = await dispatch(adminUpdateReviewStatusAsync({ id, status })).unwrap();
+            if (res.status) {
+                message.success(res.message);
+            }
+        } catch (error) {
+            message.error("Failed to update review status");
+        }
+    };
 
     const columns = [
         {
@@ -104,10 +94,12 @@ const ReviewsTable = () => {
 
                 let color;
 
-                if (status.toLowerCase() === 'published') {
+                if (status.toLowerCase() === 'approved') {
                     color = 'green'
-                } else if (status.toLowerCase() === 'on hold') {
+                } else if (status.toLowerCase() === 'pending') {
                     color = 'geekblue'
+                } else if (status.toLowerCase() === 'rejected') {
+                    color = 'red';
                 } else {
                     color = '';
                 }
@@ -136,22 +128,31 @@ const ReviewsTable = () => {
         },
         {
             title: 'Action',
-            dataIndex: 'action',
             key: 'action',
-            render: () => {
+            render: (_, record) => {
                 return (
-                    <>
-                        <Space size={'small'} className='mb-1'>
-                            <button className='btn btn-sm btn-primary py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>reply</i> <span>Reply</span></button>
-                        </Space>
-                        <Space size={'small'} className='mb-1'>
-                            <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>delete</i> <span>Delete</span></button>
-                        </Space>
-                        <Space size={'small'} >
-                            <button className='btn btn-sm btn-warning py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>report</i> <span>Report</span></button>
-                        </Space>
-                    </>
-
+                    <div className="d-flex flex-column gap-1">
+                        {record.status !== 'Approved' && (
+                            <Popconfirm
+                                title="Approve this review?"
+                                onConfirm={() => handleUpdateStatus(record.key, 'Approved')}
+                            >
+                                <button className='btn btn-sm btn-success py-1 px-2 text-white d-flex align-items-center justify-content-center' style={{ fontSize: "12px", width: "90px" }}>
+                                    <i className='material-symbols-outlined me-1' style={{ fontSize: "14px" }}>check_circle</i> <span>Approve</span>
+                                </button>
+                            </Popconfirm>
+                        )}
+                        {record.status !== 'Rejected' && (
+                            <Popconfirm
+                                title="Reject this review?"
+                                onConfirm={() => handleUpdateStatus(record.key, 'Rejected')}
+                            >
+                                <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex align-items-center justify-content-center' style={{ fontSize: "12px", width: "90px" }}>
+                                    <i className='material-symbols-outlined me-1' style={{ fontSize: "14px" }}>cancel</i> <span>Reject</span>
+                                </button>
+                            </Popconfirm>
+                        )}
+                    </div>
                 )
             },
             width: 150
@@ -159,6 +160,7 @@ const ReviewsTable = () => {
     ];
     return (
         <Table
+            loading={isLoading}
             columns={columns}
             dataSource={dataSource}
             pagination={{

@@ -14,4 +14,7 @@ router.get('/orders', adminController.getOrders);
 
 router.post('/impersonate', adminController.impersonateUser);
 
+router.get('/reviews', adminController.getAllReviews);
+router.patch('/reviews/:id/status', adminController.updateReviewStatus);
+
 module.exports = router;

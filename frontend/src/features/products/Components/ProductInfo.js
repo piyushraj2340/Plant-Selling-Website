@@ -23,13 +23,13 @@ const ProductInfo = () => {
                 </div>
                 <small style={{ position: "relative", top: "5px", left: "3px" }}><Link to={`/nursery/store/view/${product.nursery._id}`} className='small link-secondary'><i className="fas fa-store"></i> {product.nursery.nurseryName}</Link></small>
                 <div className="card-text">
-                    <Rating initialValue={3 + Math.random() * 2} readonly={true} size={20} allowFraction={true} />
+                    <Rating initialValue={product.ratings || 0} readonly={true} size={20} allowFraction={true} />
                     <small className='ps-2 pe-2' style={{ position: "relative", top: "4px" }}>
-                        <Link to={'/rating-link'}>{Math.floor(Math.random() * 200)} ratings</Link>
+                        <Link to={'/rating-link'}>{product.numOfReviews || 0} ratings</Link>
                     </small>
                     <span style={{ position: "relative", top: "3px" }}>|</span>
                     <small className='ps-2 pe-2' style={{ position: "relative", top: "4px" }}>
-                        <Link to={'/rating-link'}>{Math.floor(Math.random() * 200)} answered questions</Link>
+                        <Link to={'/rating-link'}>0 answered questions</Link>
                     </small>
                 </div>
                 <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>
