@@ -69,7 +69,8 @@ const adminController = {
             });
 
             res.status(200).json({
-                success: true,
+                status: true,
+                message: "Admin Stats Fetched Successfully",
                 stats: {
                     totalUsers,
                     totalNurseries,
@@ -89,7 +90,7 @@ const adminController = {
     getUsers: async (req, res, next) => {
         try {
             const users = await User.find().select('-password -tokens');
-            res.status(200).json({ success: true, users });
+            res.status(200).json({ status: true, message: "Users fetched successfully", users });
         } catch (error) {
             next(error);
         }
@@ -163,7 +164,8 @@ const adminController = {
                 .limit(50); // Pagination can be added later
 
             res.status(200).json({ 
-                success: true, 
+                status: true,
+                message: "Admin Plants Fetched Successfully",
                 stats: {
                     lineChart: lineData,
                     polarChart: [polarData.Published, polarData.Draft, polarData["On Hold"]]
@@ -179,7 +181,7 @@ const adminController = {
     getOrders: async (req, res, next) => {
         try {
             const orders = await Order.find().populate('user').populate('nursery');
-            res.status(200).json({ success: true, orders });
+            res.status(200).json({ status: true, message: "Orders fetched successfully", orders });
         } catch (error) {
             next(error);
         }
@@ -205,7 +207,7 @@ const adminController = {
             const tokens = await targetUser.generateAuthToken();
             
             res.status(200).json({
-                success: true,
+                status: true,
                 message: `Impersonating ${targetUser.email}`,
                 accessToken: tokens.accessToken,
                 refreshToken: tokens.refreshToken,

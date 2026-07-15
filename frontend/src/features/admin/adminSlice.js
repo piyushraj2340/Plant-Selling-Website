@@ -64,7 +64,7 @@ export const adminSlice = createSlice({
             })
             .addCase(adminStatsAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                if (action.payload.success) {
+                if (action.payload.status) {
                     state.stats = action.payload.stats;
                 }
                 state.error = null;
@@ -80,7 +80,7 @@ export const adminSlice = createSlice({
             })
             .addCase(adminOrdersAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                if (action.payload.success) {
+                if (action.payload.status) {
                     state.orders = action.payload.orders;
                 }
                 state.error = null;
@@ -96,7 +96,7 @@ export const adminSlice = createSlice({
             })
             .addCase(adminUsersAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                if (action.payload.success) {
+                if (action.payload.status) {
                     state.users = action.payload.users;
                 }
                 state.error = null;
@@ -129,7 +129,7 @@ export const adminSlice = createSlice({
             })
             .addCase(adminProductsAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                if (action.payload.success) {
+                if (action.payload.status) {
                     state.productsData = {
                         stats: action.payload.stats,
                         plants: action.payload.plants
