@@ -1,13 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { message } from 'antd';
-import { userLogin } from '../../../actions/userAction';
+import localStorageUtil from '../../../utils/localStorage';
 
 const Users = () => {
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(false);
     const token = useSelector((state) => state.user.token);
-    const dispatch = useDispatch();
 
     useEffect(() => {
         fetchUsers();
@@ -48,7 +47,8 @@ const Users = () => {
             const data = await res.json();
             if (data.success) {
                 message.success(data.message);
-                dispatch(userLogin(data.user, data.accessToken, data.refreshToken));
+                localStorageUtil.setData("accessToken", data.accessToken);
+                localStorageUtil.setData("refreshToken", data.refreshToken);
                 window.location.href = '/home'; // Redirect to user home after impersonating
             } else {
                 message.error(data.message || "Failed to impersonate");

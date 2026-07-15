@@ -7,7 +7,7 @@ dotenv.config();
 
 const createAdmin = async () => {
     try {
-        const mongoURI = `mongodb+srv://${process.env.COLLECTION_NAME}:${process.env.COLLECTION_PASSWORD}@cluster0.x5x3wnd.mongodb.net/plant-selling-website?retryWrites=true&w=majority`;
+        const mongoURI = `mongodb+srv://${process.env.COLLECTION_NAME}:${process.env.COLLECTION_PASSWORD}@${process.env.COLLECTION_NAME}.cbqsaya.mongodb.net/?retryWrites=true&w=majority`;
         await mongoose.connect(mongoURI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
