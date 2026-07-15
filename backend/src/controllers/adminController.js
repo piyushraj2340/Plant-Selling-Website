@@ -180,8 +180,65 @@ const adminController = {
     // Get all orders
     getOrders: async (req, res, next) => {
         try {
-            const orders = await Order.find().populate('user').populate('orderItems.nursery');
-            res.status(200).json({ status: true, message: "Orders fetched successfully", orders });
+            const { year, search, filter } = req.query;
+            const targetYear = parseInt(year) || new Date().getFullYear();
+
+            // 1. Line/Bar Chart Data: Orders per month for the given year
+            const startOfYear = new Date(`${targetYear}-01-01T00:00:00.000Z`);
+            const endOfYear = new Date(`${targetYear}-12-31T23:59:59.999Z`);
+            
+            const ordersByMonth = await Order.aggregate([
+                { $match: { orderAt: { $gte: startOfYear, $lte: endOfYear } } },
+                { $group: { _id: { $month: "$orderAt" }, count: { $sum: 1 } } }
+            ]);
+
+            const barData = new Array(12).fill(0);
+            ordersByMonth.forEach(item => {
+                if (item._id >= 1 && item._id <= 12) {
+                    barData[item._id - 1] = item.count;
+                }
+            });
+
+            // 2. Pie Chart Data: Orders by plant category
+            const categoryAgg = await Order.aggregate([
+                { $unwind: "$orderItems" },
+                { $lookup: { from: "plants", localField: "orderItems.plant", foreignField: "_id", as: "plantDetails" } },
+                { $unwind: { path: "$plantDetails", preserveNullAndEmptyArrays: true } },
+                { $group: { _id: "$plantDetails.category", count: { $sum: 1 } } }
+            ]);
+
+            const pieLabels = [];
+            const pieData = [];
+            categoryAgg.forEach(item => {
+                const cat = item._id ? item._id.toUpperCase() : 'OTHER';
+                pieLabels.push(cat);
+                pieData.push(item.count);
+            });
+
+            // 3. Table Data: Orders filtering
+            // For simplicity, we just filter all orders and populate user, and then let frontend search order items
+            let query = {};
+            if (search) {
+                query = { _id: search }; // Very basic search by Order ID for now, as searching populated fields is complex in Mongoose without aggregates.
+                // Could expand this to use aggregation for deep searching if necessary.
+                try {
+                    query = { _id: search.trim() };
+                } catch (e) {
+                    query = {}; // Invalid ObjectId
+                }
+            }
+
+            const orders = await Order.find(query).populate('user').populate('orderItems.nursery').sort({ orderAt: -1 });
+            
+            res.status(200).json({ 
+                status: true, 
+                message: "Orders fetched successfully", 
+                stats: {
+                    barChart: barData,
+                    pieChart: { labels: pieLabels, data: pieData }
+                },
+                orders 
+            });
         } catch (error) {
             next(error);
         }

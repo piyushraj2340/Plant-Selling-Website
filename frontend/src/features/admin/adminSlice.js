@@ -13,7 +13,10 @@ const initialState = {
         barData: { labels: [], data: [] },
         doughnutData: { labels: [], data: [] }
     },
-    orders: [],
+    ordersData: {
+        stats: { barChart: [], pieChart: { labels: [], data: [] } },
+        data: []
+    },
     users: [],
     productsData: {
         stats: { lineChart: [], polarChart: [] },
@@ -28,8 +31,8 @@ export const adminStatsAsync = createAsyncThunk('/admin/stats', async (filter = 
     return response.data;
 });
 
-export const adminOrdersAsync = createAsyncThunk('/admin/orders', async () => {
-    const response = await handelDataFetch(`/api/v2/admin/orders`, 'GET');
+export const adminOrdersAsync = createAsyncThunk('/admin/orders', async ({ year = '', search = '', filter = '' } = {}) => {
+    const response = await handelDataFetch(`/api/v2/admin/orders?year=${year}&search=${search}&filter=${filter}`, 'GET');
     return response.data;
 });
 
@@ -81,7 +84,10 @@ export const adminSlice = createSlice({
             .addCase(adminOrdersAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
                 if (action.payload.status) {
-                    state.orders = action.payload.orders;
+                    state.ordersData = {
+                        stats: action.payload.stats,
+                        data: action.payload.orders
+                    };
                 }
                 state.error = null;
             })

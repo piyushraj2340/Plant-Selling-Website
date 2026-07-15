@@ -7,7 +7,8 @@ import { adminOrdersAsync } from '../adminSlice';
 const RecentOrder = () => {
   const dispatch = useDispatch();
   const [tableData, setTableData] = useState([]);
-  const { orders, isLoading } = useSelector((state) => state.admin);
+  const { ordersData, isLoading } = useSelector((state) => state.admin);
+  const orders = ordersData?.data || [];
 
   useEffect(() => {
     dispatch(adminOrdersAsync());
