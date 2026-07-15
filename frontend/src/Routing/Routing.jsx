@@ -41,6 +41,7 @@ import HelpPage from "../pages/HelpPage";
 import ProfileSettings from "../features/user/Components/ProfileSettings";
 import UserProfile from "../features/user/Components/UserProfile";
 import TwoFactorAuthenticationPage from "../pages/TwoFactorAuthenticationPage";
+import ProtectedRoute from "./ProtectedRoute";
 import AdminProtectedRoute from "./AdminProtectedRoute";
 import AdminLayout from "../features/admin/AdminLayout";
 import AdminDashboard from "../features/admin/Components/Dashboard";
