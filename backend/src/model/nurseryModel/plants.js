@@ -90,6 +90,11 @@ const plantsSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         required: [true, "Plant added at is required."]
+    },
+    status: {
+        type: String,
+        enum: ['Published', 'Draft', 'On Hold'],
+        default: 'Draft'
     }
 });
 

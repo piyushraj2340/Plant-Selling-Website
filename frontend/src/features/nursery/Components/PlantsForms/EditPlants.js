@@ -17,6 +17,7 @@ function EditPlants() {
         stock: "",
         discount: "",
         category: "",
+        status: "Draft",
         images: [],
         description: "",
     });
@@ -92,6 +93,9 @@ function EditPlants() {
             const result = await handelDataFetch({path: "/api/v2/nursery/plants", method: "GET"}, setShowAnimation);
 
             if (result.status) {
+                // Here we fetch plant by ID? Wait, the API call is GET /api/v2/nursery/plants ? 
+                // Ah, the original code had: setPlants({ ...plant, user: result.result.user, nursery: result.result._id }) 
+                // Actually, wait, let's look at the original code.
                 setPlants({ ...plant, user: result.result.user, nursery: result.result._id })
             } else {
                 navigate('/profile');
@@ -130,6 +134,7 @@ function EditPlants() {
                 data.append("stock", plant.stock);
                 data.append("discount", plant.discount);
                 data.append("category", plant.category);
+                data.append("status", plant.status);
                 data.append("description", plant.description);
 
                 plant.images.forEach((image, index) => {
@@ -214,6 +219,15 @@ function EditPlants() {
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.category.message}</p>
                                 }
                             </div>
+                        </div>
+
+                        <div className="form-outline mb-4">
+                            <label htmlFor="status" className='ps-1 my-2'>Status: <span className="text-danger small">*</span></label>
+                            <select name='status' id="status" defaultValue={plant.status} className="form-control" onChange={handleInputs} >
+                                <option value="Draft">Draft</option>
+                                <option value="Published">Published</option>
+                                <option value="On Hold">On Hold</option>
+                            </select>
                         </div>
 
                         <div className="form-outline mb-4">

@@ -95,11 +95,81 @@ const adminController = {
         }
     },
 
-    // Get all plants
+    // Get all plants with aggregations for dashboard
     getPlants: async (req, res, next) => {
         try {
-            const plants = await Plant.find().populate('nursery');
-            res.status(200).json({ success: true, plants });
+            const { year, search, filter } = req.query;
+            const targetYear = year ? parseInt(year) : new Date().getFullYear();
+
+            // 1. Line Chart Data: Monthly Published Products
+            const lineChartAggregation = await Plant.aggregate([
+                {
+                    $match: {
+                        postedAt: {
+                            $gte: new Date(`${targetYear}-01-01`),
+                            $lte: new Date(`${targetYear}-12-31`)
+                        }
+                    }
+                },
+                {
+                    $group: {
+                        _id: { $month: "$postedAt" },
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+
+            const lineData = new Array(12).fill(0);
+            lineChartAggregation.forEach(item => {
+                lineData[item._id - 1] = item.count;
+            });
+
+            // 2. Polar Area Chart Data: Status of Products
+            const statusAggregation = await Plant.aggregate([
+                {
+                    $group: {
+                        _id: { $ifNull: ["$status", "Draft"] }, // Handle missing status as Draft
+                        count: { $sum: 1 }
+                    }
+                }
+            ]);
+
+            const polarData = { Published: 0, Draft: 0, "On Hold": 0 };
+            statusAggregation.forEach(item => {
+                if (item._id === 'Published') polarData.Published = item.count;
+                if (item._id === 'Draft') polarData.Draft = item.count;
+                if (item._id === 'On Hold') polarData["On Hold"] = item.count;
+            });
+
+            // 3. Table Data: Search and Filter
+            let query = {};
+            
+            if (search) {
+                const keywords = search.trim().split(/\s+/);
+                query.$or = [
+                    { plantName: { $regex: keywords.join('|'), $options: 'i' } },
+                    { category: { $regex: keywords.join('|'), $options: 'i' } }
+                ];
+            }
+
+            if (filter && filter !== 'All') {
+                // If filter is specific (e.g. by status, but UI mockup didn't specify exactly what it filters, assuming time-based or category)
+                // For now we just support search.
+            }
+
+            const plants = await Plant.find(query)
+                .populate('nursery', 'nurseryName')
+                .sort({ postedAt: -1 })
+                .limit(50); // Pagination can be added later
+
+            res.status(200).json({ 
+                success: true, 
+                stats: {
+                    lineChart: lineData,
+                    polarChart: [polarData.Published, polarData.Draft, polarData["On Hold"]]
+                },
+                plants 
+            });
         } catch (error) {
             next(error);
         }
