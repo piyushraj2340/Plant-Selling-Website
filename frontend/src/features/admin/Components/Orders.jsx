@@ -1,10 +1,21 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux'
 import OrdersBarGraph from './OrdersBarGraph'
 import OrdersPieChart from './OrdersPieChart'
 import OrdersTable from './OrdersTable'
-import RecentOrder from './RecentOrder'
+import { adminOrdersAsync } from '../adminSlice'
 
 const Orders = () => {
+  const dispatch = useDispatch();
+  const currentYear = new Date().getFullYear();
+  const [year, setYear] = useState(currentYear);
+  const [search, setSearch] = useState('');
+  const [filter, setFilter] = useState('All');
+
+  useEffect(() => {
+    dispatch(adminOrdersAsync({ year, search, filter }));
+  }, [dispatch, year, search, filter]);
+
   return (
     <>
       <div className="row d-flex g-2 my-2 h-auto">
@@ -16,15 +27,11 @@ const Orders = () => {
                 <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Monthly Orders</small>
               </div>
               <div className="right">
-                <select name="filterIncome" id="filterIncome" defaultValue="2023" className="form-select" style={{ fontSize: "12px" }}>
-                  <option value="2020">2020</option>
-                  <option value="2021">2021</option>
-                  <option value="2022">2022</option>
-                  <option value="2023">2023</option>
-                  <option value="2023">2023</option>
-                  <option value="2023">2023</option>
-                  <option value="2023">2023</option>
-                  <option value="2023">2023</option>
+                <select name="filterYear" id="filterYear" value={year} onChange={(e) => setYear(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
+                  <option value={currentYear - 3}>{currentYear - 3}</option>
+                  <option value={currentYear - 2}>{currentYear - 2}</option>
+                  <option value={currentYear - 1}>{currentYear - 1}</option>
+                  <option value={currentYear}>{currentYear}</option>
                 </select>
               </div>
             </div>
@@ -49,10 +56,11 @@ const Orders = () => {
             </div>
             <div className="tools d-flex align-items-center justify-content-between justify-content-md-end col-12 col-md-4">
               <div className="search me-1">
-                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Searching..." style={{ fontSize: "14px" }} />
+                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Search Order ID..." style={{ fontSize: "14px" }} value={search} onChange={(e) => setSearch(e.target.value)} />
               </div>
               <div className="select ms-1">
-                <select name="filterIncome" id="filterIncome" defaultValue="Quarterly" className="form-select" style={{ fontSize: "12px" }}>
+                <select name="filterStatus" id="filterStatus" value={filter} onChange={(e) => setFilter(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
+                  <option value="All">All</option>
                   <option value="Monthly">Monthly</option>
                   <option value="Quarterly">Quarterly</option>
                   <option value="Yearly">Yearly</option>

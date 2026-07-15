@@ -1,56 +1,39 @@
-import React from 'react'
-
+import React, { useEffect, useState } from 'react'
+import { useSelector } from 'react-redux'
 import { Table, Tag, Space } from 'antd';
 
 {/* Add Rating, Review into the component */ }
 const OrdersTable = () => {
-  const dataSource = [
-    {
-      key: '1',
-      products: {
-        productName: "PlantRose",
-        description: "lorem ipsum dolor sit amet, consectetur adip",
-        imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-        link: "/rose",
-      },
-      sale: 32,
-      stock: 120,
-      amount: `₹${6313.21}`,
-      tag: "completed",
-      status: "Products Delivered",
-      action: 'completed',
-    },
-    {
-      key: '2',
-      products: {
-        productName: "PlantLotus",
-        description: "lorem ipsum dolor sit amet, consectetur adip",
-        imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-        link: "/lotus",
-      },
-      sale: 42,
-      stock: 101,
-      amount: `₹${2999.82}`,
-      tag: "pending",
-      status: "Prepare to dispatch",
-      action: 'pending',
-    },
-    {
-      key: '3',
-      products: {
-        productName: "PlantSunFlower",
-        description: "lorem ipsum dolor sit amet, consectetur adip",
-        imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-        link: "/sun-flower",
-      },
-      sale: 42,
-      stock: 101,
-      amount: `₹${2999.82}`,
-      tag: "in-transit",
-      status: "Product is waiting for the delivered",
-      action: 'in-transit',
-    },
-  ];
+  const { ordersData, isLoading } = useSelector(state => state.admin);
+  const [dataSource, setDataSource] = useState([]);
+
+  useEffect(() => {
+    if (ordersData?.data && ordersData.data.length > 0) {
+      const rows = [];
+      ordersData.data.forEach(order => {
+        order.orderItems.forEach(item => {
+          rows.push({
+            key: `${order._id}-${item._id}`,
+            products: {
+              productName: item.plantName,
+              description: `Order ID: ${order._id}`,
+              imgLink: item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
+              link: `/product/${item.plant}`,
+            },
+            sale: item.quantity,
+            stock: 'N/A', // Admin panel might need plant stock from populate later
+            amount: `₹${item.price}`,
+            tag: item.orderStatus?.status || 'pending',
+            status: item.orderStatus?.message || 'Processing',
+            action: item.orderStatus?.status || 'pending',
+          });
+        });
+      });
+      setDataSource(rows);
+    } else {
+      setDataSource([]);
+    }
+  }, [ordersData]);
 
   const columns = [
     {
@@ -133,6 +116,7 @@ const OrdersTable = () => {
 
   return (
     <Table
+      loading={isLoading}
       dataSource={dataSource}
       columns={columns}
       pagination={{
