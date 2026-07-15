@@ -1,31 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-import { message, Spin } from 'antd';
+import { Navigate, useLocation } from 'react-router-dom';
+import useUserData from '../hooks/useUserData';
+import Animation from '../features/common/Animation';
 
 const AdminProtectedRoute = ({ children }) => {
-    const user = useSelector((state) => state.user.user);
-    const navigate = useNavigate();
-    const [isVerified, setIsVerified] = useState(false);
+    const location = useLocation();
+    const { userData, IsUserDataFetchedError } = useUserData();
 
-    useEffect(() => {
-        if (!user) {
-            message.error("You are not logged in!");
-            navigate('/login');
-        } else if (!user.role || !user.role.includes('admin')) {
-            message.error("Access denied. Admin privileges required.");
-            navigate('/home');
-        } else {
-            setIsVerified(true);
-        }
-    }, [user, navigate]);
+    if (IsUserDataFetchedError) {
+        return <Navigate to={`/login?redirect=${encodeURIComponent(location.pathname)}`} replace={true} />;
+    }
 
-    if (!isVerified) {
-        return (
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-                <Spin size="large" />
-            </div>
-        );
+    if (userData === null) {
+        return <Animation />;
     }
 
     return children;

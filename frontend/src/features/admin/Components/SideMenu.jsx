@@ -6,14 +6,14 @@ function SideMenu({ openSlider, setOpenSlider }) {
     const path = location.pathname;
 
     const navItems = [
-        { path: '/admin', icon: 'fa-dashcube', label: 'Dashboard' },
-        { path: '/admin/products', icon: 'fa-box-open', label: 'Products' },
-        { path: '/admin/orders', icon: 'fa-clipboard', label: 'Orders' },
-        { path: '/admin/review', icon: 'fa-star-half-alt', label: 'Reviews' },
-        { path: '/admin/income', icon: 'fa-wallet', label: 'Income' },
-        { path: '/admin/coupon', icon: 'fa-percentage', label: 'Coupons' },
-        { path: '/admin/help', icon: 'fa-question-circle', label: 'Help' },
-        { path: '/admin/users', icon: 'fa-users', label: 'Users' }
+        { path: '/dashboard', icon: 'fa-dashcube', label: 'Dashboard' },
+        { path: '/dashboard/products', icon: 'fa-box-open', label: 'Products' },
+        { path: '/dashboard/orders', icon: 'fa-clipboard', label: 'Orders' },
+        { path: '/dashboard/review', icon: 'fa-star-half-alt', label: 'Reviews' },
+        { path: '/dashboard/income', icon: 'fa-wallet', label: 'Income' },
+        { path: '/dashboard/coupon', icon: 'fa-percentage', label: 'Coupons' },
+        { path: '/dashboard/help', icon: 'fa-question-circle', label: 'Help' },
+        { path: '/dashboard/users', icon: 'fa-users', label: 'Users' }
     ];
 
     return (
@@ -32,7 +32,7 @@ function SideMenu({ openSlider, setOpenSlider }) {
                             <div className="nav-item m-2" key={item.path}>
                                 <Link to={item.path} className='text-decoration-none hover-side-nav-link'>
                                     <div className={`nav-link py-2 rounded px-3 ${isActive ? 'bg-white text-black fw-bold active-drop-shadow' : 'bg-transparent text-white fw-lighter'}`}>
-                                        <i className={`fas ${item.icon} text-center`} style={{ width: '20px' }}></i> 
+                                        <i className={`fas ${item.icon} text-center`} style={{ width: '20px' }}></i>
                                         {(openSlider || window.innerWidth > 992) && <span className="item ms-2">{item.label}</span>}
                                     </div>
                                 </Link>
@@ -44,7 +44,7 @@ function SideMenu({ openSlider, setOpenSlider }) {
                     <div className="nav-item m-2">
                         <Link to={'/profile'} className='text-decoration-none hover-side-nav-link'>
                             <div className={`nav-link py-2 rounded px-3 text-white`}>
-                                <i className="fas fa-user-circle text-center" style={{ width: '20px' }}></i> 
+                                <i className="fas fa-user-circle text-center" style={{ width: '20px' }}></i>
                                 {(openSlider || window.innerWidth > 992) && <span className="item ms-2">User Profile</span>}
                             </div>
                         </Link>
