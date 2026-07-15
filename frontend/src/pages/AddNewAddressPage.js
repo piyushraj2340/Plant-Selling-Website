@@ -12,7 +12,7 @@ const AddNewAddressPage = () => {
 
     useEffect(() => {
         if (!user) {
-            navigate("/login?redirect=/address/new");
+            navigate("/login?redirect=/address/add");
         }
     }, [])
 
