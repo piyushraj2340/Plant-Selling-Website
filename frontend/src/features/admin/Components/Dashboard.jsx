@@ -9,15 +9,12 @@ import { adminStatsAsync } from '../adminSlice';
 
 const Dashboard = () => {
     const dispatch = useDispatch();
-    const token = useSelector(state => state.user.token);
     const { stats } = useSelector(state => state.admin);
     const [filter, setFilter] = useState('Monthly');
 
     useEffect(() => {
-        if (token) {
-            dispatch(adminStatsAsync(filter));
-        }
-    }, [dispatch, token, filter]);
+        dispatch(adminStatsAsync(filter));
+    }, [dispatch, filter]);
 
     return (
         <>
