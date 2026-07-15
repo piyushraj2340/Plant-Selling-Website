@@ -95,6 +95,14 @@ const plantsSchema = new mongoose.Schema({
         type: String,
         enum: ['Published', 'Draft', 'On Hold'],
         default: 'Draft'
+    },
+    ratings: {
+        type: Number,
+        default: 0
+    },
+    numOfReviews: {
+        type: Number,
+        default: 0
     }
 });
 

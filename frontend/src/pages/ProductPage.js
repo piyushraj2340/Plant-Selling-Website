@@ -5,6 +5,7 @@ import { getProductAsync } from '../features/products/productsSlice';
 import ProductImages from '../features/products/Components/ProductImages';
 import ProductInfo from '../features/products/Components/ProductInfo';
 import ProductSummary from '../features/products/Components/ProductSummary';
+import ProductReviews from '../features/products/Components/ProductReviews';
 import NoDataFound from '../features/common/NoDataFound';
 import Animation from '../features/common/Animation';
 
@@ -31,6 +32,7 @@ const ProductPage = () => {
               <ProductImages />
               <ProductInfo />
               <ProductSummary />
+              <ProductReviews plantId={_id} />
             </div>
           </div >
           :

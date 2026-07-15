@@ -1,10 +1,18 @@
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useDispatch } from 'react-redux'
 import ProductsTable from './ProductsTable'
 import ReviewsTable from './ReviewsTable'
 import ReviewsPieChart from './ReviewsPieChart'
 import ReviewLineChart from './ReviewLineChart'
+import { adminReviewsAsync } from '../adminSlice'
 
 const Reviews = () => {
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(adminReviewsAsync());
+    }, [dispatch]);
+
     return (
         <>
 

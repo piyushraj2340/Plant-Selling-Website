@@ -6,6 +6,7 @@ const initialState = {
     product: null,
     productPricing: null,
     totalProducts: null,
+    productReviews: [],
     isLoading: false
 }
 
@@ -28,6 +29,16 @@ export const getProductAsync = createAsyncThunk('products/fetchProduct', async (
 
 export const searchProductsAsync = createAsyncThunk('products/search', async ({search, category}) => {
     const response = await handelDataFetch(`/api/v2/products/search/plants/?search=${search}&category=${(typeof category === 'string' && category.length > 0) ? category: 'all'}`, 'GET');
+    return response.data;
+});
+
+export const getProductReviewsAsync = createAsyncThunk('products/fetchReviews', async (plantId) => {
+    const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/reviews`, 'GET');
+    return response.data;
+});
+
+export const addProductReviewAsync = createAsyncThunk('products/addReview', async ({ plantId, rating, reviewText }) => {
+    const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/reviews`, 'POST', { rating, reviewText });
     return response.data;
 });
 
@@ -71,6 +82,21 @@ export const productsSlice = createSlice({
                 state.isLoading = false;
                 state.products = action.payload.result;
             }).addCase(searchProductsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(getProductReviewsAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(getProductReviewsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.productReviews = action.payload.result;
+            }).addCase(getProductReviewsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(addProductReviewAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(addProductReviewAsync.fulfilled, (state) => {
+                state.isLoading = false;
+            }).addCase(addProductReviewAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             })
