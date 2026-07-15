@@ -1,54 +1,23 @@
-import React from 'react'
-
+import { useSelector } from 'react-redux';
 import { Table, Tag, Space } from 'antd';
 
 const ProductsTable = () => {
-  const dataSource = [
-    {
-      key: '1',
-      products: {
-        productName: "PlantRose",
-        description: "lorem ipsum dolor sit amet, consectetur adip",
-        imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-        link: "/rose",
-      },
-      stock: 120,
-      price: `₹${6313.21}`,
-      tags: ["flower", "indore plants"],
-      status: "Published",
-      action: 'completed',
+  const plants = useSelector(state => state.admin.productsData.plants) || [];
+
+  const dataSource = plants.map((plant, index) => ({
+    key: plant._id || index,
+    products: {
+      productName: plant.plantName,
+      description: plant.description?.substring(0, 50) + "...",
+      imgLink: plant.images && plant.images.length > 0 ? plant.images[0].url : "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
+      link: `/product/${plant._id}`,
     },
-    {
-      key: '2',
-      products: {
-        productName: "PlantLotus",
-        description: "lorem ipsum dolor sit amet, consectetur adip",
-        imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-        link: "/lotus",
-      },
-      sale: 42,
-      stock: 101,
-      price: `₹${2999.82}`,
-      tags: ["flower", "indore plants"],
-      status: "Draft",
-      action: 'pending',
-    },
-    {
-      key: '3',
-      products: {
-        productName: "PlantSunFlower",
-        description: "lorem ipsum dolor sit amet, consectetur adip",
-        imgLink: "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-        link: "/sun-flower",
-      },
-      sale: 42,
-      stock: 101,
-      price: `₹${2999.82}`,
-      tags: ["flower", "indore plants"],
-      status: "ON Hold",
-      action: 'in-transit',
-    },
-  ];
+    stock: plant.stock,
+    price: `₹${plant.price}`,
+    tags: plant.category ? [plant.category] : [],
+    status: plant.status || "Draft",
+    action: plant.status || "Draft",
+  }));
 
   const columns = [
     {

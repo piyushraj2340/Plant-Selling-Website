@@ -16,6 +16,7 @@ function AddPlants() {
         stock: "",
         discount: "",
         category: "",
+        status: "Draft",
         images: [],
         description: "",
     });
@@ -111,6 +112,7 @@ function AddPlants() {
         formData.append("stock", plant.stock);
         formData.append("discount", plant.discount);
         formData.append("category", plant.category);
+        formData.append("status", plant.status);
         formData.append("description", plant.description);
 
         plant.images.forEach((image, index) => {
@@ -189,6 +191,15 @@ function AddPlants() {
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.category.message}</p>
                                 }
                             </div>
+                        </div>
+
+                        <div className="form-outline mb-4">
+                            <label htmlFor="status" className='ps-1 my-2'>Status: <span className="text-danger small">*</span></label>
+                            <select name='status' id="status" defaultValue={plant.status} className="form-control" onChange={handleInputs} >
+                                <option value="Draft">Draft</option>
+                                <option value="Published">Published</option>
+                                <option value="On Hold">On Hold</option>
+                            </select>
                         </div>
 
                         <div className="form-outline mb-4">

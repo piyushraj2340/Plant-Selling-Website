@@ -15,6 +15,10 @@ const initialState = {
     },
     orders: [],
     users: [],
+    productsData: {
+        stats: { lineChart: [], polarChart: [] },
+        plants: []
+    },
     isLoading: false,
     error: null,
 };
@@ -31,6 +35,11 @@ export const adminOrdersAsync = createAsyncThunk('/admin/orders', async () => {
 
 export const adminUsersAsync = createAsyncThunk('/admin/users', async () => {
     const response = await handelDataFetch(`/api/v2/admin/users`, 'GET');
+    return response.data;
+});
+
+export const adminProductsAsync = createAsyncThunk('/admin/products', async ({ year = '', search = '', filter = '' } = {}) => {
+    const response = await handelDataFetch(`/api/v2/admin/plants?year=${year}&search=${search}&filter=${filter}`, 'GET');
     return response.data;
 });
 
@@ -112,6 +121,25 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
                 message.error({ content: action.error.message || 'Impersonation failed!', key: 'impersonate' });
+            })
+            // PRODUCTS
+            .addCase(adminProductsAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminProductsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                if (action.payload.success) {
+                    state.productsData = {
+                        stats: action.payload.stats,
+                        plants: action.payload.plants
+                    };
+                }
+                state.error = null;
+            })
+            .addCase(adminProductsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
             });
     }
 });

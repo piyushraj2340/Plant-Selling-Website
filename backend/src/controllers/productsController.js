@@ -2,7 +2,9 @@ const plantsModel = require('../model/nurseryModel/plants');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
-        const result = await plantsModel.find().populate({
+        const result = await plantsModel.find({ 
+            $or: [{ status: 'Published' }, { status: { $exists: false } }] 
+        }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
         }).select("-user"); // Populate nursery details
@@ -21,7 +23,10 @@ exports.getAllPlants = async (req, res, next) => {
 exports.getPlantById = async (req, res, next) => {
     try {
         const _id = req.params.id;
-        const result = await plantsModel.findOne({ _id }).populate({
+        const result = await plantsModel.findOne({ 
+            _id, 
+            $or: [{ status: 'Published' }, { status: { $exists: false } }] 
+        }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
         }).select("-user"); // Populate nursery details
@@ -52,9 +57,14 @@ exports.getPlantsByCategory = async (req, res, next) => {
 
         // Construct a MongoDB query to match keywords in various fields
         const query = {
-            $or: [
-                { category: { $regex: category.split(",").join('|'), $options: 'i' } }, // Match in category
-            ],
+            $and: [
+                { $or: [{ status: 'Published' }, { status: { $exists: false } }] },
+                {
+                    $or: [
+                        { category: { $regex: category.split(",").join('|'), $options: 'i' } }, // Match in category
+                    ]
+                }
+            ]
         };
 
         // Handle multiple categories if provided
@@ -97,12 +107,17 @@ exports.searchProducts = async (req, res, next) => {
 
         // Construct a MongoDB query to match keywords in various fields
         const query = {
-            $or: [
-                { plantName: { $regex: keywords.join('|'), $options: 'i' } }, // Match any keyword in title
-                { description: { $regex: keywords.join('|'), $options: 'i' } }, // Match in description
-                { category: { $regex: keywords.join('|'), $options: 'i' } }, // Match in category
-                { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } }, // Match numeric keywords with price
-            ],
+            $and: [
+                { $or: [{ status: 'Published' }, { status: { $exists: false } }] },
+                {
+                    $or: [
+                        { plantName: { $regex: keywords.join('|'), $options: 'i' } }, // Match any keyword in title
+                        { description: { $regex: keywords.join('|'), $options: 'i' } }, // Match in description
+                        { category: { $regex: keywords.join('|'), $options: 'i' } }, // Match in category
+                        { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } }, // Match numeric keywords with price
+                    ]
+                }
+            ]
         };
 
         // Handle multiple categories if provided
