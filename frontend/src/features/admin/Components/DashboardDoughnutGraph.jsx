@@ -17,7 +17,10 @@ ChartJS.register(
     Legend
 )
 
-const DashboardDoughnutGraph = () => {
+const DashboardDoughnutGraph = ({ data, total }) => {
+    const labels = data?.labels || ['Pending', 'Completed'];
+    const graphData = data?.data || [0, 0];
+
     const customCenterText = (chart) => {
         chart.options.info.forEach((elem, index) => {
             const { width, height } = chart;
@@ -39,14 +42,14 @@ const DashboardDoughnutGraph = () => {
             <Doughnut
                 data={
                     {
-                        labels: ['Orders', 'Products', 'Incomes'],
+                        labels: labels,
                         datasets: [
                             {
-                                data: [20, 20, 10],
+                                data: graphData,
                                 // backgroundColor: ['red', 'blue', 'yellow'],
                                 // borderAlign: "",
                                 // borderJoinStyle: 'miter'
-                                label: "Percentage"
+                                label: "Orders"
                             },
                         ],
 
@@ -66,19 +69,14 @@ const DashboardDoughnutGraph = () => {
                         // responsive: true,
                         info: [
                             {
-                                text: '55%',
+                                text: `${total || 0}`,
                                 font: '25px arial',
                                 color: "red"
                             },
                             {
-                                text: 'Total New',
+                                text: 'Total Orders',
                                 font: '16px arial',
                                 color: "black"
-                            },
-                            {
-                                text: 'Customer.',
-                                font: '16px arial',
-                                color: 'black'
                             },
                         ],
                         cutout: "70%",

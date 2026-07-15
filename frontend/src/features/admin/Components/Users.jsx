@@ -1,68 +1,35 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
 import { message } from 'antd';
 import localStorageUtil from '../../../utils/localStorage';
+import { adminUsersAsync, adminImpersonateAsync } from '../adminSlice';
 
 const Users = () => {
-    const [users, setUsers] = useState([]);
-    const [loading, setLoading] = useState(false);
+    const dispatch = useDispatch();
     const token = useSelector((state) => state.user.token);
+    const { users, isLoading } = useSelector((state) => state.admin);
 
     useEffect(() => {
-        fetchUsers();
-    }, []);
-
-    const fetchUsers = async () => {
-        try {
-            setLoading(true);
-            const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v2/admin/users`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            });
-            const data = await res.json();
-            if (data.success) {
-                setUsers(data.users);
-            } else {
-                message.error(data.message || "Failed to fetch users");
-            }
-        } catch (err) {
-            console.error(err);
-            message.error("An error occurred");
-        } finally {
-            setLoading(false);
+        if (token) {
+            dispatch(adminUsersAsync());
         }
-    };
+    }, [dispatch, token]);
 
     const handleImpersonate = async (userId) => {
-        try {
-            const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v2/admin/impersonate`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ targetUserId: userId })
-            });
-            const data = await res.json();
-            if (data.success) {
-                message.success(data.message);
-                localStorageUtil.setData("accessToken", data.accessToken);
-                localStorageUtil.setData("refreshToken", data.refreshToken);
-                window.location.href = '/home'; // Redirect to user home after impersonating
-            } else {
-                message.error(data.message || "Failed to impersonate");
-            }
-        } catch (error) {
-            console.error(error);
-            message.error("Failed to impersonate");
+        const action = await dispatch(adminImpersonateAsync({ targetUserId: userId }));
+        
+        if (adminImpersonateAsync.fulfilled.match(action) && action.payload.success) {
+            // Set the new tokens to local storage to become the user
+            localStorageUtil.setData("accessToken", action.payload.accessToken);
+            localStorageUtil.setData("refreshToken", action.payload.refreshToken);
+            window.location.href = '/home'; // Redirect to user home after impersonating
         }
     };
 
     return (
         <div className="container-fluid p-2 p-md-4 bg-white rounded border">
             <h4 className="mb-4 fw-bold">Platform Users</h4>
-            {loading ? <p>Loading...</p> : (
+            {isLoading ? <p>Loading...</p> : (
                 <div className="table-responsive">
                     <table className="table table-hover align-middle">
                         <thead className="table-light">

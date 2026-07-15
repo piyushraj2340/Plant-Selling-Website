@@ -1,39 +1,23 @@
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { message } from 'antd';
 import DashboardBarGraph from "./DashboardBarGraph";
 import DashboardDoughnutGraph from "./DashboardDoughnutGraph";
 import RecentOrder from './RecentOrder';
+import { adminStatsAsync } from '../adminSlice';
 
 
 const Dashboard = () => {
+    const dispatch = useDispatch();
     const token = useSelector(state => state.user.token);
-    const [stats, setStats] = useState({
-        totalUsers: 0,
-        totalNurseries: 0,
-        totalPlants: 0,
-        totalOrders: 0,
-        totalRevenue: 0
-    });
+    const { stats } = useSelector(state => state.admin);
+    const [filter, setFilter] = useState('Monthly');
 
     useEffect(() => {
-        const fetchStats = async () => {
-            try {
-                const res = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:8000'}/api/v2/admin/stats`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                if (data.success) {
-                    setStats(data.stats);
-                } else {
-                    message.error(data.message || 'Failed to fetch stats');
-                }
-            } catch (err) {
-                console.error(err);
-            }
-        };
-        fetchStats();
-    }, [token]);
+        if (token) {
+            dispatch(adminStatsAsync(filter));
+        }
+    }, [dispatch, token, filter]);
 
     return (
         <>
@@ -92,24 +76,24 @@ const Dashboard = () => {
                                 <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Overview for the store.</small>
                             </div>
                             <div className="right">
-                                <select name="filterIncome" id="filterIncome" defaultValue="Quarterly" className="form-select" style={{ fontSize: "12px" }}>
+                                <select name="filterIncome" id="filterIncome" value={filter} onChange={(e) => setFilter(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
+                                    <option value="Weekly">Weekly</option>
                                     <option value="Monthly">Monthly</option>
-                                    <option value="Quarterly">Quarterly</option>
                                     <option value="Yearly">Yearly</option>
                                 </select>
                             </div>
                         </div>
-                        <DashboardBarGraph />
+                        <DashboardBarGraph data={stats.barData} />
                     </div>
                 </div>
 
                 <div className="bar-graph col-12 col-lg-4">
                     <div className="bg-light rounded border px-3 py-2 px-md-4 d-flex flex-column justify-content-center align-items-center w-100">
                         <div className="graph-header d-flex flex-column py-3 text-center">
-                            <h5 className="h4 fw-bold">Customers</h5>
-                            <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Customers that buy products</small>
+                            <h5 className="h4 fw-bold">Order Status</h5>
+                            <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Breakdown of recent orders</small>
                         </div>
-                        <DashboardDoughnutGraph />
+                        <DashboardDoughnutGraph data={stats.doughnutData} total={stats.totalOrders} />
                     </div>
                 </div>
             </div>

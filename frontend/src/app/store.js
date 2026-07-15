@@ -8,6 +8,7 @@ import nurseryReducer from '../features/nursery/nurserySlice';
 import orderReducer from '../features/order/orderSlice';
 import checkoutReducer from '../features/checkout/checkoutSlice';
 import nurseryPublicStoreSlice  from '../features/nursery/nurseryPublicStoreSlice';
+import adminReducer from '../features/admin/adminSlice';
 
 export default configureStore({
     reducer: {
@@ -20,5 +21,6 @@ export default configureStore({
         nurseryPublicStore: nurseryPublicStoreSlice,
         checkout: checkoutReducer,
         order: orderReducer,
+        admin: adminReducer,
     },
 });

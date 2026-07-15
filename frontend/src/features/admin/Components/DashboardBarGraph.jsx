@@ -20,22 +20,24 @@ ChartJS.register(
 
 
 
-const DashboardBarGraph = () => {
+const DashboardBarGraph = ({ data }) => {
+    const labels = data?.labels || ["No Data"];
+    const graphData = data?.data || [0];
 
     return (
         <div className="col-12" style={{ width: "100%", height: "250px" }}>
             <Bar data={{
-                labels: ["Products", "Orders", "Incomes", "Ratings", "Views"],
+                labels: labels,
                 datasets: [
                     {
                         backgroundColor: 'rgba(75, 192, 192, 0.2)',
                         borderColor: 'rgba(75, 192, 192, 1)',
                         hoverBackgroundColor: 'rgba(50, 200, 200, 1)',
                         borderRadius: 12,
-                        data: [60, 50, 44, 51, 61],
+                        data: graphData,
                         borderSkipped: false,
                         borderWidth: 1,
-                        label: "Percentage",
+                        label: "Revenue",
                     },
                 ],
             }} options={{
