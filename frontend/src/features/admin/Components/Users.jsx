@@ -6,19 +6,16 @@ import { adminUsersAsync, adminImpersonateAsync } from '../adminSlice';
 
 const Users = () => {
     const dispatch = useDispatch();
-    const token = useSelector((state) => state.user.token);
     const { users, isLoading } = useSelector((state) => state.admin);
 
     useEffect(() => {
-        if (token) {
-            dispatch(adminUsersAsync());
-        }
-    }, [dispatch, token]);
+        dispatch(adminUsersAsync());
+    }, [dispatch]);
 
     const handleImpersonate = async (userId) => {
         const action = await dispatch(adminImpersonateAsync({ targetUserId: userId }));
         
-        if (adminImpersonateAsync.fulfilled.match(action) && action.payload.success) {
+        if (adminImpersonateAsync.fulfilled.match(action) && action.payload.status) {
             // Set the new tokens to local storage to become the user
             localStorageUtil.setData("accessToken", action.payload.accessToken);
             localStorageUtil.setData("refreshToken", action.payload.refreshToken);

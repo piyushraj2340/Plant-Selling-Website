@@ -7,14 +7,11 @@ import { adminOrdersAsync } from '../adminSlice';
 const RecentOrder = () => {
   const dispatch = useDispatch();
   const [tableData, setTableData] = useState([]);
-  const token = useSelector((state) => state.user.token);
   const { orders, isLoading } = useSelector((state) => state.admin);
 
   useEffect(() => {
-    if (token) {
-        dispatch(adminOrdersAsync());
-    }
-  }, [dispatch, token]);
+    dispatch(adminOrdersAsync());
+  }, [dispatch]);
 
   useEffect(() => {
     if (orders && orders.length > 0) {
