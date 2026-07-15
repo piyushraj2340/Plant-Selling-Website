@@ -41,7 +41,16 @@ import HelpPage from "../pages/HelpPage";
 import ProfileSettings from "../features/user/Components/ProfileSettings";
 import UserProfile from "../features/user/Components/UserProfile";
 import TwoFactorAuthenticationPage from "../pages/TwoFactorAuthenticationPage";
-import ProtectedRoute from "./ProtectedRoute";
+import AdminProtectedRoute from "./AdminProtectedRoute";
+import AdminLayout from "../features/admin/AdminLayout";
+import AdminDashboard from "../features/admin/Components/Dashboard";
+import AdminProducts from "../features/admin/Components/Products";
+import AdminOrders from "../features/admin/Components/Orders";
+import AdminIncome from "../features/admin/Components/Income";
+import AdminReviews from "../features/admin/Components/Reviews";
+import AdminCoupon from "../features/admin/Components/Coupon";
+import AdminHelp from "../features/admin/Components/Help";
+import AdminUsers from "../features/admin/Components/Users";
 
 const Routing = () => {
     return (
@@ -69,9 +78,9 @@ const Routing = () => {
             <Route exact path="/nursery/update" element={<EditNurseryPage />} />
             <Route exact path="/nursery/plant/new" element={<AddNewPlants />} />
             <Route exact path="/nursery/plant/update/:id" element={<EditPlantsPage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
-            <Route exact path="/address" element={<AddressPage />} />
-            <Route exact path="/address/new" element={<AddNewAddressPage />} />
-            <Route exact path="/address/update/:id" element={<EditAddressPage />} />
+            <Route exact path="/address" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
+            <Route exact path="/address/add" element={<ProtectedRoute><AddNewAddressPage /></ProtectedRoute>} />
+            <Route exact path="/address/update/:id" element={<ProtectedRoute><EditAddressPage /></ProtectedRoute>} />
             <Route exact path="/contact-us" element={<ContactUsPage />} />
 
             <Route path="/cart" element={<CartPage />} />
@@ -88,6 +97,18 @@ const Routing = () => {
             <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
             <Route path="/FAQ" element={<FAQPage />} />
             <Route path="/help" element={<HelpPage />} />
+
+            {/* Admin Routes */}
+            <Route path="/admin" element={<AdminProtectedRoute><AdminLayout /></AdminProtectedRoute>}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProducts />} />
+                <Route path="orders" element={<AdminOrders />} />
+                <Route path="review" element={<AdminReviews />} />
+                <Route path="income" element={<AdminIncome />} />
+                <Route path="coupon" element={<AdminCoupon />} />
+                <Route path="help" element={<AdminHelp />} />
+                <Route path="users" element={<AdminUsers />} />
+            </Route>
 
             <Route path="*" element={<PageNotFound />} />
         </Routes>

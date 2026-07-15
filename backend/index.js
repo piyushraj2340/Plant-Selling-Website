@@ -46,6 +46,7 @@ const payment = require("./src/router/checkoutRoute/payment");
 const contactUs = require("./src/router/contact");
 const nurseryPublicStore = require('./src/router/nurseryRoute/nurseryPublicStore');
 const subscriberEmail = require("./src/router/subscriberEmail");
+const adminRoute = require("./src/router/adminRoute/adminRouter");
 
 // route middleware
 
@@ -54,6 +55,7 @@ app.use('/api/v2/auth', authRoute);
 app.use('/api/v2/user', user, cart, orderRoute, address);
 app.use("/api/v2/nursery", nurseryRoute, nurseryStoreRoute, plantsRoute);
 app.use("/api/v2/checkout", payment);
+app.use("/api/v2/admin", adminRoute);
 
 // public routes
 app.use("/api/v2/products", products);
