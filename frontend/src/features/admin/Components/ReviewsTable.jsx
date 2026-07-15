@@ -63,7 +63,7 @@ const ReviewsTable = () => {
                 return (
                     <a href={link} className='d-flex text-decoration-none hover-product-name'>
                         <div style={{ width: "50px", height: "50px" }} className='border p-1 rounded me-1'>
-                            <img src={imgLink} alt="plants flowers" />
+                            <img style={{ width: "100%", height: "100%", objectFit: "cover" }} src={imgLink} alt="plants flowers" />
                         </div>
                         <div className="d-flex flex-column ms-1 justify-content-start mt-1">
                             <h6 className='h6 fw-bold text-black'>{productName}</h6>

@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Table, Tag, Space } from 'antd';
 
-{/* Add Rating, Review into the component */}
+{/* Add Rating, Review into the component */ }
 const OrdersTable = () => {
   const dataSource = [
     {
@@ -62,7 +62,7 @@ const OrdersTable = () => {
         return (
           <a href={link} className='d-flex text-decoration-none hover-product-name'>
             <div style={{ width: "50px", height: "50px" }} className='border p-1 rounded me-1'>
-              <img src={imgLink} alt="plants flowers" />
+              <img style={{ width: "100%", height: "100%", objectFit: "cover" }} src={imgLink} alt="plants flowers" />
             </div>
             <div className="d-flex flex-column ms-1 justify-content-start mt-1">
               <h6 className='h6 fw-bold text-black'>{productName}</h6>
@@ -120,13 +120,13 @@ const OrdersTable = () => {
       dataIndex: 'action',
       key: 'action',
       render: (_, { action }) => {
-        if(action.toLowerCase() === 'pending')
-        return (
-          <Space size={'small'}>
-            <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{fontSize: "12px"}}>Accepted</button>
-            <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{fontSize: "12px"}}>Reject</button>
-          </Space>
-        )
+        if (action.toLowerCase() === 'pending')
+          return (
+            <Space size={'small'}>
+              <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Accepted</button>
+              <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Reject</button>
+            </Space>
+          )
       }
     },
   ];
