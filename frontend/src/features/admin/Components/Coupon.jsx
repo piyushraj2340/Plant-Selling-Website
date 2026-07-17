@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Modal } from 'antd';
-import CouponTables from './CouponTables'
+import { useDispatch } from 'react-redux';
+import { adminCreateCouponAsync } from '../adminSlice';
+import CouponTables from './CouponTables';
 
 const Coupon = () => {
 
@@ -38,18 +40,26 @@ const Coupon = () => {
         name = e.target.name;
         value = e.target.value;
 
+        if (name === 'couponName') {
+            value = value.toUpperCase();
+        }
+
         setCoupon({ ...coupon, [name]: value });
     }
 
     // options
+    const generateRandomCode = () => {
+        return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
     const handelUseAutoGenerateCoupons = (e) => {
 
         if (e.target.checked) {
             setOptions({ ...options, useAutoGenerateCoupons: true });
-            setCoupon({ ...coupon, couponName: 'RANDOM' });
+            setCoupon(prev => ({ ...prev, couponName: generateRandomCode() }));
         } else {
             setOptions({ ...options, useAutoGenerateCoupons: false });
-            setCoupon({ ...coupon, couponName: '' });
+            setCoupon(prev => ({ ...prev, couponName: '' }));
         }
 
     }
@@ -106,8 +116,33 @@ const Coupon = () => {
         setOptions({ ...options, termsModalVisible: true })
     };
 
-    const handelCreateNewCouponModelSave = async () => {
+    const dispatch = useDispatch();
 
+    const handelCreateNewCouponModelSave = async () => {
+        // Dispatch the action to create the coupon
+        dispatch(adminCreateCouponAsync(coupon)).unwrap().then(() => {
+            // Close the modal
+            handelCreateNewCouponModelClose();
+            // Reset the form
+            setCoupon({
+                couponName: '',
+                description: '',
+                numberOfCoupon: '',
+                minAmount: '',
+                discount: '',
+                maxDiscountInCost: '',
+                createdAt: '',
+                categories: 'all',
+                subCategories: '',
+                redeemBefore: '',
+                freeDelivery: false,
+                singleCouponPerUser: false,
+                newUser: false
+            });
+            setOptions({ ...options, useAutoGenerateCoupons: false, useUnlimitedCoupons: false, useFlatDiscount: false, createNewCouponModelEnabled: false });
+        }).catch((err) => {
+            // Error is handled in the slice, but we can log or show local error if needed.
+        });
     }
 
     const handelCreateNewCouponModelOpen = () => {

@@ -132,3 +132,70 @@ exports.isPlantAddedToCart = async (req, res, next) => {
         next(error); //! Pass the error to the global error middleware
     }
 };
+
+exports.applyCoupon = async (req, res, next) => {
+    try {
+        const PromotionService = require('../../utils/promotionEngine');
+        const { couponCode } = req.body;
+
+        if (!couponCode) {
+            const error = new Error("Coupon code is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // 1. Fetch user's cart items
+        const cartItems = await cartModel.find({ user: req.user._id }).populate('plant', '_id category');
+
+        if (!cartItems || cartItems.length === 0) {
+            const error = new Error("Your cart is empty");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        // 2. Transform the raw cart docs into the CartContext format expected by the engine
+        let total = 0;
+        const items = cartItems.map(item => {
+            const itemTotal = item.pricing.priceAfterDiscount * item.quantity;
+            total += itemTotal;
+            
+            return {
+                product: {
+                    _id: item.plant._id,
+                    category: item.plant.category
+                },
+                price: item.pricing.priceAfterDiscount,
+                quantity: item.quantity
+            };
+        });
+
+        const cartContext = {
+            total,
+            items
+        };
+
+        // 3. Delegate to the reusable Promotion Engine
+        const result = await PromotionService.applyCoupon(couponCode, cartContext, req.user);
+
+        if (!result.success) {
+            return res.status(400).json({
+                status: false,
+                message: result.message
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: "Coupon applied successfully!",
+            data: {
+                couponId: result.couponId,
+                discountAmount: result.discountAmount,
+                freeDelivery: result.freeDelivery,
+                newTotal: result.newTotal
+            }
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};

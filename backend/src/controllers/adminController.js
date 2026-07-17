@@ -607,6 +607,88 @@ const adminController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // Create a new Coupon
+    createCoupon: async (req, res, next) => {
+        try {
+            const Coupon = require('../model/nurseryModel/coupon');
+            const data = req.body;
+
+            // Map frontend data to the schema structure
+            const couponData = {
+                code: data.couponName,
+                description: data.description,
+                discount: {
+                    type: data.discount ? 'Percentage' : 'Flat',
+                    value: data.discount ? parseFloat(data.discount) : parseFloat(data.maxDiscountInCost),
+                    maxDiscountAmount: data.discount && data.maxDiscountInCost ? parseFloat(data.maxDiscountInCost) : null
+                },
+                applicability: {
+                    type: data.categories === 'all' ? 'All' : (data.categories === 'categories' ? 'Categories' : 'Products'),
+                    categories: data.categories === 'categories' ? [data.subCategories] : [],
+                    products: data.categories === 'individual' ? [data.subCategories] : []
+                },
+                rules: {
+                    minOrderAmount: data.minAmount ? parseFloat(data.minAmount) : 0,
+                    validUntil: data.redeemBefore ? new Date(data.redeemBefore) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // Default 30 days
+                    freeDelivery: data.freeDelivery || false,
+                    singleUsePerUser: data.singleCouponPerUser || false,
+                    isNewUserOnly: data.newUser || false
+                },
+                usage: {
+                    maxUsageCount: data.numberOfCoupon && data.numberOfCoupon !== 'Infinity' ? parseInt(data.numberOfCoupon) : null,
+                    currentUsageCount: 0
+                },
+                createdBy: req.user._id // Assuming req.user is set by auth middleware
+            };
+
+            const newCoupon = new Coupon(couponData);
+            await newCoupon.save();
+
+            res.status(201).json({ status: true, message: "Coupon created successfully", coupon: newCoupon });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Get all coupons for Admin Dashboard
+    getCoupons: async (req, res, next) => {
+        try {
+            const Coupon = require('../model/nurseryModel/coupon');
+            const coupons = await Coupon.find().populate('createdBy', 'name').sort({ createdAt: -1 });
+
+            res.status(200).json({ status: true, message: "Coupons fetched successfully", coupons });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Update coupon status
+    updateCouponStatus: async (req, res, next) => {
+        try {
+            const Coupon = require('../model/nurseryModel/coupon');
+            const { id } = req.params;
+            const { status } = req.body;
+
+            if (!['Active', 'Expired', 'Disabled'].includes(status)) {
+                const error = new Error("Invalid status");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const coupon = await Coupon.findByIdAndUpdate(id, { status }, { new: true });
+
+            if (!coupon) {
+                const error = new Error("Coupon not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: "Coupon status updated successfully", coupon });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

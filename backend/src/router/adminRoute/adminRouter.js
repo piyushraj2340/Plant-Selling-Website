@@ -25,4 +25,9 @@ router.patch('/orders/:orderId/items/:itemId/status', adminController.updateOrde
 
 router.get('/income', adminController.getIncome);
 
+// Coupons Endpoints
+router.post('/coupons', adminController.createCoupon);
+router.get('/coupons', adminController.getCoupons);
+router.patch('/coupons/:id/status', adminController.updateCouponStatus);
+
 module.exports = router;

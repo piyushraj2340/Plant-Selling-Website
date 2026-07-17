@@ -30,6 +30,9 @@ const initialState = {
         stats: { barChart: [], pieChart: { labels: [], data: [] } },
         orders: []
     },
+    couponsData: {
+        coupons: [],
+    },
     isLoading: false,
     error: null,
 };
@@ -97,6 +100,21 @@ export const adminUpdateReviewStatusAsync = createAsyncThunk('/admin/updateRevie
 export const adminBulkUpdateReviewStatusAsync = createAsyncThunk('/admin/bulkUpdateReviewStatus', async ({ ids, status }) => {
     const response = await handelDataFetch(`/api/v2/admin/reviews/bulk-status`, 'PATCH', { ids, status });
     return { ...response.data, ids, status };
+});
+
+export const adminCreateCouponAsync = createAsyncThunk('/admin/createCoupon', async (data) => {
+    const response = await handelDataFetch(`/api/v2/admin/coupons`, 'POST', data);
+    return response.data;
+});
+
+export const adminCouponsAsync = createAsyncThunk('/admin/coupons', async () => {
+    const response = await handelDataFetch(`/api/v2/admin/coupons`, 'GET');
+    return response.data;
+});
+
+export const adminUpdateCouponStatusAsync = createAsyncThunk('/admin/updateCouponStatus', async ({ id, status }) => {
+    const response = await handelDataFetch(`/api/v2/admin/coupons/${id}/status`, 'PATCH', { status });
+    return response.data;
 });
 
 export const adminSlice = createSlice({
@@ -369,6 +387,61 @@ export const adminSlice = createSlice({
             .addCase(adminBulkUpdateReviewStatusAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
+            })
+            // GET COUPONS
+            .addCase(adminCouponsAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminCouponsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    state.couponsData.coupons = action.payload.coupons;
+                }
+            })
+            .addCase(adminCouponsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            // CREATE COUPON
+            .addCase(adminCreateCouponAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminCreateCouponAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status && action.payload.coupon) {
+                    state.couponsData.coupons.unshift(action.payload.coupon);
+                    message.success("Coupon created successfully!");
+                }
+            })
+            .addCase(adminCreateCouponAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to create coupon");
+            })
+            // UPDATE COUPON STATUS
+            .addCase(adminUpdateCouponStatusAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdateCouponStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status && action.payload.coupon) {
+                    const index = state.couponsData.coupons.findIndex(c => c._id === action.payload.coupon._id);
+                    if (index !== -1) {
+                        state.couponsData.coupons[index].status = action.payload.coupon.status;
+                        message.success("Coupon status updated!");
+                    }
+                }
+            })
+            .addCase(adminUpdateCouponStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error("Failed to update coupon status");
             });
     }
 });
