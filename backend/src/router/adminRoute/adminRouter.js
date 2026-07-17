@@ -16,5 +16,7 @@ router.post('/impersonate', adminController.impersonateUser);
 
 router.get('/reviews', adminController.getAllReviews);
 router.patch('/reviews/:id/status', adminController.updateReviewStatus);
+router.patch('/plants/bulk-status', adminController.bulkUpdatePlantStatus);
+router.patch('/plants/:id/status', adminController.updatePlantStatus);
 
 module.exports = router;

@@ -1,8 +1,12 @@
-import { useSelector } from 'react-redux';
-import { Table, Tag, Space } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { Table, Tag, Space, message, Popconfirm } from 'antd';
+import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync } from '../adminSlice';
+import React, { useState } from 'react';
 
 const ProductsTable = () => {
+  const dispatch = useDispatch();
   const plants = useSelector(state => state.admin.productsData.plants) || [];
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
   const dataSource = plants.map((plant, index) => ({
     key: plant._id || index,
@@ -18,6 +22,38 @@ const ProductsTable = () => {
     status: plant.status || "Draft",
     action: plant.status || "Draft",
   }));
+
+  const handleUpdateStatus = async (id, status) => {
+    try {
+      const res = await dispatch(adminUpdatePlantStatusAsync({ id, status })).unwrap();
+      if (res.status) {
+        message.success(res.message);
+      }
+    } catch (error) {
+      message.error("Failed to update product status");
+    }
+  };
+
+  const handleBulkStatusUpdate = async (status) => {
+    try {
+      const res = await dispatch(adminBulkUpdatePlantStatusAsync({ ids: selectedRowKeys, status })).unwrap();
+      if (res.status) {
+        message.success(res.message);
+        setSelectedRowKeys([]);
+      }
+    } catch (error) {
+      message.error("Failed to update bulk status");
+    }
+  };
+
+  const onSelectChange = (newSelectedRowKeys) => {
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
 
   const columns = [
     {
@@ -87,22 +123,28 @@ const ProductsTable = () => {
     },
     {
       title: 'Action',
-      dataIndex: 'action',
       key: 'action',
-      render: (_, { status }) => {
+      render: (_, record) => {
+        const status = record.status;
         return (
           <Space size={'small'}>
             {
               status.toLowerCase() !== 'published' &&
-              <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Published</button>
+              <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')}>
+                <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Publish</button>
+              </Popconfirm>
             }
             {
               status.toLowerCase() !== 'draft' &&
-              <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Draft</button>
+              <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')}>
+                <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Draft</button>
+              </Popconfirm>
             }
             {
               status.toLowerCase() !== 'on hold' &&
-              <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>On Hold</button>
+              <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')}>
+                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>On Hold</button>
+              </Popconfirm>
             }
 
 
@@ -112,16 +154,36 @@ const ProductsTable = () => {
       }
     },
   ];
+
+  const hasSelected = selectedRowKeys.length > 0;
+
   return (
-    <Table
-      columns={columns}
-      dataSource={dataSource}
-      pagination={{
-        position: ['bottomCenter'],
-        pageSize: 20
-      }}
-      className='overflow-x-auto'
-    />
+    <div className="w-100">
+      {hasSelected && (
+        <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
+          <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
+          <Popconfirm title={`Publish ${selectedRowKeys.length} selected products?`} onConfirm={() => handleBulkStatusUpdate('Published')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Publish</button>
+          </Popconfirm>
+          <Popconfirm title={`Move ${selectedRowKeys.length} selected products to draft?`} onConfirm={() => handleBulkStatusUpdate('Draft')}>
+            <button className="btn btn-sm btn-secondary py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Draft</button>
+          </Popconfirm>
+          <Popconfirm title={`Put ${selectedRowKeys.length} selected products on hold?`} onConfirm={() => handleBulkStatusUpdate('On Hold')}>
+            <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk On Hold</button>
+          </Popconfirm>
+        </div>
+      )}
+      <Table
+        rowSelection={rowSelection}
+        columns={columns}
+        dataSource={dataSource}
+        pagination={{
+          position: ['bottomCenter'],
+          pageSize: 20
+        }}
+        className='overflow-x-auto'
+      />
+    </div>
   )
 }
 

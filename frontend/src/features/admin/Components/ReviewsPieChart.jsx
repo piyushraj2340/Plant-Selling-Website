@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import {
     Chart as ChartJS,
@@ -18,6 +19,9 @@ ChartJS.register(
 )
 
 const ReviewsPieChart = () => {
+  const { reviewsData } = useSelector(state => state.admin);
+  const pieData = reviewsData?.stats?.pieChart?.data || [0, 0, 0, 0, 0];
+
   return (
     <div style={{ width: "100%" }}>
 
@@ -28,11 +32,11 @@ const ReviewsPieChart = () => {
                         labels: ['1 Star Rating', '2 Star Rating', '3 Star Rating', '4 Star Rating', '5 Star Rating'],
                         datasets: [
                             {
-                                data: [9, 11, 17, 29, 34],
+                                data: pieData,
                                 backgroundColor: ['#dc3545','#6c757d','#ffc107', '#4e84ff','#1fb36e'],
                                 // borderAlign: 'center'
                                 hoverBackgroundColor: "rgba(90, 90, 90,0.5)",
-                                label: "Percentage"
+                                label: "Reviews"
                             },
                         ],
                     }

@@ -5,7 +5,7 @@ const Order = require('../model/checkoutModel/orders');
 exports.getAllPlants = async (req, res, next) => {
     try {
         const result = await plantsModel.find({ 
-            $or: [{ status: 'Published' }, { status: { $exists: false } }] 
+            status: 'Published'
         }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
@@ -27,11 +27,17 @@ exports.getPlantById = async (req, res, next) => {
         const _id = req.params.id;
         const result = await plantsModel.findOne({ 
             _id, 
-            $or: [{ status: 'Published' }, { status: { $exists: false } }] 
+            status: 'Published'
         }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
         }).select("-user"); // Populate nursery details
+
+        if (!result) {
+            const error = new Error("Product not found or not published");
+            error.statusCode = 404;
+            throw error;
+        }
 
         // Assuming there's a method increaseVisit() defined in the plant model
         await result.increaseVisit();
@@ -60,57 +66,50 @@ exports.getPlantsByCategory = async (req, res, next) => {
         // Construct a MongoDB query to match keywords in various fields
         const query = {
             $and: [
-                { $or: [{ status: 'Published' }, { status: { $exists: false } }] },
-                {
-                    $or: [
-                        { category: { $regex: category.split(",").join('|'), $options: 'i' } }, // Match in category
-                    ]
-                }
+                { status: 'Published' }
             ]
         };
 
         // Handle multiple categories if provided
         if (category && category.toLowerCase() !== 'all') {
             const categoryList = category.split(',').map(cat => cat.trim());
-            query.$and = [
-                { category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } }, // Match categories in a case-insensitive manner
-            ];
+            query.$and.push({ category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } });
         }
 
         const result = await plantsModel.find(query).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
         }).select("-user"); // Populate nursery details
-
+ 
         const info = {
             status: true,
             message: `Data For ${category}`,
             result
         };
-
+ 
         res.status(200).send(info);
     } catch (error) {
         next(error);
     }
 };
-
+ 
 exports.searchProducts = async (req, res, next) => {
     try {
         const { search, category } = req.query;
-
+ 
         if (!search) {
             const error = new Error('Search query is required');
             error.statusCode = 400;
             throw error;
         }
-
+ 
         // Split the search string into keywords
         const keywords = search.trim().split(/\s+/);
-
+ 
         // Construct a MongoDB query to match keywords in various fields
         const query = {
             $and: [
-                { $or: [{ status: 'Published' }, { status: { $exists: false } }] },
+                { status: 'Published' },
                 {
                     $or: [
                         { plantName: { $regex: keywords.join('|'), $options: 'i' } }, // Match any keyword in title
@@ -121,13 +120,11 @@ exports.searchProducts = async (req, res, next) => {
                 }
             ]
         };
-
+ 
         // Handle multiple categories if provided
         if (category && category.toLowerCase() !== 'all') {
             const categoryList = category.split(',').map(cat => cat.trim());
-            query.$and = [
-                { category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } }, // Match categories in a case-insensitive manner
-            ];
+            query.$and.push({ category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } });
         }
 
         // Execute the query and fetch matching products

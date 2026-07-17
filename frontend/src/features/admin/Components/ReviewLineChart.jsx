@@ -1,4 +1,5 @@
 import React from 'react';
+import { useSelector } from 'react-redux';
 
 import {
     Chart as ChartJS,
@@ -24,18 +25,20 @@ ChartJS.register(
 
 
 const ReviewLineChart = () => {
+    const { reviewsData } = useSelector(state => state.admin);
+    const lineData = reviewsData?.stats?.lineChart || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+
     return (
         <div className='col-12' style={{ width: "100%", height: "250px" }}>
             <Line data={{
                 labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
                 datasets: [
                     {
-                        label: null,
+                        label: 'Average Rating',
                         borderWidth: 1,
                         borderRadius: 12,
-                        data: [60, 50, 38, 44, 51, 67, 70, 20, 48, 44, 20, 27],
+                        data: lineData,
                         borderSkipped: false,
-                        label: "Products"
                     },
                 ],
             }} options={{

@@ -7,7 +7,7 @@ import { message } from 'antd';
 const ProductReviews = ({ plantId }) => {
     const dispatch = useDispatch();
     const { productReviews, isLoading } = useSelector(state => state.products);
-    const user = useSelector(state => state.user.user); // Assuming user is in state.user
+    const user = useSelector(state => state.user.data); // User is in state.user.data
     
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState('');

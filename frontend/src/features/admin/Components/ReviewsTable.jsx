@@ -7,7 +7,8 @@ import { adminUpdateReviewStatusAsync } from '../adminSlice';
 
 const ReviewsTable = () => {
     const dispatch = useDispatch();
-    const { reviews, isLoading } = useSelector(state => state.admin);
+    const { reviewsData, isLoading } = useSelector(state => state.admin);
+    const reviews = reviewsData?.reviews || [];
     const [dataSource, setDataSource] = useState([]);
 
     useEffect(() => {
