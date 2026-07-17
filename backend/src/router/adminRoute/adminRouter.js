@@ -30,4 +30,9 @@ router.post('/coupons', adminController.createCoupon);
 router.get('/coupons', adminController.getCoupons);
 router.patch('/coupons/:id/status', adminController.updateCouponStatus);
 
+// Contact Us Endpoints
+router.get('/contact-us', adminController.getAllContactMessages);
+router.post('/contact-us/:id/reply', adminController.replyToContactMessage);
+router.delete('/contact-us/:id', adminController.deleteContactMessage);
+
 module.exports = router;

@@ -2,6 +2,8 @@ const User = require('../model/userModel/user');
 const Nursery = require('../model/nurseryModel/nursery');
 const Plant = require('../model/nurseryModel/plants');
 const Order = require('../model/checkoutModel/orders');
+const Contact = require('../model/contact');
+const { replyToContactMessageEmail } = require('./smtp/emailController');
 
 const adminController = {
     // Get Dashboard Stats
@@ -689,7 +691,71 @@ const adminController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // Get all contact messages
+    getAllContactMessages: async (req, res, next) => {
+        try {
+            const contacts = await Contact.find().sort({ createdAt: -1 });
+            res.status(200).json({ status: true, contacts });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Reply to a specific contact message
+    replyToContactMessage: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { replyMessage } = req.body;
+
+            if (!replyMessage) {
+                const error = new Error("Reply message is required");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const contact = await Contact.findById(id);
+            if (!contact) {
+                const error = new Error("Contact message not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            // Send email
+            const isEmailSent = await replyToContactMessageEmail(contact.email, contact.name, replyMessage);
+
+            if (!isEmailSent) {
+                const error = new Error("Failed to send reply email");
+                error.statusCode = 500;
+                throw error;
+            }
+
+            contact.isReplied = true;
+            await contact.save();
+
+            res.status(200).json({ status: true, message: "Reply sent successfully", contact });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Delete a specific contact message (hard-delete)
+    deleteContactMessage: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            const contact = await Contact.findByIdAndDelete(id);
+            if (!contact) {
+                const error = new Error("Contact message not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: "Contact message deleted successfully", id });
+        } catch (error) {
+            next(error);
+        }
     }
 };
-
 module.exports = adminController;
