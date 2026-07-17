@@ -1,9 +1,9 @@
 const userModel = require('../model/userModel/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken, generateToken, generateSecureOTP } = require('../utils/generateToken');
-const { setData, deleteData, getData } = require('../utils/redisVercelKv');
 const { confirmAccountSendEmail, resetPasswordSendEmail, sendOTP } = require('./smtp/emailController');
 const jwt = require('jsonwebtoken');
+const { setData, getData, deleteData } = require('../utils/redisService');
 const { decryptMessage } = require('../utils/cryptoUtil');
 const user = require('../model/userModel/user');
 const validator = require('validator');
