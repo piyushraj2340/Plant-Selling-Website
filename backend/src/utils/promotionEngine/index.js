@@ -114,9 +114,31 @@ const PromotionService = {
                             discountValue: coupon.discountValue,
                             description: coupon.description || `Get ${coupon.discountType === 'Percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue} off`,
                             discountAmount,
-                            freeDelivery: coupon.rules.freeDelivery
+                            freeDelivery: coupon.rules.freeDelivery,
+                            isApplicable: true,
+                            reason: null
+                        });
+                    } else {
+                        applicableCoupons.push({
+                            _id: coupon._id,
+                            code: coupon.code,
+                            discountType: coupon.discountType,
+                            discountValue: coupon.discountValue,
+                            description: coupon.description || `Get ${coupon.discountType === 'Percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue} off`,
+                            isApplicable: false,
+                            reason: ruleResult.reason
                         });
                     }
+                } else {
+                     applicableCoupons.push({
+                        _id: coupon._id,
+                        code: coupon.code,
+                        discountType: coupon.discountType,
+                        discountValue: coupon.discountValue,
+                        description: coupon.description || `Get ${coupon.discountType === 'Percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue} off`,
+                        isApplicable: false,
+                        reason: "This coupon is not applicable to any items in your cart."
+                    });
                 }
             }
 

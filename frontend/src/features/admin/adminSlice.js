@@ -150,6 +150,16 @@ export const adminUpdateCouponStatusAsync = createAsyncThunk('/admin/updateCoupo
     return response.data;
 });
 
+export const adminUpdateCouponAsync = createAsyncThunk('/admin/updateCoupon', async ({ id, data }) => {
+    const response = await handelDataFetch(`/api/v2/admin/coupons/${id}`, 'PUT', data);
+    return response.data;
+});
+
+export const adminDeleteCouponAsync = createAsyncThunk('/admin/deleteCoupon', async (id) => {
+    const response = await handelDataFetch(`/api/v2/admin/coupons/${id}`, 'DELETE');
+    return response.data;
+});
+
 export const adminGetContactsAsync = createAsyncThunk('/admin/getContacts', async () => {
     const response = await handelDataFetch(`/api/v2/admin/contact-us`, 'GET');
     return response.data;
@@ -490,6 +500,45 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
                 message.error("Failed to update coupon status");
+            })
+            // UPDATE COUPON
+            .addCase(adminUpdateCouponAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdateCouponAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status && action.payload.coupon) {
+                    const index = state.couponsData.coupons.findIndex(c => c._id === action.payload.coupon._id);
+                    if (index !== -1) {
+                        state.couponsData.coupons[index] = action.payload.coupon;
+                        message.success("Coupon updated successfully!");
+                    }
+                }
+            })
+            .addCase(adminUpdateCouponAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to update coupon");
+            })
+            // DELETE COUPON
+            .addCase(adminDeleteCouponAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminDeleteCouponAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    state.couponsData.coupons = state.couponsData.coupons.filter(c => c._id !== action.payload.id);
+                    message.success("Coupon deleted successfully!");
+                }
+            })
+            .addCase(adminDeleteCouponAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to delete coupon");
             })
             // CONTACTS
             .addCase(adminGetContactsAsync.pending, (state) => {

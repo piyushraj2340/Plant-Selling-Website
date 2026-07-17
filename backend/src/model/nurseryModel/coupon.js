@@ -59,11 +59,11 @@ const couponSchema = new mongoose.Schema({
     usage: {
         maxUsageCount: { type: Number, default: null }, // Null means Infinity
         currentUsageCount: { type: Number, default: 0 },
-        usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }] // To enforce singleUsePerUser
+        usedBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'user' }] // To enforce singleUsePerUser
     },
     
     // Metadata
-    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }
 }, { 
     timestamps: true 
 });

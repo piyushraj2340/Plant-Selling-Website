@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal } from 'antd';
-import { useDispatch } from 'react-redux';
-import { adminCreateCouponAsync } from '../adminSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { adminCreateCouponAsync, adminUpdateCouponAsync } from '../adminSlice';
 import CouponTables from './CouponTables';
 
 const Coupon = () => {
@@ -118,31 +118,73 @@ const Coupon = () => {
 
     const dispatch = useDispatch();
 
+    const { couponsData } = useSelector(state => state.admin);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editingCouponId, setEditingCouponId] = useState(null);
+
     const handelCreateNewCouponModelSave = async () => {
-        // Dispatch the action to create the coupon
-        dispatch(adminCreateCouponAsync(coupon)).unwrap().then(() => {
-            // Close the modal
-            handelCreateNewCouponModelClose();
-            // Reset the form
+        if (isEditing) {
+            dispatch(adminUpdateCouponAsync({ id: editingCouponId, data: coupon })).unwrap().then(() => {
+                handelCreateNewCouponModelClose();
+                resetCouponForm();
+            }).catch((err) => {});
+        } else {
+            // Dispatch the action to create the coupon
+            dispatch(adminCreateCouponAsync(coupon)).unwrap().then(() => {
+                handelCreateNewCouponModelClose();
+                resetCouponForm();
+            }).catch((err) => {});
+        }
+    }
+
+    const resetCouponForm = () => {
+        setCoupon({
+            couponName: '',
+            description: '',
+            numberOfCoupon: '',
+            minAmount: '',
+            discount: '',
+            maxDiscountInCost: '',
+            createdAt: '',
+            categories: 'all',
+            subCategories: '',
+            redeemBefore: '',
+            freeDelivery: false,
+            singleCouponPerUser: false,
+            newUser: false
+        });
+        setOptions({ ...options, useAutoGenerateCoupons: false, useUnlimitedCoupons: false, useFlatDiscount: false, createNewCouponModelEnabled: false });
+        setIsEditing(false);
+        setEditingCouponId(null);
+    }
+
+    const onEditCoupon = (id) => {
+        const c = couponsData.coupons.find(coupon => coupon._id === id);
+        if (c) {
             setCoupon({
-                couponName: '',
-                description: '',
-                numberOfCoupon: '',
-                minAmount: '',
-                discount: '',
-                maxDiscountInCost: '',
-                createdAt: '',
+                couponName: c.code,
+                description: c.description,
+                numberOfCoupon: c.usage?.maxUsageCount === null ? Infinity : (c.usage?.maxUsageCount || ''),
+                minAmount: c.rules?.minOrderAmount || '',
+                discount: c.discount?.value || '',
+                maxDiscountInCost: c.discount?.maxDiscountAmount || '',
+                createdAt: c.createdAt,
                 categories: 'all',
                 subCategories: '',
-                redeemBefore: '',
-                freeDelivery: false,
-                singleCouponPerUser: false,
-                newUser: false
+                redeemBefore: c.rules?.validUntil ? new Date(c.rules.validUntil).toISOString().slice(0, 16) : '',
+                freeDelivery: c.rules?.freeDelivery || false,
+                singleCouponPerUser: c.rules?.singleUsePerUser || false,
+                newUser: c.rules?.isNewUserOnly || false
             });
-            setOptions({ ...options, useAutoGenerateCoupons: false, useUnlimitedCoupons: false, useFlatDiscount: false, createNewCouponModelEnabled: false });
-        }).catch((err) => {
-            // Error is handled in the slice, but we can log or show local error if needed.
-        });
+            setIsEditing(true);
+            setEditingCouponId(id);
+            setOptions({ 
+                ...options, 
+                createNewCouponModelEnabled: true,
+                useUnlimitedCoupons: c.usage?.maxUsageCount === null,
+                useFlatDiscount: c.discount?.type === 'Flat'
+            });
+        }
     }
 
     const handelCreateNewCouponModelOpen = () => {
@@ -167,7 +209,7 @@ const Coupon = () => {
                     <button className="btn btn-success" onClick={handelCreateNewCouponModelOpen}>Create New Coupon</button>
                 </div>
             </div>
-            <CouponTables showTermsModalOpen={showTermsModalOpen} /> {/* Add Rating, Review into the component */}
+            <CouponTables showTermsModalOpen={showTermsModalOpen} onEditCoupon={onEditCoupon} /> {/* Add Rating, Review into the component */}
 
             <Modal title="Terms and Conditions" open={options.termsModalVisible} onCancel={handleTermsModalClose} footer={null} >
                 <ul>
@@ -177,7 +219,7 @@ const Coupon = () => {
                 </ul>
             </Modal>
 
-            <Modal title="Create New Coupon" open={options.createNewCouponModelEnabled} onCancel={handelCreateNewCouponModelClose} onOk={handelCreateNewCouponModelSave} okText="Draft" >
+            <Modal title={isEditing ? "Edit Coupon" : "Create New Coupon"} open={options.createNewCouponModelEnabled} onCancel={() => {handelCreateNewCouponModelClose(); resetCouponForm();}} onOk={handelCreateNewCouponModelSave} okText={isEditing ? "Save" : "Draft"} >
                 <div className="row border py-3 rounded">
                     <div className="mb-1">
                         <div className="form-floating mb-1">
@@ -186,14 +228,14 @@ const Coupon = () => {
                         </div>
                         <div className="form-check small ms-2 text-secondary">
                             <p className="small">
-                                <input type="checkbox" className='form-check-input' id="autoGenerateCouponCheck" onChange={handelUseAutoGenerateCoupons} />
+                                <input type="checkbox" className='form-check-input' id="autoGenerateCouponCheck" checked={options.useAutoGenerateCoupons} onChange={handelUseAutoGenerateCoupons} />
                                 <label htmlFor="autoGenerateCouponCheck"> Auto Generate Coupon</label>
                             </p>
                         </div>
                     </div>
                     <div className="mb-3">
                         <div className="form-floating mb-1">
-                            <textarea className="form-control" id="description" name='description' placeholder="Enter Description" onChange={handelFormInputs}></textarea>
+                            <textarea className="form-control" id="description" name='description' value={coupon.description} placeholder="Enter Description" onChange={handelFormInputs}></textarea>
                             <label for="description">Description <small className='text-danger'>*</small></label>
                         </div>
                         <div className="small ms-2 text-secondary">
@@ -207,14 +249,14 @@ const Coupon = () => {
                         </div>
                         <div className="form-check small ms-2 text-secondary">
                             <p className="small">
-                                <input type="checkbox" className='form-check-input' id="useUnlimitedCoupons" onChange={handelUseUnlimitedCoupons} />
+                                <input type="checkbox" className='form-check-input' id="useUnlimitedCoupons" checked={options.useUnlimitedCoupons} onChange={handelUseUnlimitedCoupons} />
                                 <label htmlFor="useUnlimitedCoupons"> Unlimited Coupons.</label>
                             </p>
                         </div>
                     </div>
                     <div className="mb-3 col-md-6">
                         <div className="form-floating mb-1">
-                            <input type="number" className="form-control" id="minAmount" name='minAmount' placeholder="Enter minimum cost to applicable coupon." onChange={handelFormInputs} />
+                            <input type="number" className="form-control" id="minAmount" name='minAmount' value={coupon.minAmount} placeholder="Enter minimum cost to applicable coupon." onChange={handelFormInputs} />
                             <label for="minAmount">Minimum Cost <small className='text-danger'>*</small></label>
                         </div>
                         <div className="small ms-2 text-secondary">
@@ -228,14 +270,14 @@ const Coupon = () => {
                         </div>
                         <div className="form-check small ms-2 text-secondary">
                             <p className="small">
-                                <input type="checkbox" className='form-check-input' id="useFlatDiscountCheck" onChange={handelFlatDiscount} />
+                                <input type="checkbox" className='form-check-input' id="useFlatDiscountCheck" checked={options.useFlatDiscount} onChange={handelFlatDiscount} />
                                 <label htmlFor="useFlatDiscountCheck"> Use Flat Discount.</label>
                             </p>
                         </div>
                     </div>
                     <div className="mb-3 col-md-6">
                         <div className="form-floating mb-1">
-                            <input type="number" className="form-control" id="maxDiscountInCost" name='maxDiscountInCost' placeholder="Enter Maximum discount in cost." onChange={handelFormInputs} />
+                            <input type="number" className="form-control" id="maxDiscountInCost" name='maxDiscountInCost' value={coupon.maxDiscountInCost} placeholder="Enter Maximum discount in cost." onChange={handelFormInputs} />
                             <label for="maxDiscountInCost">Maximum Discount in Cost <small className='text-danger'>*</small></label>
                         </div>
                         <div className="small ms-2 text-secondary">
@@ -286,7 +328,7 @@ const Coupon = () => {
 
                     <div className={`mb-3 ${coupon.categories === 'all' ? 'col-md-6' : 'col-md-12'}`}>
                         <div className="form-floating mb-1">
-                            <input type="datetime-local" className="form-control" id="redeemBefore" name='redeemBefore' onChange={handelFormInputs} />
+                            <input type="datetime-local" className="form-control" id="redeemBefore" name='redeemBefore' value={coupon.redeemBefore} onChange={handelFormInputs} />
                             <label for="redeemBefore">Redeem Before <small className='text-danger'>*</small></label>
                         </div>
                         <div className="small ms-2 text-secondary">
@@ -296,15 +338,15 @@ const Coupon = () => {
                     <div className="mb-3">
                         <h6>Terms and Conditions.</h6>
                         <div className="form-check  ms-2 text-secondary">
-                            <input type="checkbox" className='form-check-input' id="freeDelivery" name='freeDelivery' onChange={handelCheckFreeDelivery} />
+                            <input type="checkbox" className='form-check-input' id="freeDelivery" name='freeDelivery' checked={coupon.freeDelivery} onChange={handelCheckFreeDelivery} />
                             <label htmlFor="freeDelivery"> Applicable for Free Delivery</label>
                         </div>
                         <div className="form-check  ms-2 text-secondary">
-                            <input type="checkbox" className='form-check-input' id="singleCouponPerUser" name='singleCouponPerUser' onChange={handelCheckSingleCouponPerUser} />
+                            <input type="checkbox" className='form-check-input' id="singleCouponPerUser" name='singleCouponPerUser' checked={coupon.singleCouponPerUser} onChange={handelCheckSingleCouponPerUser} />
                             <label htmlFor="singleCouponPerUser"> Only single Coupon Per User.</label>
                         </div>
                         <div className="form-check  ms-2 text-secondary">
-                            <input type="checkbox" className='form-check-input' id="newUser" name='newUser' onChange={handelCheckNewUser} />
+                            <input type="checkbox" className='form-check-input' id="newUser" name='newUser' checked={coupon.newUser} onChange={handelCheckNewUser} />
                             <label htmlFor="newUser"> Only for new User.</label>
                         </div>
                     </div>

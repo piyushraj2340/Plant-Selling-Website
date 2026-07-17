@@ -47,6 +47,8 @@ const Navigation = () => {
         };
     }, []);
 
+    const dispatch = useDispatch();
+
     useEffect(() => {
         // Extract the category query parameter and update the selected categories
         const queryParams = new URLSearchParams(location.search);
@@ -57,6 +59,14 @@ const Navigation = () => {
             setSelectedCategories([]);
         }
     }, [location.search]);
+
+    useEffect(() => {
+        if (user) {
+            import('../cart/cartSlice').then(({ cartDataFetchAsync }) => {
+                dispatch(cartDataFetchAsync());
+            });
+        }
+    }, [user, dispatch]);
 
     const handleCategoryChange = (category) => {
         setSelectedCategories((prev) => {

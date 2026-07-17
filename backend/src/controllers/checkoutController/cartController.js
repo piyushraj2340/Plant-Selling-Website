@@ -2,8 +2,23 @@ const cartModel = require('../../model/checkoutModel/cart');
 
 exports.addToCart = async (req, res, next) => {
     try {
-        const newCart = new cartModel(req.body);
-        const result = await newCart.save().then(t => t.populate(["plant", "nursery"])).then(t => t);
+        const { user, plant, quantity = 1 } = req.body;
+
+        // Check if item already exists in user's cart
+        let cartItem = await cartModel.findOne({ user, plant });
+
+        if (cartItem) {
+            // If exists, increment quantity
+            cartItem.quantity += parseInt(quantity);
+            await cartItem.save();
+        } else {
+            // Otherwise create new cart item
+            cartItem = new cartModel(req.body);
+            await cartItem.save();
+        }
+
+        // Populate required fields
+        const result = await cartItem.populate(["plant", "nursery"]);
 
         const info = {
             status: true,
@@ -205,7 +220,7 @@ exports.getApplicableCoupons = async (req, res, next) => {
         const PromotionService = require('../../utils/promotionEngine');
         
         // 1. Fetch user's cart items
-        const cartItems = await cartModel.find({ user: req.user._id }).populate('plant', '_id category');
+        const cartItems = await cartModel.find({ user: req.user }).populate('plant', '_id category');
 
         if (!cartItems || cartItems.length === 0) {
             return res.status(200).json({ status: true, coupons: [] });
