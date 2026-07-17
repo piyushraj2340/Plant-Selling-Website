@@ -284,8 +284,50 @@ const adminController = {
     getAllReviews: async (req, res, next) => {
         try {
             const Review = require('../model/nurseryModel/review');
+            const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+            
+            // Build matching query based on search and filter if needed
+            // For now, fetch all as we're doing basic stats
             const reviews = await Review.find().populate('user', 'name email avatar').populate('plant', 'plantName category images').sort({ _id: -1 });
-            res.status(200).json({ status: true, message: "Reviews fetched successfully", reviews });
+            
+            // Stats calculation
+            const starCounts = [0, 0, 0, 0, 0];
+            const monthRatings = Array(12).fill(0);
+            const monthCounts = Array(12).fill(0);
+
+            reviews.forEach(review => {
+                // Pie Chart: Count by star rating
+                const rating = Math.floor(review.rating);
+                if (rating >= 1 && rating <= 5) {
+                    starCounts[rating - 1]++;
+                }
+
+                // Line Chart: Average rating per month for the selected year
+                const reviewDate = review.createdAt ? new Date(review.createdAt) : new Date(); // Fallback if no createdAt
+                if (reviewDate.getFullYear() === year) {
+                    const month = reviewDate.getMonth();
+                    monthRatings[month] += review.rating;
+                    monthCounts[month]++;
+                }
+            });
+
+            // Calculate monthly averages
+            const lineData = monthRatings.map((total, index) => {
+                return monthCounts[index] > 0 ? parseFloat((total / monthCounts[index]).toFixed(1)) : 0;
+            });
+
+            res.status(200).json({ 
+                status: true, 
+                message: "Reviews fetched successfully", 
+                stats: {
+                    lineChart: lineData,
+                    pieChart: {
+                        labels: ['1 Star Rating', '2 Star Rating', '3 Star Rating', '4 Star Rating', '5 Star Rating'],
+                        data: starCounts
+                    }
+                },
+                reviews 
+            });
         } catch (error) {
             next(error);
         }
@@ -323,6 +365,59 @@ const adminController = {
             }
 
             res.status(200).json({ status: true, message: `Review ${status.toLowerCase()} successfully`, review });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Update plant status
+    updatePlantStatus: async (req, res, next) => {
+        try {
+            const Plant = require('../model/nurseryModel/plants');
+            const { status } = req.body;
+            const plantId = req.params.id;
+
+            if (!['Published', 'Draft', 'On Hold'].includes(status)) {
+                const error = new Error("Invalid status");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const plant = await Plant.findByIdAndUpdate(plantId, { status }, { new: true });
+
+            if (!plant) {
+                const error = new Error("Plant not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: `Product status updated to ${status} successfully`, plant });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Bulk update plant status
+    bulkUpdatePlantStatus: async (req, res, next) => {
+        try {
+            const Plant = require('../model/nurseryModel/plants');
+            const { ids, status } = req.body;
+
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                const error = new Error("Product IDs are required");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            if (!['Published', 'Draft', 'On Hold'].includes(status)) {
+                const error = new Error("Invalid status");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            await Plant.updateMany({ _id: { $in: ids } }, { status });
+
+            res.status(200).json({ status: true, message: `Bulk updated ${ids.length} products to ${status} successfully` });
         } catch (error) {
             next(error);
         }

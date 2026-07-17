@@ -22,7 +22,10 @@ const initialState = {
         stats: { lineChart: [], polarChart: [] },
         plants: []
     },
-    reviews: [],
+    reviewsData: {
+        stats: { lineChart: [], pieChart: { labels: [], data: [] } },
+        reviews: []
+    },
     isLoading: false,
     error: null,
 };
@@ -47,13 +50,23 @@ export const adminProductsAsync = createAsyncThunk('/admin/products', async ({ y
     return response.data;
 });
 
+export const adminUpdatePlantStatusAsync = createAsyncThunk('/admin/updatePlantStatus', async ({ id, status }) => {
+    const response = await handelDataFetch(`/api/v2/admin/plants/${id}/status`, 'PATCH', { status });
+    return response.data;
+});
+
+export const adminBulkUpdatePlantStatusAsync = createAsyncThunk('/admin/bulkUpdatePlantStatus', async ({ ids, status }) => {
+    const response = await handelDataFetch(`/api/v2/admin/plants/bulk-status`, 'PATCH', { ids, status });
+    return { ...response.data, ids, status };
+});
+
 export const adminImpersonateAsync = createAsyncThunk('/admin/impersonate', async (data) => {
     const response = await handelDataFetch(`/api/v2/admin/impersonate`, 'POST', data);
     return response.data;
 });
 
-export const adminReviewsAsync = createAsyncThunk('/admin/reviews', async () => {
-    const response = await handelDataFetch(`/api/v2/admin/reviews`, 'GET');
+export const adminReviewsAsync = createAsyncThunk('/admin/reviews', async ({ year = '', search = '', filter = '' } = {}) => {
+    const response = await handelDataFetch(`/api/v2/admin/reviews?year=${year}&search=${search}&filter=${filter}`, 'GET');
     return response.data;
 });
 
@@ -158,6 +171,46 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
             })
+            // UPDATE PLANT STATUS
+            .addCase(adminUpdatePlantStatusAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdatePlantStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status && action.payload.plant) {
+                    const index = state.productsData.plants.findIndex(p => p._id === action.payload.plant._id);
+                    if (index !== -1) {
+                        state.productsData.plants[index].status = action.payload.plant.status;
+                    }
+                }
+            })
+            .addCase(adminUpdatePlantStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            // BULK UPDATE PLANT STATUS
+            .addCase(adminBulkUpdatePlantStatusAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminBulkUpdatePlantStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const { ids, status } = action.payload;
+                    state.productsData.plants.forEach(p => {
+                        if (ids.includes(p._id)) {
+                            p.status = status;
+                        }
+                    });
+                }
+            })
+            .addCase(adminBulkUpdatePlantStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
             // REVIEWS
             .addCase(adminReviewsAsync.pending, (state) => {
                 state.isLoading = true;
@@ -166,7 +219,10 @@ export const adminSlice = createSlice({
             .addCase(adminReviewsAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
                 if (action.payload.status) {
-                    state.reviews = action.payload.reviews;
+                    state.reviewsData = {
+                        stats: action.payload.stats,
+                        reviews: action.payload.reviews
+                    };
                 }
                 state.error = null;
             })
@@ -183,9 +239,9 @@ export const adminSlice = createSlice({
                 state.error = null;
                 // Update the specific review in the state
                 if (action.payload.status && action.payload.review) {
-                    const index = state.reviews.findIndex(r => r._id === action.payload.review._id);
+                    const index = state.reviewsData.reviews.findIndex(r => r._id === action.payload.review._id);
                     if (index !== -1) {
-                        state.reviews[index].status = action.payload.review.status;
+                        state.reviewsData.reviews[index].status = action.payload.review.status;
                     }
                 }
             })
