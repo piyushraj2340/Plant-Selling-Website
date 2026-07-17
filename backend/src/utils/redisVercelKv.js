@@ -1,3 +1,7 @@
+/**
+ * @deprecated This file is no longer used. We have migrated from Vercel KV to a local Redis instance.
+ * Please use `redisService.js` instead.
+ */
 const { kv } = require('@vercel/kv'); // Import the appropriate Redis client library
 
 async function getData(userId, orderToken, key) {

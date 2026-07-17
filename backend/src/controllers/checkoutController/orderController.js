@@ -1,8 +1,7 @@
 const mongoose = require('mongoose');
 const ordersModel = require('../../model/checkoutModel/orders');
 const cartModel = require('../../model/checkoutModel/cart');
-const { kv } = require('@vercel/kv'); //? Import the appropriate Redis client library :: TO REMOVE THE KV: DATA AFTER PAYMENT SUCCEEDED
-
+const { deleteMultipleData } = require('../../utils/redisService');
 exports.createOrder = async (req, res, next) => {
     try {
         const newOrder = new ordersModel(req.body);
@@ -154,18 +153,15 @@ exports.confirmOrderPayment = async (req, res, next) => {
         await Promise.all(deleteCartPromises);
 
         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA
+        const prefix = process.env.REDIS_VERCEL_KV_DB || 'development';
         const redisKeys = [
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:cartOrProducts`,
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:shipping`,
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:pricing`,
-            `${process.env.REDIS_VERCEL_KV_DB}:${req.user}:${req.orderToken}:payment`
+            `${prefix}:${req.user}:${req.orderToken}:cartOrProducts`,
+            `${prefix}:${req.user}:${req.orderToken}:shipping`,
+            `${prefix}:${req.user}:${req.orderToken}:pricing`,
+            `${prefix}:${req.user}:${req.orderToken}:payment`
         ];
 
-        const deleteRedisPromises = redisKeys.map(async (key) => {
-            await kv.json.del(key);
-        });
-
-        await Promise.all(deleteRedisPromises);
+        await deleteMultipleData(redisKeys);
 
         //* CLEANUP_TASK:: REMOVE THE ORDER_SESSION
         //? remove the order auth session
