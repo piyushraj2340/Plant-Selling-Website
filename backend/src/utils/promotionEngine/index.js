@@ -85,6 +85,46 @@ const PromotionService = {
             console.error("Promotion Engine Error:", error);
             return { success: false, message: "An error occurred while evaluating the coupon." };
         }
+    },
+
+    /**
+     * Finds all active coupons that are currently applicable to the given cart
+     * @param {Object} cart - The cart object containing total and items
+     * @param {Object} user - The user object
+     */
+    getApplicableCoupons: async (cart, user) => {
+        try {
+            // Fetch all active coupons
+            const activeCoupons = await Coupon.find({ status: 'Active' });
+            const applicableCoupons = [];
+
+            for (const coupon of activeCoupons) {
+                // 1. Build Applicable Cart Context
+                const cartContext = buildCartContext(coupon, cart);
+
+                if (cartContext.applicableTotal > 0) {
+                    // 2. Evaluate Rule Eligibility
+                    const ruleResult = await engine.evaluateRules(coupon, cartContext, user);
+                    if (ruleResult.passed) {
+                        const discountAmount = engine.calculateDiscount(coupon, cartContext);
+                        applicableCoupons.push({
+                            _id: coupon._id,
+                            code: coupon.code,
+                            discountType: coupon.discountType,
+                            discountValue: coupon.discountValue,
+                            description: coupon.description || `Get ${coupon.discountType === 'Percentage' ? coupon.discountValue + '%' : '₹' + coupon.discountValue} off`,
+                            discountAmount,
+                            freeDelivery: coupon.rules.freeDelivery
+                        });
+                    }
+                }
+            }
+
+            return { success: true, coupons: applicableCoupons };
+        } catch (error) {
+            console.error("Promotion Engine Error:", error);
+            return { success: false, message: "An error occurred while fetching applicable coupons." };
+        }
     }
 };
 

@@ -19,7 +19,8 @@ router.route('/carts/:id')
 router.route('/isPlantsAddedToCart/:plantId')
 .get(isPlantAddedToCart);
 
-const { applyCoupon } = require("../../controllers/checkoutController/cartController");
+const { applyCoupon, getApplicableCoupons } = require("../../controllers/checkoutController/cartController");
 router.post('/coupons/apply', applyCoupon);
+router.get('/coupons/applicable', getApplicableCoupons);
 
 module.exports = router;
