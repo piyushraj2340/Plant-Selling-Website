@@ -8,7 +8,10 @@ const adminController = require('../../controllers/adminController');
 router.use(auth, isAdmin);
 
 router.get('/stats', adminController.getStats);
+// Users Endpoints
 router.get('/users', adminController.getUsers);
+router.delete('/users/:id', adminController.deleteUser);
+router.post('/users/bulk-delete', adminController.bulkDeleteUsers);
 router.get('/plants', adminController.getPlants);
 router.get('/orders', adminController.getOrders);
 

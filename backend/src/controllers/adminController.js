@@ -98,6 +98,39 @@ const adminController = {
         }
     },
 
+    // Delete a single user
+    deleteUser: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const user = await User.findByIdAndDelete(id);
+            if (!user) {
+                const error = new Error("User not found");
+                error.statusCode = 404;
+                throw error;
+            }
+            res.status(200).json({ status: true, message: "User deleted successfully", id });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Bulk delete users
+    bulkDeleteUsers: async (req, res, next) => {
+        try {
+            const { ids } = req.body;
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                const error = new Error("No user IDs provided");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const result = await User.deleteMany({ _id: { $in: ids } });
+            res.status(200).json({ status: true, message: `${result.deletedCount} users deleted successfully`, ids });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     // Get all plants with aggregations for dashboard
     getPlants: async (req, res, next) => {
         try {
