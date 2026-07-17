@@ -421,6 +421,70 @@ const adminController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // Update individual order item status
+    updateOrderItemStatus: async (req, res, next) => {
+        try {
+            const { orderId, itemId } = req.params;
+            const { status, message } = req.body;
+
+            const order = await Order.findOneAndUpdate(
+                { _id: orderId, "orderItems._id": itemId },
+                {
+                    $set: {
+                        "orderItems.$.orderStatus.status": status,
+                        "orderItems.$.orderStatus.message": message || `${status} status updated`,
+                        "orderItems.$.orderStatus.statusAt": new Date()
+                    }
+                },
+                { new: true }
+            );
+
+            if (!order) {
+                const error = new Error("Order item not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: `Order status updated to ${status} successfully`, order });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Bulk update order items status
+    bulkUpdateOrderItemStatus: async (req, res, next) => {
+        try {
+            const { keys, status, message } = req.body;
+            if (!keys || !Array.isArray(keys) || keys.length === 0) {
+                const error = new Error("Keys are required");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const bulkOps = keys.map(key => {
+                const [orderId, itemId] = key.split('-');
+                return {
+                    updateOne: {
+                        filter: { _id: orderId, "orderItems._id": itemId },
+                        update: {
+                            $set: {
+                                "orderItems.$.orderStatus.status": status,
+                                "orderItems.$.orderStatus.message": message || `${status} status updated`,
+                                "orderItems.$.orderStatus.statusAt": new Date()
+                            }
+                        }
+                    }
+                };
+            });
+
+            await Order.bulkWrite(bulkOps);
+
+            res.status(200).json({ status: true, message: `Bulk updated ${keys.length} orders to ${status} successfully` });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

@@ -40,6 +40,16 @@ export const adminOrdersAsync = createAsyncThunk('/admin/orders', async ({ year 
     return response.data;
 });
 
+export const adminUpdateOrderItemStatusAsync = createAsyncThunk('/admin/updateOrderItemStatus', async ({ orderId, itemId, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/admin/orders/${orderId}/items/${itemId}/status`, 'PATCH', { status, message });
+    return { ...response.data, orderId, itemId, status, statusMessage: message };
+});
+
+export const adminBulkUpdateOrderItemStatusAsync = createAsyncThunk('/admin/bulkUpdateOrderItemStatus', async ({ keys, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/admin/orders/bulk-status`, 'PATCH', { keys, status, message });
+    return { ...response.data, keys, status, statusMessage: message };
+});
+
 export const adminUsersAsync = createAsyncThunk('/admin/users', async () => {
     const response = await handelDataFetch(`/api/v2/admin/users`, 'GET');
     return response.data;
@@ -116,6 +126,63 @@ export const adminSlice = createSlice({
                 state.error = null;
             })
             .addCase(adminOrdersAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            // UPDATE ORDER ITEM STATUS
+            .addCase(adminUpdateOrderItemStatusAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdateOrderItemStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const { orderId, itemId, status, statusMessage } = action.payload;
+                    const orderIndex = state.ordersData.data.findIndex(o => o._id === orderId);
+                    if (orderIndex !== -1) {
+                        const itemIndex = state.ordersData.data[orderIndex].orderItems.findIndex(i => i._id === itemId);
+                        if (itemIndex !== -1) {
+                            state.ordersData.data[orderIndex].orderItems[itemIndex].orderStatus = {
+                                status,
+                                message: statusMessage || `${status} status updated`,
+                                statusAt: new Date().toISOString()
+                            };
+                        }
+                    }
+                }
+            })
+            .addCase(adminUpdateOrderItemStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            // BULK UPDATE ORDER ITEMS STATUS
+            .addCase(adminBulkUpdateOrderItemStatusAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminBulkUpdateOrderItemStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const { keys, status, statusMessage } = action.payload;
+                    keys.forEach(key => {
+                        const [orderId, itemId] = key.split('-');
+                        const orderIndex = state.ordersData.data.findIndex(o => o._id === orderId);
+                        if (orderIndex !== -1) {
+                            const itemIndex = state.ordersData.data[orderIndex].orderItems.findIndex(i => i._id === itemId);
+                            if (itemIndex !== -1) {
+                                state.ordersData.data[orderIndex].orderItems[itemIndex].orderStatus = {
+                                    status,
+                                    message: statusMessage || `${status} status updated`,
+                                    statusAt: new Date().toISOString()
+                                };
+                            }
+                        }
+                    });
+                }
+            })
+            .addCase(adminBulkUpdateOrderItemStatusAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             })
