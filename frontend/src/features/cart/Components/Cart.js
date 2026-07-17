@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
-import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing, cartApplyCouponAsync, removeCoupon } from '../cartSlice';
+import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing, cartApplyCouponAsync, removeCoupon, cartGetApplicableCouponsAsync } from '../cartSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 import handelShareProduct from '../../../utils/handelShareProduct';
@@ -16,6 +16,7 @@ function Cart() {
   const selectedAddress = useSelector(state => state.address.selectedAddress);
   const cartPriceDetails = useSelector(state => state.cart.cartPriceDetails);
   const appliedCoupon = useSelector(state => state.cart.appliedCoupon);
+  const applicableCoupons = useSelector(state => state.cart.applicableCoupons);
 
   const dispatch = useDispatch();
 
@@ -28,8 +29,10 @@ function Cart() {
 
   useEffect(() => {
     dispatch(clearIsSessionError());
-    dispatch(cartDataFetchAsync());
-  }, [])
+    dispatch(cartDataFetchAsync()).then(() => {
+      dispatch(cartGetApplicableCouponsAsync());
+    });
+  }, [dispatch]);
 
   useEffect(() => {
        user && (addressList ?? dispatch(addressListDataFetchAsync()))
@@ -216,10 +219,26 @@ function Cart() {
                         <button onClick={() => dispatch(removeCoupon())} className="btn-close" style={{fontSize: '10px'}}></button>
                       </div>
                     ) : (
-                      <p className="text-muted mt-1 input-group">
-                        <input style={{ width: "70%" }} type="text" className='form-control' name="coupon" id="coupon" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" />
-                        <button style={{ width: "30%" }} className='form-control btn btn-info' onClick={() => { if(couponInput) dispatch(cartApplyCouponAsync(couponInput)) }}>Apply</button>
-                      </p>
+                      <div className="mt-1">
+                        <div className="input-group">
+                          <input style={{ width: "70%" }} type="text" className='form-control' name="coupon" id="coupon" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" />
+                          <button style={{ width: "30%" }} className='form-control btn btn-info' onClick={() => { if(couponInput) dispatch(cartApplyCouponAsync(couponInput)) }}>Apply</button>
+                        </div>
+                        {applicableCoupons && applicableCoupons.length > 0 && (
+                          <div className="mt-3">
+                            <p className="text-muted small mb-1"><i className="fas fa-tags"></i> Available Coupons:</p>
+                            {applicableCoupons.map(coupon => (
+                              <div key={coupon._id} className="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
+                                <div>
+                                  <div className="fw-bold text-success" style={{fontSize: '0.9rem'}}>{coupon.code}</div>
+                                  <div className="text-muted" style={{fontSize: '0.75rem'}}>{coupon.description}</div>
+                                </div>
+                                <button className="btn btn-sm btn-outline-info" style={{fontSize: '0.7rem'}} onClick={() => { setCouponInput(coupon.code); dispatch(cartApplyCouponAsync(coupon.code)); }}>Apply</button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     )
                   }
 

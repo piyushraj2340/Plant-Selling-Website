@@ -9,6 +9,7 @@ const initialState = {
     cartPriceDetails: null,
     cartLength: 0,
     appliedCoupon: null,
+    applicableCoupons: [],
     error: null,
     isLoading: false
 }
@@ -36,7 +37,12 @@ export const cartDataUpdateQuantityAsync = createAsyncThunk('/cart/details/updat
 });
 
 export const cartApplyCouponAsync = createAsyncThunk('/cart/coupons/apply', async (couponCode) => {
-    const response = await handelDataFetch(`/api/v2/checkout/carts/coupons/apply`, 'POST', { couponCode });
+    const response = await handelDataFetch(`/api/v2/user/coupons/apply`, 'POST', { couponCode });
+    return response.data;
+});
+
+export const cartGetApplicableCouponsAsync = createAsyncThunk('/cart/coupons/applicable', async () => {
+    const response = await handelDataFetch(`/api/v2/user/coupons/applicable`, 'GET');
     return response.data;
 });
 
@@ -177,6 +183,21 @@ export const cartSlice = createSlice({
                 }
             })
             .addCase(cartApplyCouponAsync.rejected, (state, action) => {
+                state.error = action.error;
+                state.isLoading = false;
+            })
+            .addCase(cartGetApplicableCouponsAsync.pending, (state) => {
+                state.error = null;
+                state.isLoading = true;
+            })
+            .addCase(cartGetApplicableCouponsAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.applicableCoupons = action.payload.coupons;
+                }
+                state.error = null;
+                state.isLoading = false;
+            })
+            .addCase(cartGetApplicableCouponsAsync.rejected, (state, action) => {
                 state.error = action.error;
                 state.isLoading = false;
             });

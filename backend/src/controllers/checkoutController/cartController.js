@@ -199,3 +199,50 @@ exports.applyCoupon = async (req, res, next) => {
         next(error);
     }
 };
+
+exports.getApplicableCoupons = async (req, res, next) => {
+    try {
+        const PromotionService = require('../../utils/promotionEngine');
+        
+        // 1. Fetch user's cart items
+        const cartItems = await cartModel.find({ user: req.user._id }).populate('plant', '_id category');
+
+        if (!cartItems || cartItems.length === 0) {
+            return res.status(200).json({ status: true, coupons: [] });
+        }
+
+        // 2. Transform the raw cart docs into the CartContext format
+        let total = 0;
+        const items = cartItems.map(item => {
+            const itemTotal = item.pricing.priceAfterDiscount * item.quantity;
+            total += itemTotal;
+            
+            return {
+                product: {
+                    _id: item.plant._id,
+                    category: item.plant.category
+                },
+                price: item.pricing.priceAfterDiscount,
+                quantity: item.quantity
+            };
+        });
+
+        const cartContext = { total, items };
+
+        // 3. Delegate to Promotion Engine
+        const result = await PromotionService.getApplicableCoupons(cartContext, req.user);
+
+        if (!result.success) {
+            return res.status(400).json({ status: false, message: result.message });
+        }
+
+        return res.status(200).json({
+            status: true,
+            message: "Applicable coupons retrieved successfully",
+            coupons: result.coupons
+        });
+
+    } catch (error) {
+        next(error);
+    }
+};
