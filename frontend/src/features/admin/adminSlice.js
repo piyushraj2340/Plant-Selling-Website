@@ -66,7 +66,17 @@ export const adminBulkUpdateOrderItemStatusAsync = createAsyncThunk('/admin/bulk
 });
 
 export const adminUsersAsync = createAsyncThunk('/admin/users', async () => {
-    const response = await handelDataFetch(`/api/v2/admin/users`, 'GET');
+    const response = await handelDataFetch('/api/v2/admin/users', 'GET');
+    return response.data;
+});
+
+export const adminDeleteUserAsync = createAsyncThunk('/admin/users/delete', async (id) => {
+    const response = await handelDataFetch(`/api/v2/admin/users/${id}`, 'DELETE');
+    return response.data;
+});
+
+export const adminBulkDeleteUsersAsync = createAsyncThunk('/admin/users/bulkDelete', async (ids) => {
+    const response = await handelDataFetch(`/api/v2/admin/users/bulk-delete`, 'POST', { ids });
     return response.data;
 });
 
@@ -496,6 +506,42 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
                 message.error(action.error.message || "Failed to send reply");
+            })
+            // SINGLE DELETE
+            .addCase(adminDeleteUserAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminDeleteUserAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    state.users = state.users.filter(u => u._id !== action.payload.id);
+                    message.success("User deleted successfully!");
+                }
+            })
+            .addCase(adminDeleteUserAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to delete user");
+            })
+            // BULK DELETE
+            .addCase(adminBulkDeleteUsersAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminBulkDeleteUsersAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    state.users = state.users.filter(u => !action.payload.ids.includes(u._id));
+                    message.success(action.payload.message);
+                }
+            })
+            .addCase(adminBulkDeleteUsersAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to bulk delete users");
             })
             .addCase(adminDeleteContactAsync.pending, (state) => {
                 state.isLoading = true;
