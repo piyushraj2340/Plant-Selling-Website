@@ -8,6 +8,7 @@ const initialState = {
     selectedCart: null,
     cartPriceDetails: null,
     cartLength: 0,
+    appliedCoupon: null,
     error: null,
     isLoading: false
 }
@@ -31,6 +32,11 @@ export const cartDataDeleteAsync = createAsyncThunk('/cart/details/delete', asyn
 export const cartDataUpdateQuantityAsync = createAsyncThunk('/cart/details/update', async ({ cartId, quantity }) => {
     console.log(cartId);
     const response = await handelDataFetch(`/api/v2/user/carts/${cartId}`, 'PATCH', { quantity });
+    return response.data;
+});
+
+export const cartApplyCouponAsync = createAsyncThunk('/cart/coupons/apply', async (couponCode) => {
+    const response = await handelDataFetch(`/api/v2/checkout/carts/coupons/apply`, 'POST', { couponCode });
     return response.data;
 });
 
@@ -61,6 +67,9 @@ export const cartSlice = createSlice({
         },
         setSelectedCart: (state, action) => {
             state.selectedCart = action.payload;
+        },
+        removeCoupon: (state) => {
+            state.appliedCoupon = null;
         }
     },
     extraReducers: (builder) => {
@@ -156,8 +165,23 @@ export const cartSlice = createSlice({
                 state.error = action.error;
                 state.isLoading = false;
             })
+            .addCase(cartApplyCouponAsync.pending, (state) => {
+                state.error = null;
+                state.isLoading = true;
+            })
+            .addCase(cartApplyCouponAsync.fulfilled, (state, action) => {
+                state.error = null;
+                state.isLoading = false;
+                if (action.payload.status) {
+                    state.appliedCoupon = action.payload.data;
+                }
+            })
+            .addCase(cartApplyCouponAsync.rejected, (state, action) => {
+                state.error = action.error;
+                state.isLoading = false;
+            });
     }
 });
 
-export const { setCartPricing, setSelectedCart } = cartSlice.actions;
+export const { setCartPricing, setSelectedCart, removeCoupon } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
-import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing } from '../cartSlice';
+import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing, cartApplyCouponAsync, removeCoupon } from '../cartSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 import handelShareProduct from '../../../utils/handelShareProduct';
@@ -15,10 +15,12 @@ function Cart() {
   const addressList = useSelector(state => state.address.addressList);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
   const cartPriceDetails = useSelector(state => state.cart.cartPriceDetails);
+  const appliedCoupon = useSelector(state => state.cart.appliedCoupon);
 
   const dispatch = useDispatch();
 
   const [viewAddressList, setViewAddressList] = useState(false);
+  const [couponInput, setCouponInput] = useState('');
 
   const noDataFound = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
@@ -68,8 +70,9 @@ function Cart() {
     const data = {
       data: {
         cartOrProducts: cart,
-        pricing: cartPriceDetails,
-        shippingInfo: selectedAddress
+        pricing: appliedCoupon ? { ...cartPriceDetails, totalPrice: appliedCoupon.newTotal, couponDiscount: appliedCoupon.discountAmount } : cartPriceDetails,
+        shippingInfo: selectedAddress,
+        couponId: appliedCoupon ? appliedCoupon.couponId : null
       },
       navigate
     }
@@ -199,20 +202,31 @@ function Cart() {
                     <small>ITEMS {(cart ?? 0) && Number(cart.length)}</small>
                     <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount}</b></span>
                   </p>
-                  <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }}>
+                  <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }} style={{cursor: 'pointer'}}>
                     <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : "Select delivery location"}</small>
                   </p>
-                  <p className="text-muted mb-0">
+                  
+                  <p className="text-muted mb-0 mt-3">
                     <small className='small'>Have Coupon?</small>
                   </p>
-                  <p className="text-muted mt-1 input-group">
-                    <input style={{ width: "70%" }} type="text" className='form-control' name="coupon" id="coupon" />
-                    <button style={{ width: "30%" }} className='form-control btn btn-info'>Apply</button>
-                  </p>
+                  {
+                    appliedCoupon ? (
+                      <div className="alert alert-success d-flex justify-content-between p-2 mt-1 mb-3 align-items-center">
+                        <small><strong>Applied:</strong> ₹{appliedCoupon.discountAmount} Off</small>
+                        <button onClick={() => dispatch(removeCoupon())} className="btn-close" style={{fontSize: '10px'}}></button>
+                      </div>
+                    ) : (
+                      <p className="text-muted mt-1 input-group">
+                        <input style={{ width: "70%" }} type="text" className='form-control' name="coupon" id="coupon" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" />
+                        <button style={{ width: "30%" }} className='form-control btn btn-info' onClick={() => { if(couponInput) dispatch(cartApplyCouponAsync(couponInput)) }}>Apply</button>
+                      </p>
+                    )
+                  }
+
                   <p className="text-muted border-bottom pb-3">
                     <i className='fas fa-info-circle'></i>
                     {
-                      cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount > 500 ?
+                      (cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount > 500) || (appliedCoupon && appliedCoupon.freeDelivery) ?
                         <span className="m-0">
                           <small className='small'> Eligible for FREE Delivery. <Link>Detail</Link></small>
                         </span>
@@ -232,9 +246,17 @@ function Cart() {
                       <small>Discount : </small>
                       <span>- ₹<b>{cartPriceDetails && cartPriceDetails.discountPrice}</b></span>
                     </p>
+                    { appliedCoupon && (
+                      <p className="text-success d-flex justify-content-between">
+                        <small>Coupon Savings : </small>
+                        <span>- ₹<b>{appliedCoupon.discountAmount}</b></span>
+                      </p>
+                    )}
                     <p className="text-muted d-flex justify-content-between">
                       <small>Delivery : </small>
-                      <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryPrice}</b></span>
+                      { appliedCoupon?.freeDelivery ? 
+                        <span><del className="text-muted">₹{cartPriceDetails && cartPriceDetails.deliveryPrice}</del> <b className="text-success">FREE</b></span>
+                      : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryPrice}</b></span> }
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Subtotal : </small>
@@ -242,7 +264,7 @@ function Cart() {
                     </p>
                   </div>
                   <div className="d-flex flex-row-reverse p-3">
-                    <p className="h5">Total: <sup>₹</sup>{cartPriceDetails && cartPriceDetails.totalPrice}</p>
+                    <p className="h5">Total: <sup>₹</sup>{appliedCoupon ? appliedCoupon.newTotal : (cartPriceDetails && cartPriceDetails.totalPrice)}</p>
                   </div>
                   <div className="row m-0">
                     <button onClick={handelBuyProduct} className="btn btn-success">Checkout</button>

@@ -19,5 +19,7 @@ router.route('/carts/:id')
 router.route('/isPlantsAddedToCart/:plantId')
 .get(isPlantAddedToCart);
 
+const { applyCoupon } = require("../../controllers/checkoutController/cartController");
+router.post('/coupons/apply', applyCoupon);
 
 module.exports = router;

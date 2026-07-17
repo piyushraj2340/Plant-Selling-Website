@@ -1,49 +1,40 @@
-import React, { useState } from 'react';
-import { Table, Space, Modal } from 'antd';
+import React, { useEffect } from 'react';
+import { Table, Space, Tag, Popconfirm } from 'antd';
+import { useDispatch, useSelector } from 'react-redux';
+import { adminCouponsAsync, adminUpdateCouponStatusAsync } from '../adminSlice';
 
+const CouponTables = ({ showTermsModalOpen }) => {
+    const dispatch = useDispatch();
+    const { couponsData, isLoading } = useSelector(state => state.admin);
 
-const CouponTables = ({showTermsModalOpen}) => {
-    const dataSource = [
-        {
-            key: '1',
-            couponName: "FIRST25",
-            description: {
-                overview: "Unlock a fantastic 25% discount, up to 100 Rupees, on your first purchase when you place an order totaling 149 Rupees or more. This special offer is designed exclusively for our valued first-time users, giving you extra savings on top of our already amazing deals",
-                termsAndConditions: ["Valid for first-time users only.", "Minimum order value of 149 Rupees required.", "Maximum discount capped at 100 Rupees.", "Use code FIRST25 at checkout.", "Limited time offer, subject to availability", "Not applicable with other promotions or discounts.", "The company reserves the right to modify or terminate the offer at any time."]
-            },
-            discount: "25%",
-            createdAt: '12:00:00 UTC 1st January 2024',
-            redeemBefore: '12:00:00 UTC 1st January 2025',
-            redemptionLimit: "1",
-            action: 'publish'
+    useEffect(() => {
+        dispatch(adminCouponsAsync());
+    }, [dispatch]);
+
+    const handleStatusUpdate = (id, newStatus) => {
+        dispatch(adminUpdateCouponStatusAsync({ id, status: newStatus }));
+    };
+
+    const dataSource = couponsData.coupons.map(coupon => ({
+        key: coupon._id,
+        _id: coupon._id,
+        couponName: coupon.code,
+        description: {
+            overview: coupon.description,
+            termsAndConditions: [
+                `Valid until: ${new Date(coupon.rules.validUntil).toLocaleDateString()}`,
+                coupon.rules.minOrderAmount ? `Minimum order amount: ₹${coupon.rules.minOrderAmount}` : 'No minimum order required',
+                coupon.rules.freeDelivery ? 'Includes free delivery' : null,
+                coupon.rules.singleUsePerUser ? 'Single use per user' : null,
+                coupon.rules.isNewUserOnly ? 'Valid for new users only' : null,
+            ].filter(Boolean)
         },
-        {
-            key: '2',
-            couponName: "FIRST25",
-            description: {
-                overview: "Unlock a fantastic 25% discount, up to 100 Rupees, on your first purchase when you place an order totaling 149 Rupees or more. This special offer is designed exclusively for our valued first-time users, giving you extra savings on top of our already amazing deals",
-                termsAndConditions: ["Valid for first-time users only.", "Minimum order value of 149 Rupees required.", "Maximum discount capped at 100 Rupees.", "Use code FIRST25 at checkout.", "Limited time offer, subject to availability", "Not applicable with other promotions or discounts.", "The company reserves the right to modify or terminate the offer at any time."]
-            },
-            discount: "25%",
-            createdAt: '12:00:00 UTC 1st January 2024',
-            redeemBefore: '12:00:00 UTC 1st January 2025',
-            redemptionLimit: "1",
-            action: 'draft'
-        },
-        {
-            key: '3',
-            couponName: "FIRST25",
-            description: {
-                overview: "Unlock a fantastic 25% discount, up to 100 Rupees, on your first purchase when you place an order totaling 149 Rupees or more. This special offer is designed exclusively for our valued first-time users, giving you extra savings on top of our already amazing deals",
-                termsAndConditions: ["Valid for first-time users only.", "Minimum order value of 149 Rupees required.", "Maximum discount capped at 100 Rupees.", "Use code FIRST25 at checkout.", "Limited time offer, subject to availability", "Not applicable with other promotions or discounts.", "The company reserves the right to modify or terminate the offer at any time."]
-            },
-            discount: "25%",
-            createdAt: '12:00:00 UTC 1st January 2024',
-            redeemBefore: '12:00:00 UTC 1st January 2025',
-            redemptionLimit: "1",
-            action: 'draft'
-        }
-    ];
+        discount: coupon.discount.type === 'Percentage' ? `${coupon.discount.value}%` : `₹${coupon.discount.value}`,
+        createdAt: new Date(coupon.createdAt).toLocaleDateString(),
+        redeemBefore: new Date(coupon.rules.validUntil).toLocaleDateString(),
+        redemptionLimit: coupon.usage.maxUsageCount ? `${coupon.usage.currentUsageCount}/${coupon.usage.maxUsageCount}` : 'Unlimited',
+        status: coupon.status
+    }));
 
     const columns = [
         {
@@ -85,32 +76,32 @@ const CouponTables = ({showTermsModalOpen}) => {
         },
         {
             title: 'Action',
-            dataIndex: 'action',
-            key: 'action',
-            render: (action) => {
+            dataIndex: 'status',
+            key: 'status',
+            render: (status, record) => {
                 return (
                     <>
                         <Space size={'small'} className='mb-1'>
-                            <button className='btn btn-sm btn-primary py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>edit</i> <span>Edit</span></button>
+                            <Tag color={status === 'Active' ? 'green' : status === 'Expired' ? 'red' : 'default'}>{status}</Tag>
                         </Space>
-                        <Space size={'small'} className='mb-1'>
-                            <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>delete</i> <span>Delete</span></button>
-                        </Space>
-
+                        <br/>
                         {
-                            action.toLowerCase() !== 'draft' &&
-                            <Space size={'small'} >
-                                <button className='btn btn-sm btn-warning py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>draft</i> <span>Draft</span></button>
+                            status !== 'Disabled' && status !== 'Expired' &&
+                            <Space size={'small'} className='mt-2'>
+                                <Popconfirm title="Disable this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Disabled')}>
+                                    <button className='btn btn-sm btn-warning py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><span>Disable</span></button>
+                                </Popconfirm>
                             </Space>
                         }
                         {
-                            action.toLowerCase() !== 'publish' &&
-                            <Space size={'small'} >
-                                <button className='btn btn-sm btn-warning py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>publish</i> <span>Publish</span></button>
+                            status === 'Disabled' &&
+                            <Space size={'small'} className='mt-2'>
+                                <Popconfirm title="Activate this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Active')}>
+                                    <button className='btn btn-sm btn-success py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><span>Activate</span></button>
+                                </Popconfirm>
                             </Space>
                         }
                     </>
-
                 )
             },
             width: 150
