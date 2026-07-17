@@ -370,6 +370,46 @@ const adminController = {
         }
     },
 
+    // Bulk update review status
+    bulkUpdateReviewStatus: async (req, res, next) => {
+        try {
+            const Review = require('../model/nurseryModel/review');
+            const Plant = require('../model/nurseryModel/plants');
+            const { ids, status } = req.body;
+
+            if (!ids || !Array.isArray(ids) || ids.length === 0) {
+                const error = new Error("Review IDs are required");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            if (!['Approved', 'Rejected'].includes(status)) {
+                const error = new Error("Invalid status");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            await Review.updateMany({ _id: { $in: ids } }, { status });
+
+            // Recalculate average ratings for all plants whose reviews were approved
+            if (status === 'Approved') {
+                const reviews = await Review.find({ _id: { $in: ids } });
+                const plantIds = [...new Set(reviews.map(r => r.plant.toString()))];
+
+                for (const plantId of plantIds) {
+                    const allApproved = await Review.find({ plant: plantId, status: 'Approved' });
+                    const numOfReviews = allApproved.length;
+                    const ratings = numOfReviews > 0 ? (allApproved.reduce((acc, curr) => acc + curr.rating, 0) / numOfReviews) : 0;
+                    await Plant.findByIdAndUpdate(plantId, { ratings, numOfReviews });
+                }
+            }
+
+            res.status(200).json({ status: true, message: `Bulk updated ${ids.length} reviews to ${status} successfully` });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     // Update plant status
     updatePlantStatus: async (req, res, next) => {
         try {

@@ -14,6 +14,10 @@ const AdminProtectedRoute = ({ children }) => {
         return <Animation />;
     }
 
+    if (!userData.role.includes("admin")) {
+        return <Navigate to="/profile" replace={true} />;
+    }
+
     return children;
 };
 

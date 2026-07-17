@@ -34,6 +34,14 @@ const ProfileSideNav = () => {
                             <p className="mb-0">{user.role.includes("seller") ? "Manage Your Nursery" : "Add Your Nursery"}</p>
                         </li>
                     </Link>
+                    {user.role.includes("admin") && (
+                        <Link to="/dashboard">
+                            <li className="list-group-item d-flex justify-content-between align-items-center p-3">
+                                <i className="fas fa-chart-line fa-lg text-warning"></i>
+                                <p className="mb-0">Admin Dashboard</p>
+                            </li>
+                        </Link>
+                    )}
                     <Link to={"/profile/settings"}>
                         <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                             <i className="fa fa-gear fa-lg text-warning"></i>

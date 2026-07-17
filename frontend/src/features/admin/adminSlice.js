@@ -85,6 +85,11 @@ export const adminUpdateReviewStatusAsync = createAsyncThunk('/admin/updateRevie
     return response.data;
 });
 
+export const adminBulkUpdateReviewStatusAsync = createAsyncThunk('/admin/bulkUpdateReviewStatus', async ({ ids, status }) => {
+    const response = await handelDataFetch(`/api/v2/admin/reviews/bulk-status`, 'PATCH', { ids, status });
+    return { ...response.data, ids, status };
+});
+
 export const adminSlice = createSlice({
     name: 'admin',
     initialState,
@@ -313,6 +318,27 @@ export const adminSlice = createSlice({
                 }
             })
             .addCase(adminUpdateReviewStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            // BULK UPDATE REVIEWS STATUS
+            .addCase(adminBulkUpdateReviewStatusAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminBulkUpdateReviewStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const { ids, status } = action.payload;
+                    state.reviewsData.reviews.forEach(r => {
+                        if (ids.includes(r._id)) {
+                            r.status = status;
+                        }
+                    });
+                }
+            })
+            .addCase(adminBulkUpdateReviewStatusAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             });

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Tag, Space, message, Popconfirm } from 'antd';
 import { Rating } from 'react-simple-star-rating';
-import { adminUpdateReviewStatusAsync } from '../adminSlice';
+import { adminUpdateReviewStatusAsync, adminBulkUpdateReviewStatusAsync } from '../adminSlice';
 
 
 const ReviewsTable = () => {
@@ -10,6 +10,7 @@ const ReviewsTable = () => {
     const { reviewsData, isLoading } = useSelector(state => state.admin);
     const reviews = reviewsData?.reviews || [];
     const [dataSource, setDataSource] = useState([]);
+    const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
     useEffect(() => {
         if (reviews && reviews.length > 0) {
@@ -45,6 +46,27 @@ const ReviewsTable = () => {
         }
     };
 
+    const handleBulkStatusUpdate = async (status) => {
+        try {
+            const res = await dispatch(adminBulkUpdateReviewStatusAsync({ ids: selectedRowKeys, status })).unwrap();
+            if (res.status) {
+                message.success(res.message);
+                setSelectedRowKeys([]);
+            }
+        } catch (error) {
+            message.error("Failed to update bulk review status");
+        }
+    };
+
+    const onSelectChange = (newSelectedRowKeys) => {
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
+
+    const rowSelection = {
+        selectedRowKeys,
+        onChange: onSelectChange,
+    };
+
     const columns = [
         {
             title: 'Product Name',
@@ -77,8 +99,8 @@ const ReviewsTable = () => {
             render: (_, { tags }) => {
 
                 return tags.map(tag =>
-                    <Space size={'small'} className='mb-1'>
-                        <Tag key={tag}>
+                    <Space size={'small'} className='mb-1' key={tag}>
+                        <Tag>
                             {tag.toUpperCase()}
                         </Tag>
                     </Space>
@@ -117,7 +139,6 @@ const ReviewsTable = () => {
             dataIndex: 'rating',
             key: 'rating',
             render: value => {
-                console.log(value);
                 return <Rating initialValue={value} size={20} readonly={true} allowFraction="true" />
             }
         },
@@ -139,7 +160,7 @@ const ReviewsTable = () => {
                                 onConfirm={() => handleUpdateStatus(record.key, 'Approved')}
                             >
                                 <button className='btn btn-sm btn-success py-1 px-2 text-white d-flex align-items-center justify-content-center' style={{ fontSize: "12px", width: "90px" }}>
-                                    <i className='material-symbols-outlined me-1' style={{ fontSize: "14px" }}>check_circle</i> <span>Approve</span>
+                                    <i className='fas fa-check-circle me-1' style={{ fontSize: "14px" }}></i> <span>Approve</span>
                                 </button>
                             </Popconfirm>
                         )}
@@ -149,7 +170,7 @@ const ReviewsTable = () => {
                                 onConfirm={() => handleUpdateStatus(record.key, 'Rejected')}
                             >
                                 <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex align-items-center justify-content-center' style={{ fontSize: "12px", width: "90px" }}>
-                                    <i className='material-symbols-outlined me-1' style={{ fontSize: "14px" }}>cancel</i> <span>Reject</span>
+                                    <i className='fas fa-times-circle me-1' style={{ fontSize: "14px" }}></i> <span>Reject</span>
                                 </button>
                             </Popconfirm>
                         )}
@@ -159,18 +180,35 @@ const ReviewsTable = () => {
             width: 150
         },
     ];
+
+    const hasSelected = selectedRowKeys.length > 0;
+
     return (
-        <Table
-            loading={isLoading}
-            columns={columns}
-            dataSource={dataSource}
-            pagination={{
-                position: ['bottomCenter'],
-                pageSize: 20
-            }}
-            className='overflow-x-auto'
-            scroll={{ x: 'max-content' }}
-        />
+        <div className="w-100 p-0">
+            {hasSelected && (
+                <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2 w-100">
+                    <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
+                    <Popconfirm title={`Approve ${selectedRowKeys.length} selected reviews?`} onConfirm={() => handleBulkStatusUpdate('Approved')}>
+                        <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Approve</button>
+                    </Popconfirm>
+                    <Popconfirm title={`Reject ${selectedRowKeys.length} selected reviews?`} onConfirm={() => handleBulkStatusUpdate('Rejected')}>
+                        <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Reject</button>
+                    </Popconfirm>
+                </div>
+            )}
+            <Table
+                rowSelection={rowSelection}
+                loading={isLoading}
+                columns={columns}
+                dataSource={dataSource}
+                pagination={{
+                    position: ['bottomCenter'],
+                    pageSize: 20
+                }}
+                className='overflow-x-auto w-100'
+                scroll={{ x: 'max-content' }}
+            />
+        </div>
     )
 }
 
