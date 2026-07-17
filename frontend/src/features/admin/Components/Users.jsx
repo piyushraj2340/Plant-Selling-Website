@@ -1,13 +1,32 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { message, Table, Space, Popconfirm, Tag, Button } from 'antd';
+import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input } from 'antd';
+import { DownOutlined, EllipsisOutlined } from '@ant-design/icons';
 import localStorageUtil from '../../../utils/localStorage';
-import { adminUsersAsync, adminImpersonateAsync, adminDeleteUserAsync, adminBulkDeleteUsersAsync } from '../adminSlice';
+import { 
+    adminUsersAsync, 
+    adminImpersonateAsync, 
+    adminDeleteUserAsync, 
+    adminBulkDeleteUsersAsync,
+    adminUpdateUserRoleAsync,
+    adminUpdateUserPasswordAsync,
+    adminToggleBlockUserAsync,
+    adminToggleVerifyUserAsync
+} from '../adminSlice';
 
 const Users = () => {
     const dispatch = useDispatch();
     const { users, isLoading } = useSelector((state) => state.admin);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    
+    // Modal states
+    const [roleModalVisible, setRoleModalVisible] = useState(false);
+    const [passwordModalVisible, setPasswordModalVisible] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    
+    // Form states
+    const [selectedRoles, setSelectedRoles] = useState([]);
+    const [newPassword, setNewPassword] = useState('');
 
     useEffect(() => {
         dispatch(adminUsersAsync());
@@ -34,6 +53,46 @@ const Users = () => {
         });
     };
 
+    const handleBlockToggle = (userId) => {
+        dispatch(adminToggleBlockUserAsync(userId));
+    };
+
+    const handleVerifyToggle = (userId) => {
+        dispatch(adminToggleVerifyUserAsync(userId));
+    };
+
+    const openRoleModal = (user) => {
+        setSelectedUser(user);
+        setSelectedRoles([...user.role]);
+        setRoleModalVisible(true);
+    };
+
+    const submitRoleUpdate = () => {
+        if (selectedRoles.length === 0) {
+            message.error("User must have at least one role.");
+            return;
+        }
+        dispatch(adminUpdateUserRoleAsync({ id: selectedUser._id, role: selectedRoles })).then(() => {
+            setRoleModalVisible(false);
+        });
+    };
+
+    const openPasswordModal = (user) => {
+        setSelectedUser(user);
+        setNewPassword('');
+        setPasswordModalVisible(true);
+    };
+
+    const submitPasswordUpdate = () => {
+        if (newPassword.length < 6) {
+            message.error("Password must be at least 6 characters.");
+            return;
+        }
+        dispatch(adminUpdateUserPasswordAsync({ id: selectedUser._id, password: newPassword })).then(() => {
+            setPasswordModalVisible(false);
+        });
+    };
+
     const onSelectChange = (newSelectedRowKeys) => {
         setSelectedRowKeys(newSelectedRowKeys);
     };
@@ -49,6 +108,13 @@ const Users = () => {
             dataIndex: 'name',
             key: 'name',
             sorter: (a, b) => a.name.localeCompare(b.name),
+            render: (text, record) => (
+                <Space>
+                    {text}
+                    {record.isBlocked && <Tag color="red">BLOCKED</Tag>}
+                    {!record.isUserVerified && <Tag color="orange">UNVERIFIED</Tag>}
+                </Space>
+            )
         },
         {
             title: 'Email',
@@ -75,35 +141,93 @@ const Users = () => {
         {
             title: 'Actions',
             key: 'actions',
-            render: (_, record) => (
-                <Space size="middle">
-                    <button 
-                        className="btn btn-sm btn-primary" 
-                        onClick={() => handleImpersonate(record._id)}
-                        disabled={record.role.includes('admin')}
-                    >
-                        Impersonate
-                    </button>
-                    
-                    <Popconfirm
-                        title="Delete this user?"
-                        description="Are you sure you want to permanently delete this user?"
-                        onConfirm={() => handleDelete(record._id)}
-                        okText="Yes, Delete"
-                        cancelText="No"
-                        okButtonProps={{ danger: true }}
-                        disabled={record.role.includes('admin')}
-                    >
-                        <button className="btn btn-sm btn-danger" disabled={record.role.includes('admin')}>
-                            <i className="fas fa-trash"></i>
-                        </button>
-                    </Popconfirm>
-                </Space>
-            ),
+            render: (_, record) => {
+                const isAdmin = record.role.includes('admin');
+                
+                const items = [
+                    {
+                        key: '1',
+                        label: 'Impersonate',
+                        disabled: isAdmin || record.isBlocked,
+                        onClick: () => handleImpersonate(record._id)
+                    },
+                    {
+                        key: '2',
+                        label: 'Assign Roles',
+                        disabled: isAdmin,
+                        onClick: () => openRoleModal(record)
+                    },
+                    {
+                        key: '3',
+                        label: 'Change Password',
+                        disabled: isAdmin,
+                        onClick: () => openPasswordModal(record)
+                    },
+                    {
+                        type: 'divider',
+                    },
+                    {
+                        key: '4',
+                        label: record.isBlocked ? 'Unblock User' : 'Block User',
+                        disabled: isAdmin,
+                        danger: !record.isBlocked,
+                        onClick: () => {
+                            Modal.confirm({
+                                title: record.isBlocked ? 'Unblock User?' : 'Block User?',
+                                content: record.isBlocked ? 'This user will be able to log in again.' : 'This user will be immediately logged out and prevented from accessing the API.',
+                                okText: 'Yes',
+                                cancelText: 'No',
+                                onConfirm: () => handleBlockToggle(record._id)
+                            });
+                        }
+                    },
+                    {
+                        key: '5',
+                        label: record.isUserVerified ? 'Unverify User' : 'Verify User',
+                        disabled: isAdmin,
+                        onClick: () => {
+                            Modal.confirm({
+                                title: record.isUserVerified ? 'Unverify User?' : 'Verify User?',
+                                content: record.isUserVerified ? 'This user will lose verified status.' : 'This user will be marked as verified and will bypass OTP check.',
+                                okText: 'Yes',
+                                cancelText: 'No',
+                                onConfirm: () => handleVerifyToggle(record._id)
+                            });
+                        }
+                    },
+                    {
+                        key: '6',
+                        label: 'Delete User',
+                        disabled: isAdmin,
+                        danger: true,
+                        onClick: () => {
+                            Modal.confirm({
+                                title: 'Delete User?',
+                                content: 'Are you sure you want to permanently delete this user?',
+                                okText: 'Yes, Delete',
+                                okType: 'danger',
+                                cancelText: 'No',
+                                onConfirm: () => handleDelete(record._id)
+                            });
+                        }
+                    }
+                ];
+
+                return (
+                    <Dropdown menu={{ items }} trigger={['click']}>
+                        <Button icon={<EllipsisOutlined />} size="small" />
+                    </Dropdown>
+                );
+            },
         },
     ];
 
     const hasSelected = selectedRowKeys.length > 0;
+    const roleOptions = [
+        { label: 'User', value: 'user' },
+        { label: 'Nursery', value: 'nursery' },
+        { label: 'Admin', value: 'admin' },
+    ];
 
     return (
         <div className="container-fluid p-2 p-md-4 bg-white rounded border">
@@ -134,6 +258,42 @@ const Users = () => {
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
             />
+
+            {/* Role Modal */}
+            <Modal
+                title={`Assign Roles to ${selectedUser?.name}`}
+                open={roleModalVisible}
+                onOk={submitRoleUpdate}
+                onCancel={() => setRoleModalVisible(false)}
+                okText="Save Roles"
+            >
+                <div className="py-3">
+                    <p className="text-muted small">Select the roles this user should have:</p>
+                    <Checkbox.Group 
+                        options={roleOptions} 
+                        value={selectedRoles} 
+                        onChange={(checkedValues) => setSelectedRoles(checkedValues)} 
+                    />
+                </div>
+            </Modal>
+
+            {/* Password Modal */}
+            <Modal
+                title={`Change Password for ${selectedUser?.name}`}
+                open={passwordModalVisible}
+                onOk={submitPasswordUpdate}
+                onCancel={() => setPasswordModalVisible(false)}
+                okText="Update Password"
+            >
+                <div className="py-3">
+                    <p className="text-muted small">Enter a new secure password (minimum 6 characters):</p>
+                    <Input.Password
+                        placeholder="New Password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                </div>
+            </Modal>
         </div>
     );
 };

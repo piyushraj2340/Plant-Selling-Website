@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     avatar: {
         public_id: {
             type: String,

@@ -80,6 +80,26 @@ export const adminBulkDeleteUsersAsync = createAsyncThunk('/admin/users/bulkDele
     return response.data;
 });
 
+export const adminUpdateUserRoleAsync = createAsyncThunk('/admin/users/role', async ({ id, role }) => {
+    const response = await handelDataFetch(`/api/v2/admin/users/${id}/role`, 'PATCH', { role });
+    return response.data;
+});
+
+export const adminUpdateUserPasswordAsync = createAsyncThunk('/admin/users/password', async ({ id, password }) => {
+    const response = await handelDataFetch(`/api/v2/admin/users/${id}/password`, 'PATCH', { password });
+    return response.data;
+});
+
+export const adminToggleBlockUserAsync = createAsyncThunk('/admin/users/block', async (id) => {
+    const response = await handelDataFetch(`/api/v2/admin/users/${id}/block`, 'PATCH');
+    return response.data;
+});
+
+export const adminToggleVerifyUserAsync = createAsyncThunk('/admin/users/verify', async (id) => {
+    const response = await handelDataFetch(`/api/v2/admin/users/${id}/verify`, 'PATCH');
+    return response.data;
+});
+
 export const adminProductsAsync = createAsyncThunk('/admin/products', async ({ year = '', search = '', filter = '' } = {}) => {
     const response = await handelDataFetch(`/api/v2/admin/plants?year=${year}&search=${search}&filter=${filter}`, 'GET');
     return response.data;
@@ -542,6 +562,86 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
                 message.error(action.error.message || "Failed to bulk delete users");
+            })
+            // UPDATE ROLE
+            .addCase(adminUpdateUserRoleAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdateUserRoleAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const index = state.users.findIndex(u => u._id === action.payload.user._id);
+                    if (index !== -1) {
+                        state.users[index] = action.payload.user;
+                    }
+                    message.success(action.payload.message);
+                }
+            })
+            .addCase(adminUpdateUserRoleAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to update role");
+            })
+            // UPDATE PASSWORD
+            .addCase(adminUpdateUserPasswordAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminUpdateUserPasswordAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    message.success(action.payload.message);
+                }
+            })
+            .addCase(adminUpdateUserPasswordAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to update password");
+            })
+            // TOGGLE BLOCK
+            .addCase(adminToggleBlockUserAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminToggleBlockUserAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const index = state.users.findIndex(u => u._id === action.payload.user._id);
+                    if (index !== -1) {
+                        state.users[index] = action.payload.user;
+                    }
+                    message.success(action.payload.message);
+                }
+            })
+            .addCase(adminToggleBlockUserAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to toggle block status");
+            })
+            // TOGGLE VERIFY
+            .addCase(adminToggleVerifyUserAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminToggleVerifyUserAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    const index = state.users.findIndex(u => u._id === action.payload.user._id);
+                    if (index !== -1) {
+                        state.users[index] = action.payload.user;
+                    }
+                    message.success(action.payload.message);
+                }
+            })
+            .addCase(adminToggleVerifyUserAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to toggle verify status");
             })
             .addCase(adminDeleteContactAsync.pending, (state) => {
                 state.isLoading = true;
