@@ -107,13 +107,13 @@ export const checkoutSlice = createSlice({
                 // console.log(action.payload); //TODO: NEED TO IMPLEMENT THIS 
 
             }).addCase(getValidateCheckoutAsync.rejected, (state, action) => {
-                //! REJECTED: GET_VALIDATE_CHECKOUT_PROCESS
+                //? REJECTED: GET_VALIDATE_CHECKOUT_PROCESS
 
                 state.error = action.error;
                 state.isLoading = false;
-                state.isSessionError = action.error;
+                state.isSessionError = true;
 
-
+                // Do not show an error toast here, the UI will naturally redirect or show a "start over" button based on isSessionError
             })
 
             .addCase(getSelectedShippingAsync.pending, (state) => {
