@@ -796,7 +796,73 @@ const adminController = {
         }
     },
 
-    // Update coupon status
+    updateCoupon: async (req, res, next) => {
+        try {
+            const Coupon = require('../model/nurseryModel/coupon');
+            const { id } = req.params;
+            const data = req.body;
+
+            const updateData = {
+                code: data.couponName,
+                description: data.description,
+                discount: {
+                    type: data.discount ? 'Percentage' : 'Flat',
+                    value: data.discount ? parseFloat(data.discount) : parseFloat(data.maxDiscountInCost),
+                    maxDiscountAmount: data.discount && data.maxDiscountInCost ? parseFloat(data.maxDiscountInCost) : null
+                },
+                applicability: {
+                    type: data.categories === 'all' ? 'All' : (data.categories === 'categories' ? 'Categories' : 'Products'),
+                    categories: data.categories === 'categories' ? [data.subCategories] : [],
+                    products: data.categories === 'individual' ? [data.subCategories] : []
+                },
+                rules: {
+                    minOrderAmount: data.minAmount ? parseFloat(data.minAmount) : 0,
+                    validUntil: data.redeemBefore ? new Date(data.redeemBefore) : undefined,
+                    freeDelivery: data.freeDelivery || false,
+                    singleUsePerUser: data.singleCouponPerUser || false,
+                    isNewUserOnly: data.newUser || false
+                },
+                usage: {
+                    maxUsageCount: data.numberOfCoupon && data.numberOfCoupon !== 'Infinity' ? parseInt(data.numberOfCoupon) : null,
+                }
+            };
+            
+            // Remove undefined validUntil if it was not passed
+            if (!updateData.rules.validUntil) delete updateData.rules.validUntil;
+
+            const coupon = await Coupon.findByIdAndUpdate(id, { $set: updateData }, { new: true });
+
+            if (!coupon) {
+                const error = new Error("Coupon not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: "Coupon updated successfully", coupon });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    deleteCoupon: async (req, res, next) => {
+        try {
+            const Coupon = require('../model/nurseryModel/coupon');
+            const { id } = req.params;
+
+            const coupon = await Coupon.findByIdAndDelete(id);
+
+            if (!coupon) {
+                const error = new Error("Coupon not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: "Coupon deleted successfully", id });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     updateCouponStatus: async (req, res, next) => {
         try {
             const Coupon = require('../model/nurseryModel/coupon');

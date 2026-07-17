@@ -229,11 +229,21 @@ function Cart() {
                             <p className="text-muted small mb-1"><i className="fas fa-tags"></i> Available Coupons:</p>
                             {applicableCoupons.map(coupon => (
                               <div key={coupon._id} className="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
-                                <div>
-                                  <div className="fw-bold text-success" style={{fontSize: '0.9rem'}}>{coupon.code}</div>
+                                <div style={{maxWidth: '70%'}}>
+                                  <div className={`fw-bold ${coupon.isApplicable ? 'text-success' : 'text-muted'}`} style={{fontSize: '0.9rem'}}>{coupon.code}</div>
                                   <div className="text-muted" style={{fontSize: '0.75rem'}}>{coupon.description}</div>
+                                  {!coupon.isApplicable && coupon.reason && (
+                                      <div className="text-danger mt-1" style={{fontSize: '0.65rem', fontStyle: 'italic'}}>{coupon.reason}</div>
+                                  )}
                                 </div>
-                                <button className="btn btn-sm btn-outline-info" style={{fontSize: '0.7rem'}} onClick={() => { setCouponInput(coupon.code); dispatch(cartApplyCouponAsync(coupon.code)); }}>Apply</button>
+                                <button 
+                                    className={`btn btn-sm ${coupon.isApplicable ? 'btn-outline-info' : 'btn-outline-secondary'}`} 
+                                    style={{fontSize: '0.7rem'}} 
+                                    disabled={!coupon.isApplicable}
+                                    onClick={() => { setCouponInput(coupon.code); dispatch(cartApplyCouponAsync(coupon.code)); }}
+                                >
+                                    Apply
+                                </button>
                               </div>
                             ))}
                           </div>

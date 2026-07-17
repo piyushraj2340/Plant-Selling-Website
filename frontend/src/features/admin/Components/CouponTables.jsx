@@ -1,9 +1,9 @@
 import React, { useEffect } from 'react';
 import { Table, Space, Tag, Popconfirm } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
-import { adminCouponsAsync, adminUpdateCouponStatusAsync } from '../adminSlice';
+import { adminCouponsAsync, adminUpdateCouponStatusAsync, adminDeleteCouponAsync } from '../adminSlice';
 
-const CouponTables = ({ showTermsModalOpen }) => {
+const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const dispatch = useDispatch();
     const { couponsData, isLoading } = useSelector(state => state.admin);
 
@@ -13,6 +13,10 @@ const CouponTables = ({ showTermsModalOpen }) => {
 
     const handleStatusUpdate = (id, newStatus) => {
         dispatch(adminUpdateCouponStatusAsync({ id, status: newStatus }));
+    };
+
+    const handleDelete = (id) => {
+        dispatch(adminDeleteCouponAsync(id));
     };
 
     const dataSource = couponsData.coupons.map(coupon => ({
@@ -101,6 +105,14 @@ const CouponTables = ({ showTermsModalOpen }) => {
                                 </Popconfirm>
                             </Space>
                         }
+                        <Space size={'small'} className='mt-2'>
+                            <button className='btn btn-sm btn-info py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} onClick={() => onEditCoupon(record._id)}><span>Edit</span></button>
+                        </Space>
+                        <Space size={'small'} className='mt-2'>
+                            <Popconfirm title="Permanently delete this coupon?" onConfirm={() => handleDelete(record._id)}>
+                                <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><span>Delete</span></button>
+                            </Popconfirm>
+                        </Space>
                     </>
                 )
             },

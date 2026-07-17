@@ -1,4 +1,4 @@
-const Order = require('../../../model/checkoutModel/order');
+const Order = require('../../../model/checkoutModel/orders');
 
 module.exports = {
     name: 'New User Rule',

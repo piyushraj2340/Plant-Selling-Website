@@ -36,6 +36,8 @@ router.get('/income', adminController.getIncome);
 router.post('/coupons', adminController.createCoupon);
 router.get('/coupons', adminController.getCoupons);
 router.patch('/coupons/:id/status', adminController.updateCouponStatus);
+router.put('/coupons/:id', adminController.updateCoupon);
+router.delete('/coupons/:id', adminController.deleteCoupon);
 
 // Contact Us Endpoints
 router.get('/contact-us', adminController.getAllContactMessages);
