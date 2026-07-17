@@ -12,6 +12,10 @@ router.get('/stats', adminController.getStats);
 router.get('/users', adminController.getUsers);
 router.delete('/users/:id', adminController.deleteUser);
 router.post('/users/bulk-delete', adminController.bulkDeleteUsers);
+router.patch('/users/:id/role', adminController.updateUserRole);
+router.patch('/users/:id/password', adminController.updateUserPassword);
+router.patch('/users/:id/block', adminController.toggleBlockUser);
+router.patch('/users/:id/verify', adminController.toggleVerifyUser);
 router.get('/plants', adminController.getPlants);
 router.get('/orders', adminController.getOrders);
 

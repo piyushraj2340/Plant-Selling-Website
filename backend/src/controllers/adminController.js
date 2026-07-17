@@ -131,6 +131,103 @@ const adminController = {
         }
     },
 
+    // Update user role
+    updateUserRole: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { role } = req.body;
+
+            if (!role || !Array.isArray(role)) {
+                const error = new Error("Valid role array is required");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const user = await User.findByIdAndUpdate(id, { role }, { new: true }).select('-password -tokens');
+            if (!user) {
+                const error = new Error("User not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: "User role updated successfully", user });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Update user password
+    updateUserPassword: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+            const { password } = req.body;
+
+            if (!password || password.length < 6) {
+                const error = new Error("Password must be at least 6 characters long");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const bcryptjs = require('bcryptjs');
+            const hashPassword = await bcryptjs.hash(password, 10);
+
+            const user = await User.findByIdAndUpdate(id, { password: hashPassword }, { new: true }).select('-password -tokens');
+            if (!user) {
+                const error = new Error("User not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            res.status(200).json({ status: true, message: "User password updated successfully", user });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Toggle block user
+    toggleBlockUser: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findById(id);
+            if (!user) {
+                const error = new Error("User not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            user.isBlocked = !user.isBlocked;
+            await user.save();
+
+            const updatedUser = await User.findById(id).select('-password -tokens');
+            res.status(200).json({ status: true, message: `User has been ${user.isBlocked ? 'blocked' : 'unblocked'} successfully`, user: updatedUser });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Toggle verify user
+    toggleVerifyUser: async (req, res, next) => {
+        try {
+            const { id } = req.params;
+
+            const user = await User.findById(id);
+            if (!user) {
+                const error = new Error("User not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            user.isUserVerified = !user.isUserVerified;
+            await user.save();
+
+            const updatedUser = await User.findById(id).select('-password -tokens');
+            res.status(200).json({ status: true, message: `User has been ${user.isUserVerified ? 'verified' : 'unverified'} successfully`, user: updatedUser });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     // Get all plants with aggregations for dashboard
     getPlants: async (req, res, next) => {
         try {
