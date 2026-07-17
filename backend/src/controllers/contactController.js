@@ -5,15 +5,15 @@ const { getInTouch } = require('./smtp/emailController');
 // Controller to save contact form data to the database
 const GetInTouch = async (req, res, next) => {
     try {
-        const { name, email, message } = req.body;
+        const { name, email, category, message } = req.body;
 
         // Validate the input data
-        if (!name || !email || !message) {
+        if (!name || !email || !message || !category) {
             return res.status(400).json({ error: 'All fields are required' });
         }
 
-        // // Save the data to the database
-        const newContact = new Contact({ name, email, message });
+        // Save the data to the database
+        const newContact = new Contact({ name, email, category, message });
         await newContact.save();
 
         const isEmailSent = await getInTouch(email, name, message);

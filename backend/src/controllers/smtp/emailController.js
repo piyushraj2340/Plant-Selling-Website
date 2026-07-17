@@ -102,9 +102,34 @@ exports.getInTouch = async (to, recipientName, userMessage) => {
     await transporter.sendMail(thankyouForContactingUsOptions);
     await transporter.sendMail(youHaveNewContactUsMessageOptions);
 
-    return true
+    return true;
   } catch (error) {
     console.error('Error sending email:', error);
+  }
+};
+
+exports.replyToContactMessageEmail = async (to, userName, replyMessage) => {
+  try {
+    // Render the email template
+    const emailTemplate = await ejs.renderFile(
+      path.join(__dirname, '../../views/adminReplyToContactUs.ejs'),
+      { userName, replyMessage }
+    );
+
+    const mailOptions = {
+      from: `"Plant Seller Support" <${smtpConfig.auth.user}>`, // Sender address
+      to, // List of receivers
+      subject: "Reply to your inquiry - PlantSeller Support", // Subject line
+      html: emailTemplate, // HTML body
+    };
+
+    // Send email
+    await transporter.sendMail(mailOptions);
+
+    return true;
+  } catch (error) {
+    console.error('Error sending email:', error);
+    return false;
   }
 };
 

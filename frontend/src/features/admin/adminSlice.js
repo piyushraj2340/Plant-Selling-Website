@@ -33,6 +33,9 @@ const initialState = {
     couponsData: {
         coupons: [],
     },
+    contactsData: {
+        contacts: [],
+    },
     isLoading: false,
     error: null,
 };
@@ -114,6 +117,21 @@ export const adminCouponsAsync = createAsyncThunk('/admin/coupons', async () => 
 
 export const adminUpdateCouponStatusAsync = createAsyncThunk('/admin/updateCouponStatus', async ({ id, status }) => {
     const response = await handelDataFetch(`/api/v2/admin/coupons/${id}/status`, 'PATCH', { status });
+    return response.data;
+});
+
+export const adminGetContactsAsync = createAsyncThunk('/admin/getContacts', async () => {
+    const response = await handelDataFetch(`/api/v2/admin/contact-us`, 'GET');
+    return response.data;
+});
+
+export const adminReplyToContactAsync = createAsyncThunk('/admin/replyToContact', async ({ id, replyMessage }) => {
+    const response = await handelDataFetch(`/api/v2/admin/contact-us/${id}/reply`, 'POST', { replyMessage });
+    return response.data;
+});
+
+export const adminDeleteContactAsync = createAsyncThunk('/admin/deleteContact', async (id) => {
+    const response = await handelDataFetch(`/api/v2/admin/contact-us/${id}`, 'DELETE');
     return response.data;
 });
 
@@ -442,6 +460,59 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
                 message.error("Failed to update coupon status");
+            })
+            // CONTACTS
+            .addCase(adminGetContactsAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminGetContactsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    state.contactsData.contacts = action.payload.contacts;
+                }
+            })
+            .addCase(adminGetContactsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            .addCase(adminReplyToContactAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminReplyToContactAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status && action.payload.contact) {
+                    const index = state.contactsData.contacts.findIndex(c => c._id === action.payload.contact._id);
+                    if (index !== -1) {
+                        state.contactsData.contacts[index] = action.payload.contact;
+                    }
+                    message.success("Reply sent successfully!");
+                }
+            })
+            .addCase(adminReplyToContactAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to send reply");
+            })
+            .addCase(adminDeleteContactAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminDeleteContactAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.error = null;
+                if (action.payload.status) {
+                    state.contactsData.contacts = state.contactsData.contacts.filter(c => c._id !== action.payload.id);
+                    message.success("Contact message deleted!");
+                }
+            })
+            .addCase(adminDeleteContactAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+                message.error(action.error.message || "Failed to delete contact message");
             });
     }
 });

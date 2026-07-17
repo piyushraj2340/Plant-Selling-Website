@@ -10,9 +10,19 @@ const contactSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    category: {
+        type: String,
+        required: true,
+        enum: ['General Inquiry', 'Order Support', 'Technical Issue', 'Partnership', 'Other'],
+        default: 'General Inquiry'
+    },
     message: {
         type: String,
         required: true
+    },
+    isReplied: {
+        type: Boolean,
+        default: false
     },
     createdAt: {
         type: Date,
