@@ -23,4 +23,6 @@ router.patch('/plants/:id/status', adminController.updatePlantStatus);
 router.patch('/orders/bulk-status', adminController.bulkUpdateOrderItemStatus);
 router.patch('/orders/:orderId/items/:itemId/status', adminController.updateOrderItemStatus);
 
+router.get('/income', adminController.getIncome);
+
 module.exports = router;

@@ -525,6 +525,88 @@ const adminController = {
         } catch (error) {
             next(error);
         }
+    },
+
+    // Get Income Stats
+    getIncome: async (req, res, next) => {
+        try {
+            const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+            const search = req.query.search || '';
+            const filter = req.query.filter || 'All';
+
+            const startOfYear = new Date(year, 0, 1);
+            const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+
+            // 1. Line/Bar Chart Data: Revenue per month for the given year
+            const revenueByMonth = await Order.aggregate([
+                { 
+                    $match: { 
+                        orderAt: { $gte: startOfYear, $lte: endOfYear },
+                        "payment.status": { $ne: 'Failed' }
+                    } 
+                },
+                { 
+                    $group: { 
+                        _id: { $month: "$orderAt" }, 
+                        revenue: { $sum: "$pricing.totalPrice" } 
+                    } 
+                }
+            ]);
+
+            const monthlyRevenue = Array(12).fill(0);
+            revenueByMonth.forEach(item => {
+                monthlyRevenue[item._id - 1] = item.revenue;
+            });
+
+            // 2. Pie Chart Data: Revenue by plant category
+            const categoryRevenueAgg = await Order.aggregate([
+                { 
+                    $match: { 
+                        orderAt: { $gte: startOfYear, $lte: endOfYear },
+                        "payment.status": { $ne: 'Failed' }
+                    } 
+                },
+                { $unwind: "$orderItems" },
+                { $lookup: { from: "plants", localField: "orderItems.plant", foreignField: "_id", as: "plantDetails" } },
+                { $unwind: "$plantDetails" },
+                { 
+                    $group: { 
+                        _id: "$plantDetails.category", 
+                        revenue: { $sum: { $multiply: ["$orderItems.quantity", "$orderItems.price"] } } 
+                    } 
+                }
+            ]);
+
+            const pieLabels = [];
+            const pieData = [];
+            categoryRevenueAgg.forEach(item => {
+                pieLabels.push(item._id || 'Uncategorized');
+                pieData.push(item.revenue);
+            });
+
+            // 3. Table Data: Orders (Successful/Processing)
+            const query = {
+                "payment.status": { $ne: 'Failed' }
+            };
+
+            if (search) {
+                query._id = search;
+            }
+
+            const orders = await Order.find(query).populate('user').populate('orderItems.nursery').sort({ orderAt: -1 });
+
+            res.status(200).json({
+                status: true,
+                message: "Income stats fetched successfully",
+                stats: {
+                    barChart: monthlyRevenue,
+                    pieChart: { labels: pieLabels, data: pieData }
+                },
+                orders
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 };
 

@@ -26,6 +26,10 @@ const initialState = {
         stats: { lineChart: [], pieChart: { labels: [], data: [] } },
         reviews: []
     },
+    incomeData: {
+        stats: { barChart: [], pieChart: { labels: [], data: [] } },
+        orders: []
+    },
     isLoading: false,
     error: null,
 };
@@ -37,6 +41,11 @@ export const adminStatsAsync = createAsyncThunk('/admin/stats', async (filter = 
 
 export const adminOrdersAsync = createAsyncThunk('/admin/orders', async ({ year = '', search = '', filter = '' } = {}) => {
     const response = await handelDataFetch(`/api/v2/admin/orders?year=${year}&search=${search}&filter=${filter}`, 'GET');
+    return response.data;
+});
+
+export const adminIncomeAsync = createAsyncThunk('/admin/income', async ({ year = '', search = '', filter = '' } = {}) => {
+    const response = await handelDataFetch(`/api/v2/admin/income?year=${year}&search=${search}&filter=${filter}`, 'GET');
     return response.data;
 });
 
@@ -131,6 +140,25 @@ export const adminSlice = createSlice({
                 state.error = null;
             })
             .addCase(adminOrdersAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            // INCOME
+            .addCase(adminIncomeAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(adminIncomeAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                if (action.payload.status) {
+                    state.incomeData = {
+                        stats: action.payload.stats,
+                        orders: action.payload.orders
+                    };
+                }
+                state.error = null;
+            })
+            .addCase(adminIncomeAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             })
