@@ -9,7 +9,7 @@ exports.getAllPlants = async (req, res, next) => {
         }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details
+        }).populate("category").select("-user"); // Populate nursery and category details
 
         const info = {
             status: true,
@@ -31,7 +31,7 @@ exports.getPlantById = async (req, res, next) => {
         }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details
+        }).populate("category").select("-user"); // Populate nursery and category details
 
         if (!result) {
             const error = new Error("Product not found or not published");
@@ -79,7 +79,7 @@ exports.getPlantsByCategory = async (req, res, next) => {
         const result = await plantsModel.find(query).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details
+        }).populate("category").select("-user"); // Populate nursery and category details
  
         const info = {
             status: true,
@@ -131,7 +131,7 @@ exports.searchProducts = async (req, res, next) => {
         const products = await plantsModel.find(query).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details;
+        }).populate("category").select("-user"); // Populate nursery and category details;
 
         // Create a response object
         const info = {
