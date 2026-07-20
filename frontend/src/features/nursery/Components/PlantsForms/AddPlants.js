@@ -12,7 +12,7 @@ function AddPlants() {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(getAllCategoriesAsync());
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
     }, [dispatch]);
 
     const [plant, setPlants] = useState({

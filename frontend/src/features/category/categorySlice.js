@@ -1,4 +1,4 @@
-﻿import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
+import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import handelDataFetch from '../../utils/handelDataFetch';
 
 const initialState = {
@@ -9,7 +9,11 @@ const initialState = {
 
 export const getAllCategoriesAsync = createAsyncThunk('category/fetchAllCategories', async (args, { rejectWithValue }) => {
     try {
-        const response = await handelDataFetch('/api/v2/categories', 'GET');
+        let url = '/api/v2/categories';
+        if (args && args.status) {
+            url += `?status=${args.status}`;
+        }
+        const response = await handelDataFetch(url, 'GET');
         return response.data.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -27,7 +31,7 @@ export const createCategoryAsync = createAsyncThunk('category/createCategory', a
 
 export const updateCategoryAsync = createAsyncThunk('category/updateCategory', async ({ id, data }, { rejectWithValue }) => {
     try {
-        const response = await handelDataFetch(\/api/v2/categories/\\, 'PUT', data);
+        const response = await handelDataFetch(`/api/v2/categories/${id}`, 'PUT', data);
         return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
@@ -36,7 +40,7 @@ export const updateCategoryAsync = createAsyncThunk('category/updateCategory', a
 
 export const deleteCategoryAsync = createAsyncThunk('category/deleteCategory', async (id, { rejectWithValue }) => {
     try {
-        const response = await handelDataFetch(\/api/v2/categories/\\, 'DELETE');
+        const response = await handelDataFetch(`/api/v2/categories/${id}`, 'DELETE');
         return { id, ...response.data };
     } catch (error) {
         return rejectWithValue(error.response.data);

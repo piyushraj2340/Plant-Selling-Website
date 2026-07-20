@@ -22,7 +22,7 @@ const Products = () => {
     const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
     useEffect(() => {
-        dispatch(getAllCategoriesAsync());
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
         if (!searchKeyword && !category) {
             // Case 1: /products
             dispatch(getAllProductsAsync());

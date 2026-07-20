@@ -1,8 +1,12 @@
-﻿const Category = require('../model/category');
+const Category = require('../model/category');
 
 exports.getAllCategories = async (req, res, next) => {
     try {
-        const categories = await Category.find().populate('parentCategory', 'name slug').sort({ name: 1 });
+        const query = {};
+        if (req.query.status && req.query.status !== 'All') {
+            query.status = req.query.status;
+        }
+        const categories = await Category.find(query).populate('parentCategory', 'name slug').sort({ name: 1 });
         res.status(200).json({ status: true, data: categories });
     } catch (error) {
         next(error);
