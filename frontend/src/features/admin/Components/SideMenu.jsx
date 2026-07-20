@@ -12,6 +12,7 @@ function SideMenu({ openSlider, setOpenSlider }) {
         { path: '/dashboard/review', icon: 'fa-star-half-alt', label: 'Reviews' },
         { path: '/dashboard/income', icon: 'fa-wallet', label: 'Income' },
         { path: '/dashboard/coupon', icon: 'fa-percentage', label: 'Coupons' },
+        { path: '/dashboard/categories', icon: 'fa-list-alt', label: 'Categories' },
         { path: '/dashboard/help', icon: 'fa-question-circle', label: 'Help' },
         { path: '/dashboard/users', icon: 'fa-users', label: 'Users' }
     ];

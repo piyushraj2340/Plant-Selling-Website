@@ -51,6 +51,7 @@ import AdminOrders from "../features/admin/Components/Orders";
 import AdminIncome from "../features/admin/Components/Income";
 import AdminReviews from "../features/admin/Components/Reviews";
 import AdminCoupon from "../features/admin/Components/Coupon";
+import AdminCategories from "../features/admin/Components/Categories";
 import AdminHelp from "../features/admin/Components/Help";
 import AdminUsers from "../features/admin/Components/Users";
 
@@ -113,6 +114,7 @@ const Routing = () => {
                 <Route path="review" element={<AdminReviews />} />
                 <Route path="income" element={<AdminIncome />} />
                 <Route path="coupon" element={<AdminCoupon />} />
+                <Route path="categories" element={<AdminCategories />} />
                 <Route path="help" element={<AdminHelp />} />
                 <Route path="users" element={<AdminUsers />} />
             </Route>
