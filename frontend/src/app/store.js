@@ -9,6 +9,7 @@ import orderReducer from '../features/order/orderSlice';
 import checkoutReducer from '../features/checkout/checkoutSlice';
 import nurseryPublicStoreSlice  from '../features/nursery/nurseryPublicStoreSlice';
 import adminReducer from '../features/admin/adminSlice';
+import categoryReducer from '../features/category/categorySlice';
 
 export default configureStore({
     reducer: {
@@ -22,5 +23,6 @@ export default configureStore({
         checkout: checkoutReducer,
         order: orderReducer,
         admin: adminReducer,
+        category: categoryReducer,
     },
 });
