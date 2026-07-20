@@ -4,17 +4,72 @@ const Order = require('../model/checkoutModel/orders');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
-        const result = await plantsModel.find({ 
-            status: 'Published'
-        }).populate({
-            path: "nursery",
-            select: "nurseryName _id"  // Select only the fields you need
-        }).populate("category").select("-user"); // Populate nursery and category details
+        const { search, category, sort, page = 1, limit = 12 } = req.query;
+
+        // Build the base query
+        const query = { status: 'Published' };
+
+        // Handle category filter
+        if (category && category.toLowerCase() !== 'all') {
+            const categoryList = category.split(',').map(cat => cat.trim());
+            query.category = { $in: categoryList };
+        }
+
+        // Handle search keyword filter
+        if (search) {
+            const keywords = search.trim().split(/\s+/);
+            const Category = require('../model/category');
+            const matchedCategories = await Category.find({ name: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
+            const categoryIds = matchedCategories.map(cat => cat._id);
+
+            query.$or = [
+                { plantName: { $regex: keywords.join('|'), $options: 'i' } },
+                { description: { $regex: keywords.join('|'), $options: 'i' } },
+                { category: { $in: categoryIds } },
+                { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } },
+            ];
+        }
+
+        // Handle sorting
+        let sortQuery = {};
+        if (sort === 'price_asc') {
+            sortQuery.price = 1;
+        } else if (sort === 'price_desc') {
+            sortQuery.price = -1;
+        } else if (sort === 'name_asc') {
+            sortQuery.plantName = 1;
+        } else if (sort === 'name_desc') {
+            sortQuery.plantName = -1;
+        } else if (sort === 'newest') {
+            sortQuery.createdAt = -1;
+        } else {
+            sortQuery.createdAt = -1; // Default
+        }
+
+        // Handle pagination
+        const skip = (page - 1) * limit;
+        const parsedLimit = parseInt(limit, 10);
+
+        const result = await plantsModel.find(query)
+            .populate({ path: "nursery", select: "nurseryName _id" })
+            .populate("category")
+            .select("-user")
+            .sort(sortQuery)
+            .skip(skip)
+            .limit(parsedLimit);
+
+        const totalProducts = await plantsModel.countDocuments(query);
 
         const info = {
             status: true,
-            message: "Data of all products",
-            result
+            message: "Data of products",
+            result,
+            pagination: {
+                totalProducts,
+                currentPage: parseInt(page, 10),
+                totalPages: Math.ceil(totalProducts / parsedLimit),
+                limit: parsedLimit
+            }
         };
         res.status(200).send(info);
     } catch (error) {

@@ -5,30 +5,28 @@ const initialState = {
     products: [],
     product: null,
     productPricing: null,
-    totalProducts: null,
+    pagination: {
+        totalProducts: null,
+        currentPage: null,
+        totalPages: null,
+        limit: null
+    },
     productReviews: [],
     isLoading: false
 }
 
-export const getAllProductsAsync = createAsyncThunk('products/fetchAllProducts', async () => {
-    const response = await handelDataFetch('/api/v2/products/plants', 'GET');
+export const getAllProductsAsync = createAsyncThunk('products/fetchAllProducts', async (query) => {
+    let url = '/api/v2/products/plants?';
+    if (query) {
+        url += new URLSearchParams(query).toString();
+    }
+    const response = await handelDataFetch(url, 'GET');
     return response.data;
 });
-
-// TODO: check the rendering after deployment 
-export const getProductsByCategoryAsync = createAsyncThunk('products/fetchProductsByCategory', async (category) => {
-    const response = await handelDataFetch(`/api/v2/products/plantsByCategory/${category}`, 'GET');
-    return response.data;
-})
 
 // TODO: check the rendering after deployment 
 export const getProductAsync = createAsyncThunk('products/fetchProduct', async (_id) => {
     const response = await handelDataFetch(`/api/v2/products/plant/${_id}`, 'GET');
-    return response.data;
-});
-
-export const searchProductsAsync = createAsyncThunk('products/search', async ({search, category}) => {
-    const response = await handelDataFetch(`/api/v2/products/search/plants/?search=${search}&category=${(typeof category === 'string' && category.length > 0) ? category: 'all'}`, 'GET');
     return response.data;
 });
 
@@ -57,15 +55,8 @@ export const productsSlice = createSlice({
             }).addCase(getAllProductsAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.products = action.payload.result;
+                state.pagination = action.payload.pagination;
             }).addCase(getAllProductsAsync.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.error;
-            }).addCase(getProductsByCategoryAsync.pending, (state) => {
-                state.isLoading = true;
-            }).addCase(getProductsByCategoryAsync.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.products = action.payload.result;
-            }).addCase(getProductsByCategoryAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             }).addCase(getProductAsync.pending, (state) => {
@@ -74,14 +65,6 @@ export const productsSlice = createSlice({
                 state.isLoading = false;
                 state.product = action.payload.result;
             }).addCase(getProductAsync.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.error;
-            }).addCase(searchProductsAsync.pending, (state) => {
-                state.isLoading = true;
-            }).addCase(searchProductsAsync.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.products = action.payload.result;
-            }).addCase(searchProductsAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             }).addCase(getProductReviewsAsync.pending, (state) => {
