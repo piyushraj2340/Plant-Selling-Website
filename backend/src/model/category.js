@@ -1,4 +1,4 @@
-﻿const mongoose = require('mongoose');
+const mongoose = require('mongoose');
 
 const categorySchema = new mongoose.Schema({
     name: {
@@ -31,10 +31,15 @@ const categorySchema = new mongoose.Schema({
         ref: 'Category',
         default: null
     },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'user',
+        required: true
+    },
     status: {
         type: String,
-        enum: ['Active', 'Disabled'],
-        default: 'Active'
+        enum: ['Pending', 'Active', 'Disabled'],
+        default: 'Pending'
     }
 }, { timestamps: true });
 

@@ -58,6 +58,8 @@ app.use("/api/v2/checkout", payment);
 app.use("/api/v2/admin", adminRoute);
 
 // public routes
+const categoryRoute = require("./src/router/categoryRoute");
+app.use("/api/v2/categories", categoryRoute);
 app.use("/api/v2/products", products);
 app.use("/api/v2", contactUs);
 app.use("/api/v2/public/nursery", nurseryPublicStore);
