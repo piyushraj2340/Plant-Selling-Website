@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Modal, Table, Space, Tag, Button, Form, Input, Select, message } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllCategoriesAsync, createCategoryAsync, updateCategoryAsync, deleteCategoryAsync } from '../../category/categorySlice';
@@ -10,11 +10,12 @@ const Categories = () => {
     const { categories, isLoading } = useSelector(state => state.category);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
+    const [filterStatus, setFilterStatus] = useState('All');
     const [form] = Form.useForm();
 
     useEffect(() => {
-        dispatch(getAllCategoriesAsync());
-    }, [dispatch]);
+        dispatch(getAllCategoriesAsync({ status: filterStatus }));
+    }, [dispatch, filterStatus]);
 
     const showModal = (category = null) => {
         setEditingCategory(category);
@@ -35,6 +36,12 @@ const Categories = () => {
         form.resetFields();
     };
 
+    const handleNameChange = (e) => {
+        const name = e.target.value;
+        const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+        form.setFieldsValue({ slug });
+    };
+
     const onFinish = async (values) => {
         try {
             if (editingCategory) {
@@ -45,7 +52,7 @@ const Categories = () => {
                 message.success('Category created successfully');
             }
             setIsModalVisible(false);
-            dispatch(getAllCategoriesAsync());
+            dispatch(getAllCategoriesAsync({ status: filterStatus }));
         } catch (error) {
             message.error(error.message || 'Action failed');
         }
@@ -58,7 +65,7 @@ const Categories = () => {
                 try {
                     await dispatch(deleteCategoryAsync(id)).unwrap();
                     message.success('Category deleted successfully');
-                    dispatch(getAllCategoriesAsync());
+                    dispatch(getAllCategoriesAsync({ status: filterStatus }));
                 } catch (error) {
                     message.error(error.message || 'Delete failed');
                 }
@@ -114,7 +121,15 @@ const Categories = () => {
         <div className='p-4 bg-white rounded shadow-sm'>
             <div className='d-flex justify-content-between align-items-center mb-4'>
                 <h4 className='m-0'>Manage Categories</h4>
-                <Button type='primary' onClick={() => showModal()}>Add New Category</Button>
+                <div className='d-flex gap-3 align-items-center'>
+                    <Select value={filterStatus} onChange={setFilterStatus} style={{ width: 150 }}>
+                        <Option value='All'>All Status</Option>
+                        <Option value='Active'>Active</Option>
+                        <Option value='Pending'>Pending</Option>
+                        <Option value='Disabled'>Disabled</Option>
+                    </Select>
+                    <Button type='primary' onClick={() => showModal()}>Add New Category</Button>
+                </div>
             </div>
             <Table 
                 columns={columns} 
@@ -131,7 +146,7 @@ const Categories = () => {
             >
                 <Form layout='vertical' form={form} onFinish={onFinish}>
                     <Form.Item name='name' label='Category Name' rules={[{ required: true, message: 'Please enter category name' }]}>
-                        <Input placeholder='Enter name (e.g. Flowering Plants)' />
+                        <Input placeholder='Enter name (e.g. Flowering Plants)' onChange={handleNameChange} />
                     </Form.Item>
                     <Form.Item name='slug' label='Slug' rules={[{ required: true, message: 'Please enter slug' }]}>
                         <Input placeholder='Enter slug (e.g. flowering-plants)' />

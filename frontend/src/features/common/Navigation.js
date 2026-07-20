@@ -52,7 +52,7 @@ const Navigation = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
-        dispatch(getAllCategoriesAsync());
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
         // Extract the category query parameter and update the selected categories
         const queryParams = new URLSearchParams(location.search);
         const category = queryParams.get('category');

@@ -112,7 +112,7 @@ function EditPlants() {
 
     useEffect(() => {
         handelNurseryData();
-        dispatch(getAllCategoriesAsync());
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
     }, [dispatch]);
 
 

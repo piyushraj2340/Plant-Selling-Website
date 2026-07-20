@@ -73,7 +73,7 @@ exports.getPlantsByCategory = async (req, res, next) => {
         // Handle multiple categories if provided
         if (category && category.toLowerCase() !== 'all') {
             const categoryList = category.split(',').map(cat => cat.trim());
-            query.$and.push({ category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } });
+            query.$and.push({ category: { $in: categoryList } });
         }
 
         const result = await plantsModel.find(query).populate({
@@ -106,6 +106,11 @@ exports.searchProducts = async (req, res, next) => {
         // Split the search string into keywords
         const keywords = search.trim().split(/\s+/);
  
+        // Find categories that match the keywords
+        const Category = require('../model/category');
+        const matchedCategories = await Category.find({ name: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
+        const categoryIds = matchedCategories.map(cat => cat._id);
+
         // Construct a MongoDB query to match keywords in various fields
         const query = {
             $and: [
@@ -114,7 +119,7 @@ exports.searchProducts = async (req, res, next) => {
                     $or: [
                         { plantName: { $regex: keywords.join('|'), $options: 'i' } }, // Match any keyword in title
                         { description: { $regex: keywords.join('|'), $options: 'i' } }, // Match in description
-                        { category: { $regex: keywords.join('|'), $options: 'i' } }, // Match in category
+                        { category: { $in: categoryIds } }, // Match in category by resolved ObjectIds
                         { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } }, // Match numeric keywords with price
                     ]
                 }
@@ -124,7 +129,7 @@ exports.searchProducts = async (req, res, next) => {
         // Handle multiple categories if provided
         if (category && category.toLowerCase() !== 'all') {
             const categoryList = category.split(',').map(cat => cat.trim());
-            query.$and.push({ category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } });
+            query.$and.push({ category: { $in: categoryList } });
         }
 
         // Execute the query and fetch matching products
