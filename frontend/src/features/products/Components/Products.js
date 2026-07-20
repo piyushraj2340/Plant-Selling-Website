@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllProductsAsync, getProductsByCategoryAsync, searchProductsAsync } from '../productsSlice';
+import { getAllProductsAsync } from '../productsSlice';
 import { getAllCategoriesAsync } from '../../category/categorySlice';
 import { transformImageUrl } from '../../../utils/imageUtils';
+import { Pagination, Select } from 'antd';
 
 const Products = () => {
-    const products = useSelector((state) => state.products.products);
+    const { products, pagination } = useSelector((state) => state.products);
     const { categories } = useSelector((state) => state.category);
 
     const dispatch = useDispatch();
@@ -17,51 +18,72 @@ const Products = () => {
     const queryParams = new URLSearchParams(location.search);
     const searchKeyword = queryParams.get('search');
     const category = queryParams.get('category');
+    const sort = queryParams.get('sort') || 'recommended';
+    const page = parseInt(queryParams.get('page') || '1', 10);
     const categoryList = category ? category.split(',') : [];
 
     const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
     useEffect(() => {
         dispatch(getAllCategoriesAsync({ status: 'Active' }));
-        if (!searchKeyword && !category) {
-            // Case 1: /products
-            dispatch(getAllProductsAsync());
-        } else if (category && !searchKeyword) {
-            // Case 2: /products/?category='some category'
-            if(categoryList.length === 1 && category === 'all') {
-                dispatch(getAllProductsAsync());
-            } else {
-                dispatch(getProductsByCategoryAsync(category));
-            }
-        } else if (searchKeyword && !category) {
-            // Case 3: /products/?search='some keyword'
-            dispatch(searchProductsAsync({ search: searchKeyword, category: null }));
-        } else if (searchKeyword && category) {
-            // Case 4: /products/?search='some keyword'&category='some category'
-            dispatch(searchProductsAsync({ search: searchKeyword, category }));
-        }
+        
+        const query = {};
+        if (searchKeyword) query.search = searchKeyword;
+        if (category) query.category = category;
+        if (sort) query.sort = sort;
+        if (page) query.page = page;
+
+        dispatch(getAllProductsAsync(query));
     }, [location.search, dispatch]);
 
-    const handelSearchProductsByCategory = (category) => {
-        if(category === 'all' && categoryList.length === 0 && category === 'all') {
-            navigate(`/products`);
+    const updateUrlParams = (key, value) => {
+        const newParams = new URLSearchParams(location.search);
+        if (value && value !== 'all') {
+            newParams.set(key, value);
         } else {
-            let query;
-            if(category === 'all') {
-                query = 'all';
-            }else if (categoryList.includes(category)) {
-                query = categoryList.filter((cat) => cat !== category);
+            newParams.delete(key);
+        }
+        if (key !== 'page') newParams.set('page', '1'); // Reset to page 1 on filter change
+        navigate(`/products/?${newParams.toString()}`);
+    };
+
+    const handelSearchProductsByCategory = (catId) => {
+        if(catId === 'all') {
+            updateUrlParams('category', 'all');
+        } else {
+            let newCatList;
+            if (categoryList.includes(catId)) {
+                newCatList = categoryList.filter((cat) => cat !== catId);
             } else {
-                query = [...categoryList.filter((cat) => cat !== 'all'), category];
+                newCatList = [...categoryList.filter((cat) => cat !== 'all'), catId];
             }
-            navigate(`/products/?category=${query}`);
+            updateUrlParams('category', newCatList.join(','));
         }
     }
 
+    const handleSortChange = (value) => {
+        updateUrlParams('sort', value);
+    };
+
+    const handlePageChange = (page) => {
+        updateUrlParams('page', page);
+    };
+
     return (
         <div className="container product-container mb-4 mb-md-5">
-            <div className="p-2">
-                <h1 className='text-center p-2'>Available Plants for Sell</h1>
+            <div className="p-2 d-flex justify-content-between align-items-center flex-wrap">
+                <h1 className='text-center p-2 mb-0'>Available Plants for Sell</h1>
+                <div className="d-flex align-items-center">
+                    <span className="me-2 fw-bold">Sort By:</span>
+                    <Select value={sort} onChange={handleSortChange} style={{ width: 160 }}>
+                        <Select.Option value="recommended">Recommended</Select.Option>
+                        <Select.Option value="price_asc">Price: Low to High</Select.Option>
+                        <Select.Option value="price_desc">Price: High to Low</Select.Option>
+                        <Select.Option value="name_asc">Name: A to Z</Select.Option>
+                        <Select.Option value="name_desc">Name: Z to A</Select.Option>
+                        <Select.Option value="newest">Newest Arrivals</Select.Option>
+                    </Select>
+                </div>
             </div>
             <div className="p-2 d-flex flex-wrap justify-content-center align-item-center">
                 <button onClick={() => handelSearchProductsByCategory("all")} className={`btn ${categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} m-1`}>All</button>
@@ -104,7 +126,18 @@ const Products = () => {
                     })
                 }
             </div>
-            <div className="w-100">
+            {pagination && pagination.totalProducts > 0 && (
+                <div className="d-flex justify-content-center mt-4">
+                    <Pagination
+                        current={pagination.currentPage}
+                        total={pagination.totalProducts}
+                        pageSize={pagination.limit}
+                        onChange={handlePageChange}
+                        showSizeChanger={false}
+                    />
+                </div>
+            )}
+            <div className="w-100 mt-4">
                 {
                     products.length === 0 &&
                     <div className="d-flex justify-content-center">
