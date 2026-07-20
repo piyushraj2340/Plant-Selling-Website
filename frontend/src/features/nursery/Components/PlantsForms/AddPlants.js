@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { message } from "antd";
 import { useDispatch, useSelector } from 'react-redux';
 import { addNewPlantsToNurseryAsync } from '../../nurserySlice';
+import { getAllCategoriesAsync } from '../../../category/categorySlice';
+import { useEffect } from 'react';
 
 function AddPlants() {
     const nursery = useSelector(state => state.nursery.nursery);
+    const { categories } = useSelector(state => state.category);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getAllCategoriesAsync());
+    }, [dispatch]);
 
     const [plant, setPlants] = useState({
         user: nursery.user,
@@ -182,10 +189,9 @@ function AddPlants() {
                                 <label htmlFor="category" className='ps-1 my-2'>Category: <span className="text-danger small">*</span></label>
                                 <select type="text" name='category' id="category" defaultValue={plant.category == "" ? "none" : plant.category} className="form-control" placeholder='Category' onChange={handleInputs} >
                                     <option value="none" disabled >--Select Category--</option>
-                                    <option value="flowering-plants">Flowering Plants</option>
-                                    <option value="medicinal-plants">Medicinal Plants</option>
-                                    <option value="ornamental-plants">Ornamental Plants</option>
-                                    <option value="indoor-plants">Indoor Plants</option>
+                                    {categories && categories.map(cat => (
+                                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                    ))}
                                 </select>
                                 {errorMessage.category.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.category.message}</p>

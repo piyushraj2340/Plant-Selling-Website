@@ -1,8 +1,10 @@
 import { message } from 'antd';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const Footer = () => {
+    const { categories } = useSelector((state) => state.category);
     const logoImg = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/plant_seller_bg_none";
 
     const [email, setEmail] = useState("");
@@ -77,18 +79,11 @@ const Footer = () => {
                                     <h6 className="text-uppercase fw-bold mb-4">
                                         Plants
                                     </h6>
-                                    <p>
-                                        <Link to="/products/?category=flowering-plants" className="text-reset">Flowering</Link>
-                                    </p>
-                                    <p>
-                                        <Link to="/products/?category=medicinal-plants" className="text-reset">Medicinal</Link>
-                                    </p>
-                                    <p>
-                                        <Link to="/products/?category=ornamental-plants" className="text-reset">Ornamental</Link>
-                                    </p>
-                                    <p>
-                                        <Link to="/products/?category=indoor-plants" className="text-reset">Indoor</Link>
-                                    </p>
+                                    {categories && categories.slice(0, 4).map(cat => (
+                                        <p key={cat._id}>
+                                            <Link to={`/products/?category=${cat._id}`} className="text-reset">{cat.name}</Link>
+                                        </p>
+                                    ))}
                                 </div>
                                 <div className="d-flex flex-column align-items-start pe-3">
                                     <h6 className="text-uppercase fw-bold mb-4">

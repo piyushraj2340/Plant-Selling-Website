@@ -3,9 +3,11 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { message } from 'antd';
 import useUserData from '../../hooks/useUserData';
+import { getAllCategoriesAsync } from '../category/categorySlice';
 
 const Navigation = () => {
     const cartLength = useSelector((state) => state.cart.cartLength);
+    const { categories } = useSelector((state) => state.category);
     const {userData:user} = useUserData();
 
     const [viewSearchFilter, setViewSearchFilter] = useState(false);
@@ -50,6 +52,7 @@ const Navigation = () => {
     const dispatch = useDispatch();
 
     useEffect(() => {
+        dispatch(getAllCategoriesAsync());
         // Extract the category query parameter and update the selected categories
         const queryParams = new URLSearchParams(location.search);
         const category = queryParams.get('category');
@@ -58,7 +61,7 @@ const Navigation = () => {
         } else {
             setSelectedCategories([]);
         }
-    }, [location.search]);
+    }, [location.search, dispatch]);
 
     useEffect(() => {
         if (user) {
@@ -121,22 +124,12 @@ const Navigation = () => {
                                         <input type="checkbox" name="allProducts" id="allProducts" className='form-check-input' onChange={() => handleCategoryChange('all')} checked={selectedCategories.includes('all')} />
                                         <label htmlFor="allProducts" className='form-check-label '>All Products</label>
                                     </div>
-                                    <div className="form-check font-weight-bold">
-                                        <input type="checkbox" name="flower" id="flower" className='form-check-input' onChange={() => handleCategoryChange('flowering-plants')} checked={selectedCategories.includes('flowering-plants') || selectedCategories.includes('all')}/>
-                                        <label htmlFor="flower" className='form-check-label '>Flowering</label>
-                                    </div>
-                                    <div className="form-check font-weight-bold">
-                                        <input type="checkbox" name="medicinal" id="medicinal" className='form-check-input' onChange={() => handleCategoryChange('medicinal-plants')} checked={selectedCategories.includes('medicinal-plants') || selectedCategories.includes('all')}/>
-                                        <label htmlFor="medicinal" className='form-check-label '>Medicinal</label>
-                                    </div>
-                                    <div className="form-check font-weight-bold">
-                                        <input type="checkbox" name="ornamental" id="ornamental" className='form-check-input' onChange={() => handleCategoryChange('ornamental-plants')} checked={selectedCategories.includes('ornamental-plants') || selectedCategories.includes('all')}/>
-                                        <label htmlFor="ornamental" className='form-check-label '>Ornamental</label>
-                                    </div>
-                                    <div className="form-check font-weight-bold">
-                                        <input type="checkbox" name="indoor" id="indoor" className='form-check-input' onChange={() => handleCategoryChange('indoor-plants')} checked={selectedCategories.includes('indoor-plants') || selectedCategories.includes('all')} />
-                                        <label htmlFor="indoor" className='form-check-label '>Indoor</label>
-                                    </div>
+                                    {categories && categories.map(cat => (
+                                        <div key={cat._id} className="form-check font-weight-bold">
+                                            <input type="checkbox" name={cat._id} id={cat._id} className='form-check-input' onChange={() => handleCategoryChange(cat._id)} checked={selectedCategories.includes(cat._id) || selectedCategories.includes('all')}/>
+                                            <label htmlFor={cat._id} className='form-check-label '>{cat.name}</label>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                             <input
