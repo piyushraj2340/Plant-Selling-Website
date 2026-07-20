@@ -18,7 +18,7 @@ const ProductsTable = () => {
     },
     stock: plant.stock,
     price: `₹${plant.price}`,
-    tags: plant.category ? [plant.category] : [],
+    tags: plant.category ? [plant.category.name || plant.category] : [],
     status: plant.status || "Draft",
     action: plant.status || "Draft",
   }));

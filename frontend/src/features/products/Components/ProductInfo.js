@@ -39,7 +39,7 @@ const ProductInfo = () => {
                     <span className="text-success">-{product.discount}%</span> <sup>₹</sup>{Math.round(product.price - product.discount / 100 * product.price)}
                 </div>
                 <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Category</div>
-                <div className="card-text">{product.category}</div>
+                <div className="card-text">{product.category ? (product.category.name || product.category) : "N/A"}</div>
                 <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Description</div>
                 <div className="card-text">{product.description}</div>
             </div>

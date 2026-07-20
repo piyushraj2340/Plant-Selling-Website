@@ -3,10 +3,12 @@ import { Rating } from 'react-simple-star-rating';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllProductsAsync, getProductsByCategoryAsync, searchProductsAsync } from '../productsSlice';
+import { getAllCategoriesAsync } from '../../category/categorySlice';
 import { transformImageUrl } from '../../../utils/imageUtils';
 
 const Products = () => {
     const products = useSelector((state) => state.products.products);
+    const { categories } = useSelector((state) => state.category);
 
     const dispatch = useDispatch();
     const location = useLocation();
@@ -20,6 +22,7 @@ const Products = () => {
     const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
     useEffect(() => {
+        dispatch(getAllCategoriesAsync());
         if (!searchKeyword && !category) {
             // Case 1: /products
             dispatch(getAllProductsAsync());
@@ -62,10 +65,11 @@ const Products = () => {
             </div>
             <div className="p-2 d-flex flex-wrap justify-content-center align-item-center">
                 <button onClick={() => handelSearchProductsByCategory("all")} className={`btn ${categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} m-1`}>All</button>
-                <button onClick={() => handelSearchProductsByCategory("flowering-plants")} className={`btn ${categoryList.includes('flowering-plants') || categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} btn-primary m-1`}>Flowering Plants</button>
-                <button onClick={() => handelSearchProductsByCategory("medicinal-plants")} className={`btn ${categoryList.includes('medicinal-plants') || categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} m-1`}>Medicinal Plants</button>
-                <button onClick={() => handelSearchProductsByCategory("ornamental-plants")} className={`btn ${categoryList.includes('ornamental-plants') || categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} m-1`}>Ornamental Plants</button>
-                <button onClick={() => handelSearchProductsByCategory("indoor-plants")} className={`btn ${categoryList.includes('indoor-plants') || categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} m-1`}>Indoor Plants</button>
+                {categories && categories.map(cat => (
+                    <button key={cat._id} onClick={() => handelSearchProductsByCategory(cat._id)} className={`btn ${categoryList.includes(cat._id) || categoryList.includes('all') ? 'btn-primary' : 'btn-secondary'} m-1`}>
+                        {cat.name}
+                    </button>
+                ))}
             </div>
             <div className="product-content px-2">
                 {
@@ -81,7 +85,7 @@ const Products = () => {
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>price</p>
                                             <p className="card-text">₹ {Math.round(elem.price - elem.discount / 100 * elem.price)}</p>
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>category</p>
-                                            <p className="card-text">{elem.category}</p>
+                                            <p className="card-text">{elem.category ? elem.category.name : "N/A"}</p>
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>ratings</p>
                                             <p className="card-text">
                                                 <Rating

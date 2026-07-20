@@ -2,12 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../../../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import handelDataFetch from '../../../../utils/handelDataFetch';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllCategoriesAsync } from '../../../category/categorySlice';
 
 
 function EditPlants() {
     document.title = "Edit Your Plants Details"
 
     const { setShowAnimation } = useContext(UserContext);
+    const dispatch = useDispatch();
+    const { categories } = useSelector(state => state.category);
 
     const [plant, setPlants] = useState({
         user: "",
@@ -108,7 +112,8 @@ function EditPlants() {
 
     useEffect(() => {
         handelNurseryData();
-    }, []);
+        dispatch(getAllCategoriesAsync());
+    }, [dispatch]);
 
 
     const postData = async (e) => {
@@ -210,10 +215,9 @@ function EditPlants() {
                                 <label htmlFor="category" className='ps-1 my-2'>Category: <span className="text-danger small">*</span></label>
                                 <select type="text" name='category' id="category" defaultValue={plant.category == "" ? "none" : plant.category} className="form-control" placeholder='Category' onChange={handleInputs} >
                                     <option value="none" disabled >--Select Category--</option>
-                                    <option value="flowering-plants">Flowering Plants</option>
-                                    <option value="medicinal-plants">Medicinal Plants</option>
-                                    <option value="ornamental-plants">Ornamental Plants</option>
-                                    <option value="indoor-plants">Indoor Plants</option>
+                                    {categories && categories.map(cat => (
+                                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                    ))}
                                 </select>
                                 {errorMessage.category.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.category.message}</p>
