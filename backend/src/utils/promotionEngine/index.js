@@ -18,11 +18,17 @@ const buildCartContext = (coupon, cart) => {
         applicableTotal = cart.total;
     } 
     else if (coupon.applicability.type === 'Categories') {
-        const allowedCategories = coupon.applicability.categories.map(c => c.toLowerCase());
+        const allowedCategoryIds = coupon.applicability.categories.map(c => c.toString());
         cart.items.forEach(item => {
-            // Assuming item.product has a category property
-            if (item.product && item.product.category && allowedCategories.includes(item.product.category.toLowerCase())) {
-                applicableTotal += item.price * item.quantity;
+            // Check if item.product has a category that matches (handle both populated object and plain ObjectId)
+            if (item.product && item.product.category) {
+                const itemCategoryId = typeof item.product.category === 'object' && item.product.category._id 
+                    ? item.product.category._id.toString() 
+                    : item.product.category.toString();
+
+                if (allowedCategoryIds.includes(itemCategoryId)) {
+                    applicableTotal += item.price * item.quantity;
+                }
             }
         });
     } 

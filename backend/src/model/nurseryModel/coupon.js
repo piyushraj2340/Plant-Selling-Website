@@ -42,7 +42,7 @@ const couponSchema = new mongoose.Schema({
             enum: ['All', 'Categories', 'Products'], 
             default: 'All' 
         },
-        categories: [{ type: String }], // e.g., ["indoor", "outdoor"]
+        categories: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Category' }], // Reference to Category schema
         products: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Plant' }] // Specific plant IDs
     },
 
