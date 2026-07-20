@@ -758,8 +758,8 @@ const adminController = {
                 },
                 applicability: {
                     type: data.categories === 'all' ? 'All' : (data.categories === 'categories' ? 'Categories' : 'Products'),
-                    categories: data.categories === 'categories' ? [data.subCategories] : [],
-                    products: data.categories === 'individual' ? [data.subCategories] : []
+                    categories: data.categories === 'categories' ? (Array.isArray(data.subCategories) ? data.subCategories : [data.subCategories]) : [],
+                    products: data.categories === 'individual' ? (Array.isArray(data.subCategories) ? data.subCategories : [data.subCategories]) : []
                 },
                 rules: {
                     minOrderAmount: data.minAmount ? parseFloat(data.minAmount) : 0,
@@ -812,8 +812,8 @@ const adminController = {
                 },
                 applicability: {
                     type: data.categories === 'all' ? 'All' : (data.categories === 'categories' ? 'Categories' : 'Products'),
-                    categories: data.categories === 'categories' ? [data.subCategories] : [],
-                    products: data.categories === 'individual' ? [data.subCategories] : []
+                    categories: data.categories === 'categories' ? (Array.isArray(data.subCategories) ? data.subCategories : [data.subCategories]) : [],
+                    products: data.categories === 'individual' ? (Array.isArray(data.subCategories) ? data.subCategories : [data.subCategories]) : []
                 },
                 rules: {
                     minOrderAmount: data.minAmount ? parseFloat(data.minAmount) : 0,

@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { Modal } from 'antd';
+import { Modal, Select } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminCreateCouponAsync, adminUpdateCouponAsync } from '../adminSlice';
+import { getAllCategoriesAsync } from '../../category/categorySlice';
+import { getAllProductsAsync } from '../../products/productsSlice';
 import CouponTables from './CouponTables';
 
 const Coupon = () => {
@@ -18,7 +20,7 @@ const Coupon = () => {
         maxDiscountInCost: '',
         createdAt: '', // on submitting the button automatically handles in back-end.
         categories: 'all',
-        subCategories: '', // need to check multiple from dropdown
+        subCategories: [], // now an array
         redeemBefore: '',
         freeDelivery: false,
         singleCouponPerUser: false,
@@ -50,6 +52,10 @@ const Coupon = () => {
     // options
     const generateRandomCode = () => {
         return Math.random().toString(36).substring(2, 10).toUpperCase();
+    }
+
+    const handleSubCategoriesChange = (val) => {
+        setCoupon({ ...coupon, subCategories: val });
     }
 
     const handelUseAutoGenerateCoupons = (e) => {
@@ -119,6 +125,14 @@ const Coupon = () => {
     const dispatch = useDispatch();
 
     const { couponsData } = useSelector(state => state.admin);
+    const { categories } = useSelector(state => state.category);
+    const { products } = useSelector(state => state.products);
+
+    React.useEffect(() => {
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
+        dispatch(getAllProductsAsync());
+    }, [dispatch]);
+
     const [isEditing, setIsEditing] = useState(false);
     const [editingCouponId, setEditingCouponId] = useState(null);
 
@@ -147,7 +161,7 @@ const Coupon = () => {
             maxDiscountInCost: '',
             createdAt: '',
             categories: 'all',
-            subCategories: '',
+            subCategories: [],
             redeemBefore: '',
             freeDelivery: false,
             singleCouponPerUser: false,
@@ -300,30 +314,44 @@ const Coupon = () => {
 
 
                     {coupon.categories !== 'all' &&
-
                         <div className="mb-3 col-md-6">
                             {coupon.categories === 'categories' &&
-                                <div className="form-floating mb-1">
-                                    <select type="datetime-local" className="form-control" id="subCategories" name='subCategories' onChange={handelFormInputs}>
-                                        <option value="plants">Plants</option>
-                                        <option value="indore">Indore Plants</option>
-                                        <option value="medical">medical</option>
-                                    </select>
-                                    <label for="subCategories">Select Product Categories <small className='text-danger'>*</small></label>
+                                <div className="mb-1">
+                                    <label className="form-label" htmlFor="subCategories">Select Product Categories <small className='text-danger'>*</small></label>
+                                    <br />
+                                    <Select
+                                        mode="multiple"
+                                        style={{ width: '100%' }}
+                                        placeholder="Select Categories"
+                                        onChange={handleSubCategoriesChange}
+                                        value={coupon.subCategories}
+                                        options={categories?.map(c => ({ label: c.name, value: c._id })) || []}
+                                        showSearch
+                                        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                                    />
                                 </div>
                             }
 
                             {coupon.categories === 'individual' &&
-                                <div className="form-floating mb-1">
-                                    <input type="search" className="form-control" id="subCategories" name='subCategories' placeholder='Search Individual Products' onChange={handelFormInputs} />
-                                    <label for="subCategories">Search Individual Products </label>
+                                <div className="mb-1">
+                                    <label className="form-label" htmlFor="subCategories">Search Individual Products <small className='text-danger'>*</small></label>
+                                    <br />
+                                    <Select
+                                        mode="multiple"
+                                        style={{ width: '100%' }}
+                                        placeholder="Search Individual Products"
+                                        onChange={handleSubCategoriesChange}
+                                        value={coupon.subCategories}
+                                        options={products?.map(p => ({ label: p.plantName, value: p._id })) || []}
+                                        showSearch
+                                        filterOption={(input, option) => (option?.label ?? '').toLowerCase().includes(input.toLowerCase())}
+                                    />
                                 </div>
                             }
-                            <div className="small ms-2 text-secondary">
-                                <p className='small'> <i className="fas fa-info-circle"></i> Sub-option for which coupon are valid.</p>
+                            <div className="small ms-2 mt-1 text-secondary">
+                                <p className='small'> <i className="fas fa-info-circle"></i> Multiple options can be selected.</p>
                             </div>
                         </div>
-
                     }
 
                     <div className={`mb-3 ${coupon.categories === 'all' ? 'col-md-6' : 'col-md-12'}`}>
