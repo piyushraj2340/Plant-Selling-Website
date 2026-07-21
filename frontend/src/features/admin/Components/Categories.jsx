@@ -1,22 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Table, Space, Tag, Button, Form, Input, Select, message } from 'antd';
+import { Modal, Table, Space, Tag, Button, Form, Input, Select, message, Row, Col } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllCategoriesAsync, createCategoryAsync, updateCategoryAsync, deleteCategoryAsync } from '../../category/categorySlice';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 const { Option } = Select;
 
 const Categories = () => {
     const dispatch = useDispatch();
-    const { categories, isLoading } = useSelector(state => state.category);
+    const { categories, total, isLoading } = useSelector(state => state.category);
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
-    const [filterStatus, setFilterStatus] = useState('All');
     const [form] = Form.useForm();
 
-    useEffect(() => {
-        dispatch(getAllCategoriesAsync({ status: filterStatus }));
-    }, [dispatch, filterStatus]);
-
+    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(getAllCategoriesAsync);
     const showModal = (category = null) => {
         setEditingCategory(category);
         if (category) {
@@ -52,7 +49,7 @@ const Categories = () => {
                 message.success('Category created successfully');
             }
             setIsModalVisible(false);
-            dispatch(getAllCategoriesAsync({ status: filterStatus }));
+            dispatch(getAllCategoriesAsync(tableParams.pagination));
         } catch (error) {
             message.error(error.message || 'Action failed');
         }
@@ -65,7 +62,7 @@ const Categories = () => {
                 try {
                     await dispatch(deleteCategoryAsync(id)).unwrap();
                     message.success('Category deleted successfully');
-                    dispatch(getAllCategoriesAsync({ status: filterStatus }));
+                    dispatch(getAllCategoriesAsync(tableParams.pagination));
                 } catch (error) {
                     message.error(error.message || 'Delete failed');
                 }
@@ -114,25 +111,37 @@ const Categories = () => {
 
 
     return (
-        <div className='p-4 bg-white rounded shadow-sm'>
-            <div className='d-flex justify-content-between align-items-center mb-4'>
-                <h4 className='m-0'>Manage Categories</h4>
-                <div className='d-flex gap-3 align-items-center'>
-                    <Select value={filterStatus} onChange={setFilterStatus} style={{ width: 150 }}>
-                        <Option value='All'>All Status</Option>
-                        <Option value='Active'>Active</Option>
-                        <Option value='Pending'>Pending</Option>
-                        <Option value='Disabled'>Disabled</Option>
-                    </Select>
-                    <Button type='primary' style={{width: "125px"}} onClick={() => showModal()}>Add Category</Button>
-                </div>
-            </div>
+        <div className="w-100 p-0">
+            <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+                <Col xs={24} md={8}>
+                    <Button type="primary" onClick={() => showModal()}>
+                        Add Category
+                    </Button>
+                </Col>
+                <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                    <Input.Search
+                        placeholder="Search categories..."
+                        allowClear
+                        value={localSearch}
+                        onChange={handleSearchChange}
+                        style={{ width: '100%', maxWidth: '300px' }}
+                    />
+                </Col>
+            </Row>
+
             <Table 
                 columns={columns} 
                 dataSource={categories} 
-                rowKey='_id' 
-                loading={isLoading} 
-                pagination={{ pageSize: 10 }}
+                rowKey="_id" 
+                loading={isLoading}
+                pagination={{
+                    ...tableParams.pagination,
+                    total: total,
+                    showSizeChanger: true,
+                    position: ['bottomCenter']
+                }}
+                onChange={handleTableChange}
+                scroll={{ x: 'max-content' }}
             />
             <Modal
                 title={editingCategory ? 'Edit Category' : 'Add New Category'}

@@ -4,6 +4,7 @@ const Plant = require('../model/nurseryModel/plants');
 const Order = require('../model/checkoutModel/orders');
 const Contact = require('../model/contact');
 const { replyToContactMessageEmail } = require('./smtp/emailController');
+const { getQueryOptions, buildSearchQuery } = require('../utils/queryHelper');
 
 const adminController = {
     // Get Dashboard Stats
@@ -93,8 +94,24 @@ const adminController = {
     // Get all users
     getUsers: async (req, res, next) => {
         try {
-            const users = await User.find().select('-password -tokens');
-            res.status(200).json({ status: true, message: "Users fetched successfully", users });
+            const { page, limit, skip, search, sort } = getQueryOptions(req);
+            const query = buildSearchQuery(search, ['name', 'email']);
+
+            const total = await User.countDocuments(query);
+            const users = await User.find(query)
+                .select('-password -tokens')
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
+
+            res.status(200).json({ 
+                status: true, 
+                message: "Users fetched successfully", 
+                users,
+                total,
+                page,
+                limit
+            });
         } catch (error) {
             next(error);
         }
@@ -277,10 +294,13 @@ const adminController = {
             });
 
             // 3. Table Data: Search and Filter
+            const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
             let query = {};
             
-            if (search) {
-                const keywords = search.trim().split(/\s+/);
+            // Override with new search handling if search exists
+            const searchQueryStr = parsedSearch || search; // support old `search` if passed directly
+            if (searchQueryStr) {
+                const keywords = searchQueryStr.trim().split(/\s+/);
                 query.$or = [
                     { plantName: { $regex: keywords.join('|'), $options: 'i' } },
                     { category: { $regex: keywords.join('|'), $options: 'i' } }
@@ -292,10 +312,12 @@ const adminController = {
                 // For now we just support search.
             }
 
+            const total = await Plant.countDocuments(query);
             const plants = await Plant.find(query)
                 .populate('nursery', 'nurseryName')
-                .sort({ postedAt: -1 })
-                .limit(50); // Pagination can be added later
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
 
             res.status(200).json({ 
                 status: true,
@@ -304,20 +326,100 @@ const adminController = {
                     lineChart: lineData,
                     polarChart: [polarData.Published, polarData.Draft, polarData["On Hold"]]
                 },
-                plants 
+                plants,
+                total,
+                page,
+                limit
             });
         } catch (error) {
             next(error);
         }
     },
 
-    // Get all orders
+    // Get all orders (Table Data only)
     getOrders: async (req, res, next) => {
         try {
-            const { year, search, filter } = req.query;
+            const { search, timeFilter, status, tag } = req.query;
+            const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
+            
+            let query = {};
+            const searchQueryStr = parsedSearch || search;
+            
+            if (searchQueryStr) {
+                const mongoose = require('mongoose');
+                const OrderItem = require('../model/checkoutModel/orderItem');
+                const searchRegex = new RegExp(searchQueryStr.trim(), 'i');
+                
+                // 1. Find OrderItem matches (by plantName)
+                const matchedItems = await OrderItem.find({ plantName: searchRegex }).select('order');
+                const orderIdsFromItems = matchedItems.map(item => item.order);
+                
+                // 2. Check if the search string is a valid Order ID itself
+                const validIds = [...orderIdsFromItems];
+                if (mongoose.Types.ObjectId.isValid(searchQueryStr.trim())) {
+                    validIds.push(searchQueryStr.trim());
+                }
+                
+                if (validIds.length > 0) {
+                    query = { _id: { $in: validIds } };
+                } else {
+                    query = { _id: null }; // Invalid ID and no plant match shouldn't match anything
+                }
+            }
+            
+            if (timeFilter) {
+                const now = new Date();
+                if (timeFilter === 'Monthly') {
+                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 30)) };
+                } else if (timeFilter === 'Quarterly') {
+                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 90)) };
+                } else if (timeFilter === 'Yearly') {
+                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 365)) };
+                }
+            }
+
+            if (tag) {
+                const tags = tag.split(',').map(t => new RegExp(`^${t.trim()}$`, 'i'));
+                query['orderStatus.status'] = { $in: tags };
+            }
+
+            if (status) {
+                const statuses = status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query['orderStatus.message'] = { $in: statuses };
+            }
+
+            const total = await Order.countDocuments(query);
+            const orders = await Order.find(query)
+                .populate('user')
+                .populate({
+                    path: 'orderItems',
+                    populate: [
+                        { path: 'nursery' },
+                        { path: 'plant' } 
+                    ]
+                })
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
+            
+            res.status(200).json({ 
+                status: true, 
+                message: "Orders fetched successfully", 
+                orders,
+                total,
+                page,
+                limit
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getOrdersBarChart: async (req, res, next) => {
+        try {
+            const { year } = req.query;
             const targetYear = parseInt(year) || new Date().getFullYear();
 
-            // 1. Line/Bar Chart Data: Orders per month for the given year
             const startOfYear = new Date(`${targetYear}-01-01T00:00:00.000Z`);
             const endOfYear = new Date(`${targetYear}-12-31T23:59:59.999Z`);
             
@@ -333,7 +435,17 @@ const adminController = {
                 }
             });
 
-            // 2. Pie Chart Data: Orders by plant category
+            res.status(200).json({ 
+                status: true, 
+                barData 
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getOrdersPieChart: async (req, res, next) => {
+        try {
             const categoryAgg = await Order.aggregate([
                 { $unwind: "$orderItems" },
                 { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
@@ -351,38 +463,10 @@ const adminController = {
                 pieData.push(item.count);
             });
 
-            // 3. Table Data: Orders filtering
-            // For simplicity, we just filter all orders and populate user, and then let frontend search order items
-            let query = {};
-            if (search) {
-                query = { _id: search }; // Very basic search by Order ID for now, as searching populated fields is complex in Mongoose without aggregates.
-                // Could expand this to use aggregation for deep searching if necessary.
-                try {
-                    query = { _id: search.trim() };
-                } catch (e) {
-                    query = {}; // Invalid ObjectId
-                }
-            }
-
-            const orders = await Order.find(query)
-                .populate('user')
-                .populate({
-                    path: 'orderItems',
-                    populate: [
-                        { path: 'nursery' },
-                        { path: 'plant' } // Need plant populated to show stock or correct images if needed
-                    ]
-                })
-                .sort({ orderAt: -1 });
-            
             res.status(200).json({ 
                 status: true, 
-                message: "Orders fetched successfully", 
-                stats: {
-                    barChart: barData,
-                    pieChart: { labels: pieLabels, data: pieData }
-                },
-                orders 
+                pieLabels,
+                pieData 
             });
         } catch (error) {
             next(error);
@@ -429,18 +513,18 @@ const adminController = {
     getAllReviews: async (req, res, next) => {
         try {
             const Review = require('../model/nurseryModel/review');
-            const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+            const { year } = req.query;
+            const targetYear = year ? parseInt(year) : new Date().getFullYear();
             
-            // Build matching query based on search and filter if needed
-            // For now, fetch all as we're doing basic stats
-            const reviews = await Review.find().populate('user', 'name email avatar').populate('plant', 'plantName category images price discount').sort({ _id: -1 });
+            // 1. Stats calculation (needs all reviews for the year)
+            // Fetch minimal data for stats
+            const allReviewsForStats = await Review.find().select('rating createdAt');
             
-            // Stats calculation
             const starCounts = [0, 0, 0, 0, 0];
             const monthRatings = Array(12).fill(0);
             const monthCounts = Array(12).fill(0);
 
-            reviews.forEach(review => {
+            allReviewsForStats.forEach(review => {
                 // Pie Chart: Count by star rating
                 const rating = Math.floor(review.rating);
                 if (rating >= 1 && rating <= 5) {
@@ -461,6 +545,23 @@ const adminController = {
                 return monthCounts[index] > 0 ? parseFloat((total / monthCounts[index]).toFixed(1)) : 0;
             });
 
+            // 2. Table Data (Paginated)
+            const { page, limit, skip, search, sort } = getQueryOptions(req);
+            let query = {};
+            if (search) {
+                // To search by populated fields (user name, plant name) in mongoose requires complex lookups.
+                // We'll search by review text.
+                query = { review: { $regex: search, $options: 'i' } };
+            }
+
+            const total = await Review.countDocuments(query);
+            const reviews = await Review.find(query)
+                .populate('user', 'name email avatar')
+                .populate('plant', 'plantName category images price discount')
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
+
             res.status(200).json({ 
                 status: true, 
                 message: "Reviews fetched successfully", 
@@ -471,7 +572,10 @@ const adminController = {
                         data: starCounts
                     }
                 },
-                reviews 
+                reviews,
+                total,
+                page,
+                limit
             });
         } catch (error) {
             next(error);
@@ -732,14 +836,21 @@ const adminController = {
             });
 
             // 3. Table Data: Orders (Successful/Processing)
-            const query = {
+            const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
+            let query = {
                 "payment.status": { $ne: 'Failed' }
             };
 
-            if (search) {
-                query._id = search;
+            const searchQueryStr = parsedSearch || search;
+            if (searchQueryStr) {
+                try {
+                    query._id = searchQueryStr.trim();
+                } catch(e) {
+                    // Invalid ObjectId
+                }
             }
 
+            const total = await Order.countDocuments(query);
             const orders = await Order.find(query)
                 .populate('user')
                 .populate({
@@ -749,16 +860,21 @@ const adminController = {
                         { path: 'plant' }
                     ]
                 })
-                .sort({ orderAt: -1 });
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
 
-            res.status(200).json({
-                status: true,
-                message: "Income stats fetched successfully",
+            res.status(200).json({ 
+                status: true, 
+                message: "Income Stats fetched successfully", 
                 stats: {
                     barChart: monthlyRevenue,
                     pieChart: { labels: pieLabels, data: pieData }
                 },
-                orders
+                orders,
+                total,
+                page,
+                limit
             });
         } catch (error) {
             next(error);
@@ -812,9 +928,25 @@ const adminController = {
     getCoupons: async (req, res, next) => {
         try {
             const Coupon = require('../model/nurseryModel/coupon');
-            const coupons = await Coupon.find().populate('createdBy', 'name').sort({ createdAt: -1 });
+            const { page, limit, skip, search, sort } = getQueryOptions(req);
+            
+            const query = buildSearchQuery(search, ['code', 'description']);
+            
+            const total = await Coupon.countDocuments(query);
+            const coupons = await Coupon.find(query)
+                .populate('createdBy', 'name')
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
 
-            res.status(200).json({ status: true, message: "Coupons fetched successfully", coupons });
+            res.status(200).json({ 
+                status: true, 
+                message: "Coupons fetched successfully", 
+                coupons,
+                total,
+                page,
+                limit
+            });
         } catch (error) {
             next(error);
         }
@@ -916,8 +1048,22 @@ const adminController = {
     // Get all contact messages
     getAllContactMessages: async (req, res, next) => {
         try {
-            const contacts = await Contact.find().sort({ createdAt: -1 });
-            res.status(200).json({ status: true, contacts });
+            const { page, limit, skip, search, sort } = getQueryOptions(req);
+            const query = buildSearchQuery(search, ['name', 'email', 'subject']);
+            
+            const total = await Contact.countDocuments(query);
+            const contacts = await Contact.find(query)
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
+
+            res.status(200).json({ 
+                status: true, 
+                contacts,
+                total,
+                page,
+                limit
+            });
         } catch (error) {
             next(error);
         }

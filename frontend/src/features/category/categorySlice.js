@@ -7,14 +7,12 @@ const initialState = {
     error: null
 }
 
-export const getAllCategoriesAsync = createAsyncThunk('category/fetchAllCategories', async (args, { rejectWithValue }) => {
+export const getAllCategoriesAsync = createAsyncThunk('category/fetchAllCategories', async (args = {}, { rejectWithValue }) => {
     try {
-        let url = '/api/v2/categories';
-        if (args && args.status) {
-            url += `?status=${args.status}`;
-        }
+        const queryStr = new URLSearchParams(args).toString();
+        let url = `/api/v2/categories?${queryStr}`;
         const response = await handelDataFetch(url, 'GET');
-        return response.data.data;
+        return response.data;
     } catch (error) {
         return rejectWithValue(error.response.data);
     }
@@ -59,7 +57,8 @@ const categorySlice = createSlice({
             })
             .addCase(getAllCategoriesAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.categories = action.payload;
+                state.categories = action.payload.data;
+                state.total = action.payload.total || 0;
             })
             .addCase(getAllCategoriesAsync.rejected, (state, action) => {
                 state.isLoading = false;

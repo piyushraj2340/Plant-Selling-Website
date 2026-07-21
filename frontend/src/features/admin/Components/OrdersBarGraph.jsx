@@ -1,5 +1,6 @@
-import React from 'react'
-import { useSelector } from 'react-redux'
+import React, { useEffect } from 'react'
+import { useSelector, useDispatch } from 'react-redux'
+import { adminOrdersBarChartAsync } from '../adminSlice';
 import {
     Chart as ChartJS,
     BarElement,
@@ -20,8 +21,12 @@ ChartJS.register(
 )
 
 const OrdersBarGraph = () => {
-    const { ordersData } = useSelector(state => state.admin);
-    const barData = ordersData?.stats?.barChart || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const dispatch = useDispatch();
+    const barData = useSelector(state => state.admin.ordersBarChartData);
+
+    useEffect(() => {
+        dispatch(adminOrdersBarChartAsync(new Date().getFullYear()));
+    }, [dispatch]);
 
     return (
         <div className='col-12' style={{ width: "100%", height: "250px" }}>

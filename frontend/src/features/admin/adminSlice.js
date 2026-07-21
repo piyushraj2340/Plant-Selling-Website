@@ -14,27 +14,35 @@ const initialState = {
         doughnutData: { labels: [], data: [] }
     },
     ordersData: {
-        stats: { barChart: [], pieChart: { labels: [], data: [] } },
-        data: []
+        data: [],
+        total: 0
     },
+    ordersBarChartData: [],
+    ordersPieChartData: { labels: [], data: [] },
     users: [],
+    usersTotal: 0,
     productsData: {
         stats: { lineChart: [], polarChart: [] },
-        plants: []
+        plants: [],
+        total: 0
     },
     reviewsData: {
         stats: { lineChart: [], pieChart: { labels: [], data: [] } },
-        reviews: []
+        reviews: [],
+        total: 0
     },
     incomeData: {
         stats: { barChart: [], pieChart: { labels: [], data: [] } },
-        orders: []
+        orders: [],
+        total: 0
     },
     couponsData: {
         coupons: [],
+        total: 0
     },
     contactsData: {
         contacts: [],
+        total: 0
     },
     isLoading: false,
     error: null,
@@ -45,13 +53,25 @@ export const adminStatsAsync = createAsyncThunk('/admin/stats', async (filter = 
     return response.data;
 });
 
-export const adminOrdersAsync = createAsyncThunk('/admin/orders', async ({ year = '', search = '', filter = '' } = {}) => {
-    const response = await handelDataFetch(`/api/v2/admin/orders?year=${year}&search=${search}&filter=${filter}`, 'GET');
+export const adminOrdersAsync = createAsyncThunk('/admin/orders', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/orders?${queryStr}`, 'GET');
     return response.data;
 });
 
-export const adminIncomeAsync = createAsyncThunk('/admin/income', async ({ year = '', search = '', filter = '' } = {}) => {
-    const response = await handelDataFetch(`/api/v2/admin/income?year=${year}&search=${search}&filter=${filter}`, 'GET');
+export const adminOrdersBarChartAsync = createAsyncThunk('/admin/ordersBarChart', async (year) => {
+    const response = await handelDataFetch(`/api/v2/admin/orders/charts/bar?year=${year}`, 'GET');
+    return response.data;
+});
+
+export const adminOrdersPieChartAsync = createAsyncThunk('/admin/ordersPieChart', async () => {
+    const response = await handelDataFetch(`/api/v2/admin/orders/charts/pie`, 'GET');
+    return response.data;
+});
+
+export const adminIncomeAsync = createAsyncThunk('/admin/income', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/income?${queryStr}`, 'GET');
     return response.data;
 });
 
@@ -65,8 +85,9 @@ export const adminBulkUpdateOrderItemStatusAsync = createAsyncThunk('/admin/bulk
     return { ...response.data, keys, status, statusMessage: message };
 });
 
-export const adminUsersAsync = createAsyncThunk('/admin/users', async () => {
-    const response = await handelDataFetch('/api/v2/admin/users', 'GET');
+export const adminUsersAsync = createAsyncThunk('/admin/users', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/users?${queryStr}`, 'GET');
     return response.data;
 });
 
@@ -100,8 +121,9 @@ export const adminToggleVerifyUserAsync = createAsyncThunk('/admin/users/verify'
     return response.data;
 });
 
-export const adminProductsAsync = createAsyncThunk('/admin/products', async ({ year = '', search = '', filter = '' } = {}) => {
-    const response = await handelDataFetch(`/api/v2/admin/plants?year=${year}&search=${search}&filter=${filter}`, 'GET');
+export const adminProductsAsync = createAsyncThunk('/admin/products', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/plants?${queryStr}`, 'GET');
     return response.data;
 });
 
@@ -120,8 +142,9 @@ export const adminImpersonateAsync = createAsyncThunk('/admin/impersonate', asyn
     return response.data;
 });
 
-export const adminReviewsAsync = createAsyncThunk('/admin/reviews', async ({ year = '', search = '', filter = '' } = {}) => {
-    const response = await handelDataFetch(`/api/v2/admin/reviews?year=${year}&search=${search}&filter=${filter}`, 'GET');
+export const adminReviewsAsync = createAsyncThunk('/admin/reviews', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/reviews?${queryStr}`, 'GET');
     return response.data;
 });
 
@@ -140,8 +163,9 @@ export const adminCreateCouponAsync = createAsyncThunk('/admin/createCoupon', as
     return response.data;
 });
 
-export const adminCouponsAsync = createAsyncThunk('/admin/coupons', async () => {
-    const response = await handelDataFetch(`/api/v2/admin/coupons`, 'GET');
+export const adminCouponsAsync = createAsyncThunk('/admin/coupons', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/coupons?${queryStr}`, 'GET');
     return response.data;
 });
 
@@ -160,8 +184,9 @@ export const adminDeleteCouponAsync = createAsyncThunk('/admin/deleteCoupon', as
     return response.data;
 });
 
-export const adminGetContactsAsync = createAsyncThunk('/admin/getContacts', async () => {
-    const response = await handelDataFetch(`/api/v2/admin/contact-us`, 'GET');
+export const adminGetContactsAsync = createAsyncThunk('/admin/getContacts', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/admin/contact-us?${queryStr}`, 'GET');
     return response.data;
 });
 
@@ -209,14 +234,43 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 if (action.payload.status) {
                     state.ordersData = {
-                        stats: action.payload.stats,
-                        data: action.payload.orders
+                        data: action.payload.orders,
+                        total: action.payload.total || 0
                     };
                 }
                 state.error = null;
             })
             .addCase(adminOrdersAsync.rejected, (state, action) => {
                 state.isLoading = false;
+                state.error = action.error;
+            })
+            // ORDERS BAR CHART
+            .addCase(adminOrdersBarChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminOrdersBarChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.ordersBarChartData = action.payload.barData;
+                }
+                state.error = null;
+            })
+            .addCase(adminOrdersBarChartAsync.rejected, (state, action) => {
+                state.error = action.error;
+            })
+            // ORDERS PIE CHART
+            .addCase(adminOrdersPieChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminOrdersPieChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.ordersPieChartData = {
+                        labels: action.payload.pieLabels,
+                        data: action.payload.pieData
+                    };
+                }
+                state.error = null;
+            })
+            .addCase(adminOrdersPieChartAsync.rejected, (state, action) => {
                 state.error = action.error;
             })
             // INCOME
@@ -229,7 +283,8 @@ export const adminSlice = createSlice({
                 if (action.payload.status) {
                     state.incomeData = {
                         stats: action.payload.stats,
-                        orders: action.payload.orders
+                        orders: action.payload.orders,
+                        total: action.payload.total || 0
                     };
                 }
                 state.error = null;
@@ -304,6 +359,7 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 if (action.payload.status) {
                     state.users = action.payload.users;
+                    state.usersTotal = action.payload.total || 0;
                 }
                 state.error = null;
             })
@@ -338,7 +394,8 @@ export const adminSlice = createSlice({
                 if (action.payload.status) {
                     state.productsData = {
                         stats: action.payload.stats,
-                        plants: action.payload.plants
+                        plants: action.payload.plants,
+                        total: action.payload.total || 0
                     };
                 }
                 state.error = null;
@@ -397,7 +454,8 @@ export const adminSlice = createSlice({
                 if (action.payload.status) {
                     state.reviewsData = {
                         stats: action.payload.stats,
-                        reviews: action.payload.reviews
+                        reviews: action.payload.reviews,
+                        total: action.payload.total || 0
                     };
                 }
                 state.error = null;
@@ -455,7 +513,10 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = null;
                 if (action.payload.status) {
-                    state.couponsData.coupons = action.payload.coupons;
+                    state.couponsData = {
+                        coupons: action.payload.coupons,
+                        total: action.payload.total || 0
+                    };
                 }
             })
             .addCase(adminCouponsAsync.rejected, (state, action) => {
@@ -549,7 +610,10 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 state.error = null;
                 if (action.payload.status) {
-                    state.contactsData.contacts = action.payload.contacts;
+                    state.contactsData = {
+                        contacts: action.payload.contacts,
+                        total: action.payload.total || 0
+                    };
                 }
             })
             .addCase(adminGetContactsAsync.rejected, (state, action) => {

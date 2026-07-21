@@ -1,15 +1,15 @@
 import React, { useEffect } from 'react';
-import { Table, Space, Tag, Popconfirm } from 'antd';
+import { Table, Space, Tag, Popconfirm, Input, Row, Col } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminCouponsAsync, adminUpdateCouponStatusAsync, adminDeleteCouponAsync } from '../adminSlice';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const dispatch = useDispatch();
     const { couponsData, isLoading } = useSelector(state => state.admin);
+    const couponsTotal = useSelector(state => state.admin.couponsData?.total) || 0;
 
-    useEffect(() => {
-        dispatch(adminCouponsAsync());
-    }, [dispatch]);
+    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminCouponsAsync);
 
     const handleStatusUpdate = (id, newStatus) => {
         dispatch(adminUpdateCouponStatusAsync({ id, status: newStatus }));
@@ -121,17 +121,36 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     ];
 
     return (
-        <>
+        <div className="w-100">
+            <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+                <Col xs={24} md={8}>
+                    {/* Title can go here if needed */}
+                </Col>
+                <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                    <Input.Search
+                        placeholder="Search coupons..."
+                        allowClear
+                        value={localSearch}
+                        onChange={handleSearchChange}
+                        style={{ width: '100%', maxWidth: '300px' }}
+                    />
+                </Col>
+            </Row>
+
             <Table
                 dataSource={dataSource}
                 columns={columns}
+                loading={isLoading}
                 pagination={{
-                    position: ['bottomCenter'],
-                    pageSize: 20,
+                    ...tableParams.pagination,
+                    total: couponsTotal,
+                    showSizeChanger: true,
+                    position: ['bottomCenter']
                 }}
+                onChange={handleTableChange}
                 className='overflow-x-auto'
             />
-        </>
+        </div>
     )
 }
 

@@ -1,13 +1,29 @@
 const Category = require('../model/category');
+const { getQueryOptions, buildSearchQuery } = require('../utils/queryHelper');
 
 exports.getAllCategories = async (req, res, next) => {
     try {
-        const query = {};
+        const { page, limit, skip, search, sort } = getQueryOptions(req);
+        const query = buildSearchQuery(search, ['name', 'slug', 'description']);
+        
         if (req.query.status && req.query.status !== 'All') {
             query.status = req.query.status;
         }
-        const categories = await Category.find(query).populate('parentCategory', 'name slug').sort({ name: 1 });
-        res.status(200).json({ status: true, data: categories });
+
+        const total = await Category.countDocuments(query);
+        const categories = await Category.find(query)
+            .populate('parentCategory', 'name slug')
+            .sort(sort)
+            .skip(skip)
+            .limit(limit);
+            
+        res.status(200).json({ 
+            status: true, 
+            data: categories,
+            total,
+            page,
+            limit
+        });
     } catch (error) {
         next(error);
     }

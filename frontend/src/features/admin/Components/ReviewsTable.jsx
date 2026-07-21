@@ -1,16 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm } from 'antd';
+import { Table, Tag, Space, message, Popconfirm, Input, Row, Col } from 'antd';
 import { Rating } from 'react-simple-star-rating';
-import { adminUpdateReviewStatusAsync, adminBulkUpdateReviewStatusAsync } from '../adminSlice';
+import { adminUpdateReviewStatusAsync, adminBulkUpdateReviewStatusAsync, adminReviewsAsync } from '../adminSlice';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 
 const ReviewsTable = () => {
     const dispatch = useDispatch();
     const { reviewsData, isLoading } = useSelector(state => state.admin);
     const reviews = reviewsData?.reviews || [];
+    const reviewsTotal = useSelector(state => state.admin.reviewsData?.total) || 0;
     const [dataSource, setDataSource] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminReviewsAsync);
 
     useEffect(() => {
         if (reviews && reviews.length > 0) {
@@ -185,6 +189,20 @@ const ReviewsTable = () => {
 
     return (
         <div className="w-100 p-0">
+            <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+                <Col xs={24} md={8}>
+                    {/* Title can go here if needed */}
+                </Col>
+                <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                    <Input.Search
+                        placeholder="Search by review text or plant name..."
+                        allowClear
+                        value={localSearch}
+                        onChange={handleSearchChange}
+                        style={{ width: '100%', maxWidth: '300px' }}
+                    />
+                </Col>
+            </Row>
             {hasSelected && (
                 <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2 w-100">
                     <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
@@ -202,9 +220,12 @@ const ReviewsTable = () => {
                 columns={columns}
                 dataSource={dataSource}
                 pagination={{
-                    position: ['bottomCenter'],
-                    pageSize: 20
+                    ...tableParams.pagination,
+                    total: reviewsTotal,
+                    showSizeChanger: true,
+                    position: ['bottomCenter']
                 }}
+                onChange={handleTableChange}
                 className='overflow-x-auto w-100'
                 scroll={{ x: 'max-content' }}
             />

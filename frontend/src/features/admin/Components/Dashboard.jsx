@@ -98,19 +98,7 @@ const Dashboard = () => {
                 <div className="row g-2 bg-white border rounded">
                     <div className="header d-flex flex-column flex-md-row justify-content-start justify-content-md-between align-items-start p-2 ps-md-4 w-100">
                         <div className="head">
-                            <h5 className='h5 fw-bolder'>Recent Orders </h5>
-                        </div>
-                        <div className="tools d-flex align-items-center justify-content-between justify-content-md-end col-12 col-md-4">
-                            <div className="search me-1">
-                                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Searching..." style={{ fontSize: "14px" }} />
-                            </div>
-                            <div className="select ms-1">
-                                <select name="filterIncome" id="filterIncome" defaultValue="Quarterly" className="form-select" style={{ fontSize: "12px" }}>
-                                    <option value="Monthly">Monthly</option>
-                                    <option value="Quarterly">Quarterly</option>
-                                    <option value="Yearly">Yearly</option>
-                                </select>
-                            </div>
+                            <h5 className='h5 fw-bolder mb-0'>Recent Orders</h5>
                         </div>
                     </div>
 
