@@ -18,6 +18,8 @@ router.patch('/users/:id/block', adminController.toggleBlockUser);
 router.patch('/users/:id/verify', adminController.toggleVerifyUser);
 router.get('/plants', adminController.getPlants);
 router.get('/orders', adminController.getOrders);
+router.get('/orders/charts/bar', adminController.getOrdersBarChart);
+router.get('/orders/charts/pie', adminController.getOrdersPieChart);
 
 router.post('/impersonate', adminController.impersonateUser);
 

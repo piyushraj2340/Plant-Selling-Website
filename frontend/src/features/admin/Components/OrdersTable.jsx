@@ -1,14 +1,18 @@
 import React, { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
-import { Table, Tag, Space, message, Popconfirm } from 'antd';
-import { adminUpdateOrderItemStatusAsync, adminBulkUpdateOrderItemStatusAsync } from '../adminSlice';
+import { Table, Tag, Space, message, Popconfirm, Input, Row, Col } from 'antd';
+import { adminUpdateOrderItemStatusAsync, adminBulkUpdateOrderItemStatusAsync, adminOrdersAsync } from '../adminSlice';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 {/* Add Rating, Review into the component */ }
 const OrdersTable = () => {
   const dispatch = useDispatch();
   const { ordersData, isLoading } = useSelector(state => state.admin);
+  const ordersTotal = useSelector(state => state.admin.ordersData.total) || 0;
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminOrdersAsync);
 
   useEffect(() => {
     if (ordersData?.data && ordersData.data.length > 0) {
@@ -165,6 +169,21 @@ const OrdersTable = () => {
 
   return (
     <div className="w-100">
+      <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+        <Col xs={24} md={8}>
+            {/* Title can go here if needed */}
+        </Col>
+        <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+            <Input.Search
+                placeholder="Search by Order ID..."
+                allowClear
+                value={localSearch}
+                onChange={handleSearchChange}
+                style={{ width: '100%', maxWidth: '300px' }}
+            />
+        </Col>
+      </Row>
+
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
@@ -185,9 +204,12 @@ const OrdersTable = () => {
         dataSource={dataSource}
         columns={columns}
         pagination={{
-          position: ['bottomCenter'],
-          pageSize: 20,
+          ...tableParams.pagination,
+          total: ordersTotal,
+          showSizeChanger: true,
+          position: ['bottomCenter']
         }}
+        onChange={handleTableChange}
         className='overflow-x-auto'
       />
     </div>

@@ -1,20 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Space, Modal, Input, Form, message, Popconfirm } from 'antd';
+import { Table, Tag, Space, Modal, Input, Form, message, Popconfirm, Row, Col } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminGetContactsAsync, adminReplyToContactAsync, adminDeleteContactAsync } from '../adminSlice';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 const Help = () => {
   const dispatch = useDispatch();
   const { contactsData, isLoading } = useSelector((state) => state.admin);
   const contacts = contactsData?.contacts || [];
 
+  const contactsTotal = useSelector((state) => state.admin.contactsData?.total) || 0;
+
   const [isReplyModalVisible, setIsReplyModalVisible] = useState(false);
   const [selectedContact, setSelectedContact] = useState(null);
   const [replyForm] = Form.useForm();
 
-  useEffect(() => {
-    dispatch(adminGetContactsAsync());
-  }, [dispatch]);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminGetContactsAsync);
 
   const showReplyModal = (contact) => {
     setSelectedContact(contact);
@@ -123,19 +124,36 @@ const Help = () => {
 
   return (
     <div className="row g-2 my-2 bg-white border rounded p-3">
-      <div className="header d-flex justify-content-between align-items-center mb-3">
-        <h5 className='h5 fw-bolder mb-0'>Help & Support (Contact Us Queries)</h5>
-        <button className="btn btn-outline-secondary btn-sm" onClick={() => dispatch(adminGetContactsAsync())}>
-          <i className="fas fa-sync-alt"></i> Refresh
-        </button>
-      </div>
+      <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+        <Col xs={24} md={8}>
+          <h5 className='h5 fw-bolder mb-0'>Help & Support (Contact Us Queries)</h5>
+        </Col>
+        <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+          <Input.Search
+            placeholder="Search messages..."
+            allowClear
+            value={localSearch}
+            onChange={handleSearchChange}
+            style={{ width: '100%', maxWidth: '300px' }}
+          />
+          <button className="btn btn-outline-secondary btn-sm" onClick={() => handleSearchChange({ target: { value: localSearch } })}>
+            <i className="fas fa-sync-alt"></i> Refresh
+          </button>
+        </Col>
+      </Row>
 
       <Table 
         dataSource={contacts} 
         columns={columns} 
         rowKey="_id" 
         loading={isLoading}
-        pagination={{ pageSize: 10 }}
+        pagination={{
+            ...tableParams.pagination,
+            total: contactsTotal,
+            showSizeChanger: true,
+            position: ['bottomCenter']
+        }}
+        onChange={handleTableChange}
       />
 
       <Modal

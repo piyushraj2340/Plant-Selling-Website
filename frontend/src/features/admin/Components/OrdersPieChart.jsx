@@ -1,5 +1,6 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { adminOrdersPieChartAsync } from '../adminSlice';
 
 import {
     Chart as ChartJS,
@@ -17,8 +18,12 @@ ChartJS.register(
 )
 
 const OrdersPieChart = () => {
-    const { ordersData } = useSelector(state => state.admin);
-    const pieChart = ordersData?.stats?.pieChart || { labels: ['FLOWER', 'INDOOR PLANTS', 'PLANTS'], data: [20, 20, 10] };
+    const dispatch = useDispatch();
+    const pieChart = useSelector(state => state.admin.ordersPieChartData);
+
+    useEffect(() => {
+        dispatch(adminOrdersPieChartAsync());
+    }, [dispatch]);
 
     // Generate dynamic colors based on number of items
     const backgroundColors = pieChart.labels.map((_, i) => {

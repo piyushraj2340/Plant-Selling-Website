@@ -1,12 +1,17 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm } from 'antd';
-import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync } from '../adminSlice';
+import { Table, Tag, Space, message, Popconfirm, Input, Row, Col } from 'antd';
+import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync, adminProductsAsync } from '../adminSlice';
 import React, { useState } from 'react';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 const ProductsTable = () => {
   const dispatch = useDispatch();
   const plants = useSelector(state => state.admin.productsData.plants) || [];
+  const plantsTotal = useSelector(state => state.admin.productsData.total) || 0;
+  const isLoading = useSelector(state => state.admin.isLoading);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminProductsAsync);
 
   const dataSource = plants.map((plant, index) => ({
     key: plant._id || index,
@@ -159,6 +164,21 @@ const ProductsTable = () => {
 
   return (
     <div className="w-100">
+      <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+        <Col xs={24} md={8}>
+            {/* Title can go here if needed */}
+        </Col>
+        <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+            <Input.Search
+                placeholder="Search products..."
+                allowClear
+                value={localSearch}
+                onChange={handleSearchChange}
+                style={{ width: '100%', maxWidth: '300px' }}
+            />
+        </Col>
+      </Row>
+
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
@@ -177,10 +197,14 @@ const ProductsTable = () => {
         rowSelection={rowSelection}
         columns={columns}
         dataSource={dataSource}
+        loading={isLoading}
         pagination={{
-          position: ['bottomCenter'],
-          pageSize: 20
+          ...tableParams.pagination,
+          total: plantsTotal,
+          showSizeChanger: true,
+          position: ['bottomCenter']
         }}
+        onChange={handleTableChange}
         className='overflow-x-auto'
       />
     </div>

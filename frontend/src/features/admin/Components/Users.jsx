@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input } from 'antd';
-import { DownOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input, Row, Col } from 'antd';
+import { EllipsisOutlined } from '@ant-design/icons';
+import { useTableParams } from '../../../hooks/useTableParams';
 import localStorageUtil from '../../../utils/localStorage';
 import {
     adminUsersAsync,
@@ -16,8 +17,10 @@ import {
 
 const Users = () => {
     const dispatch = useDispatch();
-    const { users, isLoading } = useSelector((state) => state.admin);
+    const { users, usersTotal, isLoading } = useSelector((state) => state.admin);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+
+    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminUsersAsync);
 
     // Modal states
     const [roleModalVisible, setRoleModalVisible] = useState(false);
@@ -28,9 +31,6 @@ const Users = () => {
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [newPassword, setNewPassword] = useState('');
 
-    useEffect(() => {
-        dispatch(adminUsersAsync());
-    }, [dispatch]);
 
     const handleImpersonate = async (userId) => {
         const action = await dispatch(adminImpersonateAsync({ targetUserId: userId }));
@@ -115,7 +115,7 @@ const Users = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            sorter: (a, b) => a.name.localeCompare(b.name),
+            sorter: true,
             render: (text, record) => (
                 <Space>
                     {text}
@@ -239,31 +239,46 @@ const Users = () => {
 
     return (
         <div className="container-fluid p-2 p-md-4 bg-white rounded border">
-            <div className="d-flex justify-content-between align-items-center mb-4">
-                <h4 className="fw-bold m-0">Platform Users</h4>
-
-                {hasSelected && (
-                    <Popconfirm
-                        title={`Delete ${selectedRowKeys.length} users?`}
-                        description="Are you sure you want to permanently delete these selected users?"
-                        onConfirm={handleBulkDelete}
-                        okText="Yes, Delete All"
-                        cancelText="No"
-                        okButtonProps={{ danger: true }}
-                    >
-                        <Button danger type="primary">
-                            Bulk Delete ({selectedRowKeys.length})
-                        </Button>
-                    </Popconfirm>
-                )}
-            </div>
+            <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+                <Col xs={24} md={8}>
+                    <h4 className="fw-bold m-0">Platform Users</h4>
+                </Col>
+                <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
+                    <Input.Search
+                        placeholder="Search users..."
+                        allowClear
+                        value={localSearch}
+                        onChange={handleSearchChange}
+                        style={{ width: '100%', maxWidth: '300px' }}
+                    />
+                    {hasSelected && (
+                        <Popconfirm
+                            title={`Delete ${selectedRowKeys.length} users?`}
+                            description="Are you sure you want to permanently delete these selected users?"
+                            onConfirm={handleBulkDelete}
+                            okText="Yes, Delete All"
+                            cancelText="No"
+                            okButtonProps={{ danger: true }}
+                        >
+                            <Button danger type="primary">
+                                Bulk Delete ({selectedRowKeys.length})
+                            </Button>
+                        </Popconfirm>
+                    )}
+                </Col>
+            </Row>
 
             <Table
                 rowSelection={rowSelection}
                 columns={columns}
                 dataSource={users.map(u => ({ ...u, key: u._id }))}
                 loading={isLoading}
-                pagination={{ pageSize: 10 }}
+                pagination={{
+                    ...tableParams.pagination,
+                    total: usersTotal,
+                    showSizeChanger: true,
+                }}
+                onChange={handleTableChange}
                 scroll={{ x: 'max-content' }}
             />
 
