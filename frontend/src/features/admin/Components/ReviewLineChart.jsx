@@ -25,8 +25,8 @@ ChartJS.register(
 
 
 const ReviewLineChart = () => {
-    const { reviewsData } = useSelector(state => state.admin);
-    const lineData = reviewsData?.stats?.lineChart || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const { reviewsLineChartData } = useSelector(state => state.admin);
+    const lineData = reviewsLineChartData?.length ? reviewsLineChartData : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 
     return (
         <div className='col-12' style={{ width: "100%", height: "250px" }}>

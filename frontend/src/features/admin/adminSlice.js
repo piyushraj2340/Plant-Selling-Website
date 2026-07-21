@@ -28,10 +28,11 @@ const initialState = {
     plantsLineChartData: [],
     plantsPolarChartData: [],
     reviewsData: {
-        stats: { lineChart: [], pieChart: { labels: [], data: [] } },
         reviews: [],
         total: 0
     },
+    reviewsLineChartData: [],
+    reviewsPieChartData: { labels: [], data: [] },
     incomeData: {
         stats: { barChart: [], pieChart: { labels: [], data: [] } },
         orders: [],
@@ -65,8 +66,9 @@ export const adminOrdersBarChartAsync = createAsyncThunk('/admin/ordersBarChart'
     return response.data;
 });
 
-export const adminOrdersPieChartAsync = createAsyncThunk('/admin/ordersPieChart', async () => {
-    const response = await handelDataFetch(`/api/v2/admin/orders/charts/pie`, 'GET');
+export const adminOrdersPieChartAsync = createAsyncThunk('/admin/ordersPieChart', async (year) => {
+    const url = year ? `/api/v2/admin/orders/charts/pie?year=${year}` : `/api/v2/admin/orders/charts/pie`;
+    const response = await handelDataFetch(url, 'GET');
     return response.data;
 });
 
@@ -156,6 +158,17 @@ export const adminImpersonateAsync = createAsyncThunk('/admin/impersonate', asyn
 export const adminReviewsAsync = createAsyncThunk('/admin/reviews', async (params = {}) => {
     const queryStr = new URLSearchParams(params).toString();
     const response = await handelDataFetch(`/api/v2/admin/reviews?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const adminReviewsLineChartAsync = createAsyncThunk('/admin/reviewsLineChart', async (year) => {
+    const response = await handelDataFetch(`/api/v2/admin/reviews/charts/line?year=${year}`, 'GET');
+    return response.data;
+});
+
+export const adminReviewsPieChartAsync = createAsyncThunk('/admin/reviewsPieChart', async (year) => {
+    const url = year ? `/api/v2/admin/reviews/charts/pie?year=${year}` : `/api/v2/admin/reviews/charts/pie`;
+    const response = await handelDataFetch(url, 'GET');
     return response.data;
 });
 
@@ -483,7 +496,6 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 if (action.payload.status) {
                     state.reviewsData = {
-                        stats: action.payload.stats,
                         reviews: action.payload.reviews,
                         total: action.payload.total || 0
                     };
@@ -492,6 +504,35 @@ export const adminSlice = createSlice({
             })
             .addCase(adminReviewsAsync.rejected, (state, action) => {
                 state.isLoading = false;
+                state.error = action.error;
+            })
+            // REVIEWS LINE CHART
+            .addCase(adminReviewsLineChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminReviewsLineChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.reviewsLineChartData = action.payload.lineData;
+                }
+                state.error = null;
+            })
+            .addCase(adminReviewsLineChartAsync.rejected, (state, action) => {
+                state.error = action.error;
+            })
+            // REVIEWS PIE CHART
+            .addCase(adminReviewsPieChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminReviewsPieChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.reviewsPieChartData = {
+                        labels: action.payload.pieLabels,
+                        data: action.payload.pieData
+                    };
+                }
+                state.error = null;
+            })
+            .addCase(adminReviewsPieChartAsync.rejected, (state, action) => {
                 state.error = action.error;
             })
             .addCase(adminUpdateReviewStatusAsync.pending, (state) => {

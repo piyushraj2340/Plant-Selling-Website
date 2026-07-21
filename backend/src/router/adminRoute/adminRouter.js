@@ -26,6 +26,8 @@ router.get('/orders/charts/pie', adminController.getOrdersPieChart);
 router.post('/impersonate', adminController.impersonateUser);
 
 router.get('/reviews', adminController.getAllReviews);
+router.get('/reviews/charts/line', adminController.getReviewsLineChart);
+router.get('/reviews/charts/pie', adminController.getReviewsPieChart);
 router.patch('/reviews/bulk-status', adminController.bulkUpdateReviewStatus);
 router.patch('/reviews/:id/status', adminController.updateReviewStatus);
 router.patch('/plants/bulk-status', adminController.bulkUpdatePlantStatus);

@@ -24,10 +24,6 @@ const OrdersBarGraph = () => {
     const dispatch = useDispatch();
     const barData = useSelector(state => state.admin.ordersBarChartData);
 
-    useEffect(() => {
-        dispatch(adminOrdersBarChartAsync(new Date().getFullYear()));
-    }, [dispatch]);
-
     return (
         <div className='col-12' style={{ width: "100%", height: "250px" }}>
             <Bar data={{

@@ -490,7 +490,22 @@ const adminController = {
 
     getOrdersPieChart: async (req, res, next) => {
         try {
-            const categoryAgg = await Order.aggregate([
+            const { year } = req.query;
+            const matchStage = {};
+            if (year) {
+                const targetYear = parseInt(year);
+                matchStage.orderAt = {
+                    $gte: new Date(`${targetYear}-01-01T00:00:00.000Z`),
+                    $lte: new Date(`${targetYear}-12-31T23:59:59.999Z`)
+                };
+            }
+
+            const pipeline = [];
+            if (Object.keys(matchStage).length > 0) {
+                pipeline.push({ $match: matchStage });
+            }
+
+            pipeline.push(
                 { $unwind: "$orderItems" },
                 { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
                 { $unwind: "$populatedOrderItem" },
@@ -498,8 +513,10 @@ const adminController = {
                 { $unwind: { path: "$plantDetails", preserveNullAndEmptyArrays: true } },
                 { $lookup: { from: "categories", localField: "plantDetails.category", foreignField: "_id", as: "categoryDetails" } },
                 { $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true } },
-                { $group: { _id: "$categoryDetails.categoryName", count: { $sum: 1 } } }
-            ]);
+                { $group: { _id: "$categoryDetails.name", count: { $sum: 1 } } }
+            );
+
+            const categoryAgg = await Order.aggregate(pipeline);
 
             const pieLabels = [];
             const pieData = [];
@@ -555,55 +572,34 @@ const adminController = {
         }
     },
 
-    // Get all reviews
+    // Get all reviews (paginated for table)
     getAllReviews: async (req, res, next) => {
         try {
             const Review = require('../model/nurseryModel/review');
-            const { year } = req.query;
-            const targetYear = year ? parseInt(year) : new Date().getFullYear();
-            
-            // 1. Stats calculation (needs all reviews for the year)
-            // Fetch minimal data for stats
-            const allReviewsForStats = await Review.find().select('rating createdAt');
-            
-            const starCounts = [0, 0, 0, 0, 0];
-            const monthRatings = Array(12).fill(0);
-            const monthCounts = Array(12).fill(0);
-
-            allReviewsForStats.forEach(review => {
-                // Pie Chart: Count by star rating
-                const rating = Math.floor(review.rating);
-                if (rating >= 1 && rating <= 5) {
-                    starCounts[rating - 1]++;
-                }
-
-                // Line Chart: Average rating per month for the selected year
-                const reviewDate = review.createdAt ? new Date(review.createdAt) : new Date(); // Fallback if no createdAt
-                if (reviewDate.getFullYear() === year) {
-                    const month = reviewDate.getMonth();
-                    monthRatings[month] += review.rating;
-                    monthCounts[month]++;
-                }
-            });
-
-            // Calculate monthly averages
-            const lineData = monthRatings.map((total, index) => {
-                return monthCounts[index] > 0 ? parseFloat((total / monthCounts[index]).toFixed(1)) : 0;
-            });
-
-            // 2. Table Data (Paginated)
             const { page, limit, skip, search, sort } = getQueryOptions(req);
             let query = {};
             if (search) {
-                // To search by populated fields (user name, plant name) in mongoose requires complex lookups.
-                // We'll search by review text.
+                // Search by review text
                 query = { review: { $regex: search, $options: 'i' } };
+            }
+            
+            // Add filtering support
+            if (req.query.status) {
+                const statuses = req.query.status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query.status = { $in: statuses };
             }
 
             const total = await Review.countDocuments(query);
             const reviews = await Review.find(query)
                 .populate('user', 'name email avatar')
-                .populate('plant', 'plantName category images price discount')
+                .populate({
+                    path: 'plant',
+                    select: 'plantName category images price discount',
+                    populate: {
+                        path: 'category',
+                        select: 'name'
+                    }
+                })
                 .sort(sort)
                 .skip(skip)
                 .limit(limit);
@@ -611,17 +607,78 @@ const adminController = {
             res.status(200).json({ 
                 status: true, 
                 message: "Reviews fetched successfully", 
-                stats: {
-                    lineChart: lineData,
-                    pieChart: {
-                        labels: ['1 Star Rating', '2 Star Rating', '3 Star Rating', '4 Star Rating', '5 Star Rating'],
-                        data: starCounts
-                    }
-                },
                 reviews,
                 total,
                 page,
                 limit
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Get reviews line chart
+    getReviewsLineChart: async (req, res, next) => {
+        try {
+            const Review = require('../model/nurseryModel/review');
+            const { year } = req.query;
+            const targetYear = year ? parseInt(year) : new Date().getFullYear();
+            
+            const reviews = await Review.find({});
+            const monthRatings = new Array(12).fill(0);
+            const monthCounts = new Array(12).fill(0);
+            
+            reviews.forEach(review => {
+                const reviewDate = review.createdAt ? new Date(review.createdAt) : new Date();
+                if (reviewDate.getFullYear() === targetYear) {
+                    const month = reviewDate.getMonth();
+                    monthRatings[month] += review.rating;
+                    monthCounts[month]++;
+                }
+            });
+
+            const lineData = monthRatings.map((total, index) => {
+                return monthCounts[index] > 0 ? parseFloat((total / monthCounts[index]).toFixed(1)) : 0;
+            });
+
+            res.status(200).json({
+                status: true,
+                message: "Reviews line chart fetched",
+                lineData
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Get reviews pie chart
+    getReviewsPieChart: async (req, res, next) => {
+        try {
+            const Review = require('../model/nurseryModel/review');
+            const { year } = req.query;
+            let query = {};
+            
+            if (year) {
+                const targetYear = parseInt(year);
+                const startDate = new Date(`${targetYear}-01-01T00:00:00.000Z`);
+                const endDate = new Date(`${targetYear}-12-31T23:59:59.999Z`);
+                query.createdAt = { $gte: startDate, $lte: endDate };
+            }
+            
+            const reviews = await Review.find(query);
+            const starCounts = [0, 0, 0, 0, 0];
+            
+            reviews.forEach(review => {
+                if (review.rating >= 1 && review.rating <= 5) {
+                    starCounts[review.rating - 1]++;
+                }
+            });
+
+            res.status(200).json({
+                status: true,
+                message: "Reviews pie chart fetched",
+                pieLabels: ['1 Star Rating', '2 Star Rating', '3 Star Rating', '4 Star Rating', '5 Star Rating'],
+                pieData: starCounts
             });
         } catch (error) {
             next(error);

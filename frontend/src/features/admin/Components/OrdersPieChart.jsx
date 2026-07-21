@@ -21,10 +21,6 @@ const OrdersPieChart = () => {
     const dispatch = useDispatch();
     const pieChart = useSelector(state => state.admin.ordersPieChartData);
 
-    useEffect(() => {
-        dispatch(adminOrdersPieChartAsync());
-    }, [dispatch]);
-
     // Generate dynamic colors based on number of items
     const backgroundColors = pieChart.labels.map((_, i) => {
         const colors = ['#1fb36e', '#383838', '#4e84ff', '#ffb34e', '#e34eff', '#ff4e4e'];
