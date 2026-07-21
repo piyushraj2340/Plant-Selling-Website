@@ -1,5 +1,6 @@
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { adminPlantsPolarChartAsync } from '../adminSlice';
 
 import {
     Chart as ChartJS,
@@ -19,7 +20,12 @@ ChartJS.register(
 )
 
 const ProductsPolarAreaChart = () => {
-    const polarChartData = useSelector(state => state.admin.productsData.stats.polarChart) || [0, 0, 0];
+    const dispatch = useDispatch();
+    const polarChartData = useSelector(state => state.admin.plantsPolarChartData) || [0, 0, 0];
+
+    useEffect(() => {
+        dispatch(adminPlantsPolarChartAsync());
+    }, [dispatch]);
 
     return (
         <div style={{ width: "100%" }}>

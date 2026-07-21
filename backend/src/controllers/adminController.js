@@ -247,13 +247,81 @@ const adminController = {
         }
     },
 
-    // Get all plants with aggregations for dashboard
+    // Get all plants (Table Data only)
     getPlants: async (req, res, next) => {
         try {
-            const { year, search, filter } = req.query;
+            const { search, status, tag } = req.query;
+            const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
+            
+            let query = {};
+            const searchQueryStr = parsedSearch || search;
+            
+            const Category = require('../model/category');
+            
+            if (searchQueryStr) {
+                const keywords = searchQueryStr.trim().split(/\s+/);
+                
+                const matchingCategories = await Category.find({ categoryName: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
+                const categoryIds = matchingCategories.map(c => c._id);
+                
+                query.$or = [
+                    { plantName: { $regex: keywords.join('|'), $options: 'i' } }
+                ];
+                
+                if (categoryIds.length > 0) {
+                    query.$or.push({ category: { $in: categoryIds } });
+                }
+                
+                // Allow exact ObjectId match too
+                const mongoose = require('mongoose');
+                if (mongoose.Types.ObjectId.isValid(searchQueryStr.trim())) {
+                    query.$or.push({ _id: searchQueryStr.trim() });
+                }
+            }
+
+            if (status) {
+                const statuses = status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query.status = { $in: statuses };
+            }
+
+            if (tag) {
+                const tagsList = tag.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                const matchingCategories = await Category.find({ categoryName: { $in: tagsList } }).select('_id');
+                const categoryIds = matchingCategories.map(c => c._id);
+                
+                if (categoryIds.length > 0) {
+                    query.category = { $in: categoryIds };
+                } else {
+                    query.category = null; // No matching categories, return none
+                }
+            }
+
+            const total = await Plant.countDocuments(query);
+            const plants = await Plant.find(query)
+                .populate('nursery', 'nurseryName')
+                .populate('category', 'categoryName') // ensure category is populated if it's an objectId
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
+
+            res.status(200).json({ 
+                status: true,
+                message: "Admin Plants Fetched Successfully",
+                plants,
+                total,
+                page,
+                limit
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getPlantsLineChart: async (req, res, next) => {
+        try {
+            const { year } = req.query;
             const targetYear = year ? parseInt(year) : new Date().getFullYear();
 
-            // 1. Line Chart Data: Monthly Published Products
             const lineChartAggregation = await Plant.aggregate([
                 {
                     $match: {
@@ -276,11 +344,21 @@ const adminController = {
                 lineData[item._id - 1] = item.count;
             });
 
-            // 2. Polar Area Chart Data: Status of Products
+            res.status(200).json({ 
+                status: true,
+                lineData
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getPlantsPolarChart: async (req, res, next) => {
+        try {
             const statusAggregation = await Plant.aggregate([
                 {
                     $group: {
-                        _id: { $ifNull: ["$status", "Draft"] }, // Handle missing status as Draft
+                        _id: { $ifNull: ["$status", "Draft"] },
                         count: { $sum: 1 }
                     }
                 }
@@ -293,43 +371,9 @@ const adminController = {
                 if (item._id === 'On Hold') polarData["On Hold"] = item.count;
             });
 
-            // 3. Table Data: Search and Filter
-            const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
-            let query = {};
-            
-            // Override with new search handling if search exists
-            const searchQueryStr = parsedSearch || search; // support old `search` if passed directly
-            if (searchQueryStr) {
-                const keywords = searchQueryStr.trim().split(/\s+/);
-                query.$or = [
-                    { plantName: { $regex: keywords.join('|'), $options: 'i' } },
-                    { category: { $regex: keywords.join('|'), $options: 'i' } }
-                ];
-            }
-
-            if (filter && filter !== 'All') {
-                // If filter is specific (e.g. by status, but UI mockup didn't specify exactly what it filters, assuming time-based or category)
-                // For now we just support search.
-            }
-
-            const total = await Plant.countDocuments(query);
-            const plants = await Plant.find(query)
-                .populate('nursery', 'nurseryName')
-                .sort(sort)
-                .skip(skip)
-                .limit(limit);
-
             res.status(200).json({ 
                 status: true,
-                message: "Admin Plants Fetched Successfully",
-                stats: {
-                    lineChart: lineData,
-                    polarChart: [polarData.Published, polarData.Draft, polarData["On Hold"]]
-                },
-                plants,
-                total,
-                page,
-                limit
+                polarData: [polarData.Published, polarData.Draft, polarData["On Hold"]]
             });
         } catch (error) {
             next(error);
@@ -452,13 +496,15 @@ const adminController = {
                 { $unwind: "$populatedOrderItem" },
                 { $lookup: { from: "plants", localField: "populatedOrderItem.plant", foreignField: "_id", as: "plantDetails" } },
                 { $unwind: { path: "$plantDetails", preserveNullAndEmptyArrays: true } },
-                { $group: { _id: "$plantDetails.category", count: { $sum: 1 } } }
+                { $lookup: { from: "categories", localField: "plantDetails.category", foreignField: "_id", as: "categoryDetails" } },
+                { $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true } },
+                { $group: { _id: "$categoryDetails.categoryName", count: { $sum: 1 } } }
             ]);
 
             const pieLabels = [];
             const pieData = [];
             categoryAgg.forEach(item => {
-                const cat = item._id ? item._id.toUpperCase() : 'OTHER';
+                const cat = item._id ? String(item._id).toUpperCase() : 'OTHER';
                 pieLabels.push(cat);
                 pieData.push(item.count);
             });
@@ -712,19 +758,19 @@ const adminController = {
         }
     },
 
-    // Update individual order item status
+    // Update individual order status
     updateOrderItemStatus: async (req, res, next) => {
         try {
-            const { orderId, itemId } = req.params;
+            const { orderId } = req.params;
             const { status, message } = req.body;
 
             const order = await Order.findOneAndUpdate(
-                { _id: orderId, "orderItems._id": itemId },
+                { _id: orderId },
                 {
                     $set: {
-                        "orderItems.$.orderStatus.status": status,
-                        "orderItems.$.orderStatus.message": message || `${status} status updated`,
-                        "orderItems.$.orderStatus.statusAt": new Date()
+                        "orderStatus.status": status,
+                        "orderStatus.message": message || `${status} status updated`,
+                        "orderStatus.statusAt": new Date()
                     }
                 },
                 { new: true }
@@ -746,29 +792,31 @@ const adminController = {
     bulkUpdateOrderItemStatus: async (req, res, next) => {
         try {
             const { keys, status, message } = req.body;
+
             if (!keys || !Array.isArray(keys) || keys.length === 0) {
-                const error = new Error("Keys are required");
+                const error = new Error("Order item keys are required");
                 error.statusCode = 400;
                 throw error;
             }
 
-            const bulkOps = keys.map(key => {
-                const [orderId, itemId] = key.split('-');
-                return {
-                    updateOne: {
-                        filter: { _id: orderId, "orderItems._id": itemId },
-                        update: {
-                            $set: {
-                                "orderItems.$.orderStatus.status": status,
-                                "orderItems.$.orderStatus.message": message || `${status} status updated`,
-                                "orderItems.$.orderStatus.statusAt": new Date()
-                            }
-                        }
-                    }
-                };
-            });
+            if (!['Processing', 'Placed', 'Delivered', 'Rejected', 'Completed'].includes(status)) {
+                const error = new Error("Invalid status");
+                error.statusCode = 400;
+                throw error;
+            }
 
-            await Order.bulkWrite(bulkOps);
+            const orderIds = [...new Set(keys.map(key => key.split('-')[0]))];
+
+            await Order.updateMany(
+                { _id: { $in: orderIds } },
+                {
+                    $set: {
+                        "orderStatus.status": status,
+                        "orderStatus.message": message || `${status} status updated`,
+                        "orderStatus.statusAt": new Date()
+                    }
+                }
+            );
 
             res.status(200).json({ status: true, message: `Bulk updated ${keys.length} orders to ${status} successfully` });
         } catch (error) {

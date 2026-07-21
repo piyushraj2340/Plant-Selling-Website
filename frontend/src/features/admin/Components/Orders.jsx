@@ -6,15 +6,7 @@ import OrdersTable from './OrdersTable'
 import { adminOrdersAsync } from '../adminSlice'
 
 const Orders = () => {
-  const dispatch = useDispatch();
-  const currentYear = new Date().getFullYear();
-  const [year, setYear] = useState(currentYear);
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
 
-  useEffect(() => {
-    dispatch(adminOrdersAsync({ year, search, filter }));
-  }, [dispatch, year, search, filter]);
 
   return (
     <>
@@ -25,14 +17,6 @@ const Orders = () => {
               <div className="left d-flex flex-column">
                 <h5 className="h4 fw-bold">Overview </h5>
                 <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Monthly Orders</small>
-              </div>
-              <div className="right">
-                <select name="filterYear" id="filterYear" value={year} onChange={(e) => setYear(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
-                  <option value={currentYear - 3}>{currentYear - 3}</option>
-                  <option value={currentYear - 2}>{currentYear - 2}</option>
-                  <option value={currentYear - 1}>{currentYear - 1}</option>
-                  <option value={currentYear}>{currentYear}</option>
-                </select>
               </div>
             </div>
             <OrdersBarGraph />
@@ -50,24 +34,6 @@ const Orders = () => {
       </div>
       <div className="row g-2 ps-2">
         <div className="row g-2 my-2 bg-white border rounded">
-          <div className="header d-flex flex-column flex-md-row justify-content-start justify-content-md-between align-items-start p-2 ps-md-4 w-100">
-            <div className="head">
-              <h5 className='h5 fw-bolder'>Recent Orders </h5>
-            </div>
-            <div className="tools d-flex align-items-center justify-content-between justify-content-md-end col-12 col-md-4">
-              <div className="search me-1">
-                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Search Order ID..." style={{ fontSize: "14px" }} value={search} onChange={(e) => setSearch(e.target.value)} />
-              </div>
-              <div className="select ms-1">
-                <select name="filterStatus" id="filterStatus" value={filter} onChange={(e) => setFilter(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
-                  <option value="All">All</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Quarterly">Quarterly</option>
-                  <option value="Yearly">Yearly</option>
-                </select>
-              </div>
-            </div>
-          </div>
           <OrdersTable /> {/* Add Rating, Review into the component */}
         </div>
       </div>

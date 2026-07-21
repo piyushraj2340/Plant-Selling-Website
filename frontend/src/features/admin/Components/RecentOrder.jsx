@@ -33,9 +33,9 @@ const RecentOrder = () => {
             sale: item.quantity,
             stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
             amount: `₹${item.price}`,
-            tag: item.orderStatus?.status || 'pending',
-            status: item.orderStatus?.message || 'Processing',
-            action: item.orderStatus?.status || 'pending',
+            tag: order.orderStatus?.status || 'pending',
+            status: order.orderStatus?.message || 'Processing',
+            action: order.orderStatus?.status || 'pending',
           });
         });
       });
