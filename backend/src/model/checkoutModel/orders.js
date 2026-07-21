@@ -10,68 +10,24 @@ const orderSchema = new mongoose.Schema({
     },
     orderItems: [
         {
-            plant: {
-                type: mongoose.Schema.ObjectId,
-                ref: "plant",
-                required: [true, "Plant Id is required."],
-                immutable: true
-            },
-            nursery: {
-                type: mongoose.Schema.ObjectId,
-                ref: "nursery",
-                required: [true, "Nursery Id is required."],
-                immutable: true
-            },
-            nurseryName: {
-                type: String,
-                required: [true, "Nursery Name is required."],
-            },
-            plantName: {
-                type: String,
-                required: [true, "Plant Name is required."]
-            },
-            images: {
-                public_id: {
-                    type: String,
-                    required: [true, "Image public id is required."]
-                },
-                url: {
-                    type: String,
-                    required: [true, "Image public url is required."]
-                },
-            },
-            price: {
-                type: Number,
-                required: [true, "Price is required."],
-                validator(value) {
-                    if (value < 0) {
-                        throw new Error("Price should not be negative");
-                    }
-                }
-            },
-            discount: {
-                type: Number,
-                required: [true, "Discount is required."],
-                validator(value) {
-                    if (value < 0 && value > 100) {
-                        throw new Error("Discount must be greater then 0 and smaller then 100");
-                    }
-                }
-            },
-            quantity: {
-                type: Number,
-                required: [true, "Quantity is required."],
-            },
-            orderStatus: {
-                status: String,
-                message: String,
-                statusAt: {
-                    type: Date,
-                    default: Date.now
-                }
-            },
+            type: mongoose.Schema.ObjectId,
+            ref: "orderItem"
         }
     ],
+    orderStatus: {
+        status: {
+            type: String,
+            default: "Processing"
+        },
+        message: {
+            type: String,
+            default: "Order is processing."
+        },
+        statusAt: {
+            type: Date,
+            default: Date.now
+        }
+    },
     shippingInfo: {
         name: {
             type: String,
@@ -114,23 +70,19 @@ const orderSchema = new mongoose.Schema({
     pricing: {
         totalPriceWithoutDiscount: {
             type: Number,
-            required: [true, "totalPriceWithoutDiscount price is required."],
+            required: [true, "totalPriceWithoutDiscount is required."],
         },
-        actualPriceAfterDiscount: {
+        totalDiscount: {
             type: Number,
-            required: [true, "totalPriceWithoutDiscount price is required."],
+            required: [true, "totalDiscount is required."],
         },
-        discountPrice: {
+        deliveryFee: {
             type: Number,
-            required: [true, "discountPrice price is required."],
+            required: [true, "deliveryFee is required."],
         },
-        deliveryPrice: {
+        finalPrice: {
             type: Number,
-            required: [true, "Delivery price is required."],
-        },
-        totalPrice: {
-            type: Number,
-            required: [true, "Total Price is required."]
+            required: [true, "finalPrice is required."]
         },
     },
     orderAt: {

@@ -1,17 +1,58 @@
 const mongoose = require('mongoose');
 const ordersModel = require('../../model/checkoutModel/orders');
 const cartModel = require('../../model/checkoutModel/cart');
+const OrderItem = require('../../model/checkoutModel/orderItem');
 const { deleteMultipleData } = require('../../utils/redisService');
 exports.createOrder = async (req, res, next) => {
+    const session = await mongoose.startSession();
     try {
-        const newOrder = new ordersModel(req.body);
-        const result = await newOrder.save();
+        session.startTransaction();
 
-        if (!result) {
-            const error = new Error("Failed to create your new order.");
-            error.statusCode = 400;
-            throw error;
+        const { shippingInfo, payment } = req.body;
+        
+        // 1. Fetch user's cart fully populated
+        const cart = await cartModel.findOne({ user: req.user._id }).populate({
+            path: 'cartItems',
+            populate: [
+                { path: 'plant' },
+                { path: 'nursery', select: 'nurseryName' }
+            ]
+        });
+
+        if (!cart || cart.cartItems.length === 0) {
+            throw new Error("Cart is empty");
         }
+
+        // 2. Create base order
+        const newOrder = new ordersModel({
+            user: req.user._id,
+            shippingInfo,
+            payment,
+            pricing: cart.pricing
+        });
+        await newOrder.save({ session });
+
+        // 3. Create order items from cart items
+        const orderItemIds = [];
+        for (const item of cart.cartItems) {
+            const newItem = new OrderItem({
+                order: newOrder._id,
+                plant: item.plant._id,
+                nursery: item.nursery,
+                nurseryName: item.nursery?.nurseryName || "Nursery", // Populated from nursery
+                plantName: item.plant.plantName,
+                images: item.plant.images[0],
+                price: item.plant.price,
+                discount: item.plant.discount,
+                quantity: item.quantity
+            });
+            await newItem.save({ session });
+            orderItemIds.push(newItem._id);
+        }
+
+        newOrder.orderItems = orderItemIds;
+        const result = await newOrder.save({ session });
+        await session.commitTransaction();
 
         const total = await ordersModel.countDocuments({ user: req.user, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) } });
 
@@ -24,7 +65,10 @@ exports.createOrder = async (req, res, next) => {
 
         res.status(200).send(info);
     } catch (error) {
+        await session.abortTransaction();
         next(error);
+    } finally {
+        await session.endSession();
     }
 };
 
@@ -51,14 +95,10 @@ exports.getOrderHistory = async (req, res, next) => {
 
         const result = await ordersModel.find({
             user: req.user, orderAt: { $gte: endDate }, $or: [
-                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
-                { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
-                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
+                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, 
                 { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
             ]
-        }).limit(limit).skip(skipData).select('-payment.paymentId -delivery -shippingInfo -pricing').sort({ _id: -1 });
+        }).populate('orderItems').limit(limit).skip(skipData).select('-payment.paymentId -delivery -shippingInfo -pricing').sort({ _id: -1 });
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -85,7 +125,7 @@ exports.getOrderById = async (req, res, next) => {
     try {
         const _id = req.params.id;
 
-        const result = await ordersModel.findOne({ _id, user: req.user }).select('-payment.paymentId -delivery');
+        const result = await ordersModel.findOne({ _id, user: req.user }).populate('orderItems').select('-payment.paymentId -delivery');
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -139,18 +179,22 @@ exports.confirmOrderPayment = async (req, res, next) => {
             throw error;
         }
 
-        //* CLEANUP_TASK:: REMOVE ALL THE MATCHING THE CART DATA FROM THE DB 
-        const deleteCartPromises = result.orderItems.map(async (items) => {
-            const deleteCartInfo = await cartModel.findOneAndDelete(
-                { plant: items.plant, user: req.user },
-                { session }
-            );
-            if (!deleteCartInfo) {
-                throw new Error("Cart not found.");
-            }
-        });
-
-        await Promise.all(deleteCartPromises);
+        const CartItem = require('../../model/checkoutModel/cartItem');
+        
+        // Find existing cart for user
+        const existingCart = await cartModel.findOne({ user: req.user });
+        
+        if (existingCart) {
+            // Delete all CartItems linked to this cart
+            await CartItem.deleteMany({ cart: existingCart._id }, { session });
+            
+            // Delete the cart itself
+            await cartModel.findByIdAndDelete(existingCart._id, { session });
+        }
+        
+        // Initialize fresh cart
+        const freshCart = new cartModel({ user: req.user, cartItems: [] });
+        await freshCart.save({ session });
 
         //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA
         const prefix = process.env.REDIS_VERCEL_KV_DB || 'development';
@@ -188,7 +232,7 @@ exports.confirmOrderPayment = async (req, res, next) => {
 
 exports.getLastOrder = async (req, res, next) => {
     try {
-        const result = await ordersModel.find({ user: req.user }).sort({ _id: -1 }).limit(1).select('-payment.paymentId -delivery -shippingInfo -pricing');
+        const result = await ordersModel.find({ user: req.user }).sort({ _id: -1 }).populate('orderItems').limit(1).select('-payment.paymentId -delivery -shippingInfo -pricing');
 
         if (!result) {
             const error = new Error("Order not found.");

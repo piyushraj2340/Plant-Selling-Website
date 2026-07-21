@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
-import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, setCartPricing, cartApplyCouponAsync, removeCoupon, cartGetApplicableCouponsAsync } from '../cartSlice';
+import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, cartApplyCouponAsync, removeCoupon, cartGetApplicableCouponsAsync } from '../cartSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 import handelShareProduct from '../../../utils/handelShareProduct';
@@ -38,9 +38,7 @@ function Cart() {
        user && (addressList ?? dispatch(addressListDataFetchAsync()))
   }, [dispatch, user]);
 
-  useEffect(() => {
-    dispatch(setCartPricing(cart));
-  }, [dispatch, cart]);
+
 
   useEffect(() => {
     addressList?.length && dispatch(setSelectedAddress(addressList[0]));
@@ -57,7 +55,6 @@ function Cart() {
 
   const handleDeleteFromCart = async (cartId) => {
     dispatch(cartDataDeleteAsync(cartId));
-    dispatch(setCartPricing());
   }
 
   const handleUpdateCart = async (cartId, quantity) => {
@@ -192,7 +189,7 @@ function Cart() {
 
               }
               <div className="d-flex flex-row-reverse p-3">
-                <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount}</b></p>
+                <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)}</b></p>
               </div>
             </div>
             <div className="m-0 p-0 col-md-4 summary">
@@ -203,7 +200,7 @@ function Cart() {
                 <div className="row">
                   <p className="d-flex justify-content-between">
                     <small>ITEMS {(cart ?? 0) && Number(cart.length)}</small>
-                    <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount}</b></span>
+                    <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)}</b></span>
                   </p>
                   <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }} style={{cursor: 'pointer'}}>
                     <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : "Select delivery location"}</small>
@@ -255,13 +252,13 @@ function Cart() {
                   <p className="text-muted border-bottom pb-3">
                     <i className='fas fa-info-circle'></i>
                     {
-                      (cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount > 500) || (appliedCoupon && appliedCoupon.freeDelivery) ?
+                      (cartPriceDetails && cartPriceDetails.deliveryFee === 0) || (appliedCoupon && appliedCoupon.freeDelivery) ?
                         <span className="m-0">
                           <small className='small'> Eligible for FREE Delivery. <Link>Detail</Link></small>
                         </span>
                         :
                         <span className="m-0">
-                          <small className='small'> Add items of </small><small>₹</small><b>{cartPriceDetails && (500 - Number(cartPriceDetails.actualPriceAfterDiscount)).toFixed(2)}</b><small> to get the for FREE Delivery <Link>Detail</Link></small>
+                          <small className='small'> Add items of </small><small>₹</small><b>{cartPriceDetails && (500 - (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)).toFixed(2)}</b><small> to get the for FREE Delivery <Link>Detail</Link></small>
                         </span>
                     }
 
@@ -273,27 +270,21 @@ function Cart() {
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Discount : </small>
-                      <span>- ₹<b>{cartPriceDetails && cartPriceDetails.discountPrice}</b></span>
+                      <span>- ₹<b>{cartPriceDetails && cartPriceDetails.totalDiscount}</b></span>
                     </p>
-                    { appliedCoupon && (
-                      <p className="text-success d-flex justify-content-between">
-                        <small>Coupon Savings : </small>
-                        <span>- ₹<b>{appliedCoupon.discountAmount}</b></span>
-                      </p>
-                    )}
                     <p className="text-muted d-flex justify-content-between">
                       <small>Delivery : </small>
-                      { appliedCoupon?.freeDelivery ? 
-                        <span><del className="text-muted">₹{cartPriceDetails && cartPriceDetails.deliveryPrice}</del> <b className="text-success">FREE</b></span>
-                      : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryPrice}</b></span> }
+                      { appliedCoupon?.freeDelivery || (cartPriceDetails && cartPriceDetails.deliveryFee === 0) ? 
+                        <span><del className="text-muted">₹90</del> <b className="text-success">FREE</b></span>
+                      : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryFee}</b></span> }
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Subtotal : </small>
-                      <span>₹<b>{cartPriceDetails && cartPriceDetails.actualPriceAfterDiscount}</b></span>
+                      <span>₹<b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)}</b></span>
                     </p>
                   </div>
                   <div className="d-flex flex-row-reverse p-3">
-                    <p className="h5">Total: <sup>₹</sup>{appliedCoupon ? appliedCoupon.newTotal : (cartPriceDetails && cartPriceDetails.totalPrice)}</p>
+                    <p className="h5">Total: <sup>₹</sup>{cartPriceDetails && cartPriceDetails.finalPrice}</p>
                   </div>
                   <div className="row m-0">
                     <button onClick={handelBuyProduct} className="btn btn-success">Checkout</button>
