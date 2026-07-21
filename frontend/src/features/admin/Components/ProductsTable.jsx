@@ -11,7 +11,7 @@ const ProductsTable = () => {
   const isLoading = useSelector(state => state.admin.isLoading);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminProductsAsync);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams } = useTableParams(adminProductsAsync);
 
   const dataSource = plants.map((plant, index) => ({
     key: plant._id || index,
@@ -23,7 +23,7 @@ const ProductsTable = () => {
     },
     stock: plant.stock,
     price: `₹${plant.price}`,
-    tags: plant.category ? [plant.category.name || plant.category] : [],
+    tags: plant.category ? [plant.category.categoryName || plant.category.name || (typeof plant.category === 'string' ? plant.category : 'Unknown')] : [],
     status: plant.status || "Draft",
     action: plant.status || "Draft",
   }));
@@ -84,16 +84,24 @@ const ProductsTable = () => {
       title: 'Stock',
       dataIndex: 'stock',
       key: 'stock',
+      sorter: true,
     },
     {
       title: 'Price',
       dataIndex: 'price',
       key: 'price',
+      sorter: true,
     },
     {
       title: "Tags",
       dataIndex: 'tag',
       key: 'tag',
+      filters: [
+        { text: 'Flower', value: 'flower' },
+        { text: 'Indoor Plants', value: 'indoor plants' },
+        { text: 'Outdoor Plants', value: 'outdoor plants' },
+      ],
+      filteredValue: searchParams.get('tag') ? searchParams.get('tag').split(',') : null,
       render: (_, { tags }) => {
 
         return tags.map(tag =>
@@ -107,6 +115,12 @@ const ProductsTable = () => {
       title: "Status",
       dataIndex: 'status',
       key: 'status',
+      filters: [
+        { text: 'Published', value: 'Published' },
+        { text: 'Draft', value: 'Draft' },
+        { text: 'On Hold', value: 'On Hold' },
+      ],
+      filteredValue: searchParams.get('status') ? searchParams.get('status').split(',') : null,
       render: (_, { status }) => {
 
         let color;
@@ -164,18 +178,19 @@ const ProductsTable = () => {
 
   return (
     <div className="w-100">
-      <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+      <Row justify="space-between" align="middle" className="mb-4 mx-3 my-3">
+        <div className="head">
+          <h5 className='h5 fw-bolder'>Products </h5>
+        </div>
         <Col xs={24} md={8}>
-            {/* Title can go here if needed */}
-        </Col>
-        <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-            <Input.Search
-                placeholder="Search products..."
-                allowClear
-                value={localSearch}
-                onChange={handleSearchChange}
-                style={{ width: '100%', maxWidth: '300px' }}
-            />
+          <Input
+            placeholder="Search products..."
+            allowClear
+            prefix={<span role="img" aria-label="search">🔍</span>}
+            value={localSearch}
+            onChange={handleSearchChange}
+            style={{ width: '100%' }}
+          />
         </Col>
       </Row>
 

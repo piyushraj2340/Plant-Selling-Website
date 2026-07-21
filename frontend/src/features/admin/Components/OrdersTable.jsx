@@ -12,7 +12,7 @@ const OrdersTable = () => {
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminOrdersAsync);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams } = useTableParams(adminOrdersAsync);
 
   useEffect(() => {
     if (ordersData?.data && ordersData.data.length > 0) {
@@ -30,9 +30,9 @@ const OrdersTable = () => {
             sale: item.quantity,
             stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
             amount: `₹${item.price}`,
-            tag: item.orderStatus?.status || 'pending',
-            status: item.orderStatus?.message || 'Processing',
-            action: item.orderStatus?.status || 'pending',
+            tag: order.orderStatus?.status || 'pending',
+            status: order.orderStatus?.message || 'Processing',
+            action: order.orderStatus?.status || 'pending',
           });
         });
       });
@@ -99,6 +99,7 @@ const OrdersTable = () => {
       title: 'Sale',
       dataIndex: 'sale',
       key: 'sale',
+      sorter: true,
     },
     {
       title: 'Stock',
@@ -109,11 +110,20 @@ const OrdersTable = () => {
       title: 'Amount',
       dataIndex: 'amount',
       key: 'amount',
+      sorter: true,
     },
     {
       title: "Tag",
       dataIndex: 'tag',
       key: 'tag',
+      filters: [
+        { text: 'Pending', value: 'pending' },
+        { text: 'Placed', value: 'placed' },
+        { text: 'Delivered', value: 'delivered' },
+        { text: 'Completed', value: 'completed' },
+        { text: 'Rejected', value: 'rejected' },
+      ],
+      filteredValue: searchParams.get('tag') ? searchParams.get('tag').split(',') : null,
       render: (_, { tag }) => {
 
         let color = 'geekblue';
@@ -136,6 +146,13 @@ const OrdersTable = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      filters: [
+        { text: 'Processing', value: 'Processing' },
+        { text: 'Order Accepted', value: 'Order Accepted' },
+        { text: 'Order Delivered', value: 'Order Delivered' },
+        { text: 'Order Rejected', value: 'Order Rejected' },
+      ],
+      filteredValue: searchParams.get('status') ? searchParams.get('status').split(',') : null,
     },
     {
       title: 'Action',
@@ -169,18 +186,19 @@ const OrdersTable = () => {
 
   return (
     <div className="w-100">
-      <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
+      <Row justify="space-between" align="middle" className="mb-4 mx-3 my-3">
+        <div className="head">
+          <h5 className='h5 fw-bolder'>Orders </h5>
+        </div>
         <Col xs={24} md={8}>
-            {/* Title can go here if needed */}
-        </Col>
-        <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-            <Input.Search
-                placeholder="Search by Order ID..."
-                allowClear
-                value={localSearch}
-                onChange={handleSearchChange}
-                style={{ width: '100%', maxWidth: '300px' }}
-            />
+          <Input
+            placeholder="Search by Order ID or Product..."
+            allowClear
+            prefix={<span role="img" aria-label="search">🔍</span>}
+            value={localSearch}
+            onChange={handleSearchChange}
+            style={{ width: '100%' }}
+          />
         </Col>
       </Row>
 

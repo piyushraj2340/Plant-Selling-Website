@@ -22,10 +22,11 @@ const initialState = {
     users: [],
     usersTotal: 0,
     productsData: {
-        stats: { lineChart: [], polarChart: [] },
         plants: [],
         total: 0
     },
+    plantsLineChartData: [],
+    plantsPolarChartData: [],
     reviewsData: {
         stats: { lineChart: [], pieChart: { labels: [], data: [] } },
         reviews: [],
@@ -124,6 +125,16 @@ export const adminToggleVerifyUserAsync = createAsyncThunk('/admin/users/verify'
 export const adminProductsAsync = createAsyncThunk('/admin/products', async (params = {}) => {
     const queryStr = new URLSearchParams(params).toString();
     const response = await handelDataFetch(`/api/v2/admin/plants?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const adminPlantsLineChartAsync = createAsyncThunk('/admin/plantsLineChart', async (year) => {
+    const response = await handelDataFetch(`/api/v2/admin/plants/charts/line?year=${year}`, 'GET');
+    return response.data;
+});
+
+export const adminPlantsPolarChartAsync = createAsyncThunk('/admin/plantsPolarChart', async () => {
+    const response = await handelDataFetch(`/api/v2/admin/plants/charts/polar`, 'GET');
     return response.data;
 });
 
@@ -393,7 +404,6 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 if (action.payload.status) {
                     state.productsData = {
-                        stats: action.payload.stats,
                         plants: action.payload.plants,
                         total: action.payload.total || 0
                     };
@@ -402,6 +412,32 @@ export const adminSlice = createSlice({
             })
             .addCase(adminProductsAsync.rejected, (state, action) => {
                 state.isLoading = false;
+                state.error = action.error;
+            })
+            // PLANTS LINE CHART
+            .addCase(adminPlantsLineChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminPlantsLineChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.plantsLineChartData = action.payload.lineData;
+                }
+                state.error = null;
+            })
+            .addCase(adminPlantsLineChartAsync.rejected, (state, action) => {
+                state.error = action.error;
+            })
+            // PLANTS POLAR CHART
+            .addCase(adminPlantsPolarChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminPlantsPolarChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.plantsPolarChartData = action.payload.polarData;
+                }
+                state.error = null;
+            })
+            .addCase(adminPlantsPolarChartAsync.rejected, (state, action) => {
                 state.error = action.error;
             })
             // UPDATE PLANT STATUS

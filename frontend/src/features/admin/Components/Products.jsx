@@ -50,24 +50,6 @@ const Products = () => {
       </div>
       <div className="row g-2 ps-2">
         <div className="row g-2 my-2 bg-white border rounded">
-          <div className="header d-flex flex-column flex-md-row justify-content-start justify-content-md-between align-items-start p-2 ps-md-4 w-100">
-            <div className="head">
-              <h5 className='h5 fw-bolder'>Products </h5>
-            </div>
-            <div className="tools d-flex align-items-center justify-content-between justify-content-md-end col-12 col-md-4">
-              <div className="search me-1">
-                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Searching..." style={{ fontSize: "14px" }} value={search} onChange={(e) => setSearch(e.target.value)} />
-              </div>
-              <div className="select ms-1">
-                <select name="filterProducts" id="filterProducts" value={filter} onChange={(e) => setFilter(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
-                  <option value="All">All</option>
-                  <option value="Draft">Draft</option>
-                  <option value="Published">Published</option>
-                  <option value="On Hold">On Hold</option>
-                </select>
-              </div>
-            </div>
-          </div>
           <ProductsTable />
         </div>
       </div>

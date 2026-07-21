@@ -1,6 +1,7 @@
 // BarGraph.js
-import React from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { adminPlantsLineChartAsync } from '../adminSlice';
 import {
     Chart as ChartJS,
     Tooltip,
@@ -24,7 +25,12 @@ ChartJS.register(
 
 
 const ProductsLineChart = () => {
-    const lineChartData = useSelector(state => state.admin.productsData.stats.lineChart) || new Array(12).fill(0);
+    const dispatch = useDispatch();
+    const lineChartData = useSelector(state => state.admin.plantsLineChartData) || new Array(12).fill(0);
+
+    useEffect(() => {
+        dispatch(adminPlantsLineChartAsync(new Date().getFullYear()));
+    }, [dispatch]);
 
     return (
         <div className='col-12' style={{ width: "100%", height: "250px" }}>

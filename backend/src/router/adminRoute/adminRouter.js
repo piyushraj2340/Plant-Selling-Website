@@ -17,6 +17,8 @@ router.patch('/users/:id/password', adminController.updateUserPassword);
 router.patch('/users/:id/block', adminController.toggleBlockUser);
 router.patch('/users/:id/verify', adminController.toggleVerifyUser);
 router.get('/plants', adminController.getPlants);
+router.get('/plants/charts/line', adminController.getPlantsLineChart);
+router.get('/plants/charts/polar', adminController.getPlantsPolarChart);
 router.get('/orders', adminController.getOrders);
 router.get('/orders/charts/bar', adminController.getOrdersBarChart);
 router.get('/orders/charts/pie', adminController.getOrdersPieChart);
