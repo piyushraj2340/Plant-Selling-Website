@@ -3,10 +3,10 @@ import { useSelector, useDispatch } from 'react-redux';
 import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input } from 'antd';
 import { DownOutlined, EllipsisOutlined } from '@ant-design/icons';
 import localStorageUtil from '../../../utils/localStorage';
-import { 
-    adminUsersAsync, 
-    adminImpersonateAsync, 
-    adminDeleteUserAsync, 
+import {
+    adminUsersAsync,
+    adminImpersonateAsync,
+    adminDeleteUserAsync,
     adminBulkDeleteUsersAsync,
     adminUpdateUserRoleAsync,
     adminUpdateUserPasswordAsync,
@@ -18,12 +18,12 @@ const Users = () => {
     const dispatch = useDispatch();
     const { users, isLoading } = useSelector((state) => state.admin);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    
+
     // Modal states
     const [roleModalVisible, setRoleModalVisible] = useState(false);
     const [passwordModalVisible, setPasswordModalVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    
+
     // Form states
     const [selectedRoles, setSelectedRoles] = useState([]);
     const [newPassword, setNewPassword] = useState('');
@@ -34,11 +34,19 @@ const Users = () => {
 
     const handleImpersonate = async (userId) => {
         const action = await dispatch(adminImpersonateAsync({ targetUserId: userId }));
-        
+
         if (adminImpersonateAsync.fulfilled.match(action) && action.payload.status) {
+            const currentAccessToken = localStorageUtil.getData("accessToken");
+            const currentRefreshToken = localStorageUtil.getData("refreshToken");
+
+            if (currentAccessToken && currentRefreshToken) {
+                localStorageUtil.setData("adminAccessToken", currentAccessToken);
+                localStorageUtil.setData("adminRefreshToken", currentRefreshToken);
+            }
+
             localStorageUtil.setData("accessToken", action.payload.accessToken);
             localStorageUtil.setData("refreshToken", action.payload.refreshToken);
-            window.location.href = '/home'; // Redirect to user home after impersonating
+            window.location.href = '/profile'; // Redirect to user home after impersonating
         }
     };
 
@@ -143,7 +151,7 @@ const Users = () => {
             key: 'actions',
             render: (_, record) => {
                 const isAdmin = record.role.includes('admin');
-                
+
                 const items = [
                     {
                         key: '1',
@@ -233,7 +241,7 @@ const Users = () => {
         <div className="container-fluid p-2 p-md-4 bg-white rounded border">
             <div className="d-flex justify-content-between align-items-center mb-4">
                 <h4 className="fw-bold m-0">Platform Users</h4>
-                
+
                 {hasSelected && (
                     <Popconfirm
                         title={`Delete ${selectedRowKeys.length} users?`}
@@ -249,11 +257,11 @@ const Users = () => {
                     </Popconfirm>
                 )}
             </div>
-            
-            <Table 
+
+            <Table
                 rowSelection={rowSelection}
-                columns={columns} 
-                dataSource={users.map(u => ({ ...u, key: u._id }))} 
+                columns={columns}
+                dataSource={users.map(u => ({ ...u, key: u._id }))}
                 loading={isLoading}
                 pagination={{ pageSize: 10 }}
                 scroll={{ x: 'max-content' }}
@@ -269,10 +277,10 @@ const Users = () => {
             >
                 <div className="py-3">
                     <p className="text-muted small">Select the roles this user should have:</p>
-                    <Checkbox.Group 
-                        options={roleOptions} 
-                        value={selectedRoles} 
-                        onChange={(checkedValues) => setSelectedRoles(checkedValues)} 
+                    <Checkbox.Group
+                        options={roleOptions}
+                        value={selectedRoles}
+                        onChange={(checkedValues) => setSelectedRoles(checkedValues)}
                     />
                 </div>
             </Modal>

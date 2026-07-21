@@ -39,11 +39,22 @@ export const handelRefreshToken = async () => {
 
     // Remove the token from the local storage...
     if (response.status === 403 && !data.status) {
-        localStorageUtil.removeData("accessToken");
-        localStorageUtil.removeData("refreshToken");
-        localStorageUtil.removeData("orderToken");
-
-        throw new Error(data.message || "Authentication Failed!");
+        if (localStorageUtil.getData("adminAccessToken")) {
+            // We are impersonating, but token refresh failed. Revert to admin token!
+            const adminAccessToken = localStorageUtil.getData("adminAccessToken");
+            const adminRefreshToken = localStorageUtil.getData("adminRefreshToken");
+            localStorageUtil.setData("accessToken", adminAccessToken);
+            localStorageUtil.setData("refreshToken", adminRefreshToken);
+            localStorageUtil.removeData("adminAccessToken");
+            localStorageUtil.removeData("adminRefreshToken");
+            window.location.href = '/dashboard/users';
+            throw new Error("Impersonation session expired or failed. Restoring admin session.");
+        } else {
+            localStorageUtil.removeData("accessToken");
+            localStorageUtil.removeData("refreshToken");
+            localStorageUtil.removeData("orderToken");
+            throw new Error(data.message || "Authentication Failed!");
+        }
     }
 
 
@@ -97,10 +108,10 @@ const handelDataFetch = async (path, method, body) => {
                 const accessToken = localStorageUtil.getData("accessToken");
                 const orderToken = localStorageUtil.getData("orderToken");
 
-                let bearer = `Bearer ${accessToken?accessToken:''}`;
+                let bearer = `Bearer ${accessToken ? accessToken : ''}`;
 
                 if (path.startsWith("/api/v2/checkout") || orderToken) {
-                    bearer = `Bearer ${accessToken?accessToken:''} orderToken ${orderToken?orderToken:''}`;
+                    bearer = `Bearer ${accessToken ? accessToken : ''} orderToken ${orderToken ? orderToken : ''}`;
                 }
 
                 const res = await fetch(apiUrl, {

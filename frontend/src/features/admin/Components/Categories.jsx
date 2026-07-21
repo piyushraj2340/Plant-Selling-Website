@@ -124,7 +124,7 @@ const Categories = () => {
                         <Option value='Pending'>Pending</Option>
                         <Option value='Disabled'>Disabled</Option>
                     </Select>
-                    <Button type='primary' onClick={() => showModal()}>Add New Category</Button>
+                    <Button type='primary' style={{width: "125px"}} onClick={() => showModal()}>Add Category</Button>
                 </div>
             </div>
             <Table 

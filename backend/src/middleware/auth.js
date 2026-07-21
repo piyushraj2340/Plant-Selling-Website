@@ -47,15 +47,15 @@ const auth = async (req, res, next) => {
             throw error;
         }
 
-        //! if user is blocked
-        if (user.isBlocked) {
+        //! if user is blocked (bypass if impersonating)
+        if (user.isBlocked && !verifyUser.isImpersonated) {
             const error = new Error("Your account has been blocked by an administrator.");
             error.statusCode = 403;
             throw error;
         }
 
-        //! if user is not verified
-        if (!user.isUserVerified) {
+        //! if user is not verified (bypass if impersonating)
+        if (!user.isUserVerified && !verifyUser.isImpersonated) {
             const error = new Error("Your Account is not verified please login and verify your account");
             error.statusCode = 403;
             throw error;

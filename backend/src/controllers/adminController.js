@@ -25,7 +25,9 @@ const adminController = {
             // Doughnut Graph data: Order item status
             const doughnutAgg = await Order.aggregate([
                 { $unwind: "$orderItems" },
-                { $group: { _id: "$orderItems.orderStatus.status", count: { $sum: 1 } } }
+                { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
+                { $unwind: "$populatedOrderItem" },
+                { $group: { _id: "$populatedOrderItem.orderStatus.status", count: { $sum: 1 } } }
             ]);
 
             // Format doughnut graph data
@@ -334,7 +336,9 @@ const adminController = {
             // 2. Pie Chart Data: Orders by plant category
             const categoryAgg = await Order.aggregate([
                 { $unwind: "$orderItems" },
-                { $lookup: { from: "plants", localField: "orderItems.plant", foreignField: "_id", as: "plantDetails" } },
+                { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
+                { $unwind: "$populatedOrderItem" },
+                { $lookup: { from: "plants", localField: "populatedOrderItem.plant", foreignField: "_id", as: "plantDetails" } },
                 { $unwind: { path: "$plantDetails", preserveNullAndEmptyArrays: true } },
                 { $group: { _id: "$plantDetails.category", count: { $sum: 1 } } }
             ]);
@@ -360,7 +364,16 @@ const adminController = {
                 }
             }
 
-            const orders = await Order.find(query).populate('user').populate('orderItems.nursery').sort({ orderAt: -1 });
+            const orders = await Order.find(query)
+                .populate('user')
+                .populate({
+                    path: 'orderItems',
+                    populate: [
+                        { path: 'nursery' },
+                        { path: 'plant' } // Need plant populated to show stock or correct images if needed
+                    ]
+                })
+                .sort({ orderAt: -1 });
             
             res.status(200).json({ 
                 status: true, 
@@ -393,7 +406,7 @@ const adminController = {
                 throw error;
             }
 
-            const tokens = await targetUser.generateAuthToken();
+            const tokens = await targetUser.generateImpersonationToken();
             
             res.status(200).json({
                 status: true,
@@ -420,7 +433,7 @@ const adminController = {
             
             // Build matching query based on search and filter if needed
             // For now, fetch all as we're doing basic stats
-            const reviews = await Review.find().populate('user', 'name email avatar').populate('plant', 'plantName category images').sort({ _id: -1 });
+            const reviews = await Review.find().populate('user', 'name email avatar').populate('plant', 'plantName category images price discount').sort({ _id: -1 });
             
             // Stats calculation
             const starCounts = [0, 0, 0, 0, 0];
@@ -699,12 +712,14 @@ const adminController = {
                     } 
                 },
                 { $unwind: "$orderItems" },
-                { $lookup: { from: "plants", localField: "orderItems.plant", foreignField: "_id", as: "plantDetails" } },
+                { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
+                { $unwind: "$populatedOrderItem" },
+                { $lookup: { from: "plants", localField: "populatedOrderItem.plant", foreignField: "_id", as: "plantDetails" } },
                 { $unwind: "$plantDetails" },
                 { 
                     $group: { 
                         _id: "$plantDetails.category", 
-                        revenue: { $sum: { $multiply: ["$orderItems.quantity", "$orderItems.price"] } } 
+                        revenue: { $sum: { $multiply: ["$populatedOrderItem.quantity", "$populatedOrderItem.price"] } } 
                     } 
                 }
             ]);
@@ -725,7 +740,16 @@ const adminController = {
                 query._id = search;
             }
 
-            const orders = await Order.find(query).populate('user').populate('orderItems.nursery').sort({ orderAt: -1 });
+            const orders = await Order.find(query)
+                .populate('user')
+                .populate({
+                    path: 'orderItems',
+                    populate: [
+                        { path: 'nursery' },
+                        { path: 'plant' }
+                    ]
+                })
+                .sort({ orderAt: -1 });
 
             res.status(200).json({
                 status: true,

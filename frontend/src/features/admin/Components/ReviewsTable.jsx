@@ -22,7 +22,7 @@ const ReviewsTable = () => {
                     imgLink: review.plant?.images?.[0]?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
                     link: `/product/${review.plant?._id}`,
                 },
-                price: 'N/A', // Assuming price isn't stored in review, or you can populate it
+                price: review.plant?.price !== undefined ? `₹${(review.plant.price - (review.plant.price * (review.plant.discount || 0) / 100)).toFixed(2)}` : 'N/A',
                 tags: review.plant?.category ? [review.plant.category] : [],
                 status: review.status,
                 rating: review.rating,
