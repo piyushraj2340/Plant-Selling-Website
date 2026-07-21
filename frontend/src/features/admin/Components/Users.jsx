@@ -20,7 +20,7 @@ const Users = () => {
     const { users, usersTotal, isLoading } = useSelector((state) => state.admin);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminUsersAsync);
+    const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminUsersAsync);
 
     // Modal states
     const [roleModalVisible, setRoleModalVisible] = useState(false);
@@ -51,22 +51,23 @@ const Users = () => {
     };
 
     const handleDelete = (userId) => {
-        dispatch(adminDeleteUserAsync(userId));
+        dispatch(adminDeleteUserAsync(userId)).then(() => fetchData());
     };
 
     const handleBulkDelete = () => {
         if (selectedRowKeys.length === 0) return;
         dispatch(adminBulkDeleteUsersAsync(selectedRowKeys)).then(() => {
             setSelectedRowKeys([]);
+            fetchData();
         });
     };
 
     const handleBlockToggle = (userId) => {
-        dispatch(adminToggleBlockUserAsync(userId));
+        dispatch(adminToggleBlockUserAsync(userId)).then(() => fetchData());
     };
 
     const handleVerifyToggle = (userId) => {
-        dispatch(adminToggleVerifyUserAsync(userId));
+        dispatch(adminToggleVerifyUserAsync(userId)).then(() => fetchData());
     };
 
     const openRoleModal = (user) => {
@@ -82,6 +83,7 @@ const Users = () => {
         }
         dispatch(adminUpdateUserRoleAsync({ id: selectedUser._id, role: selectedRoles })).then(() => {
             setRoleModalVisible(false);
+            fetchData();
         });
     };
 
@@ -98,6 +100,7 @@ const Users = () => {
         }
         dispatch(adminUpdateUserPasswordAsync({ id: selectedUser._id, password: newPassword })).then(() => {
             setPasswordModalVisible(false);
+            fetchData();
         });
     };
 

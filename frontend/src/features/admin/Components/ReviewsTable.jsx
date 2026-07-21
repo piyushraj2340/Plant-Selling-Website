@@ -14,7 +14,7 @@ const ReviewsTable = () => {
     const [dataSource, setDataSource] = useState([]);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminReviewsAsync);
+    const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminReviewsAsync);
 
     useEffect(() => {
         if (reviews && reviews.length > 0) {
@@ -44,6 +44,7 @@ const ReviewsTable = () => {
             const res = await dispatch(adminUpdateReviewStatusAsync({ id, status })).unwrap();
             if (res.status) {
                 message.success(res.message);
+                fetchData();
             }
         } catch (error) {
             message.error("Failed to update review status");
@@ -56,6 +57,7 @@ const ReviewsTable = () => {
             if (res.status) {
                 message.success(res.message);
                 setSelectedRowKeys([]);
+                fetchData();
             }
         } catch (error) {
             message.error("Failed to update bulk review status");

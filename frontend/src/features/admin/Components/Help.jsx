@@ -15,7 +15,7 @@ const Help = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [replyForm] = Form.useForm();
 
-  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminGetContactsAsync);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminGetContactsAsync);
 
   const showReplyModal = (contact) => {
     setSelectedContact(contact);
@@ -39,6 +39,7 @@ const Help = () => {
 
       if (response.status) {
         handleReplyCancel();
+        fetchData();
       }
     } catch (error) {
       console.error(error);
@@ -48,6 +49,7 @@ const Help = () => {
   const handleDelete = async (id) => {
     try {
       await dispatch(adminDeleteContactAsync(id));
+      fetchData();
     } catch (error) {
       console.error(error);
     }

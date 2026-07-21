@@ -11,7 +11,7 @@ const ProductsTable = () => {
   const isLoading = useSelector(state => state.admin.isLoading);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams } = useTableParams(adminProductsAsync);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams, fetchData } = useTableParams(adminProductsAsync);
 
   const dataSource = plants.map((plant, index) => ({
     key: plant._id || index,
@@ -33,6 +33,7 @@ const ProductsTable = () => {
       const res = await dispatch(adminUpdatePlantStatusAsync({ id, status })).unwrap();
       if (res.status) {
         message.success(res.message);
+        fetchData();
       }
     } catch (error) {
       message.error("Failed to update product status");
@@ -45,6 +46,7 @@ const ProductsTable = () => {
       if (res.status) {
         message.success(res.message);
         setSelectedRowKeys([]);
+        fetchData();
       }
     } catch (error) {
       message.error("Failed to update bulk status");

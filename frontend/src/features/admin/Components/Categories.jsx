@@ -13,7 +13,7 @@ const Categories = () => {
     const [editingCategory, setEditingCategory] = useState(null);
     const [form] = Form.useForm();
 
-    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(getAllCategoriesAsync);
+    const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(getAllCategoriesAsync);
     const showModal = (category = null) => {
         setEditingCategory(category);
         if (category) {
@@ -49,7 +49,7 @@ const Categories = () => {
                 message.success('Category created successfully');
             }
             setIsModalVisible(false);
-            dispatch(getAllCategoriesAsync(tableParams.pagination));
+            fetchData();
         } catch (error) {
             message.error(error.message || 'Action failed');
         }
@@ -62,7 +62,7 @@ const Categories = () => {
                 try {
                     await dispatch(deleteCategoryAsync(id)).unwrap();
                     message.success('Category deleted successfully');
-                    dispatch(getAllCategoriesAsync(tableParams.pagination));
+                    fetchData();
                 } catch (error) {
                     message.error(error.message || 'Delete failed');
                 }

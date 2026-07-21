@@ -57,10 +57,14 @@ export const useTableParams = (fetchAction, defaultSortField = 'createdAt') => {
         return params;
     }, [tableParams.pagination.current, tableParams.pagination.pageSize, tableParams.search, tableParams.sortField, tableParams.sortOrder, searchParams]);
 
-    // Dispatch the fetch action whenever the URL parameters change
-    useEffect(() => {
+    const fetchData = useCallback(() => {
         dispatch(fetchAction(fetchParams()));
     }, [dispatch, fetchAction, fetchParams]);
+
+    // Dispatch the fetch action whenever the URL parameters change
+    useEffect(() => {
+        fetchData();
+    }, [fetchData]);
 
     const handleTableChange = (pagination, filters, sorter) => {
         const newParams = new URLSearchParams(searchParams);
@@ -99,6 +103,7 @@ export const useTableParams = (fetchAction, defaultSortField = 'createdAt') => {
         handleTableChange,
         handleSearchChange,
         searchParams,
-        setSearchParams
+        setSearchParams,
+        fetchData
     };
 };
