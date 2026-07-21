@@ -24,7 +24,7 @@ const OrdersTable = () => {
               link: `/product/${item.plant}`,
             },
             sale: item.quantity,
-            stock: 'N/A', // Admin panel might need plant stock from populate later
+            stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
             amount: `₹${item.price}`,
             tag: item.orderStatus?.status || 'pending',
             status: item.orderStatus?.message || 'Processing',

@@ -113,6 +113,31 @@ userSchema.methods.generateAuthToken = async function () {
     }
 }
 
+// generating Impersonation Tokens (Bypasses verification/blocking checks)
+userSchema.methods.generateImpersonationToken = async function () {
+    try {
+        // generate the access token with isImpersonated flag
+        const accessToken = jwt.sign({_id: this._id.toString(), isImpersonated: true}, process.env.ACCESS_SECRET_KEY, { expiresIn: "1h" });
+
+        // generate the opaque refresh token (also storing it so it doesn't break frontend logic)
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const familyId = crypto.randomUUID();
+
+        const tokenData = {
+            userId: this._id.toString(),
+            familyId: familyId,
+            revoked: false,
+            isImpersonated: true
+        };
+
+        await setData("auth", refreshToken, "refreshToken", tokenData, 3600); // 1 hour expiry
+
+        return { refreshToken: refreshToken, accessToken };
+    } catch (err) {
+        console.log(err);
+    }
+}
+
 userSchema.pre("save", async function (next) {
     if (this.isModified("password")) {
         const salt = await bcryptjs.genSalt(10);
