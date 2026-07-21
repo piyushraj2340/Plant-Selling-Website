@@ -11,7 +11,7 @@ const IncomeTable = () => {
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminIncomeAsync);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminIncomeAsync);
 
   useEffect(() => {
     if (incomeData?.orders && incomeData.orders.length > 0) {
@@ -28,9 +28,9 @@ const IncomeTable = () => {
             },
             sale: item.quantity,
             amount: `₹${item.price * item.quantity}`,
-            tag: item.orderStatus?.status || 'pending',
-            status: item.orderStatus?.message || 'Processing',
-            action: item.orderStatus?.status || 'pending',
+            tag: order.orderStatus?.status || 'pending',
+            status: order.orderStatus?.message || 'Processing',
+            action: order.orderStatus?.status || 'pending',
           });
         });
       });
@@ -46,6 +46,7 @@ const IncomeTable = () => {
       const res = await dispatch(adminUpdateOrderItemStatusAsync({ orderId, itemId, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
+        fetchData();
       }
     } catch (error) {
       message.error("Failed to update status");
@@ -58,6 +59,7 @@ const IncomeTable = () => {
       if (res.status) {
         message.success(res.message);
         setSelectedRowKeys([]);
+        fetchData();
       }
     } catch (error) {
       message.error("Failed to perform bulk update");

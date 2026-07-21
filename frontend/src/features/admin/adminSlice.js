@@ -316,14 +316,11 @@ export const adminSlice = createSlice({
                     const { orderId, itemId, status, statusMessage } = action.payload;
                     const orderIndex = state.ordersData.data.findIndex(o => o._id === orderId);
                     if (orderIndex !== -1) {
-                        const itemIndex = state.ordersData.data[orderIndex].orderItems.findIndex(i => i._id === itemId);
-                        if (itemIndex !== -1) {
-                            state.ordersData.data[orderIndex].orderItems[itemIndex].orderStatus = {
-                                status,
-                                message: statusMessage || `${status} status updated`,
-                                statusAt: new Date().toISOString()
-                            };
-                        }
+                        state.ordersData.data[orderIndex].orderStatus = {
+                            status,
+                            message: statusMessage || `${status} status updated`,
+                            statusAt: new Date().toISOString()
+                        };
                     }
                 }
             })
@@ -345,14 +342,11 @@ export const adminSlice = createSlice({
                         const [orderId, itemId] = key.split('-');
                         const orderIndex = state.ordersData.data.findIndex(o => o._id === orderId);
                         if (orderIndex !== -1) {
-                            const itemIndex = state.ordersData.data[orderIndex].orderItems.findIndex(i => i._id === itemId);
-                            if (itemIndex !== -1) {
-                                state.ordersData.data[orderIndex].orderItems[itemIndex].orderStatus = {
-                                    status,
-                                    message: statusMessage || `${status} status updated`,
-                                    statusAt: new Date().toISOString()
-                                };
-                            }
+                            state.ordersData.data[orderIndex].orderStatus = {
+                                status,
+                                message: statusMessage || `${status} status updated`,
+                                statusAt: new Date().toISOString()
+                            };
                         }
                     });
                 }

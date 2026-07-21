@@ -12,7 +12,7 @@ const OrdersTable = () => {
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
 
-  const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams } = useTableParams(adminOrdersAsync);
+  const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams, fetchData } = useTableParams(adminOrdersAsync);
 
   useEffect(() => {
     if (ordersData?.data && ordersData.data.length > 0) {
@@ -48,6 +48,7 @@ const OrdersTable = () => {
       const res = await dispatch(adminUpdateOrderItemStatusAsync({ orderId, itemId, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
+        fetchData();
       }
     } catch (error) {
       message.error("Failed to update status");
@@ -60,6 +61,7 @@ const OrdersTable = () => {
       if (res.status) {
         message.success(res.message);
         setSelectedRowKeys([]);
+        fetchData();
       }
     } catch (error) {
       message.error("Failed to perform bulk update");

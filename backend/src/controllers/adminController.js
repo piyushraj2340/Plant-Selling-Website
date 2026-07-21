@@ -762,7 +762,11 @@ const adminController = {
     updateOrderItemStatus: async (req, res, next) => {
         try {
             const { orderId } = req.params;
-            const { status, message } = req.body;
+            let { status, message } = req.body;
+            
+            if (status) {
+                status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+            }
 
             const order = await Order.findOneAndUpdate(
                 { _id: orderId },
@@ -791,12 +795,16 @@ const adminController = {
     // Bulk update order items status
     bulkUpdateOrderItemStatus: async (req, res, next) => {
         try {
-            const { keys, status, message } = req.body;
+            let { keys, status, message } = req.body;
 
             if (!keys || !Array.isArray(keys) || keys.length === 0) {
                 const error = new Error("Order item keys are required");
                 error.statusCode = 400;
                 throw error;
+            }
+            
+            if (status) {
+                status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
             }
 
             if (!['Processing', 'Placed', 'Delivered', 'Rejected', 'Completed'].includes(status)) {

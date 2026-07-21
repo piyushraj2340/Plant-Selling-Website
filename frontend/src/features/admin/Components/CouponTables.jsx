@@ -9,14 +9,14 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const { couponsData, isLoading } = useSelector(state => state.admin);
     const couponsTotal = useSelector(state => state.admin.couponsData?.total) || 0;
 
-    const { tableParams, localSearch, handleTableChange, handleSearchChange } = useTableParams(adminCouponsAsync);
+    const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminCouponsAsync);
 
     const handleStatusUpdate = (id, newStatus) => {
-        dispatch(adminUpdateCouponStatusAsync({ id, status: newStatus }));
+        dispatch(adminUpdateCouponStatusAsync({ id, status: newStatus })).then(() => fetchData());
     };
 
     const handleDelete = (id) => {
-        dispatch(adminDeleteCouponAsync(id));
+        dispatch(adminDeleteCouponAsync(id)).then(() => fetchData());
     };
 
     const dataSource = couponsData.coupons.map(coupon => ({
