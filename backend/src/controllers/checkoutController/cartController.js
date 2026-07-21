@@ -20,9 +20,8 @@ const recalculateCart = async (userId) => {
     let totalPriceWithoutDiscount = 0;
     let totalDiscount = 0;
     let finalPrice = 0;
-
-    // Calculate base pricing
     const itemsContext = [];
+    const priceWarnings = [];
     
     for (const item of cart.cartItems) {
         if (!item.plant) continue; // Skip if plant deleted
@@ -34,6 +33,17 @@ const recalculateCart = async (userId) => {
         totalPriceWithoutDiscount += price;
         totalDiscount += discountAmt;
         finalPrice += priceAfterDiscount;
+        
+        // Evaluate price warnings
+        const currentPricePerItem = item.plant.price - (item.plant.discount / 100) * item.plant.price;
+        if (item.addedAtPrice > 0 && currentPricePerItem !== item.addedAtPrice) {
+            const diff = currentPricePerItem - item.addedAtPrice;
+            if (diff > 0) {
+                priceWarnings.push({ type: 'increase', message: `The price of ${item.plant.plantName} has increased by ₹${diff.toFixed(2)} since you added it.` });
+            } else {
+                priceWarnings.push({ type: 'decrease', message: `The price of ${item.plant.plantName} has decreased by ₹${Math.abs(diff).toFixed(2)} since you added it!` });
+            }
+        }
 
         itemsContext.push({
             product: {
@@ -47,6 +57,7 @@ const recalculateCart = async (userId) => {
 
     let deliveryFee = finalPrice < 500 ? 90 : 0;
     
+    let couponDiscountAmount = 0;
     // Evaluate Coupon if applied
     if (cart.couponApplied && cart.cartItems.length > 0) {
         const cartContext = {
@@ -58,6 +69,7 @@ const recalculateCart = async (userId) => {
         const promoResult = await PromotionService.applyCoupon(cart.couponApplied.code || cart.couponApplied, cartContext, { _id: userId });
         if (promoResult.success) {
             totalDiscount += promoResult.discountAmount;
+            couponDiscountAmount = promoResult.discountAmount;
             finalPrice = promoResult.newTotal;
             if (promoResult.freeDelivery) {
                 deliveryFee = 0;
@@ -70,12 +82,20 @@ const recalculateCart = async (userId) => {
 
     finalPrice += deliveryFee;
 
+    // Apply strict 2-decimal rounding to prevent floating point inaccuracies
+    totalPriceWithoutDiscount = Math.round(totalPriceWithoutDiscount * 100) / 100;
+    totalDiscount = Math.round(totalDiscount * 100) / 100;
+    finalPrice = Math.round(finalPrice * 100) / 100;
+
     cart.pricing = {
         totalPriceWithoutDiscount,
         totalDiscount,
         deliveryFee,
-        finalPrice
+        finalPrice,
+        couponDiscountAmount: Math.round(couponDiscountAmount * 100) / 100
     };
+    
+    cart.priceWarnings = priceWarnings;
 
     await cart.save();
     return cart;
@@ -107,7 +127,12 @@ exports.addToCart = async (req, res, next) => {
             await cart.save();
         }
 
-        // 2. Upsert Cart Item
+        // 2. Lookup Plant to get current price for addedAtPrice snapshot
+        const plantDoc = await Plant.findById(plant);
+        if (!plantDoc) throw new Error("Plant not found");
+        const currentDiscountedPrice = plantDoc.price - (plantDoc.discount / 100) * plantDoc.price;
+
+        // 3. Upsert Cart Item
         let cartItem = await CartItem.findOne({ cart: cart._id, plant });
 
         if (cartItem) {
@@ -119,7 +144,8 @@ exports.addToCart = async (req, res, next) => {
                 user: userId,
                 plant,
                 nursery,
-                quantity: parseInt(quantity)
+                quantity: parseInt(quantity),
+                addedAtPrice: currentDiscountedPrice
             });
             await cartItem.save();
             
@@ -128,7 +154,7 @@ exports.addToCart = async (req, res, next) => {
             await cart.save();
         }
 
-        // 3. Recalculate
+        // 4. Recalculate
         await recalculateCart(userId);
         const fullCart = await getFullyPopulatedCart(userId);
 
@@ -295,10 +321,12 @@ exports.applyCoupon = async (req, res, next) => {
             return res.status(400).json({ status: false, message: "Coupon is not applicable to these items." });
         }
 
+        const fullCart = await getFullyPopulatedCart(req.user._id);
+
         return res.status(200).json({
             status: true,
             message: "Coupon applied successfully!",
-            data: updatedCart.pricing
+            cart: fullCart
         });
     } catch (error) {
         next(error);

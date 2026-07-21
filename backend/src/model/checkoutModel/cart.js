@@ -23,8 +23,15 @@ const cartSchema = new mongoose.Schema({
         totalPriceWithoutDiscount: { type: Number, default: 0 },
         totalDiscount: { type: Number, default: 0 },
         deliveryFee: { type: Number, default: 0 },
-        finalPrice: { type: Number, default: 0 }
+        finalPrice: { type: Number, default: 0 },
+        couponDiscountAmount: { type: Number, default: 0 }
     },
+    priceWarnings: [
+        {
+            message: String,
+            type: { type: String, enum: ['increase', 'decrease'] }
+        }
+    ],
     createdAt: {
         type: Date,
         default: Date.now,
