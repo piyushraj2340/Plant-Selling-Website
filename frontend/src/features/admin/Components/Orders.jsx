@@ -3,10 +3,23 @@ import { useDispatch } from 'react-redux'
 import OrdersBarGraph from './OrdersBarGraph'
 import OrdersPieChart from './OrdersPieChart'
 import OrdersTable from './OrdersTable'
-import { adminOrdersAsync } from '../adminSlice'
+import { adminOrdersBarChartAsync, adminOrdersPieChartAsync } from '../adminSlice'
 
 const Orders = () => {
+  const dispatch = useDispatch();
+  
+  const currentYear = new Date().getFullYear();
+  const [selectedYear, setSelectedYear] = useState(currentYear);
 
+  const yearOptions = Array.from(
+      { length: currentYear - 2020 + 1 },
+      (_, i) => 2020 + i
+  );
+
+  useEffect(() => {
+      dispatch(adminOrdersBarChartAsync(selectedYear));
+      dispatch(adminOrdersPieChartAsync(selectedYear));
+  }, [dispatch, selectedYear]);
 
   return (
     <>
@@ -17,6 +30,20 @@ const Orders = () => {
               <div className="left d-flex flex-column">
                 <h5 className="h4 fw-bold">Overview </h5>
                 <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Monthly Orders</small>
+              </div>
+              <div className="right">
+                <select 
+                    name="filterYear" 
+                    id="filterYear" 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(e.target.value)}
+                    className="form-select" 
+                    style={{ fontSize: "12px" }}
+                >
+                    {yearOptions.map(year => (
+                        <option key={year} value={year}>{year}</option>
+                    ))}
+                </select>
               </div>
             </div>
             <OrdersBarGraph />

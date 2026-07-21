@@ -51,7 +51,7 @@ const IncomePieChart = () => {
                     className='side-view'
                 />
             ) : (
-                <p className="text-muted text-center my-5">No category revenue data available.</p>
+                <p style={{minHeight: "153px"}} className="text-muted text-center my-5">No category revenue data available.</p>
             )}
         </div>
     )

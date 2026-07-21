@@ -1,17 +1,27 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux'
 import ProductsTable from './ProductsTable'
 import ReviewsTable from './ReviewsTable'
 import ReviewsPieChart from './ReviewsPieChart'
 import ReviewLineChart from './ReviewLineChart'
-import { adminReviewsAsync } from '../adminSlice'
+import { adminReviewsLineChartAsync, adminReviewsPieChartAsync } from '../adminSlice'
 
 const Reviews = () => {
     const dispatch = useDispatch();
+    
+    const currentYear = new Date().getFullYear();
+    const [selectedYear, setSelectedYear] = useState(currentYear);
+
+    // Generate years from 2020 to current year
+    const yearOptions = Array.from(
+        { length: currentYear - 2020 + 1 },
+        (_, i) => 2020 + i
+    );
 
     useEffect(() => {
-        dispatch(adminReviewsAsync());
-    }, [dispatch]);
+        dispatch(adminReviewsLineChartAsync(selectedYear));
+        dispatch(adminReviewsPieChartAsync(selectedYear));
+    }, [dispatch, selectedYear]);
 
     return (
         <>
@@ -25,15 +35,17 @@ const Reviews = () => {
                                 <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Monthly store ratings</small>
                             </div>
                             <div className="right">
-                                <select name="filterIncome" id="filterIncome" defaultValue="2023" className="form-select" style={{ fontSize: "12px" }}>
-                                    <option value="2020">2020</option>
-                                    <option value="2021">2021</option>
-                                    <option value="2022">2022</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2023">2023</option>
-                                    <option value="2023">2023</option>
+                                <select 
+                                    name="filterIncome" 
+                                    id="filterIncome" 
+                                    value={selectedYear} 
+                                    onChange={(e) => setSelectedYear(e.target.value)}
+                                    className="form-select" 
+                                    style={{ fontSize: "12px" }}
+                                >
+                                    {yearOptions.map(year => (
+                                        <option key={year} value={year}>{year}</option>
+                                    ))}
                                 </select>
                             </div>
                         </div>
@@ -53,21 +65,6 @@ const Reviews = () => {
             <div className="row g-2 ps-2">
                 <div className="row g-2 my-2 bg-white border rounded">
                     <div className="header d-flex flex-column flex-md-row justify-content-start justify-content-md-between align-items-start p-2 ps-md-4 w-100">
-                        <div className="head">
-                            <h5 className='h5 fw-bolder'>Customer Reviews </h5>
-                        </div>
-                        <div className="tools d-flex align-items-center justify-content-between justify-content-md-end col-12 col-md-4">
-                            <div className="search me-1">
-                                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Searching..." style={{ fontSize: "14px" }} />
-                            </div>
-                            <div className="select ms-1">
-                                <select name="filterIncome" id="filterIncome" defaultValue="Quarterly" className="form-select" style={{ fontSize: "12px" }}>
-                                    <option value="Monthly">Monthly</option>
-                                    <option value="Quarterly">Quarterly</option>
-                                    <option value="Yearly">Yearly</option>
-                                </select>
-                            </div>
-                        </div>
                     </div>
                     <ReviewsTable />
                 </div>

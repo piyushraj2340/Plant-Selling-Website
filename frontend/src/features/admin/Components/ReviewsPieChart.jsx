@@ -19,8 +19,9 @@ ChartJS.register(
 )
 
 const ReviewsPieChart = () => {
-  const { reviewsData } = useSelector(state => state.admin);
-  const pieData = reviewsData?.stats?.pieChart?.data || [0, 0, 0, 0, 0];
+
+  const { reviewsPieChartData } = useSelector(state => state.admin);
+  const pieData = reviewsPieChartData?.data?.length ? reviewsPieChartData.data : [0, 0, 0, 0, 0];
 
   return (
     <div style={{ width: "100%" }}>

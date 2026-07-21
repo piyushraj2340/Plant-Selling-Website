@@ -27,7 +27,7 @@ const ReviewsTable = () => {
                     link: `/product/${review.plant?._id}`,
                 },
                 price: review.plant?.price !== undefined ? `₹${(review.plant.price - (review.plant.price * (review.plant.discount || 0) / 100)).toFixed(2)}` : 'N/A',
-                tags: review.plant?.category ? [review.plant.category] : [],
+                tags: review.plant?.category?.name ? [review.plant.category.name] : [],
                 status: review.status,
                 rating: review.rating,
                 reviews: review.review || 'No text provided.',
@@ -119,6 +119,12 @@ const ReviewsTable = () => {
             title: "Status",
             dataIndex: 'status',
             key: 'status',
+            filters: [
+                { text: 'Approved', value: 'Approved' },
+                { text: 'Pending', value: 'Pending' },
+                { text: 'Rejected', value: 'Rejected' }
+            ],
+            sorter: true,
             render: (_, { status }) => {
 
                 let color;
@@ -144,6 +150,7 @@ const ReviewsTable = () => {
             title: 'Rating',
             dataIndex: 'rating',
             key: 'rating',
+            sorter: true,
             render: value => {
                 return <Rating initialValue={value} size={20} readonly={true} allowFraction="true" />
             }
@@ -193,12 +200,15 @@ const ReviewsTable = () => {
         <div className="w-100 p-0">
             <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
                 <Col xs={24} md={8}>
-                    {/* Title can go here if needed */}
+                    <div className="head mx-3">
+                        <h5 className='h5 fw-bolder'>Customer Reviews </h5>
+                    </div>
                 </Col>
                 <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-                    <Input.Search
-                        placeholder="Search by review text or plant name..."
+                    <Input
+                        placeholder="Search by review text..."
                         allowClear
+                        prefix={<span role="img" aria-label="search">🔍</span>}
                         value={localSearch}
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}
