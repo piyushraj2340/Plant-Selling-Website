@@ -50,27 +50,6 @@ export const cartSlice = createSlice({
     name: 'cart',
     initialState,
     reducers: {
-        setCartPricing: (state, action) => {
-            const products = action.payload;
-
-            const pricing = {};
-
-            if(products.length > 0) { 
-                pricing.totalPriceWithoutDiscount = (products.reduce((total, curObj) => total + (curObj.pricing.priceWithoutDiscount * curObj.quantity), 0).toFixed(2));
-                pricing.actualPriceAfterDiscount = (products.reduce((total, curObj) => total + (curObj.pricing.priceAfterDiscount * curObj.quantity), 0)).toFixed(2);
-                pricing.discountPrice = (products.reduce((total, curObj) => total + (curObj.pricing.discountPrice * curObj.quantity), 0)).toFixed(2);
-                pricing.deliveryPrice = (pricing.actualPriceAfterDiscount < 500 ? 90 : 0).toFixed(2)
-                pricing.totalPrice = (Number(pricing.actualPriceAfterDiscount) + Number(pricing.deliveryPrice)).toFixed(2)
-            } else {
-                pricing.totalPriceWithoutDiscount = 0;
-                pricing.actualPriceAfterDiscount = 0;
-                pricing.discountPrice = 0;
-                pricing.deliveryPrice = 0;
-                pricing.totalPrice = 0;
-            }
-
-            state.cartPriceDetails = pricing;
-        },
         setSelectedCart: (state, action) => {
             state.selectedCart = action.payload;
         },
@@ -91,83 +70,81 @@ export const cartSlice = createSlice({
                 //* CLEANUP: TASK
                 //? CART_CLEANUP_TASK:: REMOVE THE CART INFORMATION AFTER SUCCEEDED PAYMENT
 
-                action.payload.result.result.orderItems.forEach(items => {
-                    const index = state.carts.findIndex(cart => cart.plant._id === items.plant);
-
-                    state.carts.splice(index, 1);
-                    state.cartLength = state.carts.length;
-                })
+                state.carts = [];
+                state.cartLength = 0;
+                state.cartPriceDetails = {
+                    totalPriceWithoutDiscount: 0,
+                    totalDiscount: 0,
+                    deliveryFee: 0,
+                    finalPrice: 0
+                };
 
             })
             .addCase(addToCartAsync.pending, (state) => {
-                //^ FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = true;
             })
             .addCase(addToCartAsync.fulfilled, (state, action) => {
-                //* FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = false;
-                state.carts.push(action.payload.result);
+                state.carts = action.payload.result;
+                if (action.payload.cart && action.payload.cart.pricing) {
+                    state.cartPriceDetails = action.payload.cart.pricing;
+                }
                 state.cartLength = state.carts.length;
             })
             .addCase(addToCartAsync.rejected, (state, action) => {
-                //! FETCH_CART_DETAILS
                 state.error = action.error;
                 state.isLoading = false;
             })
             .addCase(cartDataFetchAsync.pending, (state) => {
-                //^ FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = true;
             })
             .addCase(cartDataFetchAsync.fulfilled, (state, action) => {
-                //* FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = false;
                 state.carts = action.payload.result;
+                if (action.payload.cart && action.payload.cart.pricing) {
+                    state.cartPriceDetails = action.payload.cart.pricing;
+                }
                 state.cartLength = state.carts.length;
             })
             .addCase(cartDataFetchAsync.rejected, (state, action) => {
-                //! FETCH_CART_DETAILS
                 state.error = action.error;
                 state.isLoading = false;
             })
             .addCase(cartDataDeleteAsync.pending, (state) => {
-                //^ FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = true;
             })
             .addCase(cartDataDeleteAsync.fulfilled, (state, action) => {
-                //* FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = false;
-
-                const deleteCartIndex = state.carts.findIndex(cart => cart._id === action.payload.result._id);
-                state.carts.splice(deleteCartIndex, 1);
-
+                state.carts = action.payload.result;
+                if (action.payload.cart && action.payload.cart.pricing) {
+                    state.cartPriceDetails = action.payload.cart.pricing;
+                }
                 state.cartLength = state.carts.length;
             })
             .addCase(cartDataDeleteAsync.rejected, (state, action) => {
-                //! FETCH_CART_DETAILS
                 state.error = action.error;
                 state.isLoading = false;
             })
             .addCase(cartDataUpdateQuantityAsync.pending, (state) => {
-                //^ FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = true;
             })
             .addCase(cartDataUpdateQuantityAsync.fulfilled, (state, action) => {
-                //* FETCH_CART_DETAILS
                 state.error = null;
                 state.isLoading = false;
-
-                const deleteCartIndex = state.carts.findIndex(cart => cart._id === action.payload.result._id);
-                state.carts.splice(deleteCartIndex, 1, action.payload.result);
+                state.carts = action.payload.result;
+                if (action.payload.cart && action.payload.cart.pricing) {
+                    state.cartPriceDetails = action.payload.cart.pricing;
+                }
+                state.cartLength = state.carts.length;
             })
             .addCase(cartDataUpdateQuantityAsync.rejected, (state, action) => {
-                //! FETCH_CART_DETAILS
                 state.error = action.error;
                 state.isLoading = false;
             })
@@ -204,5 +181,5 @@ export const cartSlice = createSlice({
     }
 });
 
-export const { setCartPricing, setSelectedCart, removeCoupon } = cartSlice.actions;
+export const { setSelectedCart, removeCoupon } = cartSlice.actions;
 export default cartSlice.reducer;

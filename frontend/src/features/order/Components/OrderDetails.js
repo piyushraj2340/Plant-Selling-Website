@@ -91,15 +91,15 @@ const OrderDetails = () => {
                                                 </p>
                                                 <p className="text-muted mb-1 d-flex justify-content-between">
                                                     <small className='me-3 me-md-5'>Discount : </small>
-                                                    <span>- ₹{orderDetails.pricing.discountPrice}</span>
+                                                    <span>- ₹{orderDetails.pricing.totalDiscount}</span>
                                                 </p>
                                                 <p className="text-muted mb-1 d-flex justify-content-between">
                                                     <small className='me-3 me-md-5'>Delivery : </small>
-                                                    <span>₹{orderDetails.pricing.deliveryPrice}</span>
+                                                    <span>₹{orderDetails.pricing.deliveryFee}</span>
                                                 </p>
                                                 <p className="text-muted mb-1 d-flex justify-content-between">
                                                     <small className='me-3 me-md-5'>Total : </small>
-                                                    <span>₹<b>{orderDetails.pricing.totalPrice}</b></span>
+                                                    <span>₹<b>{orderDetails.pricing.finalPrice}</b></span>
                                                 </p>
                                             </div>
                                         }
@@ -115,9 +115,9 @@ const OrderDetails = () => {
                                         {
                                             orderDetails.orderItems &&
 
-                                            orderDetails.orderItems.map((orderItems) => {
+                                            orderDetails.orderItems.map((orderItems, index) => {
                                                 return (
-                                                    <div className='mb-4 pb-4 border-bottom d-flex flex-column flex-md-row justify-content-between'>
+                                                    <div key={orderItems._id || index} className='mb-4 pb-4 border-bottom d-flex flex-column flex-md-row justify-content-between'>
                                                         <div className="d-flex flex-column flex-sm-row ">
                                                             <div className='mb-4 rounded overflow-hidden me-2' style={{ width: "200px" }}>
                                                                 <img className="align-self-center img-fluid" src={orderItems.images.url} width="250" alt="product" />

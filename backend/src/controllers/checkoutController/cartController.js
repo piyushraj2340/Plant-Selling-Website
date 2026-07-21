@@ -1,66 +1,169 @@
-const cartModel = require('../../model/checkoutModel/cart');
+const Cart = require('../../model/checkoutModel/cart');
+const CartItem = require('../../model/checkoutModel/cartItem');
+const Plant = require('../../model/nurseryModel/plants');
+const Coupon = require('../../model/nurseryModel/coupon');
+const PromotionService = require('../../utils/promotionEngine');
+
+// --- Helper: Recalculate Cart Totals ---
+const recalculateCart = async (userId) => {
+    let cart = await Cart.findOne({ user: userId }).populate({
+        path: 'cartItems',
+        populate: { path: 'plant' }
+    });
+
+    if (!cart) {
+        cart = new Cart({ user: userId });
+        await cart.save();
+        return cart;
+    }
+
+    let totalPriceWithoutDiscount = 0;
+    let totalDiscount = 0;
+    let finalPrice = 0;
+
+    // Calculate base pricing
+    const itemsContext = [];
+    
+    for (const item of cart.cartItems) {
+        if (!item.plant) continue; // Skip if plant deleted
+
+        const price = item.plant.price * item.quantity;
+        const discountAmt = (item.plant.discount / 100) * price;
+        const priceAfterDiscount = price - discountAmt;
+
+        totalPriceWithoutDiscount += price;
+        totalDiscount += discountAmt;
+        finalPrice += priceAfterDiscount;
+
+        itemsContext.push({
+            product: {
+                _id: item.plant._id,
+                category: item.plant.category
+            },
+            price: (item.plant.price - (item.plant.discount / 100) * item.plant.price),
+            quantity: item.quantity
+        });
+    }
+
+    let deliveryFee = finalPrice < 500 ? 90 : 0;
+    
+    // Evaluate Coupon if applied
+    if (cart.couponApplied && cart.cartItems.length > 0) {
+        const cartContext = {
+            total: finalPrice,
+            items: itemsContext
+        };
+        
+        // Assume PromotionService applies the coupon correctly
+        const promoResult = await PromotionService.applyCoupon(cart.couponApplied.code || cart.couponApplied, cartContext, { _id: userId });
+        if (promoResult.success) {
+            totalDiscount += promoResult.discountAmount;
+            finalPrice = promoResult.newTotal;
+            if (promoResult.freeDelivery) {
+                deliveryFee = 0;
+            }
+        } else {
+            // Coupon invalid now, remove it
+            cart.couponApplied = null;
+        }
+    }
+
+    finalPrice += deliveryFee;
+
+    cart.pricing = {
+        totalPriceWithoutDiscount,
+        totalDiscount,
+        deliveryFee,
+        finalPrice
+    };
+
+    await cart.save();
+    return cart;
+};
+
+// --- Controllers ---
+
+const getFullyPopulatedCart = async (userId) => {
+    return await Cart.findOne({ user: userId })
+        .populate({
+            path: 'cartItems',
+            populate: [
+                { path: 'plant', select: '_id plantName price discount stock images category' },
+                { path: 'nursery', select: '_id nurseryName' }
+            ]
+        })
+        .populate('couponApplied');
+};
 
 exports.addToCart = async (req, res, next) => {
     try {
-        const { user, plant, quantity = 1 } = req.body;
+        const { plant, nursery, quantity = 1 } = req.body;
+        const userId = req.user._id;
 
-        // Check if item already exists in user's cart
-        let cartItem = await cartModel.findOne({ user, plant });
+        // 1. Get or Create Cart
+        let cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            cart = new Cart({ user: userId });
+            await cart.save();
+        }
+
+        // 2. Upsert Cart Item
+        let cartItem = await CartItem.findOne({ cart: cart._id, plant });
 
         if (cartItem) {
-            // If exists, increment quantity
             cartItem.quantity += parseInt(quantity);
             await cartItem.save();
         } else {
-            // Otherwise create new cart item
-            cartItem = new cartModel(req.body);
+            cartItem = new CartItem({
+                cart: cart._id,
+                user: userId,
+                plant,
+                nursery,
+                quantity: parseInt(quantity)
+            });
             await cartItem.save();
+            
+            // Add reference to cart
+            cart.cartItems.push(cartItem._id);
+            await cart.save();
         }
 
-        // Populate required fields
-        const result = await cartItem.populate(["plant", "nursery"]);
+        // 3. Recalculate
+        await recalculateCart(userId);
+        const fullCart = await getFullyPopulatedCart(userId);
 
-        const info = {
+        res.status(200).json({
             status: true,
             message: "Product added to cart",
-            result
-        };
-
-        res.status(200).send(info);
-
+            result: fullCart ? fullCart.cartItems : [],
+            cart: fullCart
+        });
     } catch (error) {
-        next(error); //! Pass the error to the global error middleware
+        next(error);
     }
 };
-
 
 exports.getCartItems = async (req, res, next) => {
     try {
-        const result = await cartModel.find({ user: req.user }).populate('nursery', '_id nurseryName').populate('plant', '_id plantName price discount stock images'); // todo: test this
+        // Ensure fresh calculation
+        await recalculateCart(req.user._id);
+        const fullCart = await getFullyPopulatedCart(req.user._id);
 
-        if (!result) {
-            const error = new Error("No Results Found");
-            error.statusCode = 404;
-            throw error;
-        }
-        const info = {
+        res.status(200).json({
             status: true,
-            message: "List of cart items.",
-            result
-        };
-
-        res.status(200).send(info);
-
+            message: "Cart retrieved successfully",
+            result: fullCart ? fullCart.cartItems : [],
+            cart: fullCart
+        });
     } catch (error) {
-        next(error); //! Pass the error to the global error middleware
+        next(error);
     }
 };
-
 
 exports.getCartItemById = async (req, res, next) => {
     try {
         const _id = req.params.id;
-        const result = await cartModel.findOne({ _id }).populate(["plant", "nursery"]); //todo: test this
+        const result = await CartItem.findOne({ _id }).populate(["plant", "nursery"]);
 
         if (!result) {
             const error = new Error("No Results Found");
@@ -68,67 +171,78 @@ exports.getCartItemById = async (req, res, next) => {
             throw error;
         }
 
-        const info = {
-            status: true,
-            message: "Cart with id retrieved successfully",
-            result
-        };
-        res.status(200).send(info);
-
+        res.status(200).json({ status: true, message: "Cart item retrieved", result });
     } catch (error) {
-        next(error); //! Pass the error to the global error middleware
+        next(error);
     }
 };
 
 exports.updateCartItemById = async (req, res, next) => {
     try {
-        const result = await cartModel.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('nursery', '_id nurseryName').populate('plant', '_id plantName price discount stock images');;
+        const { quantity } = req.body;
+        const cartItem = await CartItem.findById(req.params.id);
 
-        if (!result) {
+        if (!cartItem) {
             const error = new Error("No Results Found");
             error.statusCode = 404;
             throw error;
         }
 
-        const info = {
-            status: true,
-            message: "Cart Edited successfully",
-            result
-        };
-        res.status(200).send(info);
+        cartItem.quantity = quantity;
+        await cartItem.save();
 
+        // Recalculate parent cart
+        await recalculateCart(req.user._id);
+        const fullCart = await getFullyPopulatedCart(req.user._id);
+
+        res.status(200).json({ 
+            status: true, 
+            message: "Cart Updated successfully", 
+            result: fullCart ? fullCart.cartItems : [],
+            cart: fullCart
+        });
     } catch (error) {
-        next(error); //! Pass the error to the global error middleware
+        next(error);
     }
 };
 
 exports.deleteCartItemById = async (req, res, next) => {
     try {
-        const result = await cartModel.findByIdAndDelete(req.params.id);
+        const cartItem = await CartItem.findById(req.params.id);
 
-        if (!result) {
+        if (!cartItem) {
             const error = new Error("No Results Found");
             error.statusCode = 404;
             throw error;
         }
 
-        const info = {
-            status: true,
-            message: "Cart Deleted successfully",
-            result
-        };
-        res.status(200).send(info);
+        await CartItem.findByIdAndDelete(req.params.id);
 
+        // Remove from parent cart array
+        await Cart.updateOne(
+            { _id: cartItem.cart },
+            { $pull: { cartItems: cartItem._id } }
+        );
+
+        // Recalculate parent cart
+        await recalculateCart(req.user._id);
+        const fullCart = await getFullyPopulatedCart(req.user._id);
+
+        res.status(200).json({ 
+            status: true, 
+            message: "Item removed from cart",
+            result: fullCart ? fullCart.cartItems : [],
+            cart: fullCart
+        });
     } catch (error) {
-        next(error); //! Pass the error to the global error middleware
+        next(error);
     }
 };
-
 
 exports.isPlantAddedToCart = async (req, res, next) => {
     try {
         const plantId = req.params.plantId;
-        const result = await cartModel.findOne({ user: req.user, plant: plantId });
+        const result = await CartItem.findOne({ user: req.user._id, plant: plantId });
 
         if (!result) {
             const error = new Error("No Results Found");
@@ -136,22 +250,16 @@ exports.isPlantAddedToCart = async (req, res, next) => {
             throw error;
         }
 
-        const info = {
-            status: true,
-            message: "Product is in the cart.",
-            result
-        };
-        res.status(200).send(info);
-
+        res.status(200).json({ status: true, message: "Product is in the cart.", result });
     } catch (error) {
-        next(error); //! Pass the error to the global error middleware
+        next(error);
     }
 };
 
 exports.applyCoupon = async (req, res, next) => {
     try {
-        const PromotionService = require('../../utils/promotionEngine');
         const { couponCode } = req.body;
+
 
         if (!couponCode) {
             const error = new Error("Coupon code is required");
@@ -159,57 +267,39 @@ exports.applyCoupon = async (req, res, next) => {
             throw error;
         }
 
-        // 1. Fetch user's cart items
-        const cartItems = await cartModel.find({ user: req.user._id }).populate('plant', '_id category');
+        const cart = await Cart.findOne({ user: req.user._id }).populate({
+            path: 'cartItems',
+            populate: { path: 'plant' }
+        });
 
-        if (!cartItems || cartItems.length === 0) {
+        if (!cart || cart.cartItems.length === 0) {
             const error = new Error("Your cart is empty");
             error.statusCode = 400;
             throw error;
         }
 
-        // 2. Transform the raw cart docs into the CartContext format expected by the engine
-        let total = 0;
-        const items = cartItems.map(item => {
-            const itemTotal = item.pricing.priceAfterDiscount * item.quantity;
-            total += itemTotal;
-            
-            return {
-                product: {
-                    _id: item.plant._id,
-                    category: item.plant.category
-                },
-                price: item.pricing.priceAfterDiscount,
-                quantity: item.quantity
-            };
-        });
+        // Check if coupon exists
+        const coupon = await Coupon.findOne({ code: couponCode.toUpperCase(), status: 'Active' });
+        if (!coupon) {
+            return res.status(400).json({ status: false, message: "Invalid or inactive coupon code." });
+        }
 
-        const cartContext = {
-            total,
-            items
-        };
-
-        // 3. Delegate to the reusable Promotion Engine
-        const result = await PromotionService.applyCoupon(couponCode, cartContext, req.user);
-
-        if (!result.success) {
-            return res.status(400).json({
-                status: false,
-                message: result.message
-            });
+        // Apply it temporarily to calculate
+        cart.couponApplied = coupon._id;
+        await cart.save();
+        
+        const updatedCart = await recalculateCart(req.user._id);
+        
+        // If it got removed during recalculate, it means it wasn't applicable
+        if (!updatedCart.couponApplied) {
+            return res.status(400).json({ status: false, message: "Coupon is not applicable to these items." });
         }
 
         return res.status(200).json({
             status: true,
             message: "Coupon applied successfully!",
-            data: {
-                couponId: result.couponId,
-                discountAmount: result.discountAmount,
-                freeDelivery: result.freeDelivery,
-                newTotal: result.newTotal
-            }
+            data: updatedCart.pricing
         });
-
     } catch (error) {
         next(error);
     }
@@ -217,46 +307,34 @@ exports.applyCoupon = async (req, res, next) => {
 
 exports.getApplicableCoupons = async (req, res, next) => {
     try {
-        const PromotionService = require('../../utils/promotionEngine');
-        
-        // 1. Fetch user's cart items
-        const cartItems = await cartModel.find({ user: req.user }).populate('plant', '_id category');
+        const cart = await Cart.findOne({ user: req.user._id }).populate({
+            path: 'cartItems',
+            populate: { path: 'plant' }
+        });
 
-        if (!cartItems || cartItems.length === 0) {
+        if (!cart || cart.cartItems.length === 0) {
             return res.status(200).json({ status: true, coupons: [] });
         }
 
-        // 2. Transform the raw cart docs into the CartContext format
         let total = 0;
-        const items = cartItems.map(item => {
-            const itemTotal = item.pricing.priceAfterDiscount * item.quantity;
-            total += itemTotal;
-            
+        const items = cart.cartItems.map(item => {
+            const priceAfterDiscount = item.plant.price - (item.plant.discount / 100) * item.plant.price;
+            total += priceAfterDiscount * item.quantity;
             return {
-                product: {
-                    _id: item.plant._id,
-                    category: item.plant.category
-                },
-                price: item.pricing.priceAfterDiscount,
+                product: { _id: item.plant._id, category: item.plant.category },
+                price: priceAfterDiscount,
                 quantity: item.quantity
             };
         });
 
         const cartContext = { total, items };
-
-        // 3. Delegate to Promotion Engine
         const result = await PromotionService.getApplicableCoupons(cartContext, req.user);
 
         if (!result.success) {
             return res.status(400).json({ status: false, message: result.message });
         }
 
-        return res.status(200).json({
-            status: true,
-            message: "Applicable coupons retrieved successfully",
-            coupons: result.coupons
-        });
-
+        res.status(200).json({ status: true, message: "Coupons retrieved", coupons: result.coupons });
     } catch (error) {
         next(error);
     }

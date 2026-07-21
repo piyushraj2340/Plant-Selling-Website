@@ -43,7 +43,7 @@ const ProfileOrder = () => {
                 }
 
                 {
-                    lastOrder ?
+                    lastOrder?.orderItems ?
                         lastOrder.orderItems.map(items => {
 
                             return (
@@ -54,7 +54,7 @@ const ProfileOrder = () => {
                                                 <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
                                                 <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
                                                 <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({lastOrder.payment.paymentMethods}) </span></h4>
-                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(items.orderStatus.statusAt)}</span></p>
+                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(lastOrder.orderStatus.statusAt)}</span></p>
                                             </div>
                                             <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
                                                 <img className="align-self-center img-fluid" src={items.images.url} width="250" alt="product" />

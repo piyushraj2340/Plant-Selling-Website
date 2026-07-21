@@ -112,10 +112,6 @@ const Categories = () => {
         },
     ];
 
-    // Build tree data for select if we want hierarchical dropdown (simplified for now)
-    const categoryOptions = categories.map(cat => (
-        <Option key={cat._id} value={cat._id}>{cat.name}</Option>
-    ));
 
     return (
         <div className='p-4 bg-white rounded shadow-sm'>

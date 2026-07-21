@@ -33,7 +33,7 @@ const Order = () => {
         }
 
         dispatch(getOrderHistoryAsync(data));
-    }, [])
+    }, [orderPage, orderFilterByDate, orderSearch, dispatch])
 
     const itemRender = (_, type, originalElement) => {
         if (type === 'prev') {
@@ -46,25 +46,18 @@ const Order = () => {
     };
 
     const handelChangeOrderPage = (page) => {
-        const data = {
-            page: orderPage,
-            limit: 10,
-            endDate: orderFilterByDate,
-            orderSearch
-        }
         window.scrollTo(0, 0);
         setOrderPage(page);
-        dispatch(getOrderHistoryAsync(data));
 
         if (orderSearch) {
             navigate(`/orders/history/?page=${page}&orderSearch=${orderSearch}`);
         } else {
             navigate(`/orders/history/?page=${page}`);
         }
-
     }
 
     const handelFilterOrderHistoryByDate = (e) => {
+        setOrderPage(1); // Reset to first page when filtering
         switch (e.target.value) {
             case 'last6Months':
                 setOrderFilterByDate(Date.now() - (6 * 30 * 24 * 60 * 60 * 1000));
@@ -74,6 +67,9 @@ const Order = () => {
                 break;
             case 'last2Years':
                 setOrderFilterByDate(Date.now() - (2 * 365 * 24 * 60 * 60 * 1000));
+                break;
+            case 'allTime':
+                setOrderFilterByDate(0); // 0 corresponds to beginning of unix time (all time)
                 break;
             default:
                 // Default case: Retrieve data for the last 3 months
@@ -161,8 +157,9 @@ const Order = () => {
                         <select name="filter-order" id="filter-order" className='p-1' onChange={(e) => handelFilterOrderHistoryByDate(e)}>
                             <option value="last3Months">Last 3 months</option>
                             <option value="last6Months">Last 6 months</option>
-                            <option value="last1Year">Last 1 Years</option>
-                            <option value="last2Year">Last 2 Years</option>
+                            <option value="last1Year">Last 1 Year</option>
+                            <option value="last2Years">Last 2 Years</option>
+                            <option value="allTime">All Time</option>
                         </select>
                     </div>
                 </div>
@@ -184,7 +181,7 @@ const Order = () => {
                                     </div>
                                     <div className="card-body p-3 p-md-4 mb-3">
                                         {
-                                            order.orderItems.map(items => {
+                                            order.orderItems && order.orderItems.map(items => {
 
                                                 const stepsOptions = [
                                                     {
@@ -195,20 +192,20 @@ const Order = () => {
                                                     {
                                                         title: 'Order Shipped',
                                                         icon: <span className='	fas fa-shipping-fast'></span>,
-                                                        description: items.orderStatus.state === "shipped" && <span className='text-muted'>{formatTimestamp(items.orderStatus.statusAt)} <br /> {items.orderStatus.message}</span>
+                                                        description: order.orderStatus.state === "shipped" && <span className='text-muted'>{formatTimestamp(order.orderStatus.statusAt)} <br /> {order.orderStatus.message}</span>
                                                     },
                                                     {
                                                         title: 'Order Delivered',
                                                         icon: <span className='fas fa-home'></span>,
-                                                        description: items.orderStatus.state === "delivered" && <span className='text-muted'>{formatTimestamp(items.orderStatus.statusAt)} <br /> {items.orderStatus.message}</span>
+                                                        description: order.orderStatus.state === "delivered" && <span className='text-muted'>{formatTimestamp(order.orderStatus.statusAt)} <br /> {order.orderStatus.message}</span>
                                                     },
                                                 ]
 
                                                 let activeStep = 0;
 
-                                                if (items.orderStatus.status === 'delivered') {
+                                                if (order.orderStatus.status === 'delivered') {
                                                     activeStep = 2;
-                                                } else if (items.orderStatus.status === 'shipped') {
+                                                } else if (order.orderStatus.status === 'shipped') {
                                                     activeStep = 1;
                                                 } else {
                                                     activeStep = 0;
@@ -221,7 +218,7 @@ const Order = () => {
                                                                 <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
                                                                 <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
                                                                 <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({order.payment.paymentMethods}) </span></h4>
-                                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(items.orderStatus.statusAt)}</span></p>
+                                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(order.orderStatus.statusAt)}</span></p>
                                                             </div>
                                                             <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
                                                                 <img className="align-self-center img-fluid" src={items.images.url} width="250" alt="product" />

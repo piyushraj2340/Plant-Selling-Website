@@ -33,7 +33,7 @@ function SideMenu({ openSlider, setOpenSlider }) {
                             <div className="nav-item m-2" key={item.path}>
                                 <Link to={item.path} className='text-decoration-none hover-side-nav-link'>
                                     <div className={`nav-link py-2 rounded px-3 ${isActive ? 'bg-white text-black fw-bold active-drop-shadow' : 'bg-transparent text-white fw-lighter'}`}>
-                                        <i className={`fas ${item.icon} text-center`} style={{ width: '20px' }}></i>
+                                        <i className={`fas fa ${item.icon} text-center`} style={{ width: '20px' }}></i>
                                         {(openSlider || window.innerWidth > 992) && <span className="item ms-2">{item.label}</span>}
                                     </div>
                                 </Link>
