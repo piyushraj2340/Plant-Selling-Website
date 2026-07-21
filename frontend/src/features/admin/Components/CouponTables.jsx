@@ -22,7 +22,7 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const dataSource = couponsData.coupons.map(coupon => ({
         key: coupon._id,
         _id: coupon._id,
-        couponName: coupon.code,
+        code: coupon.code,
         description: {
             overview: coupon.description,
             termsAndConditions: [
@@ -35,7 +35,7 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
         },
         discount: coupon.discount.type === 'Percentage' ? `${coupon.discount.value}%` : `₹${coupon.discount.value}`,
         createdAt: new Date(coupon.createdAt).toLocaleDateString(),
-        redeemBefore: new Date(coupon.rules.validUntil).toLocaleDateString(),
+        'rules.validUntil': new Date(coupon.rules.validUntil).toLocaleDateString(),
         redemptionLimit: coupon.usage.maxUsageCount ? `${coupon.usage.currentUsageCount}/${coupon.usage.maxUsageCount}` : 'Unlimited',
         status: coupon.status
     }));
@@ -43,8 +43,9 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const columns = [
         {
             title: 'Coupon Name',
-            dataIndex: 'couponName',
-            key: 'couponName',
+            dataIndex: 'code',
+            key: 'code',
+            sorter: true,
         },
         {
             title: 'Description',
@@ -67,11 +68,13 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
             title: "Created At",
             dataIndex: 'createdAt',
             key: 'createdAt',
+            sorter: true,
         },
         {
             title: 'Redeem Before',
-            dataIndex: 'redeemBefore',
-            key: 'redeemBefore',
+            dataIndex: 'rules.validUntil',
+            key: 'rules.validUntil',
+            sorter: true,
         },
         {
             title: 'Redemption Limit',
@@ -82,6 +85,12 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
             title: 'Action',
             dataIndex: 'status',
             key: 'status',
+            sorter: true,
+            filters: [
+                { text: 'Active', value: 'Active' },
+                { text: 'Expired', value: 'Expired' },
+                { text: 'Disabled', value: 'Disabled' }
+            ],
             render: (status, record) => {
                 return (
                     <>
@@ -127,9 +136,10 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
                     {/* Title can go here if needed */}
                 </Col>
                 <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-                    <Input.Search
+                    <Input
                         placeholder="Search coupons..."
                         allowClear
+                        prefix={<span role="img" aria-label="search">🔍</span>}
                         value={localSearch}
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}

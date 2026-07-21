@@ -7,7 +7,8 @@ exports.getAllCategories = async (req, res, next) => {
         const query = buildSearchQuery(search, ['name', 'slug', 'description']);
         
         if (req.query.status && req.query.status !== 'All') {
-            query.status = req.query.status;
+            const statuses = req.query.status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+            query.status = { $in: statuses };
         }
 
         const total = await Category.countDocuments(query);

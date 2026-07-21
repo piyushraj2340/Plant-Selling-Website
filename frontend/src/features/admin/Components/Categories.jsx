@@ -75,11 +75,13 @@ const Categories = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
+            sorter: true,
         },
         {
             title: 'Slug',
             dataIndex: 'slug',
             key: 'slug',
+            sorter: true,
         },
         {
             title: 'Parent',
@@ -91,6 +93,12 @@ const Categories = () => {
             title: 'Status',
             dataIndex: 'status',
             key: 'status',
+            sorter: true,
+            filters: [
+                { text: 'Active', value: 'Active' },
+                { text: 'Pending', value: 'Pending' },
+                { text: 'Disabled', value: 'Disabled' }
+            ],
             render: (status) => (
                 <Tag color={status === 'Active' ? 'green' : 'orange'}>
                     {status}
@@ -119,9 +127,10 @@ const Categories = () => {
                     </Button>
                 </Col>
                 <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-                    <Input.Search
+                    <Input
                         placeholder="Search categories..."
                         allowClear
+                        prefix={<span role="img" aria-label="search">🔍</span>}
                         value={localSearch}
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}
