@@ -1045,6 +1045,11 @@ const adminController = {
             
             const query = buildSearchQuery(search, ['code', 'description']);
             
+            if (req.query.status) {
+                const statuses = req.query.status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query.status = { $in: statuses };
+            }
+            
             const total = await Coupon.countDocuments(query);
             const coupons = await Coupon.find(query)
                 .populate('createdBy', 'name')
