@@ -17,6 +17,7 @@ function Cart() {
   const cartPriceDetails = useSelector(state => state.cart.cartPriceDetails);
   const appliedCoupon = useSelector(state => state.cart.appliedCoupon);
   const applicableCoupons = useSelector(state => state.cart.applicableCoupons);
+  const priceWarnings = useSelector(state => state.cart.priceWarnings);
 
   const dispatch = useDispatch();
 
@@ -54,11 +55,28 @@ function Cart() {
   }
 
   const handleDeleteFromCart = async (cartId) => {
-    dispatch(cartDataDeleteAsync(cartId));
+    dispatch(cartDataDeleteAsync(cartId)).then(() => {
+        dispatch(cartGetApplicableCouponsAsync());
+    });
   }
 
   const handleUpdateCart = async (cartId, quantity) => {
-    dispatch(cartDataUpdateQuantityAsync({ cartId, quantity }))
+    dispatch(cartDataUpdateQuantityAsync({ cartId, quantity })).then(() => {
+        dispatch(cartGetApplicableCouponsAsync());
+    });
+  }
+  
+  const handleApplyCoupon = (code) => {
+    if (!code) return;
+    dispatch(cartApplyCouponAsync(code)).then((res) => {
+        if (res.payload && res.payload.status) {
+            message.success(res.payload.message || "Coupon applied successfully!");
+        } else if (res.payload && !res.payload.status) {
+            message.error(res.payload.message || "Invalid or inapplicable coupon code.");
+        } else if (res.error) {
+            message.error("Failed to apply coupon.");
+        }
+    });
   }
 
   const handelBuyProduct = async () => {
@@ -88,6 +106,16 @@ function Cart() {
             <h3 className="h3 mb-0">Shopping Cart</h3>
             <p className='text-muted small'><i>{(cart ?? 0) && Number(cart.length)} items in cart.</i></p>
           </div>
+          {priceWarnings && priceWarnings.length > 0 && (
+            <div className="p-3 pb-0">
+              {priceWarnings.map((warning, idx) => (
+                <div key={idx} className={`alert ${warning.type === 'increase' ? 'alert-warning' : 'alert-success'} mb-2 p-2`} role="alert">
+                  <i className={`fas ${warning.type === 'increase' ? 'fa-exclamation-triangle' : 'fa-check-circle'} me-2`}></i>
+                  {warning.message}
+                </div>
+              ))}
+            </div>
+          )}
           <div className="s-cart-items row m-0 p-0">
             <div className="m-0 p-0 col-md-8">
               {
@@ -189,7 +217,7 @@ function Cart() {
 
               }
               <div className="d-flex flex-row-reverse p-3">
-                <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)}</b></p>
+                <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee).toFixed(2)}</b></p>
               </div>
             </div>
             <div className="m-0 p-0 col-md-4 summary">
@@ -200,7 +228,7 @@ function Cart() {
                 <div className="row">
                   <p className="d-flex justify-content-between">
                     <small>ITEMS {(cart ?? 0) && Number(cart.length)}</small>
-                    <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)}</b></span>
+                    <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee).toFixed(2)}</b></span>
                   </p>
                   <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }} style={{cursor: 'pointer'}}>
                     <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : "Select delivery location"}</small>
@@ -219,7 +247,7 @@ function Cart() {
                       <div className="mt-1">
                         <div className="input-group">
                           <input style={{ width: "70%" }} type="text" className='form-control' name="coupon" id="coupon" value={couponInput} onChange={(e) => setCouponInput(e.target.value)} placeholder="Enter code" />
-                          <button style={{ width: "30%" }} className='form-control btn btn-info' onClick={() => { if(couponInput) dispatch(cartApplyCouponAsync(couponInput)) }}>Apply</button>
+                          <button style={{ width: "30%" }} className='form-control btn btn-info' onClick={() => handleApplyCoupon(couponInput)}>Apply</button>
                         </div>
                         {applicableCoupons && applicableCoupons.length > 0 && (
                           <div className="mt-3">
@@ -237,7 +265,7 @@ function Cart() {
                                     className={`btn btn-sm ${coupon.isApplicable ? 'btn-outline-info' : 'btn-outline-secondary'}`} 
                                     style={{fontSize: '0.7rem'}} 
                                     disabled={!coupon.isApplicable}
-                                    onClick={() => { setCouponInput(coupon.code); dispatch(cartApplyCouponAsync(coupon.code)); }}
+                                    onClick={() => { setCouponInput(coupon.code); handleApplyCoupon(coupon.code); }}
                                 >
                                     Apply
                                 </button>
@@ -266,25 +294,25 @@ function Cart() {
                   <div className="row border-bottom pb-2">
                     <p className="text-muted d-flex justify-content-between">
                       <small>Total : </small>
-                      <span>₹<b>{cartPriceDetails && cartPriceDetails.totalPriceWithoutDiscount}</b></span>
+                      <span>₹<b>{cartPriceDetails && cartPriceDetails.totalPriceWithoutDiscount.toFixed(2)}</b></span>
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Discount : </small>
-                      <span>- ₹<b>{cartPriceDetails && cartPriceDetails.totalDiscount}</b></span>
+                      <span>- ₹<b>{cartPriceDetails && cartPriceDetails.totalDiscount.toFixed(2)}</b></span>
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Delivery : </small>
                       { appliedCoupon?.freeDelivery || (cartPriceDetails && cartPriceDetails.deliveryFee === 0) ? 
-                        <span><del className="text-muted">₹90</del> <b className="text-success">FREE</b></span>
-                      : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryFee}</b></span> }
+                        <span><del className="text-muted">₹90.00</del> <b className="text-success">FREE</b></span>
+                      : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryFee.toFixed(2)}</b></span> }
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Subtotal : </small>
-                      <span>₹<b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee)}</b></span>
+                      <span>₹<b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee).toFixed(2)}</b></span>
                     </p>
                   </div>
                   <div className="d-flex flex-row-reverse p-3">
-                    <p className="h5">Total: <sup>₹</sup>{cartPriceDetails && cartPriceDetails.finalPrice}</p>
+                    <p className="h5">Total: <sup>₹</sup>{cartPriceDetails && cartPriceDetails.finalPrice.toFixed(2)}</p>
                   </div>
                   <div className="row m-0">
                     <button onClick={handelBuyProduct} className="btn btn-success">Checkout</button>

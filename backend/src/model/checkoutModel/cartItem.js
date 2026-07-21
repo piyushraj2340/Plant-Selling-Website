@@ -32,6 +32,10 @@ const cartItemSchema = new mongoose.Schema({
             if (quantity < 1) throw new Error("Cart should not be less than 1.");
         }
     },
+    addedAtPrice: {
+        type: Number,
+        default: 0
+    },
     addedAt: {
         type: Date,
         default: Date.now,

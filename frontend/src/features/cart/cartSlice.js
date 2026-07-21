@@ -9,6 +9,7 @@ const initialState = {
     cartPriceDetails: null,
     cartLength: 0,
     appliedCoupon: null,
+    priceWarnings: [],
     applicableCoupons: [],
     error: null,
     isLoading: false
@@ -88,8 +89,17 @@ export const cartSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 state.carts = action.payload.result;
-                if (action.payload.cart && action.payload.cart.pricing) {
-                    state.cartPriceDetails = action.payload.cart.pricing;
+                if (action.payload.cart) {
+                    if (action.payload.cart.pricing) state.cartPriceDetails = action.payload.cart.pricing;
+                    if (action.payload.cart.couponApplied) {
+                        state.appliedCoupon = { 
+                            ...action.payload.cart.couponApplied, 
+                            discountAmount: action.payload.cart.pricing.couponDiscountAmount 
+                        };
+                    } else if (action.payload.cart.couponApplied === null) {
+                        state.appliedCoupon = null;
+                    }
+                    if (action.payload.cart.priceWarnings) state.priceWarnings = action.payload.cart.priceWarnings;
                 }
                 state.cartLength = state.carts.length;
             })
@@ -105,8 +115,17 @@ export const cartSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 state.carts = action.payload.result;
-                if (action.payload.cart && action.payload.cart.pricing) {
-                    state.cartPriceDetails = action.payload.cart.pricing;
+                if (action.payload.cart) {
+                    if (action.payload.cart.pricing) state.cartPriceDetails = action.payload.cart.pricing;
+                    if (action.payload.cart.couponApplied) {
+                        state.appliedCoupon = { 
+                            ...action.payload.cart.couponApplied, 
+                            discountAmount: action.payload.cart.pricing.couponDiscountAmount 
+                        };
+                    } else if (action.payload.cart.couponApplied === null) {
+                        state.appliedCoupon = null;
+                    }
+                    if (action.payload.cart.priceWarnings) state.priceWarnings = action.payload.cart.priceWarnings;
                 }
                 state.cartLength = state.carts.length;
             })
@@ -122,8 +141,17 @@ export const cartSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 state.carts = action.payload.result;
-                if (action.payload.cart && action.payload.cart.pricing) {
-                    state.cartPriceDetails = action.payload.cart.pricing;
+                if (action.payload.cart) {
+                    if (action.payload.cart.pricing) state.cartPriceDetails = action.payload.cart.pricing;
+                    if (action.payload.cart.couponApplied) {
+                        state.appliedCoupon = { 
+                            ...action.payload.cart.couponApplied, 
+                            discountAmount: action.payload.cart.pricing.couponDiscountAmount 
+                        };
+                    } else if (action.payload.cart.couponApplied === null) {
+                        state.appliedCoupon = null;
+                    }
+                    if (action.payload.cart.priceWarnings) state.priceWarnings = action.payload.cart.priceWarnings;
                 }
                 state.cartLength = state.carts.length;
             })
@@ -139,8 +167,17 @@ export const cartSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 state.carts = action.payload.result;
-                if (action.payload.cart && action.payload.cart.pricing) {
-                    state.cartPriceDetails = action.payload.cart.pricing;
+                if (action.payload.cart) {
+                    if (action.payload.cart.pricing) state.cartPriceDetails = action.payload.cart.pricing;
+                    if (action.payload.cart.couponApplied) {
+                        state.appliedCoupon = { 
+                            ...action.payload.cart.couponApplied, 
+                            discountAmount: action.payload.cart.pricing.couponDiscountAmount 
+                        };
+                    } else if (action.payload.cart.couponApplied === null) {
+                        state.appliedCoupon = null;
+                    }
+                    if (action.payload.cart.priceWarnings) state.priceWarnings = action.payload.cart.priceWarnings;
                 }
                 state.cartLength = state.carts.length;
             })
@@ -156,7 +193,18 @@ export const cartSlice = createSlice({
                 state.error = null;
                 state.isLoading = false;
                 if (action.payload.status) {
-                    state.appliedCoupon = action.payload.data;
+                    if (action.payload.cart) {
+                        if (action.payload.cart.pricing) state.cartPriceDetails = action.payload.cart.pricing;
+                        if (action.payload.cart.couponApplied) {
+                            state.appliedCoupon = { 
+                                ...action.payload.cart.couponApplied, 
+                                discountAmount: action.payload.cart.pricing.couponDiscountAmount 
+                            };
+                        } else if (action.payload.cart.couponApplied === null) {
+                            state.appliedCoupon = null;
+                        }
+                        if (action.payload.cart.priceWarnings) state.priceWarnings = action.payload.cart.priceWarnings;
+                    }
                 }
             })
             .addCase(cartApplyCouponAsync.rejected, (state, action) => {
