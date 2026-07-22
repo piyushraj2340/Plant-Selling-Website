@@ -7,6 +7,7 @@ const ContactUs = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
+        category: 'General Inquiry',
         message: '',
     });
 
@@ -35,7 +36,7 @@ const ContactUs = () => {
 
             if (response.ok) {
                 setStatus('Message sent successfully!');
-                setFormData({ name: '', email: '', message: '' }); // Reset the form
+                setFormData({ name: '', email: '', category: 'General Inquiry', message: '' }); // Reset the form
             } else {
                 const errorData = await response.json();
                 setStatus(`Error: ${errorData.message || 'Failed to send message'}`);
@@ -99,6 +100,23 @@ const ContactUs = () => {
                                     value={formData.email}
                                     onChange={handleChange}
                                 />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="category" className="form-label">
+                                    Category
+                                </label>
+                                <select
+                                    className="form-select"
+                                    id="category"
+                                    value={formData.category}
+                                    onChange={handleChange}
+                                >
+                                    <option value="General Inquiry">General Inquiry</option>
+                                    <option value="Order Support">Order Support</option>
+                                    <option value="Technical Issue">Technical Issue</option>
+                                    <option value="Partnership">Partnership</option>
+                                    <option value="Other">Other</option>
+                                </select>
                             </div>
                             <div className="mb-3">
                                 <label htmlFor="message" className="form-label">

@@ -45,7 +45,8 @@ const plantsSchema = new mongoose.Schema({
         }
     },
     category: {
-        type: String,
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Category",
         required: [true, "Category is required."]
     },
     description: {
@@ -90,6 +91,19 @@ const plantsSchema = new mongoose.Schema({
         type: Date,
         default: Date.now,
         required: [true, "Plant added at is required."]
+    },
+    status: {
+        type: String,
+        enum: ['Published', 'Draft', 'On Hold'],
+        default: 'Draft'
+    },
+    ratings: {
+        type: Number,
+        default: 0
+    },
+    numOfReviews: {
+        type: Number,
+        default: 0
     }
 });
 

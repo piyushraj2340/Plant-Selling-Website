@@ -10,7 +10,7 @@ const plantModel = require('../../model/nurseryModel/plants');
 const nurseryModel = require('../../model/nurseryModel/nursery');
 const addressModel = require('../../model/userModel/address');
 const cartModel = require('../../model/checkoutModel/cart');
-const { getData, deleteData } = require('../../utils/redisVercelKv');
+const { getData, deleteData } = require('../../utils/redisService');
 const orderModel = require('../../model/checkoutModel/orders');
 const nurseryStoreContact = require('../../model/nurseryModel/nurseryStoreContact');
 

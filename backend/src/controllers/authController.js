@@ -1,9 +1,9 @@
 const userModel = require('../model/userModel/user');
 const bcryptjs = require('bcryptjs');
 const { generateUniqueLinkWithToken, generateToken, generateSecureOTP } = require('../utils/generateToken');
-const { setData, deleteData, getData } = require('../utils/redisVercelKv');
 const { confirmAccountSendEmail, resetPasswordSendEmail, sendOTP } = require('./smtp/emailController');
 const jwt = require('jsonwebtoken');
+const { setData, getData, deleteData } = require('../utils/redisService');
 const { decryptMessage } = require('../utils/cryptoUtil');
 const user = require('../model/userModel/user');
 const validator = require('validator');
@@ -144,41 +144,28 @@ exports.signIn = async (req, res, next) => {
         //* Generate Auth Token
         const token = await result.generateAuthToken();
 
-        const { encryptedMessage, iv } = token.refreshToken;
+        const { refreshToken, accessToken } = token;
 
-        if (!encryptedMessage || !iv) {
+        if (!refreshToken) {
             const error = new Error("Failed to generate refresh token");
             error.statusCode = 500;
             throw error;
         }
-
-        //* Save the IV in redis database with expire time 7.
-        await setData('authentication', encryptedMessage, 'refreshToken', { iv }, 604800); // 7d = 7 * 24 * 60 * 60
 
         //* extracting data from result
         const userInfo = { ...result._doc };
 
         //! deleting the confidential data  before sending
         delete userInfo.password;
-        delete userInfo.tokens;
         delete userInfo.__v;
-
-        //* setting the cookie into the browser 
-        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
-        // res.cookie('auth', token, {
-        //     expires: new Date(Date.now() + 50000000),
-        //     httpOnly: true,
-        //     secure: true,
-        //     sameSite: 'none'
-        // });
 
         const info = {
             status: true,
             message: "Login Successful",
             result: userInfo,
             token: {
-                accessToken: token.accessToken,
-                refreshToken: encryptedMessage
+                accessToken: accessToken,
+                refreshToken: refreshToken
             }
         }
 
@@ -191,34 +178,19 @@ exports.signIn = async (req, res, next) => {
 //* GET Routes
 exports.logout = async (req, res, next) => {
     try {
-        const result = await userModel.findByIdAndUpdate(req.user, {
-            $pull: {
-                tokens: {
-                    token: req.token //? Remove the refresh token so that it get invalid after that...
-                }
+        const { refreshToken } = req.body;
+        
+        if (refreshToken) {
+            const tokenData = await getData("auth", refreshToken, "refreshToken");
+            if (tokenData) {
+                // Mark token as revoked
+                tokenData.revoked = true;
+                await setData("auth", refreshToken, "refreshToken", tokenData, 604800);
+                
+                // Optionally blacklist the family
+                await setData("authBlacklist", tokenData.familyId, "familyId", true, 604800);
             }
-        });
-
-        //! if the user not found 
-        if (!result) {
-            const error = new Error("Logout failed");
-            error.statusCode = 400;
-            throw error;
         }
-
-        //* remove the auth session cookie
-        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
-        // res.clearCookie('auth', {
-        //     sameSite: 'none',
-        //     secure: true
-        // });
-
-        //* remove the order auth session
-        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
-        // res.clearCookie('orderSession', {
-        //     sameSite: 'none',
-        //     secure: true
-        // });
 
         const info = {
             status: true,
@@ -316,33 +288,32 @@ exports.refreshToken = async (req, res, next) => {
             throw error;
         }
 
-        const getIv = await getData("authentication", refreshToken, "refreshToken");
+        const tokenData = await getData("auth", refreshToken, "refreshToken");
 
-        if (!getIv) {
+        if (!tokenData) {
             const error = new Error("Authentication failed!");
             error.statusCode = 403;
             throw error;
         }
 
-        const decryptedToken = decryptMessage(refreshToken, getIv.iv);
-
-        await deleteData("authentication", refreshToken, "refreshToken");
-
-        if (!decryptedToken) {
+        // Check for Replay Attack
+        if (tokenData.revoked) {
+            // Replay attack detected! Blacklist the entire family.
+            await setData("authBlacklist", tokenData.familyId, "familyId", true, 604800);
             const error = new Error("Authentication failed!");
             error.statusCode = 403;
             throw error;
         }
 
-        const verifyUser = jwt.verify(decryptedToken, process.env.REFRESH_SECRET_KEY);
-
-        if (!verifyUser) {
+        // Check if family is blacklisted
+        const isFamilyBlacklisted = await getData("authBlacklist", tokenData.familyId, "familyId");
+        if (isFamilyBlacklisted) {
             const error = new Error("Authentication failed!");
             error.statusCode = 403;
             throw error;
         }
 
-        const user = await userModel.findOne({ _id: verifyUser._id }).select({ tokens: 1 });
+        const user = await userModel.findOne({ _id: tokenData.userId });
 
         if (!user) {
             const error = new Error("Authentication failed!");
@@ -350,37 +321,33 @@ exports.refreshToken = async (req, res, next) => {
             throw error;
         }
 
+        // Mark the current token as revoked
+        tokenData.revoked = true;
+        await setData("auth", refreshToken, "refreshToken", tokenData, 604800);
 
-        //* Match the token with the database...
-        if (!user.tokens.some(t => t.token === decryptedToken)) {
-            const error = new Error("Authentication failed!");
-            error.statusCode = 403;
-            throw error;
-        }
-
-        user.tokens = user.tokens.filter(t => t.token !== decryptedToken);
-
-
-        //* Generate Auth Token
+        // Generate Auth Token (creates new RT and AT)
         const token = await user.generateAuthToken();
 
-        const { encryptedMessage, iv } = token.refreshToken;
-
-        await setData("authentication", encryptedMessage, "refreshToken", { iv }, 604800); // 7d = 7 * 24 * 60 * 60
+        // Update the new token's familyId to match the existing family
+        const newTokenData = await getData("auth", token.refreshToken, "refreshToken");
+        if (newTokenData) {
+            newTokenData.familyId = tokenData.familyId;
+            await setData("auth", token.refreshToken, "refreshToken", newTokenData, 604800);
+        }
 
         const info = {
             status: true,
             message: "New Token Generated!",
             token: {
                 accessToken: token.accessToken,
-                refreshToken: encryptedMessage
+                refreshToken: token.refreshToken
             }
         }
 
         return res.status(200).send(info);
 
     } catch (error) {
-        next(error); //! Pass the error to the
+        next(error); //! Pass the error to the global error middleware
     }
 }
 
@@ -451,24 +418,21 @@ exports.validateOtp = async (req, res, next) => {
         //* Generate Auth Token
         const authToken = await user.generateAuthToken();
 
-        const { encryptedMessage, iv } = authToken.refreshToken;
+        const { refreshToken, accessToken } = authToken;
 
-        if (!encryptedMessage || !iv) {
+        if (!refreshToken) {
             const error = new Error("Failed to generate refresh token");
             error.statusCode = 500;
             throw error;
         }
-
-        //* Save the IV in redis database with expire time 7.
-        await setData('authentication', encryptedMessage, 'refreshToken', { iv }, 604800); // 7d = 7 * 24 * 60 * 60
 
         const info = {
             status: true,
             message: "Verification Completed successfully",
             result: userInfo,
             token: {
-                accessToken: authToken.accessToken,
-                refreshToken: encryptedMessage
+                accessToken: accessToken,
+                refreshToken: refreshToken
             }
         }
 

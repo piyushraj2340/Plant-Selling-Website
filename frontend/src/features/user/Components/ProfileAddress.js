@@ -43,7 +43,7 @@ const ProfileAddress = () => {
                 <div className="card-footer">
                     <div className="d-flex justify-content-around">
                         <p className="mt-3 d-flex justify-content-center">
-                            <Link to={'/address/new'} className='btn btn-light'><i className="fas fa-plus"></i> Add Address</Link>
+                            <Link to={'/address/add'} className='btn btn-light'><i className="fas fa-plus"></i> Add Address</Link>
                         </p>
                         <p className="mt-3 d-flex justify-content-center">
                             <Link to={'/address'} className='btn btn-light'><i className="fas fa-angle-double-right"></i> View More</Link>

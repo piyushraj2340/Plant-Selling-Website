@@ -15,7 +15,7 @@ app.use(cookieParser());
 app.use(cors(
     {
         origin: process.env.FRONTEND_URL,
-        methods: ['GET', 'POST', 'PATCH', 'DELETE'],
+        methods: ['GET', 'POST', 'PATCH', 'DELETE', 'PUT'],
         credentials: true
     }
 ));
@@ -46,6 +46,7 @@ const payment = require("./src/router/checkoutRoute/payment");
 const contactUs = require("./src/router/contact");
 const nurseryPublicStore = require('./src/router/nurseryRoute/nurseryPublicStore');
 const subscriberEmail = require("./src/router/subscriberEmail");
+const adminRoute = require("./src/router/adminRoute/adminRouter");
 
 // route middleware
 
@@ -54,8 +55,11 @@ app.use('/api/v2/auth', authRoute);
 app.use('/api/v2/user', user, cart, orderRoute, address);
 app.use("/api/v2/nursery", nurseryRoute, nurseryStoreRoute, plantsRoute);
 app.use("/api/v2/checkout", payment);
+app.use("/api/v2/admin", adminRoute);
 
 // public routes
+const categoryRoute = require("./src/router/categoryRoute");
+app.use("/api/v2/categories", categoryRoute);
 app.use("/api/v2/products", products);
 app.use("/api/v2", contactUs);
 app.use("/api/v2/public/nursery", nurseryPublicStore);

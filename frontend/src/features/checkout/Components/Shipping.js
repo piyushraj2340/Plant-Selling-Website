@@ -89,7 +89,7 @@ const Shipping = () => {
                 </div>
                 <div className="d-flex flex-column justify-content-start align-items-start">
                     <div className='p-2 p-md-3 w-100'>
-                        <Link to={`/address/new/?redirect=/checkout/shipping`} className="btn btn-success btn-lg w-100">Add New Address</Link>
+                        <Link to={`/address/add/?redirect=/checkout/shipping`} className="btn btn-success btn-lg w-100">Add New Address</Link>
                     </div>
                     <h3 className="h3 p-2 p-md-3">List of all the address.</h3>
                     {
@@ -118,7 +118,7 @@ const Shipping = () => {
                             <div className="row">
                                 <div className="d-flex d-flex flex-column align-items-center">
                                     <h3 className="h3" style={{ fontFamily: "cursive" }}>No Address Found</h3>
-                                    <Link to={`/address/new/?redirect=/checkout/shipping`} className='btn btn-primary'><i className="fas fa-arrow-right"></i> Add New Address</Link>
+                                    <Link to={`/address/add/?redirect=/checkout/shipping`} className='btn btn-primary'><i className="fas fa-arrow-right"></i> Add New Address</Link>
                                 </div>
                             </div>
                         </div>

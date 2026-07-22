@@ -1,0 +1,83 @@
+.admin-panel {
+  @import "~bootstrap/scss/bootstrap";
+
+  // Scoped global-like resets
+  &, * {
+    box-sizing: border-box;
+    font-family: sans-serif;
+  }
+
+  .material-symbols-outlined {
+    font-variation-settings:
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 20;
+  }
+
+
+  .slider-open {
+      position: fixed;
+      z-index: 10;
+      /* transform: translateX(-25%); */
+      animation: slider-open 0.3s ease-in-out;
+  }
+
+  .slider-close {
+    display: none !important;
+    z-index: 10;
+  }
+
+
+  @keyframes slider-open {
+    0% {
+      transform: translateX(-100%);
+      display: block;
+      opacity: 0.2;
+    }
+    25% {
+      transform: translateX(-75%);
+      opacity: 0.5;
+    }
+    50% {
+      transform: translateX(-50%);
+      opacity: 0.9;
+    }
+    100% {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @media screen and (min-width: 992px) {
+    .slider-close, .slider-open {
+      position: relative;
+      display: block!important;
+    }
+  }
+
+  .main-view, .side-view {
+    height: 250px !important;
+  }
+
+  .hover-product-name:hover h6 {
+    text-decoration: underline;
+    color: #2779f4 !important;
+    transition: all 0.3s linear;
+  }
+
+  .active-drop-shadow {
+    box-shadow: 0 0px 8px rgba(255,255,255,0.8);
+  }
+
+  .hover-side-nav-link:hover div {
+    transition: all 0.3s linear;
+    box-shadow: 0 0px 8px rgba(255,255,255,0.8);
+    color: black !important;
+    background-color: white !important;
+  }
+
+  .hover-side-nav-link:hover div > span {
+    text-decoration: underline;
+  }
+}

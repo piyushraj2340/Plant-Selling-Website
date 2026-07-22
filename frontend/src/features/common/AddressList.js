@@ -34,7 +34,7 @@ function AddressList({ addressList, handelSelectedAddress, setViewAddressList, v
 
                         <div className="container">
                             <div className="d-flex">
-                                <Link to={`/address/new${redirect}`} className='btn btn-success btn-lg w-100'><i className="fas fa-plus"></i> New Address</Link>
+                                <Link to={`/address/add${redirect}`} className='btn btn-success btn-lg w-100'><i className="fas fa-plus"></i> New Address</Link>
                             </div>
                         </div>
 
@@ -84,7 +84,7 @@ function AddressList({ addressList, handelSelectedAddress, setViewAddressList, v
                             <div className="row">
                                 <div className="d-flex d-flex flex-column align-items-center">
                                     <h3 className="h3" style={{ fontFamily: "cursive" }}>No Address Found!</h3>
-                                    <Link to={`/address/new${redirect}`} className='btn btn-primary'><i className="fas fa-plus"></i> New Address</Link>
+                                    <Link to={`/address/add${redirect}`} className='btn btn-primary'><i className="fas fa-plus"></i> New Address</Link>
                                 </div>
                             </div>
                         </div>

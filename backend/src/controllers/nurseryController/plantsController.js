@@ -60,7 +60,7 @@ exports.getAllPlantsOfNursery = async (req, res, next) => {
             throw error;
         }
 
-        const result = await plantsModel.find({ user, nursery });
+        const result = await plantsModel.find({ user, nursery }).populate('category');
 
         if (!result) {
             const error = new Error("No Plants Found.");
@@ -92,7 +92,7 @@ exports.getPlantById = async (req, res, next) => {
         }
 
         const _id = req.params.id;
-        const result = await plantsModel.findOne({ user, nursery, _id });
+        const result = await plantsModel.findOne({ user, nursery, _id }).populate('category');
 
         if (!result) {
             const error = new Error("No Plant Found.");

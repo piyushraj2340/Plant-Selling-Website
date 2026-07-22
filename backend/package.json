@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js"
@@ -23,6 +26,7 @@
     "jsonwebtoken": "^9.0.0",
     "mongoose": "^7.0.0",
     "nodemailer": "^6.9.15",
+    "redis": "^6.1.0",
     "stripe": "^11.13.0",
     "validator": "^13.9.0"
   }

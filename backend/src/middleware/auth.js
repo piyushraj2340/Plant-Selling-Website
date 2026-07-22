@@ -38,7 +38,7 @@ const auth = async (req, res, next) => {
         }
 
         //? find the right user from the database 
-        const user = await userModel.findOne({ _id: verifyUser._id }).select({ _id: 1, role: 1, isUserVerified: 1 });
+        const user = await userModel.findOne({ _id: verifyUser._id }).select({ _id: 1, role: 1, isUserVerified: 1, isBlocked: 1 });
 
         //! if user not found
         if (!user) {
@@ -47,8 +47,15 @@ const auth = async (req, res, next) => {
             throw error;
         }
 
-        //! if user is not verified
-        if (!user.isUserVerified) {
+        //! if user is blocked (bypass if impersonating)
+        if (user.isBlocked && !verifyUser.isImpersonated) {
+            const error = new Error("Your account has been blocked by an administrator.");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        //! if user is not verified (bypass if impersonating)
+        if (!user.isUserVerified && !verifyUser.isImpersonated) {
             const error = new Error("Your Account is not verified please login and verify your account");
             error.statusCode = 403;
             throw error;
