@@ -10,6 +10,7 @@ const initialState = {
     nurseryStoreTabs: [],
     nurseryStoreTemplates: [],
     nurseryStoreBlocks: [],
+    plantsData: { plants: [], total: 0 },
     error: null,
     isLoading: false,
     isCurrentTab: "info",
@@ -46,6 +47,22 @@ export const nurseryProfileImagesUpload = createAsyncThunk('/nursery/images/prof
 export const addNewPlantsToNurseryAsync = createAsyncThunk('/nursery/plants/add', async (data) => {
     const response = await handelAddNewPlantToNursery(data.data);
     return { result: response.data, redirect: data.redirect, navigate: data.navigate };
+});
+
+export const nurseryPlantsAsync = createAsyncThunk('/nursery/plants/get', async (params) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/nursery/plants?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const nurseryPlantUpdateAsync = createAsyncThunk('/nursery/plants/update', async ({ id, data }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/plants/${id}`, 'PATCH', data);
+    return response.data;
+});
+
+export const nurseryPlantDeleteAsync = createAsyncThunk('/nursery/plants/delete', async (id) => {
+    const response = await handelDataFetch(`/api/v2/nursery/plants/${id}`, 'DELETE');
+    return response.data;
 });
 
 
@@ -214,6 +231,19 @@ export const nurserySlice = createSlice({
 
                 return initialState;
 
+            })
+            .addCase(nurseryPlantsAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(nurseryPlantsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.plantsData.plants = action.payload.result;
+                state.plantsData.total = action.payload.count;
+            })
+            .addCase(nurseryPlantsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
             })
             .addCase(nurseryCreateAsync.pending, (state) => {
                 //^ PENDING: NURSERY_CREATE

@@ -1,4 +1,5 @@
 const { uploadImages, deleteResourcesByPrefix, deleteFolder } = require('../../utils/uploadImages');
+const queryHelper = require('../../utils/queryHelper');
 const plantsModel = require('../../model/nurseryModel/plants');
 const { default: mongoose } = require('mongoose');
 
@@ -60,7 +61,32 @@ exports.getAllPlantsOfNursery = async (req, res, next) => {
             throw error;
         }
 
-        const result = await plantsModel.find({ user, nursery }).populate('category');
+        const { limit, skip, search, sort } = queryHelper.getQueryOptions(req);
+        
+        let query = { user, nursery };
+        
+        if (search) {
+            query.$or = [
+                { plantName: { $regex: search, $options: 'i' } }
+            ];
+        }
+
+        if (req.query.filters) {
+            try {
+                const filters = JSON.parse(req.query.filters);
+                if (filters.category && filters.category.length > 0) {
+                    query.category = { $in: filters.category };
+                }
+                if (filters.status && filters.status.length > 0) {
+                    query.status = { $in: filters.status };
+                }
+            } catch (err) {
+                console.log("Error parsing filters", err);
+            }
+        }
+
+        const result = await plantsModel.find(query).populate('category').sort(sort).skip(skip).limit(limit);
+        const count = await plantsModel.countDocuments(query);
 
         if (!result) {
             const error = new Error("No Plants Found.");
@@ -71,7 +97,8 @@ exports.getAllPlantsOfNursery = async (req, res, next) => {
         const info = {
             status: true,
             message: "Plants Found successfully.",
-            result
+            result,
+            count
         };
 
         res.status(200).send(info);

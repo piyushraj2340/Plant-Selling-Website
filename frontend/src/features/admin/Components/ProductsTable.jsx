@@ -1,7 +1,10 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm, Input, Row, Col } from 'antd';
-import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync, adminProductsAsync } from '../adminSlice';
-import React, { useState } from 'react';
+import { Table, Tag, Space, message, Popconfirm, Input, Row, Col, Button } from 'antd';
+import { PlusOutlined } from '@ant-design/icons';
+import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync, adminProductsAsync, adminNurseriesAsync, adminAddPlantAsync, adminUpdatePlantAsync } from '../adminSlice';
+import { getAllCategoriesAsync } from '../../category/categorySlice';
+import React, { useState, useEffect } from 'react';
+import PlantFormModal from '../../common/Components/PlantFormModal';
 import { useTableParams } from '../../../hooks/useTableParams';
 
 const ProductsTable = () => {
@@ -9,7 +12,18 @@ const ProductsTable = () => {
   const plants = useSelector(state => state.admin.productsData.plants) || [];
   const plantsTotal = useSelector(state => state.admin.productsData.total) || 0;
   const isLoading = useSelector(state => state.admin.isLoading);
+  const nurseries = useSelector(state => state.admin.nurseriesList) || [];
+  const { categories } = useSelector(state => state.category);
+
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalMode, setModalMode] = useState('add');
+  const [selectedPlant, setSelectedPlant] = useState(null);
+
+  useEffect(() => {
+    dispatch(getAllCategoriesAsync({ status: 'Active' }));
+    dispatch(adminNurseriesAsync());
+  }, [dispatch]);
 
   const { tableParams, localSearch, handleTableChange, handleSearchChange, searchParams, fetchData } = useTableParams(adminProductsAsync);
 
@@ -50,6 +64,39 @@ const ProductsTable = () => {
       }
     } catch (error) {
       message.error("Failed to update bulk status");
+    }
+  };
+
+  const handleOpenModal = (mode, plant = null) => {
+    setModalMode(mode);
+    setSelectedPlant(plant);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedPlant(null);
+  };
+
+  const handleFormSubmit = async (formData) => {
+    try {
+      if (modalMode === 'add') {
+        const res = await dispatch(adminAddPlantAsync(formData)).unwrap();
+        if (res.status) {
+          message.success(res.message || "Plant added successfully!");
+          handleCloseModal();
+          fetchData();
+        }
+      } else {
+        const res = await dispatch(adminUpdatePlantAsync({ id: selectedPlant._id, data: formData })).unwrap();
+        if (res.status) {
+          message.success(res.message || "Plant updated successfully!");
+          handleCloseModal();
+          fetchData();
+        }
+      }
+    } catch (error) {
+      message.error(`Failed to ${modalMode} plant. ${error.message || ''}`);
     }
   };
 
@@ -169,7 +216,7 @@ const ProductsTable = () => {
             }
 
 
-            <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Edit</button>
+            <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Edit</button>
           </Space>
         )
       }
@@ -181,10 +228,15 @@ const ProductsTable = () => {
   return (
     <div className="w-100">
       <Row justify="space-between" align="middle" className="mb-4 mx-3 my-3">
-        <div className="head">
-          <h5 className='h5 fw-bolder'>Products </h5>
-        </div>
-        <Col xs={24} md={8}>
+        <Col>
+          <div className="head d-flex align-items-center gap-3">
+            <h5 className='h5 fw-bolder m-0'>Products</h5>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
+              Add New Plant
+            </Button>
+          </div>
+        </Col>
+        <Col xs={24} md={8} className="mt-3 mt-md-0">
           <Input
             placeholder="Search products..."
             allowClear
@@ -223,6 +275,16 @@ const ProductsTable = () => {
         }}
         onChange={handleTableChange}
         className='overflow-x-auto'
+      />
+      <PlantFormModal 
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        onSubmit={handleFormSubmit}
+        initialData={selectedPlant}
+        mode={modalMode}
+        categories={categories}
+        nurseries={nurseries}
+        loading={isLoading}
       />
     </div>
   )

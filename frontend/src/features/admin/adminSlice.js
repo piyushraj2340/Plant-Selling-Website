@@ -21,6 +21,7 @@ const initialState = {
     ordersPieChartData: { labels: [], data: [] },
     users: [],
     usersTotal: 0,
+    nurseriesList: [],
     productsData: {
         plants: [],
         total: 0
@@ -158,9 +159,24 @@ export const adminUpdatePlantStatusAsync = createAsyncThunk('/admin/updatePlantS
     return response.data;
 });
 
+export const adminAddPlantAsync = createAsyncThunk('/admin/addPlant', async (data) => {
+    const response = await handelDataFetch(`/api/v2/admin/plants`, 'POST', data);
+    return response.data;
+});
+
+export const adminUpdatePlantAsync = createAsyncThunk('/admin/updatePlant', async ({ id, data }) => {
+    const response = await handelDataFetch(`/api/v2/admin/plants/${id}`, 'PUT', data);
+    return response.data;
+});
+
 export const adminBulkUpdatePlantStatusAsync = createAsyncThunk('/admin/bulkUpdatePlantStatus', async ({ ids, status }) => {
     const response = await handelDataFetch(`/api/v2/admin/plants/bulk-status`, 'PATCH', { ids, status });
     return { ...response.data, ids, status };
+});
+
+export const adminNurseriesAsync = createAsyncThunk('/admin/nurseries', async () => {
+    const response = await handelDataFetch(`/api/v2/admin/nurseries`, 'GET');
+    return response.data;
 });
 
 export const adminImpersonateAsync = createAsyncThunk('/admin/impersonate', async (data) => {
@@ -488,24 +504,48 @@ export const adminSlice = createSlice({
             .addCase(adminPlantsPolarChartAsync.rejected, (state, action) => {
                 state.error = action.error;
             })
-            // UPDATE PLANT STATUS
+            // Update individual plant status
             .addCase(adminUpdatePlantStatusAsync.pending, (state) => {
                 state.isLoading = true;
-                state.error = null;
             })
             .addCase(adminUpdatePlantStatusAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.error = null;
-                if (action.payload.status && action.payload.plant) {
-                    const index = state.productsData.plants.findIndex(p => p._id === action.payload.plant._id);
-                    if (index !== -1) {
-                        state.productsData.plants[index].status = action.payload.plant.status;
-                    }
+                const index = state.productsData.plants.findIndex(p => p._id === action.payload.plant._id);
+                if (index !== -1) {
+                    state.productsData.plants[index] = action.payload.plant;
                 }
             })
             .addCase(adminUpdatePlantStatusAsync.rejected, (state, action) => {
                 state.isLoading = false;
-                state.error = action.error;
+                message.error(action.error.message || "Failed to update plant status");
+            })
+            // Update complete plant data
+            .addCase(adminUpdatePlantAsync.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(adminUpdatePlantAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const index = state.productsData.plants.findIndex(p => p._id === action.payload.plant._id);
+                if (index !== -1) {
+                    state.productsData.plants[index] = action.payload.plant;
+                }
+            })
+            .addCase(adminUpdatePlantAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                message.error(action.error.message || "Failed to update plant");
+            })
+            // Add new plant
+            .addCase(adminAddPlantAsync.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(adminAddPlantAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.productsData.plants.unshift(action.payload.plant);
+                state.productsData.total += 1;
+            })
+            .addCase(adminAddPlantAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                message.error(action.error.message || "Failed to add plant");
             })
             // BULK UPDATE PLANT STATUS
             .addCase(adminBulkUpdatePlantStatusAsync.pending, (state) => {
