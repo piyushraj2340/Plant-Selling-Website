@@ -92,9 +92,9 @@ export const adminIncomePieChartAsync = createAsyncThunk('/admin/incomePieChart'
     return response.data;
 });
 
-export const adminUpdateOrderItemStatusAsync = createAsyncThunk('/admin/updateOrderItemStatus', async ({ orderId, itemId, status, message }) => {
-    const response = await handelDataFetch(`/api/v2/admin/orders/${orderId}/items/${itemId}/status`, 'PATCH', { status, message });
-    return { ...response.data, orderId, itemId, status, statusMessage: message };
+export const adminUpdateOrderItemStatusAsync = createAsyncThunk('/admin/updateOrderItemStatus', async ({ id, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/admin/orders/${id}/status`, 'PATCH', { status, message });
+    return { ...response.data, id, status, statusMessage: message };
 });
 
 export const adminBulkUpdateOrderItemStatusAsync = createAsyncThunk('/admin/bulkUpdateOrderItemStatus', async ({ keys, status, message }) => {

@@ -409,11 +409,12 @@ const adminController = {
         }
     },
 
-    // Get all orders (Table Data only)
     getOrders: async (req, res, next) => {
         try {
             const { search, timeFilter, status, tag } = req.query;
             const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
+            
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
             
             let query = {};
             const searchQueryStr = parsedSearch || search;
@@ -423,12 +424,9 @@ const adminController = {
                 const OrderItem = require('../model/checkoutModel/orderItem');
                 const searchRegex = new RegExp(searchQueryStr.trim(), 'i');
                 
-                // 1. Find OrderItem matches (by plantName)
-                const matchedItems = await OrderItem.find({ plantName: searchRegex }).select('order');
-                const orderIdsFromItems = matchedItems.map(item => item.order);
+                const matchedItems = await OrderItem.find({ plantName: searchRegex }).select('vendorOrder');
+                const validIds = matchedItems.map(item => item.vendorOrder);
                 
-                // 2. Check if the search string is a valid Order ID itself
-                const validIds = [...orderIdsFromItems];
                 if (mongoose.Types.ObjectId.isValid(searchQueryStr.trim())) {
                     validIds.push(searchQueryStr.trim());
                 }
@@ -436,18 +434,18 @@ const adminController = {
                 if (validIds.length > 0) {
                     query = { _id: { $in: validIds } };
                 } else {
-                    query = { _id: null }; // Invalid ID and no plant match shouldn't match anything
+                    query = { _id: null }; 
                 }
             }
             
             if (timeFilter) {
                 const now = new Date();
                 if (timeFilter === 'Monthly') {
-                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 30)) };
+                    query.createdAt = { $gte: new Date(now.setDate(now.getDate() - 30)) };
                 } else if (timeFilter === 'Quarterly') {
-                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 90)) };
+                    query.createdAt = { $gte: new Date(now.setDate(now.getDate() - 90)) };
                 } else if (timeFilter === 'Yearly') {
-                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 365)) };
+                    query.createdAt = { $gte: new Date(now.setDate(now.getDate() - 365)) };
                 }
             }
 
@@ -461,15 +459,16 @@ const adminController = {
                 query['orderStatus.message'] = { $in: statuses };
             }
 
-            const total = await Order.countDocuments(query);
-            const orders = await Order.find(query)
-                .populate('user')
+            const total = await VendorOrder.countDocuments(query);
+            const orders = await VendorOrder.find(query)
+                .populate({
+                    path: 'order',
+                    populate: { path: 'user', select: 'name email phone avatar' }
+                })
+                .populate('nursery')
                 .populate({
                     path: 'orderItems',
-                    populate: [
-                        { path: 'nursery' },
-                        { path: 'plant' } 
-                    ]
+                    populate: { path: 'plant' } 
                 })
                 .sort(sort)
                 .skip(skip)
@@ -477,7 +476,7 @@ const adminController = {
             
             res.status(200).json({ 
                 status: true, 
-                message: "Orders fetched successfully", 
+                message: "Vendor Orders fetched successfully", 
                 orders,
                 total,
                 page,
@@ -490,15 +489,16 @@ const adminController = {
 
     getOrdersBarChart: async (req, res, next) => {
         try {
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
             const { year } = req.query;
             const targetYear = parseInt(year) || new Date().getFullYear();
 
             const startOfYear = new Date(`${targetYear}-01-01T00:00:00.000Z`);
             const endOfYear = new Date(`${targetYear}-12-31T23:59:59.999Z`);
             
-            const ordersByMonth = await Order.aggregate([
-                { $match: { orderAt: { $gte: startOfYear, $lte: endOfYear } } },
-                { $group: { _id: { $month: "$orderAt" }, count: { $sum: 1 } } }
+            const ordersByMonth = await VendorOrder.aggregate([
+                { $match: { createdAt: { $gte: startOfYear, $lte: endOfYear } } },
+                { $group: { _id: { $month: "$createdAt" }, count: { $sum: 1 } } }
             ]);
 
             const barData = new Array(12).fill(0);
@@ -519,11 +519,12 @@ const adminController = {
 
     getOrdersPieChart: async (req, res, next) => {
         try {
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
             const { year } = req.query;
             const matchStage = {};
             if (year) {
                 const targetYear = parseInt(year);
-                matchStage.orderAt = {
+                matchStage.createdAt = {
                     $gte: new Date(`${targetYear}-01-01T00:00:00.000Z`),
                     $lte: new Date(`${targetYear}-12-31T23:59:59.999Z`)
                 };
@@ -545,7 +546,7 @@ const adminController = {
                 { $group: { _id: "$categoryDetails.name", count: { $sum: 1 } } }
             );
 
-            const categoryAgg = await Order.aggregate(pipeline);
+            const categoryAgg = await VendorOrder.aggregate(pipeline);
 
             const pieLabels = [];
             const pieData = [];
@@ -847,29 +848,38 @@ const adminController = {
     // Update individual order status
     updateOrderItemStatus: async (req, res, next) => {
         try {
-            const { orderId } = req.params;
+            const { id } = req.params;
             let { status, message } = req.body;
-            
+
             if (status) {
                 status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
             }
 
-            const order = await Order.findOneAndUpdate(
-                { _id: orderId },
-                {
-                    $set: {
-                        "orderStatus.status": status,
-                        "orderStatus.message": message || `${status} status updated`,
-                        "orderStatus.statusAt": new Date()
-                    }
-                },
-                { new: true }
-            );
+            if (!['Approved', 'Cancelled'].includes(status)) {
+                const error = new Error("Invalid status. Admin can only Approve or Cancel orders.");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const { syncOverallOrderStatus } = require('../utils/orderStatusSync');
+
+            const order = await VendorOrder.findByIdAndUpdate(id, {
+                $set: {
+                    "orderStatus.status": status,
+                    "orderStatus.message": message || `${status} status updated`,
+                    "orderStatus.statusAt": new Date()
+                }
+            }, { new: true });
 
             if (!order) {
-                const error = new Error("Order item not found");
+                const error = new Error("Order not found");
                 error.statusCode = 404;
                 throw error;
+            }
+
+            if (order.order) {
+                syncOverallOrderStatus(order.order).catch(err => console.error("Sync error:", err));
             }
 
             res.status(200).json({ status: true, message: `Order status updated to ${status} successfully`, order });
@@ -882,27 +892,28 @@ const adminController = {
     bulkUpdateOrderItemStatus: async (req, res, next) => {
         try {
             let { keys, status, message } = req.body;
-
+            
             if (!keys || !Array.isArray(keys) || keys.length === 0) {
-                const error = new Error("Order item keys are required");
+                const error = new Error("No order IDs provided");
                 error.statusCode = 400;
                 throw error;
             }
-            
+
             if (status) {
                 status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
             }
 
-            if (!['Processing', 'Placed', 'Delivered', 'Rejected', 'Completed'].includes(status)) {
-                const error = new Error("Invalid status");
+            if (!['Approved', 'Cancelled'].includes(status)) {
+                const error = new Error("Invalid status. Admin can only Approve or Cancel orders.");
                 error.statusCode = 400;
                 throw error;
             }
 
-            const orderIds = [...new Set(keys.map(key => key.split('-')[0]))];
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const { syncOverallOrderStatus } = require('../utils/orderStatusSync');
 
-            await Order.updateMany(
-                { _id: { $in: orderIds } },
+            await VendorOrder.updateMany(
+                { _id: { $in: keys } },
                 {
                     $set: {
                         "orderStatus.status": status,
@@ -911,6 +922,13 @@ const adminController = {
                     }
                 }
             );
+
+            const updatedVendorOrders = await VendorOrder.find({ _id: { $in: keys } }).select('order');
+            const parentOrderIds = [...new Set(updatedVendorOrders.map(vo => vo.order.toString()))];
+            
+            parentOrderIds.forEach(orderId => {
+                syncOverallOrderStatus(orderId).catch(err => console.error("Sync error:", err));
+            });
 
             res.status(200).json({ status: true, message: `Bulk updated ${keys.length} orders to ${status} successfully` });
         } catch (error) {

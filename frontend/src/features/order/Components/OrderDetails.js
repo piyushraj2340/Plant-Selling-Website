@@ -113,34 +113,36 @@ const OrderDetails = () => {
                                     </div>
                                     <div className="card-body p-3 p-md-4 mb-3">
                                         {
-                                            orderDetails.orderItems &&
-
-                                            orderDetails.orderItems.map((orderItems, index) => {
-                                                return (
-                                                    <div key={orderItems._id || index} className='mb-4 pb-4 border-bottom d-flex flex-column flex-md-row justify-content-between'>
-                                                        <div className="d-flex flex-column flex-sm-row ">
-                                                            <div className='mb-4 rounded overflow-hidden me-2' style={{ width: "200px" }}>
-                                                                <img className="align-self-center img-fluid" src={orderItems.images.url} width="250" alt="product" />
+                                            orderDetails.vendorOrders &&
+                                            orderDetails.vendorOrders.map(vendorOrder => {
+                                                return vendorOrder.orderItems && vendorOrder.orderItems.map((orderItems, index) => {
+                                                    return (
+                                                        <div key={orderItems._id || index} className='mb-4 pb-4 border-bottom d-flex flex-column flex-md-row justify-content-between'>
+                                                            <div className="d-flex flex-column flex-sm-row ">
+                                                                <div className='mb-4 rounded overflow-hidden me-2' style={{ width: "200px" }}>
+                                                                    <img className="align-self-center img-fluid" src={orderItems.images?.url} width="250" alt="product" />
+                                                                </div>
+                                                                <div className="flex-fill ms-2 p-2">
+                                                                    <h5 className="bold"><Link to={`/product/${orderItems.plant}`} className='link-dark link-underline-hover'>{orderItems.plantName}</Link></h5>
+                                                                    <p className="text-muted m-0"> Qt: {orderItems.quantity} {orderItems.quantity > 1 ? "items" : "item"}</p>
+                                                                    <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>
+                                                                        Price : <small className='text-decoration-line-through'>₹ {orderItems.price}</small>
+                                                                    </div>
+                                                                    <div className="card-text h3">
+                                                                        <span className="text-success">-{orderItems.discount}%</span>
+                                                                    </div>
+                                                                    <h4 className="mb-3"> ₹ {(orderItems.price - orderItems.discount / 100 * orderItems.price).toFixed(2)}</h4>
+                                                                    <p className="text-muted mt-2 mb-0">Vendor Status: <span className="badge bg-secondary">{vendorOrder.orderStatus?.status}</span></p>
+                                                                </div>
                                                             </div>
-                                                            <div className="flex-fill ms-2 p-2">
-                                                                <h5 className="bold"><Link to={`/product/${orderItems.plant}`} className='link-dark link-underline-hover'>{orderItems.plantName}</Link></h5>
-                                                                <p className="text-muted m-0"> Qt: {orderItems.quantity} {orderItems.quantity > 1 ? "items" : "item"}</p>
-                                                                <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>
-                                                                    Price : <small className='text-decoration-line-through'>₹ {orderItems.price}</small>
-                                                                </div>
-                                                                <div className="card-text h3">
-                                                                    <span className="text-success">-{orderItems.discount}%</span>
-                                                                </div>
-                                                                <h4 className="mb-3"> ₹ {(orderItems.price - orderItems.discount / 100 * orderItems.price).toFixed(2)}</h4>
+                                                            <div className='p-2 p-md-3 d-flex flex-column'>
+                                                                <Link to="#" className='btn btn-warning mb-2'><i className="fas fa-comment-dots"></i> Write a review</Link>
+                                                                <Link to="#" className='btn btn-info mb-2'><i className='fa fa-refresh'></i> Buy it again</Link>
+                                                                <Link to="#" className='btn btn-primary'><i className='fas fa-shipping-fast'></i> Track order</Link>
                                                             </div>
                                                         </div>
-                                                        <div className='p-2 p-md-3 d-flex flex-column'>
-                                                            <Link to="#" className='btn btn-warning mb-2'><i className="fas fa-comment-dots"></i> Write a review</Link>
-                                                            <Link to="#" className='btn btn-info mb-2'><i className='fa fa-refresh'></i> Buy it again</Link>
-                                                            <Link to="#" className='btn btn-primary'><i className='fas fa-shipping-fast'></i> Track order</Link>
-                                                        </div>
-                                                    </div>
-                                                )
+                                                    )
+                                                })
                                             })
                                         }
 

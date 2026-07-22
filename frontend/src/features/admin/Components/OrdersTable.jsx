@@ -20,19 +20,20 @@ const OrdersTable = () => {
       ordersData.data.forEach(order => {
         order.orderItems.forEach(item => {
           rows.push({
-            key: `${order._id}-${item._id}`,
+            key: item._id,
+            vendorOrderId: order._id,
             products: {
               productName: item.plantName,
-              description: `Order ID: ${order._id}`,
+              description: `Vendor Order ID: ${order._id}`,
               imgLink: item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-              link: `/product/${item.plant}`,
+              link: `/product/${item.plant?._id || item.plant}`,
             },
             sale: item.quantity,
             stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
             amount: `₹${item.price}`,
-            tag: order.orderStatus?.status || 'pending',
-            status: order.orderStatus?.message || 'Processing',
-            action: order.orderStatus?.status || 'pending',
+            tag: order.orderStatus?.status || 'Processing',
+            status: order.orderStatus?.message || 'Order is processing',
+            action: order.orderStatus?.status || 'Processing',
           });
         });
       });
@@ -42,10 +43,9 @@ const OrdersTable = () => {
     }
   }, [ordersData]);
 
-  const handleUpdateStatus = async (key, status, statusMessage) => {
+  const handleUpdateStatus = async (vendorOrderId, status, statusMessage) => {
     try {
-      const [orderId, itemId] = key.split('-');
-      const res = await dispatch(adminUpdateOrderItemStatusAsync({ orderId, itemId, status, message: statusMessage })).unwrap();
+      const res = await dispatch(adminUpdateOrderItemStatusAsync({ id: vendorOrderId, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
         fetchData();
@@ -57,7 +57,9 @@ const OrdersTable = () => {
 
   const handleBulkUpdateStatus = async (status, statusMessage) => {
     try {
-      const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: selectedRowKeys, status, message: statusMessage })).unwrap();
+      // Get unique vendorOrderIds from selected rows
+      const selectedVendorOrderIds = [...new Set(dataSource.filter(row => selectedRowKeys.includes(row.key)).map(row => row.vendorOrderId))];
+      const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: selectedVendorOrderIds, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
         setSelectedRowKeys([]);
@@ -119,21 +121,20 @@ const OrdersTable = () => {
       dataIndex: 'tag',
       key: 'tag',
       filters: [
-        { text: 'Pending', value: 'pending' },
-        { text: 'Placed', value: 'placed' },
-        { text: 'Delivered', value: 'delivered' },
-        { text: 'Completed', value: 'completed' },
-        { text: 'Rejected', value: 'rejected' },
+        { text: 'Processing', value: 'processing' },
+        { text: 'Approved', value: 'approved' },
+        { text: 'Cancelled', value: 'cancelled' },
+        { text: 'Delivered', value: 'delivered' }
       ],
       filteredValue: searchParams.get('tag') ? searchParams.get('tag').split(',') : null,
       render: (_, { tag }) => {
 
         let color = 'geekblue';
-        if (tag.toLowerCase() === 'pending') {
+        if (tag.toLowerCase() === 'processing') {
           color = 'volcano'
-        } else if (tag.toLowerCase() === 'placed' || tag.toLowerCase() === 'delivered' || tag.toLowerCase() === 'completed') {
+        } else if (tag.toLowerCase() === 'approved' || tag.toLowerCase() === 'delivered') {
           color = 'green'
-        } else if (tag.toLowerCase() === 'rejected') {
+        } else if (tag.toLowerCase() === 'cancelled') {
           color = 'red'
         }
 
@@ -160,23 +161,18 @@ const OrdersTable = () => {
       title: 'Action',
       key: 'action',
       render: (_, record) => {
-        const action = record.action || 'pending';
+        const action = record.action || 'processing';
         return (
           <Space size={'small'}>
-            {action.toLowerCase() === 'pending' && (
+            {action.toLowerCase() === 'processing' && (
               <>
-                <Popconfirm title="Accept this order?" onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Accept</button>
+                <Popconfirm title="Approve this order?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Approve</button>
                 </Popconfirm>
-                <Popconfirm title="Reject this order?" onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Reject</button>
+                <Popconfirm title="Cancel this order?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Cancel</button>
                 </Popconfirm>
               </>
-            )}
-            {action.toLowerCase() === 'placed' && (
-              <Popconfirm title="Mark this order as Delivered?" onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>Deliver</button>
-              </Popconfirm>
             )}
           </Space>
         )
@@ -207,14 +203,11 @@ const OrdersTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Accept ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('placed', 'Orders Accepted')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Accept</button>
+          <Popconfirm title={`Approve ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Approve</button>
           </Popconfirm>
-          <Popconfirm title={`Reject ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('rejected', 'Orders Rejected')}>
-            <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Reject</button>
-          </Popconfirm>
-          <Popconfirm title={`Mark ${selectedRowKeys.length} selected orders as Delivered?`} onConfirm={() => handleBulkUpdateStatus('delivered', 'Orders Delivered')}>
-            <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Deliver</button>
+          <Popconfirm title={`Cancel ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
+            <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Cancel</button>
           </Popconfirm>
         </div>
       )}

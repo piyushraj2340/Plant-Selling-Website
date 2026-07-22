@@ -11,6 +11,7 @@ const initialState = {
     nurseryStoreTemplates: [],
     nurseryStoreBlocks: [],
     plantsData: { plants: [], total: 0 },
+    ordersData: { data: [], total: 0 },
     error: null,
     isLoading: false,
     isCurrentTab: "info",
@@ -64,6 +65,24 @@ export const nurseryPlantDeleteAsync = createAsyncThunk('/nursery/plants/delete'
     const response = await handelDataFetch(`/api/v2/nursery/plants/${id}`, 'DELETE');
     return response.data;
 });
+
+//* ALL ASYNC OF NURSERY_ORDERS GOES HERE
+export const nurseryOrdersAsync = createAsyncThunk('/nursery/orders/get', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/nursery/order?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const nurseryUpdateOrderStatusAsync = createAsyncThunk('/nursery/orders/updateStatus', async ({ id, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/order/status/${id}`, 'PATCH', { status, message });
+    return { ...response.data, id, status, statusMessage: message };
+});
+
+export const nurseryBulkUpdateOrderStatusAsync = createAsyncThunk('/nursery/orders/bulkUpdateStatus', async ({ ids, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/order/status/bulk`, 'PATCH', { ids, status, message });
+    return { ...response.data, ids, status, statusMessage: message };
+});
+
 
 
 //* ALL THE ASYNC FOR THE NURSERY_STORE_DATA
@@ -984,9 +1003,53 @@ export const nurserySlice = createSlice({
                 state.error = action.error;
 
             })
+            .addCase(nurseryOrdersAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            }).addCase(nurseryOrdersAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.ordersData.data = action.payload.orders;
+                state.ordersData.total = action.payload.total;
+            }).addCase(nurseryOrdersAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(nurseryUpdateOrderStatusAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(nurseryUpdateOrderStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const index = state.ordersData.data.findIndex(order => order._id === action.payload.id);
+                if (index !== -1) {
+                    state.ordersData.data[index].orderStatus = {
+                        status: action.payload.status,
+                        message: action.payload.statusMessage,
+                        statusAt: new Date().toISOString()
+                    };
+                }
+            }).addCase(nurseryUpdateOrderStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(nurseryBulkUpdateOrderStatusAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(nurseryBulkUpdateOrderStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                action.payload.ids.forEach(id => {
+                    const index = state.ordersData.data.findIndex(order => order._id === id);
+                    if (index !== -1) {
+                        state.ordersData.data[index].orderStatus = {
+                            status: action.payload.status,
+                            message: action.payload.statusMessage,
+                            statusAt: new Date().toISOString()
+                        };
+                    }
+                });
+            }).addCase(nurseryBulkUpdateOrderStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
     }
 });
 
 
-export const { setIsCurrentTab } = nurserySlice.actions;
-export default nurserySlice.reducer; 
+export const { setNurseryActiveTab, setNurseryStoreSectionAddType } = nurserySlice.actions;
+
+export default nurserySlice.reducer;

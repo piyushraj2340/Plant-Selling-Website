@@ -12,6 +12,7 @@ import ProfilePage from "../pages/ProfilePage";
 import NurseryProfilePage from "../pages/NurseryProfilePage";
 //TODO: ADD NURSERY PUBLIC PROFILE PAGE HERE
 import ManagePlantsPage from "../pages/ManagePlantsPage";
+import ManageOrdersPage from "../pages/ManageOrdersPage";
 import CreateNurseryPage from "../pages/CreateNurseryPage";
 import EditNurseryPage from "../pages/EditNurseryPage";
 import AddressPage from "../pages/AddressPage";
@@ -78,6 +79,7 @@ const Routing = () => {
                 <Route exact path="/account/twoFactorAuthentication/:token" element={<TwoFactorAuthenticationPage />} />
                 <Route exact path="/nursery" element={<NurseryProfilePage />} />
                 <Route exact path="/nursery/plants" element={<ManagePlantsPage />} />
+                <Route exact path="/nursery/order" element={<ManageOrdersPage />} />
                 <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
                 <Route exact path="/nursery/create" element={<CreateNurseryPage />} />
                 <Route exact path="/nursery/update" element={<EditNurseryPage />} />

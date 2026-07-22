@@ -37,7 +37,7 @@ router.patch('/plants/bulk-status', adminController.bulkUpdatePlantStatus);
 router.patch('/plants/:id/status', adminController.updatePlantStatus);
 
 router.patch('/orders/bulk-status', adminController.bulkUpdateOrderItemStatus);
-router.patch('/orders/:orderId/items/:itemId/status', adminController.updateOrderItemStatus);
+router.patch('/orders/:id/status', adminController.updateOrderItemStatus);
 
 router.get('/income', adminController.getIncome);
 router.get('/income/charts/bar', adminController.getIncomeBarChart);
