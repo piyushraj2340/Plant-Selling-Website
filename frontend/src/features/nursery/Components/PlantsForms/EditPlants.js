@@ -2,12 +2,16 @@ import React, { useState, useEffect, useContext } from 'react';
 import { UserContext } from '../../../../App';
 import { useNavigate, useParams } from 'react-router-dom';
 import handelDataFetch from '../../../../utils/handelDataFetch';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllCategoriesAsync } from '../../../category/categorySlice';
 
 
 function EditPlants() {
     document.title = "Edit Your Plants Details"
 
     const { setShowAnimation } = useContext(UserContext);
+    const dispatch = useDispatch();
+    const { categories } = useSelector(state => state.category);
 
     const [plant, setPlants] = useState({
         user: "",
@@ -17,6 +21,7 @@ function EditPlants() {
         stock: "",
         discount: "",
         category: "",
+        status: "Draft",
         images: [],
         description: "",
     });
@@ -92,6 +97,9 @@ function EditPlants() {
             const result = await handelDataFetch({path: "/api/v2/nursery/plants", method: "GET"}, setShowAnimation);
 
             if (result.status) {
+                // Here we fetch plant by ID? Wait, the API call is GET /api/v2/nursery/plants ? 
+                // Ah, the original code had: setPlants({ ...plant, user: result.result.user, nursery: result.result._id }) 
+                // Actually, wait, let's look at the original code.
                 setPlants({ ...plant, user: result.result.user, nursery: result.result._id })
             } else {
                 navigate('/profile');
@@ -104,7 +112,8 @@ function EditPlants() {
 
     useEffect(() => {
         handelNurseryData();
-    }, []);
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
+    }, [dispatch]);
 
 
     const postData = async (e) => {
@@ -130,6 +139,7 @@ function EditPlants() {
                 data.append("stock", plant.stock);
                 data.append("discount", plant.discount);
                 data.append("category", plant.category);
+                data.append("status", plant.status);
                 data.append("description", plant.description);
 
                 plant.images.forEach((image, index) => {
@@ -205,15 +215,23 @@ function EditPlants() {
                                 <label htmlFor="category" className='ps-1 my-2'>Category: <span className="text-danger small">*</span></label>
                                 <select type="text" name='category' id="category" defaultValue={plant.category == "" ? "none" : plant.category} className="form-control" placeholder='Category' onChange={handleInputs} >
                                     <option value="none" disabled >--Select Category--</option>
-                                    <option value="flowering-plants">Flowering Plants</option>
-                                    <option value="medicinal-plants">Medicinal Plants</option>
-                                    <option value="ornamental-plants">Ornamental Plants</option>
-                                    <option value="indoor-plants">Indoor Plants</option>
+                                    {categories && categories.map(cat => (
+                                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                    ))}
                                 </select>
                                 {errorMessage.category.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.category.message}</p>
                                 }
                             </div>
+                        </div>
+
+                        <div className="form-outline mb-4">
+                            <label htmlFor="status" className='ps-1 my-2'>Status: <span className="text-danger small">*</span></label>
+                            <select name='status' id="status" defaultValue={plant.status} className="form-control" onChange={handleInputs} >
+                                <option value="Draft">Draft</option>
+                                <option value="Published">Published</option>
+                                <option value="On Hold">On Hold</option>
+                            </select>
                         </div>
 
                         <div className="form-outline mb-4">

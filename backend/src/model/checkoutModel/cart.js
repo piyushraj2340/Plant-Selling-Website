@@ -5,61 +5,40 @@ const cartSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "user",
         required: [true, "userId is required."],
+        unique: true, // One cart per user
         immutable: true
     },
-    nursery: {
-        type: mongoose.Schema.ObjectId,
-        ref: "nursery",
-        required: [true, "Nursery Id is required."],
-        immutable: true
-    },
-    plant: {
-        type: mongoose.Schema.ObjectId,
-        ref: "plant",
-        required: [true, "PlantId is required."],
-        immutable: true
-    },
-    quantity: {
-        type: Number,
-        default: 1,
-        require: [true, "Cart quantity is required."],
-        validate(quantity) {
-            if(quantity < 1) throw new Error("Cart should not be less than 1.");
+    cartItems: [
+        {
+            type: mongoose.Schema.ObjectId,
+            ref: "cartItem"
         }
+    ],
+    couponApplied: {
+        type: mongoose.Schema.ObjectId,
+        ref: "Coupon",
+        default: null
     },
     pricing: {
-        priceWithoutDiscount: {
-            type: Number,
-            required: [true, "priceWithoutDiscount is required."],
-            validate(price) {
-                if(price < 0) throw new Error("Price must be greater than zero.");
-            }
-        },
-        priceAfterDiscount: {
-            type: Number,
-            required: [true, "priceAfterDiscount is required."],
-            validate(price) {
-                if(price < 0) throw new Error("Price must be greater than zero.");
-            }
-        },
-        discount: {
-            type: Number,
-            required: [true, "discount is required."],
-            validate(price) {
-                if(price < 0) throw new Error("Price must be greater than zero.");
-            }
-        },
-        discountPrice: {
-            type: Number,
-            required: [true, "discountPrice is required."],
-            validate(price) {
-                if(price < 0) throw new Error("Price must be greater than zero.");
-            }
-        },
+        totalPriceWithoutDiscount: { type: Number, default: 0 },
+        totalDiscount: { type: Number, default: 0 },
+        deliveryFee: { type: Number, default: 0 },
+        finalPrice: { type: Number, default: 0 },
+        couponDiscountAmount: { type: Number, default: 0 }
     },
-    addedAt: {
+    priceWarnings: [
+        {
+            message: String,
+            type: { type: String, enum: ['increase', 'decrease'] }
+        }
+    ],
+    createdAt: {
         type: Date,
-        required: [true, "Cart Added at is required."],
+        default: Date.now,
+        immutable: true
+    },
+    updatedAt: {
+        type: Date,
         default: Date.now
     }
 });

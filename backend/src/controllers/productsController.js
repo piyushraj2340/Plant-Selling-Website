@@ -1,16 +1,75 @@
 const plantsModel = require('../model/nurseryModel/plants');
+const Review = require('../model/nurseryModel/review');
+const Order = require('../model/checkoutModel/orders');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
-        const result = await plantsModel.find().populate({
-            path: "nursery",
-            select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details
+        const { search, category, sort, page = 1, limit = 12 } = req.query;
+
+        // Build the base query
+        const query = { status: 'Published' };
+
+        // Handle category filter
+        if (category && category.toLowerCase() !== 'all') {
+            const categoryList = category.split(',').map(cat => cat.trim());
+            query.category = { $in: categoryList };
+        }
+
+        // Handle search keyword filter
+        if (search) {
+            const keywords = search.trim().split(/\s+/);
+            const Category = require('../model/category');
+            const matchedCategories = await Category.find({ name: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
+            const categoryIds = matchedCategories.map(cat => cat._id);
+
+            query.$or = [
+                { plantName: { $regex: keywords.join('|'), $options: 'i' } },
+                { description: { $regex: keywords.join('|'), $options: 'i' } },
+                { category: { $in: categoryIds } },
+                { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } },
+            ];
+        }
+
+        // Handle sorting
+        let sortQuery = {};
+        if (sort === 'price_asc') {
+            sortQuery.price = 1;
+        } else if (sort === 'price_desc') {
+            sortQuery.price = -1;
+        } else if (sort === 'name_asc') {
+            sortQuery.plantName = 1;
+        } else if (sort === 'name_desc') {
+            sortQuery.plantName = -1;
+        } else if (sort === 'newest') {
+            sortQuery.createdAt = -1;
+        } else {
+            sortQuery.createdAt = -1; // Default
+        }
+
+        // Handle pagination
+        const skip = (page - 1) * limit;
+        const parsedLimit = parseInt(limit, 10);
+
+        const result = await plantsModel.find(query)
+            .populate({ path: "nursery", select: "nurseryName _id" })
+            .populate("category")
+            .select("-user")
+            .sort(sortQuery)
+            .skip(skip)
+            .limit(parsedLimit);
+
+        const totalProducts = await plantsModel.countDocuments(query);
 
         const info = {
             status: true,
-            message: "Data of all products",
-            result
+            message: "Data of products",
+            result,
+            pagination: {
+                totalProducts,
+                currentPage: parseInt(page, 10),
+                totalPages: Math.ceil(totalProducts / parsedLimit),
+                limit: parsedLimit
+            }
         };
         res.status(200).send(info);
     } catch (error) {
@@ -21,10 +80,19 @@ exports.getAllPlants = async (req, res, next) => {
 exports.getPlantById = async (req, res, next) => {
     try {
         const _id = req.params.id;
-        const result = await plantsModel.findOne({ _id }).populate({
+        const result = await plantsModel.findOne({ 
+            _id, 
+            status: 'Published'
+        }).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details
+        }).populate("category").select("-user"); // Populate nursery and category details
+
+        if (!result) {
+            const error = new Error("Product not found or not published");
+            error.statusCode = 404;
+            throw error;
+        }
 
         // Assuming there's a method increaseVisit() defined in the plant model
         await result.increaseVisit();
@@ -52,72 +120,78 @@ exports.getPlantsByCategory = async (req, res, next) => {
 
         // Construct a MongoDB query to match keywords in various fields
         const query = {
-            $or: [
-                { category: { $regex: category.split(",").join('|'), $options: 'i' } }, // Match in category
-            ],
+            $and: [
+                { status: 'Published' }
+            ]
         };
 
         // Handle multiple categories if provided
         if (category && category.toLowerCase() !== 'all') {
             const categoryList = category.split(',').map(cat => cat.trim());
-            query.$and = [
-                { category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } }, // Match categories in a case-insensitive manner
-            ];
+            query.$and.push({ category: { $in: categoryList } });
         }
 
         const result = await plantsModel.find(query).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details
-
+        }).populate("category").select("-user"); // Populate nursery and category details
+ 
         const info = {
             status: true,
             message: `Data For ${category}`,
             result
         };
-
+ 
         res.status(200).send(info);
     } catch (error) {
         next(error);
     }
 };
-
+ 
 exports.searchProducts = async (req, res, next) => {
     try {
         const { search, category } = req.query;
-
+ 
         if (!search) {
             const error = new Error('Search query is required');
             error.statusCode = 400;
             throw error;
         }
-
+ 
         // Split the search string into keywords
         const keywords = search.trim().split(/\s+/);
+ 
+        // Find categories that match the keywords
+        const Category = require('../model/category');
+        const matchedCategories = await Category.find({ name: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
+        const categoryIds = matchedCategories.map(cat => cat._id);
 
         // Construct a MongoDB query to match keywords in various fields
         const query = {
-            $or: [
-                { plantName: { $regex: keywords.join('|'), $options: 'i' } }, // Match any keyword in title
-                { description: { $regex: keywords.join('|'), $options: 'i' } }, // Match in description
-                { category: { $regex: keywords.join('|'), $options: 'i' } }, // Match in category
-                { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } }, // Match numeric keywords with price
-            ],
+            $and: [
+                { status: 'Published' },
+                {
+                    $or: [
+                        { plantName: { $regex: keywords.join('|'), $options: 'i' } }, // Match any keyword in title
+                        { description: { $regex: keywords.join('|'), $options: 'i' } }, // Match in description
+                        { category: { $in: categoryIds } }, // Match in category by resolved ObjectIds
+                        { price: { $in: keywords.map(k => !isNaN(k) ? parseFloat(k) : null).filter(k => k !== null) } }, // Match numeric keywords with price
+                    ]
+                }
+            ]
         };
-
+ 
         // Handle multiple categories if provided
         if (category && category.toLowerCase() !== 'all') {
             const categoryList = category.split(',').map(cat => cat.trim());
-            query.$and = [
-                { category: { $in: categoryList.map(cat => new RegExp(cat, 'i')) } }, // Match categories in a case-insensitive manner
-            ];
+            query.$and.push({ category: { $in: categoryList } });
         }
 
         // Execute the query and fetch matching products
         const products = await plantsModel.find(query).populate({
             path: "nursery",
             select: "nurseryName _id"  // Select only the fields you need
-        }).select("-user"); // Populate nursery details;
+        }).populate("category").select("-user"); // Populate nursery and category details;
 
         // Create a response object
         const info = {
@@ -129,6 +203,50 @@ exports.searchProducts = async (req, res, next) => {
         // Send the response
         res.status(200).json(info);
 
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.addReview = async (req, res, next) => {
+    try {
+        const plantId = req.params.id;
+        const userId = req.user;
+        const { rating, reviewText } = req.body;
+
+        const plant = await plantsModel.findById(plantId);
+        if (!plant) {
+            const error = new Error("Plant not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Check if user has bought this plant
+        const order = await Order.findOne({ user: userId, "orderItems.plant": plantId });
+        const isBuyer = !!order;
+
+        const newReview = new Review({
+            user: userId,
+            nursery: plant.nursery,
+            plant: plantId,
+            rating,
+            review: reviewText,
+            isBuyer
+        });
+
+        await newReview.save();
+
+        res.status(201).json({ status: true, message: "Review submitted successfully and is pending approval." });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getReviews = async (req, res, next) => {
+    try {
+        const plantId = req.params.id;
+        const reviews = await Review.find({ plant: plantId, status: 'Approved' }).populate('user', 'name avatar');
+        res.status(200).json({ status: true, message: "Reviews fetched", result: reviews });
     } catch (error) {
         next(error);
     }

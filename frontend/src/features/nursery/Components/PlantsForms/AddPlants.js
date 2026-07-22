@@ -3,10 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { message } from "antd";
 import { useDispatch, useSelector } from 'react-redux';
 import { addNewPlantsToNurseryAsync } from '../../nurserySlice';
+import { getAllCategoriesAsync } from '../../../category/categorySlice';
+import { useEffect } from 'react';
 
 function AddPlants() {
     const nursery = useSelector(state => state.nursery.nursery);
+    const { categories } = useSelector(state => state.category);
     const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(getAllCategoriesAsync({ status: 'Active' }));
+    }, [dispatch]);
 
     const [plant, setPlants] = useState({
         user: nursery.user,
@@ -16,6 +23,7 @@ function AddPlants() {
         stock: "",
         discount: "",
         category: "",
+        status: "Draft",
         images: [],
         description: "",
     });
@@ -68,7 +76,7 @@ function AddPlants() {
             if (value === "") {
                 setErrorMessages({ ...errorMessage, [name]: { status: true, message: `${name} is required.`, target: e.target } });
             } else if ((name === "plantName") && (value.length < 3 || value.length >= 30)) {
-                setErrorMessages({ ...errorMessage, ["plantName"]: { status: true, message: `The length of the Plant Name is greater than 3 and less than 30.`, target: e.target } });
+                setErrorMessages({ ...errorMessage, plantName: { status: true, message: `The length of the Plant Name is greater than 3 and less than 30.`, target: e.target } });
             } else if ((name === "discount") && (value < 0 || value > 100)) {
                 setErrorMessages({ ...errorMessage, [name]: { status: true, message: `value must be greater then 0 and smaller then 100.`, target: e.target } });
             } else if (e.target.type === "number" && value < 0) {
@@ -111,6 +119,7 @@ function AddPlants() {
         formData.append("stock", plant.stock);
         formData.append("discount", plant.discount);
         formData.append("category", plant.category);
+        formData.append("status", plant.status);
         formData.append("description", plant.description);
 
         plant.images.forEach((image, index) => {
@@ -178,17 +187,25 @@ function AddPlants() {
 
                             <div className="form-outline  col-md-6 ps-md-2">
                                 <label htmlFor="category" className='ps-1 my-2'>Category: <span className="text-danger small">*</span></label>
-                                <select type="text" name='category' id="category" defaultValue={plant.category == "" ? "none" : plant.category} className="form-control" placeholder='Category' onChange={handleInputs} >
+                                <select type="text" name='category' id="category" defaultValue={plant.category === "" ? "none" : plant.category} className="form-control" placeholder='Category' onChange={handleInputs} >
                                     <option value="none" disabled >--Select Category--</option>
-                                    <option value="flowering-plants">Flowering Plants</option>
-                                    <option value="medicinal-plants">Medicinal Plants</option>
-                                    <option value="ornamental-plants">Ornamental Plants</option>
-                                    <option value="indoor-plants">Indoor Plants</option>
+                                    {categories && categories.map(cat => (
+                                        <option key={cat._id} value={cat._id}>{cat.name}</option>
+                                    ))}
                                 </select>
                                 {errorMessage.category.status &&
                                     <p className="text-danger small m-1 mt-2"><i className="fas fa-info-circle"></i> {errorMessage.category.message}</p>
                                 }
                             </div>
+                        </div>
+
+                        <div className="form-outline mb-4">
+                            <label htmlFor="status" className='ps-1 my-2'>Status: <span className="text-danger small">*</span></label>
+                            <select name='status' id="status" defaultValue={plant.status} className="form-control" onChange={handleInputs} >
+                                <option value="Draft">Draft</option>
+                                <option value="Published">Published</option>
+                                <option value="On Hold">On Hold</option>
+                            </select>
                         </div>
 
                         <div className="form-outline mb-4">

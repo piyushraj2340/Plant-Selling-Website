@@ -22,7 +22,7 @@ const orderAuth = async (req, res, next) => {
 
         //! if the token is null
         if (!token) {
-            const error = new Error("Invalid order session token");
+            const error = new Error("Your checkout session has expired or is invalid. Please restart checkout.");
             error.statusCode = 403;
             throw error;
         };

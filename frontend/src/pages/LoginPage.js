@@ -18,7 +18,17 @@ const LoginPage = () => {
         const queryParams = new URLSearchParams(location.search);
         const redirect = queryParams.get('redirect');
 
-        return <Navigate to={`${redirect ? redirect : '/profile'}`} replace={true} />;
+        if (redirect) {
+            return <Navigate to={redirect} replace={true} />;
+        }
+
+        if (user.role.includes('admin')) {
+            return <Navigate to="/dashboard" replace={true} />;
+        } else if (user.role.includes('seller')) {
+            return <Navigate to="/nursery" replace={true} />;
+        } else {
+            return <Navigate to="/profile" replace={true} />;
+        }
     }
 
     if (isUserVerificationNeeded) {

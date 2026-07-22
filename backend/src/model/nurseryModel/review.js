@@ -34,8 +34,17 @@ const reviewSchema = new mongoose.Schema({
     upVote: {
         type: Number,
         default: 0
+    },
+    status: {
+        type: String,
+        enum: ['Pending', 'Approved', 'Rejected'],
+        default: 'Pending'
+    },
+    isBuyer: {
+        type: Boolean,
+        default: false
     }
-});
+}, { timestamps: true });
 
 
 const review = new mongoose.model('review', reviewSchema);

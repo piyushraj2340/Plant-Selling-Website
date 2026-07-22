@@ -50,6 +50,10 @@ const userSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isBlocked: {
+        type: Boolean,
+        default: false
+    },
     avatar: {
         public_id: {
             type: String,
@@ -78,27 +82,57 @@ const userSchema = new mongoose.Schema({
                 throw new Error("Invalid Age");
             }
         }
-    },
-    tokens: [{
-        token: {
-            type: String,
-            required: true
-        }
-    }]
+    }
 });
 
-// generating the JWT Tokens 
+const crypto = require('crypto');
+const { setData } = require('../../utils/redisService');
+
+// generating the JWT Tokens and Opaque Refresh Token
 userSchema.methods.generateAuthToken = async function () {
     try {
         // generate the access token
         const accessToken = jwt.sign({_id: this._id.toString()}, process.env.ACCESS_SECRET_KEY, { expiresIn: "15m" });
 
-        // generate the refresh token 
-        const refreshToken = jwt.sign({ _id: this._id.toString() }, process.env.REFRESH_SECRET_KEY, { expiresIn: "7d" });
-        this.tokens = this.tokens.concat({ token: refreshToken });
-        await this.save();
+        // generate the opaque refresh token 
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const familyId = crypto.randomUUID();
 
-        return { refreshToken: encryptMessage(refreshToken), accessToken};
+        // Store refresh token securely in Redis for 7 days (604800 seconds)
+        const tokenData = {
+            userId: this._id.toString(),
+            familyId: familyId,
+            revoked: false
+        };
+
+        await setData("auth", refreshToken, "refreshToken", tokenData, 604800);
+
+        return { refreshToken: refreshToken, accessToken };
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+// generating Impersonation Tokens (Bypasses verification/blocking checks)
+userSchema.methods.generateImpersonationToken = async function () {
+    try {
+        // generate the access token with isImpersonated flag
+        const accessToken = jwt.sign({_id: this._id.toString(), isImpersonated: true}, process.env.ACCESS_SECRET_KEY, { expiresIn: "1h" });
+
+        // generate the opaque refresh token (also storing it so it doesn't break frontend logic)
+        const refreshToken = crypto.randomBytes(64).toString('hex');
+        const familyId = crypto.randomUUID();
+
+        const tokenData = {
+            userId: this._id.toString(),
+            familyId: familyId,
+            revoked: false,
+            isImpersonated: true
+        };
+
+        await setData("auth", refreshToken, "refreshToken", tokenData, 3600); // 1 hour expiry
+
+        return { refreshToken: refreshToken, accessToken };
     } catch (err) {
         console.log(err);
     }

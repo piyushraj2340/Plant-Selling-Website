@@ -5,20 +5,24 @@ const initialState = {
     products: [],
     product: null,
     productPricing: null,
-    totalProducts: null,
+    pagination: {
+        totalProducts: null,
+        currentPage: null,
+        totalPages: null,
+        limit: null
+    },
+    productReviews: [],
     isLoading: false
 }
 
-export const getAllProductsAsync = createAsyncThunk('products/fetchAllProducts', async () => {
-    const response = await handelDataFetch('/api/v2/products/plants', 'GET');
+export const getAllProductsAsync = createAsyncThunk('products/fetchAllProducts', async (query) => {
+    let url = '/api/v2/products/plants?';
+    if (query) {
+        url += new URLSearchParams(query).toString();
+    }
+    const response = await handelDataFetch(url, 'GET');
     return response.data;
 });
-
-// TODO: check the rendering after deployment 
-export const getProductsByCategoryAsync = createAsyncThunk('products/fetchProductsByCategory', async (category) => {
-    const response = await handelDataFetch(`/api/v2/products/plantsByCategory/${category}`, 'GET');
-    return response.data;
-})
 
 // TODO: check the rendering after deployment 
 export const getProductAsync = createAsyncThunk('products/fetchProduct', async (_id) => {
@@ -26,8 +30,13 @@ export const getProductAsync = createAsyncThunk('products/fetchProduct', async (
     return response.data;
 });
 
-export const searchProductsAsync = createAsyncThunk('products/search', async ({search, category}) => {
-    const response = await handelDataFetch(`/api/v2/products/search/plants/?search=${search}&category=${(typeof category === 'string' && category.length > 0) ? category: 'all'}`, 'GET');
+export const getProductReviewsAsync = createAsyncThunk('products/fetchReviews', async (plantId) => {
+    const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/reviews`, 'GET');
+    return response.data;
+});
+
+export const addProductReviewAsync = createAsyncThunk('products/addReview', async ({ plantId, rating, reviewText }) => {
+    const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/reviews`, 'POST', { rating, reviewText });
     return response.data;
 });
 
@@ -46,15 +55,8 @@ export const productsSlice = createSlice({
             }).addCase(getAllProductsAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
                 state.products = action.payload.result;
+                state.pagination = action.payload.pagination;
             }).addCase(getAllProductsAsync.rejected, (state, action) => {
-                state.isLoading = false;
-                state.error = action.error;
-            }).addCase(getProductsByCategoryAsync.pending, (state) => {
-                state.isLoading = true;
-            }).addCase(getProductsByCategoryAsync.fulfilled, (state, action) => {
-                state.isLoading = false;
-                state.products = action.payload.result;
-            }).addCase(getProductsByCategoryAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             }).addCase(getProductAsync.pending, (state) => {
@@ -65,12 +67,19 @@ export const productsSlice = createSlice({
             }).addCase(getProductAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
-            }).addCase(searchProductsAsync.pending, (state) => {
+            }).addCase(getProductReviewsAsync.pending, (state) => {
                 state.isLoading = true;
-            }).addCase(searchProductsAsync.fulfilled, (state, action) => {
+            }).addCase(getProductReviewsAsync.fulfilled, (state, action) => {
                 state.isLoading = false;
-                state.products = action.payload.result;
-            }).addCase(searchProductsAsync.rejected, (state, action) => {
+                state.productReviews = action.payload.result;
+            }).addCase(getProductReviewsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(addProductReviewAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(addProductReviewAsync.fulfilled, (state) => {
+                state.isLoading = false;
+            }).addCase(addProductReviewAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
             })

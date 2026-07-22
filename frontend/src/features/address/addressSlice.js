@@ -5,15 +5,25 @@ import { userLogoutAsync } from "../auth/authSlice";
 import { errorState, fulfilledState, loadingState } from "./Utils/addressHelper";
 import { AddOrUpdateObjectArraySet, deleteFromObjectArraySet } from "../../utils/ObjectArraySet ";
 
+
 const initialState = {
     addressList: null,
     selectedAddress: null,
     error: null,
     isLoading: false,
     isRedirectAllowed: null,
+    lastFetched: null
 }
 
-export const addressListDataFetchAsync = createAsyncThunk('/address/data/fetch', async () => {
+export const addressListDataFetchAsync = createAsyncThunk('/address/data/fetch', async (_, { getState }) => {
+
+    const { addressList, lastFetched } = getState().address;
+
+    // Check if addressList is already fetched and not expired
+    if (addressList && lastFetched && (Date.now() - lastFetched < 60000)) { // 1 minute cache
+        return { result: addressList, timestamp: lastFetched, isCached: true };
+    }
+
     const response = await handelDataFetch('/api/v2/user/address', 'GET');
     return response.data;
 });
@@ -68,24 +78,30 @@ export const addressSlice = createSlice({
             })
 
 
-            .addCase(addressListDataFetchAsync.pending, (state) => {
+            .addCase(addressListDataFetchAsync.pending, (state, action) => {
                 //^ PENDING: ADDRESS_DATA_FETCHING
-
-                loadingState(state);
-
+                state.isLoading = true;
+                state.error = null;
             })
             .addCase(addressListDataFetchAsync.fulfilled, (state, action) => {
                 //* FULFILLED: ADDRESS_DATA_FETCHING
 
-                state.addressList = action.payload.result;
+                if (action.payload?.isCached) {
+                    state.lastFetched = action.payload.timestamp;
+                } else {
+                    state.lastFetched = Date.now();
+                }
 
-                fulfilledState(state, false);
+                state.addressList = action.payload.result;
+                state.isLoading = false;
+                state.error = null;
 
             })
             .addCase(addressListDataFetchAsync.rejected, (state, action) => {
                 //! REJECTED: ADDRESS_DATA_FETCHING
 
-                errorState(state, action);
+                state.isLoading = false;
+                state.error = action.error.message;
 
                 message.error(action.error.message);
 
@@ -105,7 +121,7 @@ export const addressSlice = createSlice({
                 // const addressIndex = state.addressList.findIndex(address => address._id === action.payload.result._id);
                 // state.addressList.splice(addressIndex, 1);
 
-                if(state.selectedAddress !== null && state.selectedAddress._id === action.payload.result._id) {
+                if (state.selectedAddress !== null && state.selectedAddress._id === action.payload.result._id) {
                     state.selectedAddress = null;
                 }
 
@@ -123,11 +139,10 @@ export const addressSlice = createSlice({
             })
 
 
-            .addCase(addNewAddressAsync.pending, (state) => {
+            .addCase(addNewAddressAsync.pending, (state, action) => {
                 //^ PENDING: ADDRESS_ADD_NEW_DATA
 
                 loadingState(state);
-
             })
             .addCase(addNewAddressAsync.fulfilled, (state, action) => {
                 //* FULFILLED: ADDRESS_ADD_NEW_DATA
