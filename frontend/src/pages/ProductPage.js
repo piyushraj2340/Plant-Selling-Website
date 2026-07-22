@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react'
 import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getProductAsync } from '../features/products/productsSlice';
+import { getProductAsync, fetchProductCouponsAsync } from '../features/products/productsSlice';
 import ProductImages from '../features/products/Components/ProductImages';
 import ProductInfo from '../features/products/Components/ProductInfo';
 import ProductSummary from '../features/products/Components/ProductSummary';
@@ -21,6 +21,7 @@ const ProductPage = () => {
 
   useEffect(() => {
     dispatch(getProductAsync(_id));
+    dispatch(fetchProductCouponsAsync(_id));
   }, []);
 
   return (
@@ -32,9 +33,15 @@ const ProductPage = () => {
               <ProductImages />
               <ProductInfo />
               <ProductSummary />
+            </div>
+            <div className='row'>
+              <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Description</div>
+              <div className="card-text" dangerouslySetInnerHTML={{ __html: product.description }}></div>
+            </div>
+            <div className="row">
               <ProductReviews plantId={_id} />
             </div>
-          </div >
+          </div>
           :
           <NoDataFound link="/products" message="Back To Products" />
       }

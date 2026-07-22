@@ -1,6 +1,8 @@
 const plantsModel = require('../model/nurseryModel/plants');
 const Review = require('../model/nurseryModel/review');
 const Order = require('../model/checkoutModel/orders');
+const PromotionService = require('../utils/promotionEngine');
+const Coupon = require('../model/nurseryModel/coupon');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
@@ -247,6 +249,41 @@ exports.getReviews = async (req, res, next) => {
         const plantId = req.params.id;
         const reviews = await Review.find({ plant: plantId, status: 'Approved' }).populate('user', 'name avatar');
         res.status(200).json({ status: true, message: "Reviews fetched", result: reviews });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.getProductCoupons = async (req, res, next) => {
+    try {
+        const id = req.params.id;
+        const product = await plantsModel.findById(id).populate('category');
+        if (!product) {
+            const error = new Error("Product not found");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        const priceAfterDiscount = product.price - (product.discount / 100) * product.price;
+
+        const cartContext = {
+            total: priceAfterDiscount,
+            items: [
+                {
+                    product: { _id: product._id, category: product.category },
+                    price: priceAfterDiscount,
+                    quantity: 1
+                }
+            ]
+        };
+
+        const result = await PromotionService.getApplicableCoupons(cartContext, null);
+
+        if (!result.success) {
+            return res.status(400).json({ status: false, message: result.message });
+        }
+
+        res.status(200).json({ status: true, message: "Coupons retrieved", coupons: result.coupons });
     } catch (error) {
         next(error);
     }
