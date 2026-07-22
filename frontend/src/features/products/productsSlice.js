@@ -12,6 +12,7 @@ const initialState = {
         limit: null
     },
     productReviews: [],
+    productCoupons: [],
     isLoading: false
 }
 
@@ -32,6 +33,11 @@ export const getProductAsync = createAsyncThunk('products/fetchProduct', async (
 
 export const getProductReviewsAsync = createAsyncThunk('products/fetchReviews', async (plantId) => {
     const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/reviews`, 'GET');
+    return response.data;
+});
+
+export const fetchProductCouponsAsync = createAsyncThunk('products/fetchCoupons', async (plantId) => {
+    const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/coupons`, 'GET');
     return response.data;
 });
 
@@ -83,6 +89,16 @@ export const productsSlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
             })
+            .addCase(fetchProductCouponsAsync.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(fetchProductCouponsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.productCoupons = action.payload.coupons || [];
+            })
+            .addCase(fetchProductCouponsAsync.rejected, (state) => {
+                state.isLoading = false;
+            });
     }
 });
 
