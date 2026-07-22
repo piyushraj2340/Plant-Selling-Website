@@ -31,7 +31,7 @@ const ProductsTable = () => {
     key: plant._id || index,
     products: {
       productName: plant.plantName,
-      description: plant.description?.substring(0, 50) + "...",
+      description: plant.description ? plant.description.replace(/<[^>]*>?/gm, '').substring(0, 50) + "..." : "",
       imgLink: plant.images && plant.images.length > 0 ? plant.images[0].url : "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
       link: `/product/${plant._id}`,
     },
@@ -231,7 +231,7 @@ const ProductsTable = () => {
         <Col>
           <div className="head d-flex align-items-center gap-3">
             <h5 className='h5 fw-bolder m-0'>Products</h5>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
+            <Button type="primary" style={{minWidth: "160px"}} icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
               Add New Plant
             </Button>
           </div>

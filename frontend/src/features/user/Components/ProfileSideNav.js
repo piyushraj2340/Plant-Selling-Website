@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import useUserData from '../../../hooks/useUserData';
 
 const ProfileSideNav = () => {
-    const {userData:user} = useUserData();
+    const { userData: user } = useUserData();
 
     return (
         <div className="card mb-4 mb-lg-0">
@@ -30,7 +30,9 @@ const ProfileSideNav = () => {
                     </Link>
                     <Link to={user.role.includes("seller") ? "/nursery" : "/nursery/create"}>
                         <li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <i className="fas fa-tree fa-lg text-warning"></i>
+                            <i class="material-symbols-outlined text-warning">
+                                compost
+                            </i>
                             <p className="mb-0">{user.role.includes("seller") ? "Manage Your Nursery" : "Add Your Nursery"}</p>
                         </li>
                     </Link>

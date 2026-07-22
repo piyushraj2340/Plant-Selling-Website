@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
 
 const { Option } = Select;
-const { TextArea } = Input;
 
 const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categories, nurseries, loading }) => {
     const [form] = Form.useForm();
@@ -192,8 +193,9 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     name="description"
                     label="Description"
                     rules={[{ required: true, message: 'Please enter plant description' }]}
+                    getValueFromEvent={(content) => content}
                 >
-                    <TextArea rows={4} placeholder="Enter description..." />
+                    <ReactQuill theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
                 </Form.Item>
 
                 <Form.Item label="Plant Images (Max 3, Max 5MB each)">
