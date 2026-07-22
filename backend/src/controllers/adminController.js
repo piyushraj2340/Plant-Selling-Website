@@ -1311,9 +1311,14 @@ const adminController = {
             const Plant = require('../model/nurseryModel/plants');
             const Nursery = require('../model/nurseryModel/nursery');
             const { uploadImages } = require('../utils/uploadImages');
+            const sanitizeHtml = require('sanitize-html');
 
             const { body, files } = req;
             
+            if (body.description) {
+                body.description = sanitizeHtml(body.description);
+            }
+
             if (!body.nursery) {
                 const error = new Error("Nursery ID is required");
                 error.statusCode = 400;
@@ -1364,9 +1369,14 @@ const adminController = {
         try {
             const Plant = require('../model/nurseryModel/plants');
             const { uploadImages, deleteResourcesByPrefix } = require('../utils/uploadImages');
+            const sanitizeHtml = require('sanitize-html');
 
             const plantId = req.params.id;
             const { body, files } = req;
+
+            if (body.description) {
+                body.description = sanitizeHtml(body.description);
+            }
 
             const plant = await Plant.findById(plantId);
             if (!plant) {

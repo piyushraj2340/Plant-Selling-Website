@@ -81,11 +81,11 @@ const handelRetryRequest = async (url, method, body, token) => {
     const response = await fetch(url, {
         method,
         headers: {
-            "Content-Type": "application/json",
+            ...(body && typeof body.append === 'function' ? {} : { "Content-Type": "application/json" }),
             Authorization: `Bearer ${token}`,
             Accept: "application/json",
         },
-        body: body ? JSON.stringify(body) : null,
+        body: (body && typeof body.append === 'function') ? body : (body ? JSON.stringify(body) : null)
     });
 
     const data = await response.json();
@@ -117,13 +117,12 @@ const handelDataFetch = async (path, method, body) => {
                 const res = await fetch(apiUrl, {
                     method,
                     headers: {
-                        "Content-Type": "application/json",
-                        // Authorization: `Bearer ${accessToken}`,
+                        ...(body && typeof body.append === 'function' ? {} : { "Content-Type": "application/json" }),
                         Authorization: bearer,
                         Accept: "application/json",
                     },
                     credentials: 'include',
-                    body: body ? JSON.stringify(body) : null
+                    body: (body && typeof body.append === 'function') ? body : (body ? JSON.stringify(body) : null)
                 });
 
                 const data = await res.json();

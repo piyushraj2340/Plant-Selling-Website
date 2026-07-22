@@ -41,7 +41,7 @@ const ProductInfo = () => {
                 <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Category</div>
                 <div className="card-text">{product.category ? (product.category.name || "N/A") : "N/A"}</div>
                 <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Description</div>
-                <div className="card-text">{product.description}</div>
+                <div className="card-text" dangerouslySetInnerHTML={{ __html: product.description }}></div>
             </div>
         </div>
     )

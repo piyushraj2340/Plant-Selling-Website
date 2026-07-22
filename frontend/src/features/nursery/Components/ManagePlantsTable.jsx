@@ -32,7 +32,7 @@ const ManagePlantsTable = () => {
         key: plant._id || index,
         products: {
             productName: plant.plantName,
-            description: plant.description?.substring(0, 50) + "...",
+            description: plant.description ? plant.description.replace(/<[^>]*>?/gm, '').substring(0, 50) + "..." : "",
             imgLink: plant.images && plant.images.length > 0 ? plant.images[0].url : "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
             link: `/product/${plant._id}`,
         },

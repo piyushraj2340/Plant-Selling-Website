@@ -5,7 +5,12 @@ const { default: mongoose } = require('mongoose');
 
 exports.addNewPlant = async (req, res, next) => {
     try {
+        const sanitizeHtml = require('sanitize-html');
         const { user, role, nursery, body, files } = req;
+
+        if (body.description) {
+            body.description = sanitizeHtml(body.description);
+        }
 
         if (!nursery || !role.includes('seller')) {
             const error = new Error("You are not allowed to access this route");
@@ -143,7 +148,12 @@ exports.getPlantById = async (req, res, next) => {
 
 exports.updatePlantById = async (req, res, next) => {
     try {
-        const { user, role, nursery } = req;
+        const sanitizeHtml = require('sanitize-html');
+        const { user, nursery, role, body, files } = req;
+
+        if (body.description) {
+            body.description = sanitizeHtml(body.description);
+        }
 
         if (!nursery || !role.includes('seller')) {
             const error = new Error("You are not allowed to access this route");
