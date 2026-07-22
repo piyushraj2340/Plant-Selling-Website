@@ -34,9 +34,11 @@ const ProductPage = () => {
               <ProductInfo />
               <ProductSummary />
             </div>
-            <div className='row'>
-              <div className="text-muted" style={{ fontSize: "14px", margin: "0" }}>Description</div>
-              <div className="card-text" dangerouslySetInnerHTML={{ __html: product.description }}></div>
+            <div className='row mt-4 mb-4 px-3'>
+              <div className="col-12">
+                <h5 className="text-muted border-bottom pb-2 mb-3" style={{ fontSize: "16px", fontWeight: "600" }}>Description</h5>
+                <div className="card-text text-secondary" style={{ lineHeight: "1.8", fontSize: "15px" }} dangerouslySetInnerHTML={{ __html: product.description }}></div>
+              </div>
             </div>
             <div className="row">
               <ProductReviews plantId={_id} />
