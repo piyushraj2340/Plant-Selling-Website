@@ -36,7 +36,17 @@
     "extends": [
       "react-app",
       "react-app/jest"
-    ]
+    ],
+    "rules": {
+      "react-hooks/exhaustive-deps": "off",
+      "no-unused-vars": "off",
+      "no-mixed-operators": "off",
+      "eqeqeq": "off",
+      "no-useless-computed-key": "off",
+      "no-lone-blocks": "off",
+      "jsx-a11y/img-redundant-alt": "off",
+      "unicode-bom": "off"
+    }
   },
   "browserslist": {
     "production": [

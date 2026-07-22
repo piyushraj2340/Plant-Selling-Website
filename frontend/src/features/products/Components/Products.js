@@ -107,7 +107,7 @@ const Products = () => {
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>price</p>
                                             <p className="card-text">₹ {Math.round(elem.price - elem.discount / 100 * elem.price)}</p>
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>category</p>
-                                            <p className="card-text">{elem.category ? elem.category.name : "N/A"}</p>
+                                            <p className="card-text">{elem.category ? (elem.category.name || "N/A") : "N/A"}</p>
                                             <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>ratings</p>
                                             <p className="card-text">
                                                 <Rating
