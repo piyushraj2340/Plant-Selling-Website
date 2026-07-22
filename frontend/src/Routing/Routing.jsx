@@ -11,10 +11,9 @@ import LogoutPage from "../pages/LogoutPage";
 import ProfilePage from "../pages/ProfilePage";
 import NurseryProfilePage from "../pages/NurseryProfilePage";
 //TODO: ADD NURSERY PUBLIC PROFILE PAGE HERE
+import ManagePlantsPage from "../pages/ManagePlantsPage";
 import CreateNurseryPage from "../pages/CreateNurseryPage";
 import EditNurseryPage from "../pages/EditNurseryPage";
-import AddNewPlants from "../pages/AddNewPlants";
-import EditPlantsPage from "../pages/EditPlantsPage";
 import AddressPage from "../pages/AddressPage";
 import AddNewAddressPage from "../pages/AddNewAddressPage";
 import EditAddressPage from "../pages/EditAddressPage";
@@ -78,11 +77,10 @@ const Routing = () => {
                 <Route exact path="/account/ResetYourPassword/:token" element={<ResetYourPasswordPage />} />
                 <Route exact path="/account/twoFactorAuthentication/:token" element={<TwoFactorAuthenticationPage />} />
                 <Route exact path="/nursery" element={<NurseryProfilePage />} />
+                <Route exact path="/nursery/plants" element={<ManagePlantsPage />} />
                 <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
                 <Route exact path="/nursery/create" element={<CreateNurseryPage />} />
                 <Route exact path="/nursery/update" element={<EditNurseryPage />} />
-                <Route exact path="/nursery/plant/new" element={<AddNewPlants />} />
-                <Route exact path="/nursery/plant/update/:id" element={<EditPlantsPage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
                 <Route exact path="/address" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
                 <Route exact path="/address/add" element={<ProtectedRoute><AddNewAddressPage /></ProtectedRoute>} />
                 <Route exact path="/address/update/:id" element={<ProtectedRoute><EditAddressPage /></ProtectedRoute>} />

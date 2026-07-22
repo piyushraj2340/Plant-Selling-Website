@@ -135,6 +135,17 @@ const adminController = {
         }
     },
 
+    // Get all nurseries
+    getNurseries: async (req, res, next) => {
+        try {
+            const Nursery = require('../model/nurseryModel/nursery');
+            const nurseries = await Nursery.find({}).select('nurseryName user');
+            res.status(200).json({ status: true, nurseries });
+        } catch (error) {
+            next(error);
+        }
+    },
+
     // Delete a single user
     deleteUser: async (req, res, next) => {
         try {
@@ -1289,6 +1300,108 @@ const adminController = {
             }
 
             res.status(200).json({ status: true, message: "Contact message deleted successfully", id });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Admin Add Plant
+    adminAddPlant: async (req, res, next) => {
+        try {
+            const Plant = require('../model/nurseryModel/plants');
+            const Nursery = require('../model/nurseryModel/nursery');
+            const { uploadImages } = require('../utils/uploadImages');
+
+            const { body, files } = req;
+            
+            if (!body.nursery) {
+                const error = new Error("Nursery ID is required");
+                error.statusCode = 400;
+                throw error;
+            }
+
+            const nurseryDoc = await Nursery.findById(body.nursery);
+            if (!nurseryDoc) {
+                const error = new Error("Nursery not found");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            body.user = nurseryDoc.user; // Inherit the user from the nursery
+
+            const images = [files?.image_0, files?.image_1, files?.image_2].filter(Boolean);
+            
+            const plant = new Plant(body);
+
+            if (images.length > 0) {
+                const resultImage = await uploadImages(images, {
+                    folder: `PlantSeller/user/${body.user}/nursery/${body.nursery}/plants/${plant._id}`,
+                    width: 550,
+                    height: 650,
+                    crop: "fit"
+                });
+
+                plant.images = resultImage.map((elem) => ({
+                    public_id: elem.public_id,
+                    url: elem.secure_url
+                }));
+
+                plant.imageList = resultImage.map((elem) => ({
+                    public_id: elem.public_id,
+                    url: elem.url
+                }));
+            }
+
+            await plant.save();
+            res.status(201).json({ status: true, message: "New plant added successfully by admin.", plant });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    // Admin Update Plant
+    adminUpdatePlant: async (req, res, next) => {
+        try {
+            const Plant = require('../model/nurseryModel/plants');
+            const { uploadImages, deleteResourcesByPrefix } = require('../utils/uploadImages');
+
+            const plantId = req.params.id;
+            const { body, files } = req;
+
+            const plant = await Plant.findById(plantId);
+            if (!plant) {
+                const error = new Error("Plant not found");
+                error.statusCode = 404;
+                throw error;
+            }
+            
+            const newImages = [files?.image_0, files?.image_1, files?.image_2].filter(Boolean);
+
+            if (newImages.length > 0) {
+                if (plant.images && plant.images.length > 0) {
+                    await deleteResourcesByPrefix(`PlantSeller/user/${plant.user}/nursery/${plant.nursery}/plants/${plant._id}`);
+                }
+
+                const resultImage = await uploadImages(newImages, {
+                    folder: `PlantSeller/user/${plant.user}/nursery/${plant.nursery}/plants/${plant._id}`,
+                    width: 550,
+                    height: 650,
+                    crop: "fit"
+                });
+
+                body.images = resultImage.map((elem) => ({
+                    public_id: elem.public_id,
+                    url: elem.secure_url
+                }));
+
+                body.imageList = resultImage.map((elem) => ({
+                    public_id: elem.public_id,
+                    url: elem.url
+                }));
+            }
+
+            const updatedPlant = await Plant.findByIdAndUpdate(plantId, body, { new: true, runValidators: true });
+            res.status(200).json({ status: true, message: "Plant updated successfully by admin.", plant: updatedPlant });
         } catch (error) {
             next(error);
         }

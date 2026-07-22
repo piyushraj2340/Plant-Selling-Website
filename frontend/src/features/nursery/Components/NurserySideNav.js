@@ -15,6 +15,14 @@ const NurserySideNav = ({ isCollapseSideNav, setIsCollapseSideNav }) => {
             <div className="mb-4 mb-lg-0">
                 <div className="p-0">
                     <div className="">
+                        <Link to={"/nursery"}>
+                            <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Manage Your Nursery'>
+                                <i class="material-symbols-outlined text-warning">
+                                    compost
+                                </i>
+                                <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Manage Your Nursery</p>
+                            </div>
+                        </Link>
                         <Link to={"/nursery/plants"}>
                             <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Manage Your Plants'>
                                 <i className="text-warning material-symbols-outlined">forest</i>
