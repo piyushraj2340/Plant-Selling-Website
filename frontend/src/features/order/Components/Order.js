@@ -181,8 +181,7 @@ const Order = () => {
                                     </div>
                                     <div className="card-body p-3 p-md-4 mb-3">
                                         {
-                                            order.orderItems && order.orderItems.map(items => {
-
+                                            order.vendorOrders && order.vendorOrders.map(vendorOrder => {
                                                 const stepsOptions = [
                                                     {
                                                         title: order.payment.status === 'pending' ? "Order Pending" : "Order Placed",
@@ -190,43 +189,46 @@ const Order = () => {
                                                         description: <span className='text-muted'>{formatTimestamp(order.orderAt)} <br /> <i className="fw-bold">{order.payment.status === 'pending' && order.payment.message}</i></span>
                                                     },
                                                     {
-                                                        title: 'Order Shipped',
+                                                        title: 'Dispatched',
                                                         icon: <span className='	fas fa-shipping-fast'></span>,
-                                                        description: order.orderStatus.state === "shipped" && <span className='text-muted'>{formatTimestamp(order.orderStatus.statusAt)} <br /> {order.orderStatus.message}</span>
+                                                        description: ['Approved', 'Dispatched'].includes(vendorOrder.orderStatus?.status) && <span className='text-muted'>{formatTimestamp(vendorOrder.orderStatus.statusAt)} <br /> {vendorOrder.orderStatus.message}</span>
                                                     },
                                                     {
-                                                        title: 'Order Delivered',
+                                                        title: 'Delivered',
                                                         icon: <span className='fas fa-home'></span>,
-                                                        description: order.orderStatus.state === "delivered" && <span className='text-muted'>{formatTimestamp(order.orderStatus.statusAt)} <br /> {order.orderStatus.message}</span>
+                                                        description: vendorOrder.orderStatus?.status === "Delivered" && <span className='text-muted'>{formatTimestamp(vendorOrder.orderStatus.statusAt)} <br /> {vendorOrder.orderStatus.message}</span>
                                                     },
-                                                ]
+                                                ];
 
                                                 let activeStep = 0;
 
-                                                if (order.orderStatus.status === 'delivered') {
+                                                if (vendorOrder.orderStatus?.status === 'Delivered') {
                                                     activeStep = 2;
-                                                } else if (order.orderStatus.status === 'shipped') {
+                                                } else if (['Approved', 'Dispatched'].includes(vendorOrder.orderStatus?.status)) {
                                                     activeStep = 1;
                                                 } else {
                                                     activeStep = 0;
                                                 }
 
-                                                return (
-                                                    <div key={items._id} className='mb-4 pb-4 border-bottom'>
-                                                        <div className="d-flex flex-row">
-                                                            <div className="flex-fill">
-                                                                <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
-                                                                <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
-                                                                <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({order.payment.paymentMethods}) </span></h4>
-                                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(order.orderStatus.statusAt)}</span></p>
+                                                return vendorOrder.orderItems && vendorOrder.orderItems.map(items => {
+                                                    return (
+                                                        <div key={items._id} className='mb-4 pb-4 border-bottom'>
+                                                            <div className="d-flex flex-row">
+                                                                <div className="flex-fill">
+                                                                    <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
+                                                                    <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
+                                                                    <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({order.payment.paymentMethods}) </span></h4>
+                                                                    <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(vendorOrder.orderStatus?.statusAt)}</span></p>
+                                                                    <p className="text-muted">Vendor Status: <span className={`badge ${vendorOrder.orderStatus?.status === 'Cancelled' ? 'bg-danger' : 'bg-primary'}`}>{vendorOrder.orderStatus?.status || 'Processing'}</span></p>
+                                                                </div>
+                                                                <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
+                                                                    <img className="align-self-center img-fluid" src={items.images?.url} width="250" alt="product" />
+                                                                </div>
                                                             </div>
-                                                            <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
-                                                                <img className="align-self-center img-fluid" src={items.images.url} width="250" alt="product" />
-                                                            </div>
+                                                            <Steps items={stepsOptions} current={activeStep} labelPlacement='vertical' />
                                                         </div>
-                                                        <Steps items={stepsOptions} current={activeStep} labelPlacement='vertical' />
-                                                    </div>
-                                                )
+                                                    )
+                                                })
                                             })
                                         }
                                     </div>

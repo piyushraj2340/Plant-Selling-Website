@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const ordersModel = require('../../model/checkoutModel/orders');
 const cartModel = require('../../model/checkoutModel/cart');
 const OrderItem = require('../../model/checkoutModel/orderItem');
+const VendorOrder = require('../../model/checkoutModel/vendorOrder');
 const { deleteMultipleData } = require('../../utils/redisService');
 exports.createOrder = async (req, res, next) => {
     const session = await mongoose.startSession();
@@ -28,29 +29,77 @@ exports.createOrder = async (req, res, next) => {
             user: req.user._id,
             shippingInfo,
             payment,
-            pricing: cart.pricing
+            pricing: cart.pricing,
+            overallStatus: "Processing"
         });
         await newOrder.save({ session });
 
-        // 3. Create order items from cart items
-        const orderItemIds = [];
+        // 3. Group cart items by nursery
+        const itemsByNursery = {};
         for (const item of cart.cartItems) {
-            const newItem = new OrderItem({
-                order: newOrder._id,
-                plant: item.plant._id,
-                nursery: item.nursery,
-                nurseryName: item.nursery?.nurseryName || "Nursery", // Populated from nursery
-                plantName: item.plant.plantName,
-                images: item.plant.images[0],
-                price: item.plant.price,
-                discount: item.plant.discount,
-                quantity: item.quantity
-            });
-            await newItem.save({ session });
-            orderItemIds.push(newItem._id);
+            const nurseryId = item.nursery && item.nursery._id ? item.nursery._id.toString() : "UnknownNursery";
+            if (!itemsByNursery[nurseryId]) {
+                itemsByNursery[nurseryId] = {
+                    nurseryData: item.nursery,
+                    items: []
+                };
+            }
+            itemsByNursery[nurseryId].items.push(item);
         }
 
-        newOrder.orderItems = orderItemIds;
+        const nurseryCount = Object.keys(itemsByNursery).length;
+        const deliveryFeePerNursery = cart.pricing && cart.pricing.deliveryFee ? (cart.pricing.deliveryFee / nurseryCount) : 0;
+        
+        const vendorOrderIds = [];
+
+        for (const [nurseryId, nurseryGroup] of Object.entries(itemsByNursery)) {
+            let subTotal = 0;
+            
+            // Calculate subtotal for this vendor
+            for (const item of nurseryGroup.items) {
+                const price = item.plant.price || 0;
+                const discount = item.plant.discount || 0;
+                const quantity = item.quantity || 1;
+                const itemPriceAfterDiscount = price - Math.round((price * discount) / 100);
+                subTotal += (itemPriceAfterDiscount * quantity);
+            }
+
+            const newVendorOrder = new VendorOrder({
+                order: newOrder._id,
+                nursery: nurseryId !== "UnknownNursery" ? nurseryId : null,
+                pricing: {
+                    subTotal: subTotal,
+                    shippingFee: deliveryFeePerNursery,
+                    nurseryDiscount: 0,
+                    netAmountOwed: subTotal + deliveryFeePerNursery
+                }
+            });
+
+            await newVendorOrder.save({ session });
+            vendorOrderIds.push(newVendorOrder._id);
+
+            const orderItemIds = [];
+            for (const item of nurseryGroup.items) {
+                const newItem = new OrderItem({
+                    vendorOrder: newVendorOrder._id,
+                    plant: item.plant._id,
+                    nursery: item.nursery && item.nursery._id ? item.nursery._id : null,
+                    nurseryName: item.nursery?.nurseryName || "Nursery",
+                    plantName: item.plant.plantName,
+                    images: item.plant.images[0],
+                    price: item.plant.price,
+                    discount: item.plant.discount,
+                    quantity: item.quantity
+                });
+                await newItem.save({ session });
+                orderItemIds.push(newItem._id);
+            }
+
+            newVendorOrder.orderItems = orderItemIds;
+            await newVendorOrder.save({ session });
+        }
+
+        newOrder.vendorOrders = vendorOrderIds;
         const result = await newOrder.save({ session });
         await session.commitTransaction();
 
@@ -82,23 +131,48 @@ exports.getOrderHistory = async (req, res, next) => {
 
         const skipData = (page - 1) * limit;
 
-        const total = await ordersModel.countDocuments({
-            user: req.user, orderAt: { $gte: endDate }, $or: [
-                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
-                { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
-                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
-                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
-            ]
-        });
+        let orderIdsFromSearch = [];
+        if (orderSearch) {
+            const OrderItem = require('../../model/checkoutModel/orderItem');
+            const searchRegex = new RegExp(orderSearch, 'i');
+            const matchedItems = await OrderItem.find({
+                $or: [
+                    { plantName: searchRegex },
+                    { nurseryName: searchRegex }
+                ]
+            }).populate('vendorOrder');
 
-        const result = await ordersModel.find({
-            user: req.user, orderAt: { $gte: endDate }, $or: [
-                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, 
-                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
-            ]
-        }).populate('orderItems').limit(limit).skip(skipData).select('-payment.paymentId -delivery -shippingInfo -pricing').sort({ _id: -1 });
+            orderIdsFromSearch = matchedItems
+                .filter(item => item.vendorOrder && item.vendorOrder.order)
+                .map(item => item.vendorOrder.order.toString());
+        }
+
+        const queryObj = { user: req.user, orderAt: { $gte: endDate } };
+        
+        if (orderSearch) {
+            const validIds = [...orderIdsFromSearch];
+            if (mongoose.isValidObjectId(orderSearch)) {
+                validIds.push(orderSearch);
+            }
+            queryObj.$or = [
+                { _id: { $in: validIds } },
+                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } }
+            ];
+        }
+
+        const total = await ordersModel.countDocuments(queryObj);
+
+        const result = await ordersModel.find(queryObj)
+            .populate({
+                path: 'vendorOrders',
+                populate: {
+                    path: 'orderItems'
+                }
+            })
+            .limit(limit)
+            .skip(skipData)
+            .select('-payment.paymentId -shippingInfo -pricing')
+            .sort({ _id: -1 });
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -125,7 +199,14 @@ exports.getOrderById = async (req, res, next) => {
     try {
         const _id = req.params.id;
 
-        const result = await ordersModel.findOne({ _id, user: req.user }).populate('orderItems').select('-payment.paymentId -delivery');
+        const result = await ordersModel.findOne({ _id, user: req.user })
+            .populate({
+                path: 'vendorOrders',
+                populate: {
+                    path: 'orderItems'
+                }
+            })
+            .select('-payment.paymentId');
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -232,7 +313,16 @@ exports.confirmOrderPayment = async (req, res, next) => {
 
 exports.getLastOrder = async (req, res, next) => {
     try {
-        const result = await ordersModel.find({ user: req.user }).sort({ _id: -1 }).populate('orderItems').limit(1).select('-payment.paymentId -delivery -shippingInfo -pricing');
+        const result = await ordersModel.find({ user: req.user })
+            .sort({ _id: -1 })
+            .populate({
+                path: 'vendorOrders',
+                populate: {
+                    path: 'orderItems'
+                }
+            })
+            .limit(1)
+            .select('-payment.paymentId -shippingInfo -pricing');
 
         if (!result) {
             const error = new Error("Order not found.");

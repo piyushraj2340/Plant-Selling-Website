@@ -8,25 +8,15 @@ const orderSchema = new mongoose.Schema({
         required: [true, "User Id is required."],
         immutable: true
     },
-    orderItems: [
+    vendorOrders: [
         {
             type: mongoose.Schema.ObjectId,
-            ref: "orderItem"
+            ref: "vendorOrder"
         }
     ],
-    orderStatus: {
-        status: {
-            type: String,
-            default: "Processing"
-        },
-        message: {
-            type: String,
-            default: "Order is processing."
-        },
-        statusAt: {
-            type: Date,
-            default: Date.now
-        }
+    overallStatus: {
+        type: String,
+        default: "Processing"
     },
     shippingInfo: {
         name: {
@@ -110,14 +100,7 @@ const orderSchema = new mongoose.Schema({
             required: true,
         }
     },
-    delivery: {
-        delivery: {
-            type: mongoose.Schema.ObjectId,
-            ref: "delivery",
-        },
-        deliveryPersonName: String,
-        deliveredAt: Date,
-    },
+
 });
 
 const orders = new mongoose.model('orders', orderSchema);
