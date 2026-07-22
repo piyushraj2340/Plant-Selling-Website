@@ -3,18 +3,22 @@ import { useDispatch } from 'react-redux'
 import IncomeBarGraph from './IncomeBarGraph'
 import IncomePieChart from './IncomePieChart'
 import IncomeTable from './IncomeTable'
-import { adminIncomeAsync } from '../adminSlice'
+import { adminIncomeBarChartAsync, adminIncomePieChartAsync } from '../adminSlice'
 
 const Income = () => {
   const dispatch = useDispatch();
   const currentYear = new Date().getFullYear();
-  const [year, setYear] = useState(currentYear);
-  const [search, setSearch] = useState('');
-  const [filter, setFilter] = useState('All');
+  const [selectedYear, setSelectedYear] = useState(currentYear);
+
+  const yearOptions = Array.from(
+      { length: currentYear - 2020 + 1 },
+      (_, i) => 2020 + i
+  );
 
   useEffect(() => {
-    dispatch(adminIncomeAsync({ year, search, filter }));
-  }, [dispatch, year, search, filter]);
+    dispatch(adminIncomeBarChartAsync(selectedYear));
+    dispatch(adminIncomePieChartAsync(selectedYear));
+  }, [dispatch, selectedYear]);
 
   return (
     <>
@@ -27,11 +31,17 @@ const Income = () => {
                 <small className="small fw-light text-secondary" style={{ fontSize: "12px" }}>Monthly Income</small>
               </div>
               <div className="right">
-                <select name="filterYear" id="filterYear" value={year} onChange={(e) => setYear(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
-                  <option value={currentYear - 3}>{currentYear - 3}</option>
-                  <option value={currentYear - 2}>{currentYear - 2}</option>
-                  <option value={currentYear - 1}>{currentYear - 1}</option>
-                  <option value={currentYear}>{currentYear}</option>
+                <select 
+                    name="filterYear" 
+                    id="filterYear" 
+                    value={selectedYear} 
+                    onChange={(e) => setSelectedYear(e.target.value)} 
+                    className="form-select" 
+                    style={{ fontSize: "12px" }}
+                >
+                  {yearOptions.map(year => (
+                      <option key={year} value={year}>{year}</option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -54,21 +64,10 @@ const Income = () => {
             <div className="head">
               <h5 className='h5 fw-bolder'>Transaction History </h5>
             </div>
-            <div className="tools d-flex align-items-center justify-content-between justify-content-md-end col-12 col-md-4">
-              <div className="search me-1">
-                <input type="search" name="search" id="search" className="form-control" placeholder="🔍 Search Order ID..." style={{ fontSize: "14px" }} value={search} onChange={(e) => setSearch(e.target.value)} />
-              </div>
-              <div className="select ms-1">
-                <select name="filterStatus" id="filterStatus" value={filter} onChange={(e) => setFilter(e.target.value)} className="form-select" style={{ fontSize: "12px" }}>
-                  <option value="All">All</option>
-                  <option value="Monthly">Monthly</option>
-                  <option value="Quarterly">Quarterly</option>
-                  <option value="Yearly">Yearly</option>
-                </select>
-              </div>
-            </div>
           </div>
-          <IncomeTable />
+          <div className="table w-100 p-0 m-0">
+            <IncomeTable />
+          </div>
         </div>
       </div>
     </>

@@ -37,6 +37,8 @@ router.patch('/orders/bulk-status', adminController.bulkUpdateOrderItemStatus);
 router.patch('/orders/:orderId/items/:itemId/status', adminController.updateOrderItemStatus);
 
 router.get('/income', adminController.getIncome);
+router.get('/income/charts/bar', adminController.getIncomeBarChart);
+router.get('/income/charts/pie', adminController.getIncomePieChart);
 
 // Coupons Endpoints
 router.post('/coupons', adminController.createCoupon);

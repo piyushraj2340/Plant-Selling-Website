@@ -19,8 +19,7 @@ ChartJS.register(
 )
 
 const IncomeBarGraph = () => {
-    const { incomeData } = useSelector(state => state.admin);
-    const barData = incomeData?.stats?.barChart || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+    const barData = useSelector(state => state.admin.incomeBarChartData);
 
     return (
         <div className='col-12' style={{ width: "100%", height: "250px" }}>

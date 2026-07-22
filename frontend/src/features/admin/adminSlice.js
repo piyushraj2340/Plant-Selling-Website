@@ -34,10 +34,11 @@ const initialState = {
     reviewsLineChartData: [],
     reviewsPieChartData: { labels: [], data: [] },
     incomeData: {
-        stats: { barChart: [], pieChart: { labels: [], data: [] } },
         orders: [],
         total: 0
     },
+    incomeBarChartData: [],
+    incomePieChartData: { labels: [], data: [] },
     couponsData: {
         coupons: [],
         total: 0
@@ -75,6 +76,18 @@ export const adminOrdersPieChartAsync = createAsyncThunk('/admin/ordersPieChart'
 export const adminIncomeAsync = createAsyncThunk('/admin/income', async (params = {}) => {
     const queryStr = new URLSearchParams(params).toString();
     const response = await handelDataFetch(`/api/v2/admin/income?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const adminIncomeBarChartAsync = createAsyncThunk('/admin/incomeBarChart', async (year) => {
+    const url = year ? `/api/v2/admin/income/charts/bar?year=${year}` : `/api/v2/admin/income/charts/bar`;
+    const response = await handelDataFetch(url, 'GET');
+    return response.data;
+});
+
+export const adminIncomePieChartAsync = createAsyncThunk('/admin/incomePieChart', async (year) => {
+    const url = year ? `/api/v2/admin/income/charts/pie?year=${year}` : `/api/v2/admin/income/charts/pie`;
+    const response = await handelDataFetch(url, 'GET');
     return response.data;
 });
 
@@ -306,7 +319,6 @@ export const adminSlice = createSlice({
                 state.isLoading = false;
                 if (action.payload.status) {
                     state.incomeData = {
-                        stats: action.payload.stats,
                         orders: action.payload.orders,
                         total: action.payload.total || 0
                     };
@@ -315,6 +327,35 @@ export const adminSlice = createSlice({
             })
             .addCase(adminIncomeAsync.rejected, (state, action) => {
                 state.isLoading = false;
+                state.error = action.error;
+            })
+            // INCOME BAR CHART
+            .addCase(adminIncomeBarChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminIncomeBarChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.incomeBarChartData = action.payload.barData;
+                }
+                state.error = null;
+            })
+            .addCase(adminIncomeBarChartAsync.rejected, (state, action) => {
+                state.error = action.error;
+            })
+            // INCOME PIE CHART
+            .addCase(adminIncomePieChartAsync.pending, (state) => {
+                state.error = null;
+            })
+            .addCase(adminIncomePieChartAsync.fulfilled, (state, action) => {
+                if (action.payload.status) {
+                    state.incomePieChartData = {
+                        labels: action.payload.pieLabels,
+                        data: action.payload.pieData
+                    };
+                }
+                state.error = null;
+            })
+            .addCase(adminIncomePieChartAsync.rejected, (state, action) => {
                 state.error = action.error;
             })
             // UPDATE ORDER ITEM STATUS

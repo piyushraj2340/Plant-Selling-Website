@@ -119,22 +119,36 @@ const Users = () => {
             dataIndex: 'name',
             key: 'name',
             sorter: true,
-            render: (text, record) => (
-                <Space>
-                    {text}
-                    {record.isBlocked && <Tag color="red">BLOCKED</Tag>}
-                    {!record.isUserVerified && <Tag color="orange">UNVERIFIED</Tag>}
-                </Space>
-            )
         },
         {
             title: 'Email',
             dataIndex: 'email',
             key: 'email',
+            sorter: true,
+        },
+        {
+            title: 'Status',
+            key: 'status',
+            filters: [
+                { text: 'Blocked', value: 'blocked' },
+                { text: 'Verified', value: 'verified' },
+                { text: 'Unverified', value: 'unverified' }
+            ],
+            render: (_, record) => (
+                <Space>
+                    {record.isBlocked && <Tag color="red">BLOCKED</Tag>}
+                    {record.isUserVerified ? <Tag color="green">VERIFIED</Tag> : <Tag color="orange">UNVERIFIED</Tag>}
+                </Space>
+            )
         },
         {
             title: 'Roles',
-            key: 'roles',
+            key: 'role',
+            filters: [
+                { text: 'Admin', value: 'admin' },
+                { text: 'User', value: 'user' },
+                { text: 'Nursery', value: 'nursery' }
+            ],
             render: (_, record) => (
                 <>
                     {record.role.map((r) => {
@@ -247,9 +261,10 @@ const Users = () => {
                     <h4 className="fw-bold m-0">Platform Users</h4>
                 </Col>
                 <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-                    <Input.Search
+                    <Input
                         placeholder="Search users..."
                         allowClear
+                        prefix={<span role="img" aria-label="search">🔍</span>}
                         value={localSearch}
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}

@@ -85,19 +85,13 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
             title: 'Action',
             dataIndex: 'status',
             key: 'status',
-            sorter: true,
-            filters: [
-                { text: 'Active', value: 'Active' },
-                { text: 'Expired', value: 'Expired' },
-                { text: 'Disabled', value: 'Disabled' }
-            ],
             render: (status, record) => {
                 return (
                     <>
                         <Space size={'small'} className='mb-1'>
                             <Tag color={status === 'Active' ? 'green' : status === 'Expired' ? 'red' : 'default'}>{status}</Tag>
                         </Space>
-                        <br/>
+                        <br />
                         {
                             status !== 'Disabled' && status !== 'Expired' &&
                             <Space size={'small'} className='mt-2'>
