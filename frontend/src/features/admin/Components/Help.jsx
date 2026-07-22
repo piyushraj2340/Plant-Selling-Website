@@ -60,16 +60,26 @@ const Help = () => {
       title: 'Name',
       dataIndex: 'name',
       key: 'name',
+      sorter: true,
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
+      sorter: true,
     },
     {
       title: 'Category',
       dataIndex: 'category',
       key: 'category',
+      sorter: true,
+      filters: [
+        { text: 'General Inquiry', value: 'General Inquiry' },
+        { text: 'Order Support', value: 'Order Support' },
+        { text: 'Technical Issue', value: 'Technical Issue' },
+        { text: 'Partnership', value: 'Partnership' },
+        { text: 'Other', value: 'Other' },
+      ],
       render: (cat) => <Tag color="blue">{cat}</Tag>
     },
     {
@@ -77,17 +87,24 @@ const Help = () => {
       dataIndex: 'message',
       key: 'message',
       ellipsis: true,
+      sorter: true,
     },
     {
       title: "Date",
       dataIndex: 'createdAt',
       key: 'createdAt',
+      sorter: true,
       render: (date) => new Date(date).toLocaleString()
     },
     {
       title: "Status",
       dataIndex: 'isReplied',
       key: 'isReplied',
+      sorter: true,
+      filters: [
+        { text: 'REPLIED', value: 'true' },
+        { text: 'PENDING', value: 'false' },
+      ],
       render: (isReplied) => (
         <Tag color={isReplied ? 'green' : 'orange'}>
           {isReplied ? 'REPLIED' : 'PENDING'}
@@ -131,9 +148,10 @@ const Help = () => {
           <h5 className='h5 fw-bolder mb-0'>Help & Support (Contact Us Queries)</h5>
         </Col>
         <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-          <Input.Search
+          <Input
             placeholder="Search messages..."
             allowClear
+            prefix={<span role="img" aria-label="search">🔍</span>}
             value={localSearch}
             onChange={handleSearchChange}
             style={{ width: '100%', maxWidth: '300px' }}

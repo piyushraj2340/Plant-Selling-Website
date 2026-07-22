@@ -110,8 +110,8 @@ const Categories = () => {
             key: 'action',
             render: (_, record) => (
                 <Space size='middle'>
-                    <Button type='link' onClick={() => showModal(record)}>Edit</Button>
-                    <Button type='link' danger onClick={() => handleDelete(record._id)}>Delete</Button>
+                    <Button type='primary' size="small" onClick={() => showModal(record)}>Edit</Button>
+                    <Button type='primary' danger size="small" onClick={() => handleDelete(record._id)}>Delete</Button>
                 </Space>
             ),
         },
@@ -119,12 +119,10 @@ const Categories = () => {
 
 
     return (
-        <div className="w-100 p-0">
+        <div className="container-fluid p-2 p-md-4 bg-white rounded border">
             <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
                 <Col xs={24} md={8}>
-                    <Button type="primary" onClick={() => showModal()}>
-                        Add Category
-                    </Button>
+                    <h4 className="fw-bold m-0">Categories</h4>
                 </Col>
                 <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
                     <Input
@@ -135,6 +133,9 @@ const Categories = () => {
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}
                     />
+                    <Button style={{minWidth: "125px"}} type="primary" onClick={() => showModal()}>
+                        Add Category
+                    </Button>
                 </Col>
             </Row>
 

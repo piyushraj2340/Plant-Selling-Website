@@ -99,16 +99,26 @@ const IncomeTable = () => {
       title: 'Quantity',
       dataIndex: 'sale',
       key: 'sale',
+      sorter: true,
     },
     {
       title: 'Total Revenue',
       dataIndex: 'amount',
       key: 'amount',
+      sorter: true,
     },
     {
       title: "Tag",
       dataIndex: 'tag',
       key: 'tag',
+      sorter: true,
+      filters: [
+        { text: 'Pending', value: 'pending' },
+        { text: 'Placed', value: 'placed' },
+        { text: 'Delivered', value: 'delivered' },
+        { text: 'Completed', value: 'completed' },
+        { text: 'Rejected', value: 'rejected' },
+      ],
       render: (_, { tag }) => {
         let color = 'geekblue';
         if (tag.toLowerCase() === 'pending') {
@@ -129,6 +139,7 @@ const IncomeTable = () => {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
+      sorter: true,
     },
     {
       title: 'Action',
@@ -167,9 +178,10 @@ const IncomeTable = () => {
             {/* Title can go here if needed */}
         </Col>
         <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-            <Input.Search
+            <Input
                 placeholder="Search by Order ID..."
                 allowClear
+                prefix={<span role="img" aria-label="search">🔍</span>}
                 value={localSearch}
                 onChange={handleSearchChange}
                 style={{ width: '100%', maxWidth: '300px' }}

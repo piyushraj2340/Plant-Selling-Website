@@ -15,8 +15,7 @@ ChartJS.register(
 )
 
 const IncomePieChart = () => {
-    const { incomeData } = useSelector(state => state.admin);
-    const pieChart = incomeData?.stats?.pieChart || { labels: [], data: [] };
+    const pieChart = useSelector(state => state.admin.incomePieChartData);
 
     // Generate dynamic colors based on number of items
     const backgroundColors = (pieChart.labels || []).map((_, i) => {

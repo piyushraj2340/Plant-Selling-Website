@@ -95,7 +95,25 @@ const adminController = {
     getUsers: async (req, res, next) => {
         try {
             const { page, limit, skip, search, sort } = getQueryOptions(req);
-            const query = buildSearchQuery(search, ['name', 'email']);
+            const query = buildSearchQuery(search, ['name', 'email', 'phone']);
+
+            if (req.query.role) {
+                const roles = req.query.role.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query.role = { $in: roles };
+            }
+
+            if (req.query.status) {
+                const statusVals = req.query.status.split(',').map(s => s.trim().toLowerCase());
+                if (statusVals.includes('blocked')) {
+                    query.isBlocked = true;
+                }
+                if (statusVals.includes('verified')) {
+                    query.isUserVerified = true;
+                }
+                if (statusVals.includes('unverified')) {
+                    query.isUserVerified = false;
+                }
+            }
 
             const total = await User.countDocuments(query);
             const users = await User.find(query)
@@ -889,17 +907,62 @@ const adminController = {
         }
     },
 
-    // Get Income Stats
+    // Get Income Table Data
     getIncome: async (req, res, next) => {
         try {
-            const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
-            const search = req.query.search || '';
-            const filter = req.query.filter || 'All';
+            const { page, limit, skip, search, sort } = getQueryOptions(req);
+            
+            let query = {
+                "payment.status": { $ne: 'Failed' }
+            };
 
+            const searchQueryStr = search || '';
+            if (searchQueryStr) {
+                // If search is a valid ObjectId, search by _id
+                if (require('mongoose').Types.ObjectId.isValid(searchQueryStr.trim())) {
+                    query._id = searchQueryStr.trim();
+                } else {
+                    query = { _id: null }; // Force no results if it's not a valid ID
+                }
+            }
+
+            if (req.query.status) {
+                const statuses = req.query.status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query['orderStatus.status'] = { $in: statuses };
+            }
+
+            const total = await Order.countDocuments(query);
+            const orders = await Order.find(query)
+                .populate('user')
+                .populate({
+                    path: 'orderItems',
+                    populate: [
+                        { path: 'nursery' },
+                        { path: 'plant' }
+                    ]
+                })
+                .sort(sort)
+                .skip(skip)
+                .limit(limit);
+
+            res.status(200).json({ 
+                status: true, 
+                orders,
+                total,
+                page,
+                limit
+            });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getIncomeBarChart: async (req, res, next) => {
+        try {
+            const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
             const startOfYear = new Date(year, 0, 1);
             const endOfYear = new Date(year, 11, 31, 23, 59, 59);
 
-            // 1. Line/Bar Chart Data: Revenue per month for the given year
             const revenueByMonth = await Order.aggregate([
                 { 
                     $match: { 
@@ -920,7 +983,18 @@ const adminController = {
                 monthlyRevenue[item._id - 1] = item.revenue;
             });
 
-            // 2. Pie Chart Data: Revenue by plant category
+            res.status(200).json({ status: true, barData: monthlyRevenue });
+        } catch (error) {
+            next(error);
+        }
+    },
+
+    getIncomePieChart: async (req, res, next) => {
+        try {
+            const year = req.query.year ? parseInt(req.query.year) : new Date().getFullYear();
+            const startOfYear = new Date(year, 0, 1);
+            const endOfYear = new Date(year, 11, 31, 23, 59, 59);
+
             const categoryRevenueAgg = await Order.aggregate([
                 { 
                     $match: { 
@@ -933,9 +1007,11 @@ const adminController = {
                 { $unwind: "$populatedOrderItem" },
                 { $lookup: { from: "plants", localField: "populatedOrderItem.plant", foreignField: "_id", as: "plantDetails" } },
                 { $unwind: "$plantDetails" },
+                { $lookup: { from: "categories", localField: "plantDetails.category", foreignField: "_id", as: "categoryDetails" } },
+                { $unwind: { path: "$categoryDetails", preserveNullAndEmptyArrays: true } },
                 { 
                     $group: { 
-                        _id: "$plantDetails.category", 
+                        _id: "$categoryDetails.name", 
                         revenue: { $sum: { $multiply: ["$populatedOrderItem.quantity", "$populatedOrderItem.price"] } } 
                     } 
                 }
@@ -948,47 +1024,7 @@ const adminController = {
                 pieData.push(item.revenue);
             });
 
-            // 3. Table Data: Orders (Successful/Processing)
-            const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
-            let query = {
-                "payment.status": { $ne: 'Failed' }
-            };
-
-            const searchQueryStr = parsedSearch || search;
-            if (searchQueryStr) {
-                try {
-                    query._id = searchQueryStr.trim();
-                } catch(e) {
-                    // Invalid ObjectId
-                }
-            }
-
-            const total = await Order.countDocuments(query);
-            const orders = await Order.find(query)
-                .populate('user')
-                .populate({
-                    path: 'orderItems',
-                    populate: [
-                        { path: 'nursery' },
-                        { path: 'plant' }
-                    ]
-                })
-                .sort(sort)
-                .skip(skip)
-                .limit(limit);
-
-            res.status(200).json({ 
-                status: true, 
-                message: "Income Stats fetched successfully", 
-                stats: {
-                    barChart: monthlyRevenue,
-                    pieChart: { labels: pieLabels, data: pieData }
-                },
-                orders,
-                total,
-                page,
-                limit
-            });
+            res.status(200).json({ status: true, pieLabels, pieData });
         } catch (error) {
             next(error);
         }
@@ -1167,8 +1203,24 @@ const adminController = {
     getAllContactMessages: async (req, res, next) => {
         try {
             const { page, limit, skip, search, sort } = getQueryOptions(req);
-            const query = buildSearchQuery(search, ['name', 'email', 'subject']);
+            const query = buildSearchQuery(search, ['name', 'email', 'subject', 'message']);
             
+            if (req.query.category) {
+                const categories = req.query.category.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
+                query.category = { $in: categories };
+            }
+
+            if (req.query.isReplied) {
+                const isRepliedStrs = req.query.isReplied.split(',').map(s => s.trim().toLowerCase());
+                const boolValues = [];
+                if (isRepliedStrs.includes('true')) boolValues.push(true);
+                if (isRepliedStrs.includes('false')) boolValues.push(false);
+                
+                if (boolValues.length > 0) {
+                    query.isReplied = { $in: boolValues };
+                }
+            }
+
             const total = await Contact.countDocuments(query);
             const contacts = await Contact.find(query)
                 .sort(sort)
