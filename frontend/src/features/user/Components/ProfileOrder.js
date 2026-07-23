@@ -43,26 +43,28 @@ const ProfileOrder = () => {
                 }
 
                 {
-                    lastOrder?.orderItems ?
-                        lastOrder.orderItems.map(items => {
-
-                            return (
-                                <div key={items._id} className="card-body px-2 px-md-4">
-                                    <div className='mb-4 pb-4 border-bottom'>
-                                        <div className="d-flex flex-row">
-                                            <div className="flex-fill">
-                                                <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
-                                                <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
-                                                <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({lastOrder.payment.paymentMethods}) </span></h4>
-                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(lastOrder.orderStatus.statusAt)}</span></p>
-                                            </div>
-                                            <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
-                                                <img className="align-self-center img-fluid" src={items.images.url} width="250" alt="product" />
+                    lastOrder?.vendorOrders ?
+                        lastOrder.vendorOrders.map(vendorOrder => {
+                            return vendorOrder.orderItems && vendorOrder.orderItems.map(items => {
+                                return (
+                                    <div key={items._id} className="card-body px-2 px-md-4">
+                                        <div className='mb-4 pb-4 border-bottom'>
+                                            <div className="d-flex flex-row">
+                                                <div className="flex-fill">
+                                                    <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
+                                                    <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
+                                                    <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({lastOrder.payment.paymentMethods}) </span></h4>
+                                                    <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(vendorOrder.orderStatus?.statusAt)}</span></p>
+                                                    <p className="text-muted mt-2 mb-0">Vendor Status: <span className="badge bg-secondary">{vendorOrder.orderStatus?.status || 'Processing'}</span></p>
+                                                </div>
+                                                <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
+                                                    <img className="align-self-center img-fluid" src={items.images?.url} width="250" alt="product" />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                            )
+                                )
+                            })
                         })
                         :
 

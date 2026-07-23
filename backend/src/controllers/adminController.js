@@ -414,69 +414,66 @@ const adminController = {
             const { search, timeFilter, status, tag } = req.query;
             const { page, limit, skip, search: parsedSearch, sort } = getQueryOptions(req);
             
-            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const Order = require('../model/checkoutModel/orders');
             
             let query = {};
             const searchQueryStr = parsedSearch || search;
             
             if (searchQueryStr) {
                 const mongoose = require('mongoose');
-                const OrderItem = require('../model/checkoutModel/orderItem');
                 const searchRegex = new RegExp(searchQueryStr.trim(), 'i');
                 
-                const matchedItems = await OrderItem.find({ plantName: searchRegex }).select('vendorOrder');
-                const validIds = matchedItems.map(item => item.vendorOrder);
-                
+                let userQuery = await require('../model/userModel/user').find({
+                    $or: [{ name: searchRegex }, { email: searchRegex }]
+                }).select('_id');
+                const userIds = userQuery.map(u => u._id);
+
+                const validIds = [];
                 if (mongoose.Types.ObjectId.isValid(searchQueryStr.trim())) {
                     validIds.push(searchQueryStr.trim());
                 }
-                
-                if (validIds.length > 0) {
-                    query = { _id: { $in: validIds } };
-                } else {
-                    query = { _id: null }; 
-                }
+
+                query = {
+                    $or: [
+                        { _id: { $in: validIds } },
+                        { user: { $in: userIds } }
+                    ]
+                };
             }
             
             if (timeFilter) {
                 const now = new Date();
                 if (timeFilter === 'Monthly') {
-                    query.createdAt = { $gte: new Date(now.setDate(now.getDate() - 30)) };
+                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 30)) };
                 } else if (timeFilter === 'Quarterly') {
-                    query.createdAt = { $gte: new Date(now.setDate(now.getDate() - 90)) };
+                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 90)) };
                 } else if (timeFilter === 'Yearly') {
-                    query.createdAt = { $gte: new Date(now.setDate(now.getDate() - 365)) };
+                    query.orderAt = { $gte: new Date(now.setDate(now.getDate() - 365)) };
                 }
             }
 
             if (tag) {
                 const tags = tag.split(',').map(t => new RegExp(`^${t.trim()}$`, 'i'));
-                query['orderStatus.status'] = { $in: tags };
+                query.overallStatus = { $in: tags };
             }
 
-            if (status) {
-                const statuses = status.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
-                query['orderStatus.message'] = { $in: statuses };
-            }
-
-            const total = await VendorOrder.countDocuments(query);
-            const orders = await VendorOrder.find(query)
+            const total = await Order.countDocuments(query);
+            const orders = await Order.find(query)
+                .populate({ path: 'user', select: 'name email phone avatar' })
                 .populate({
-                    path: 'order',
-                    populate: { path: 'user', select: 'name email phone avatar' }
+                    path: 'vendorOrders',
+                    populate: [
+                        { path: 'nursery', select: 'nurseryName' },
+                        { path: 'orderItems', populate: { path: 'plant', select: 'plantName images stock' } }
+                    ]
                 })
-                .populate('nursery')
-                .populate({
-                    path: 'orderItems',
-                    populate: { path: 'plant' } 
-                })
-                .sort(sort)
+                .sort(sort || { orderAt: -1 })
                 .skip(skip)
                 .limit(limit);
             
             res.status(200).json({ 
                 status: true, 
-                message: "Vendor Orders fetched successfully", 
+                message: "Orders fetched successfully", 
                 orders,
                 total,
                 page,

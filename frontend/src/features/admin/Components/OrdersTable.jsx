@@ -16,27 +16,16 @@ const OrdersTable = () => {
 
   useEffect(() => {
     if (ordersData?.data && ordersData.data.length > 0) {
-      const rows = [];
-      ordersData.data.forEach(order => {
-        order.orderItems.forEach(item => {
-          rows.push({
-            key: item._id,
-            vendorOrderId: order._id,
-            products: {
-              productName: item.plantName,
-              description: `Vendor Order ID: ${order._id}`,
-              imgLink: item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-              link: `/product/${item.plant?._id || item.plant}`,
-            },
-            sale: item.quantity,
-            stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
-            amount: `₹${item.price}`,
-            tag: order.orderStatus?.status || 'Processing',
-            status: order.orderStatus?.message || 'Order is processing',
-            action: order.orderStatus?.status || 'Processing',
-          });
-        });
-      });
+      const rows = ordersData.data.map(order => ({
+        key: order._id,
+        orderId: order._id,
+        customerName: order.user?.name || 'Unknown',
+        customerEmail: order.user?.email || 'N/A',
+        totalAmount: `₹${order.pricing?.finalPrice || 0}`,
+        orderDate: new Date(order.orderAt).toLocaleDateString(),
+        status: order.overallStatus || 'Processing',
+        vendorOrders: order.vendorOrders || []
+      }));
       setDataSource(rows);
     } else {
       setDataSource([]);
@@ -55,11 +44,34 @@ const OrdersTable = () => {
     }
   };
 
+  const handleGlobalUpdateStatus = async (orderId, status, statusMessage) => {
+    try {
+      const order = dataSource.find(o => o.orderId === orderId);
+      if (!order) return;
+      const vendorOrderIds = order.vendorOrders.map(vo => vo._id);
+      if (vendorOrderIds.length === 0) return;
+      
+      const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: vendorOrderIds, status, message: statusMessage })).unwrap();
+      if (res.status) {
+        message.success(`Global Order ${status}`);
+        fetchData();
+      }
+    } catch (error) {
+      message.error("Failed to update global order");
+    }
+  };
+
   const handleBulkUpdateStatus = async (status, statusMessage) => {
     try {
-      // Get unique vendorOrderIds from selected rows
-      const selectedVendorOrderIds = [...new Set(dataSource.filter(row => selectedRowKeys.includes(row.key)).map(row => row.vendorOrderId))];
-      const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: selectedVendorOrderIds, status, message: statusMessage })).unwrap();
+      let vendorOrderIds = [];
+      dataSource.forEach(order => {
+        if (selectedRowKeys.includes(order.key)) {
+          vendorOrderIds = [...vendorOrderIds, ...order.vendorOrders.map(vo => vo._id)];
+        }
+      });
+      if (vendorOrderIds.length === 0) return;
+
+      const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: vendorOrderIds, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
         setSelectedRowKeys([]);
@@ -79,118 +91,148 @@ const OrdersTable = () => {
     onChange: onSelectChange,
   };
 
-  const columns = [
+  const rootColumns = [
     {
-      title: 'Product Name',
-      dataIndex: 'products',
-      key: 'products',
-      fixed: "left",
-      render: ({ productName, description, imgLink, link }) => {
-        return (
-          <a href={link} className='d-flex text-decoration-none hover-product-name'>
-            <div style={{ width: "50px", height: "50px" }} className='border p-1 rounded me-1'>
-              <img style={{ width: "100%", height: "100%", objectFit: "cover" }} src={imgLink} alt="plants flowers" />
-            </div>
-            <div className="d-flex flex-column ms-1 justify-content-start mt-1">
-              <h6 className='h6 fw-bold text-black'>{productName}</h6>
-              <p className='text-secondary fw-lighter' style={{ fontSize: "12px" }}>{description}</p>
-            </div>
-          </a>
-        );
-      },
+      title: 'Global Order ID',
+      dataIndex: 'orderId',
+      key: 'orderId',
+      render: (text) => <span className="fw-bold">{text}</span>
     },
     {
-      title: 'Sale',
-      dataIndex: 'sale',
-      key: 'sale',
-      sorter: true,
+      title: 'Customer',
+      key: 'customer',
+      render: (_, record) => (
+        <div>
+          <div className="fw-bold">{record.customerName}</div>
+          <div className="text-muted small">{record.customerEmail}</div>
+        </div>
+      )
     },
     {
-      title: 'Stock',
-      dataIndex: 'stock',
-      key: 'stock',
+      title: 'Total Amount',
+      dataIndex: 'totalAmount',
+      key: 'totalAmount',
     },
     {
-      title: 'Amount',
-      dataIndex: 'amount',
-      key: 'amount',
-      sorter: true,
+      title: 'Date',
+      dataIndex: 'orderDate',
+      key: 'orderDate',
     },
     {
-      title: "Tag",
-      dataIndex: 'tag',
-      key: 'tag',
-      filters: [
-        { text: 'Processing', value: 'processing' },
-        { text: 'Approved', value: 'approved' },
-        { text: 'Cancelled', value: 'cancelled' },
-        { text: 'Delivered', value: 'delivered' }
-      ],
-      filteredValue: searchParams.get('tag') ? searchParams.get('tag').split(',') : null,
-      render: (_, { tag }) => {
-
-        let color = 'geekblue';
-        if (tag.toLowerCase() === 'processing') {
-          color = 'volcano'
-        } else if (tag.toLowerCase() === 'approved' || tag.toLowerCase() === 'delivered') {
-          color = 'green'
-        } else if (tag.toLowerCase() === 'cancelled') {
-          color = 'red'
-        }
-
-        return (
-          <Tag color={color} key={tag}>
-            {tag.toUpperCase()}
-          </Tag>
-        )
-      }
-    },
-    {
-      title: 'Status',
+      title: 'Overall Status',
       dataIndex: 'status',
       key: 'status',
-      filters: [
-        { text: 'Processing', value: 'Processing' },
-        { text: 'Order Accepted', value: 'Order Accepted' },
-        { text: 'Order Delivered', value: 'Order Delivered' },
-        { text: 'Order Rejected', value: 'Order Rejected' },
-      ],
-      filteredValue: searchParams.get('status') ? searchParams.get('status').split(',') : null,
+      render: (status) => {
+        let color = 'geekblue';
+        if (status.toLowerCase() === 'processing') color = 'volcano';
+        else if (status.toLowerCase() === 'delivered') color = 'green';
+        else if (status.toLowerCase() === 'cancelled') color = 'red';
+        return <Tag color={color}>{status.toUpperCase()}</Tag>;
+      }
     },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => {
-        const action = record.action || 'processing';
+        const action = record.status || 'Processing';
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'processing' && (
               <>
-                <Popconfirm title="Approve this order?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Approved', 'Order Approved')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Approve</button>
+                <Popconfirm title="Approve ALL vendor orders?" onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Approve All</button>
                 </Popconfirm>
-                <Popconfirm title="Cancel this order?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Cancelled', 'Order Cancelled')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Cancel</button>
+                <Popconfirm title="Cancel ALL vendor orders?" onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Cancel All</button>
                 </Popconfirm>
               </>
             )}
           </Space>
         )
       }
-    },
+    }
   ];
+
+  const vendorOrderColumns = [
+    { title: 'Vendor Order ID', dataIndex: '_id', key: '_id' },
+    { title: 'Nursery', key: 'nursery', render: (_, record) => record.nursery?.nurseryName || 'Unknown' },
+    { title: 'Vendor Status', dataIndex: ['orderStatus', 'status'], key: 'status' },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => {
+        const action = record.orderStatus?.status || 'Processing';
+        return (
+          <Space size={'small'}>
+            {action.toLowerCase() === 'processing' && (
+              <>
+                <Popconfirm title="Approve this vendor order?" onConfirm={() => handleUpdateStatus(record._id, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-outline-success py-0 px-2' style={{ fontSize: "12px" }}>Approve</button>
+                </Popconfirm>
+                <Popconfirm title="Cancel this vendor order?" onConfirm={() => handleUpdateStatus(record._id, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-outline-danger py-0 px-2' style={{ fontSize: "12px" }}>Cancel</button>
+                </Popconfirm>
+              </>
+            )}
+          </Space>
+        )
+      }
+    }
+  ];
+
+  const orderItemColumns = [
+    {
+      title: 'Product',
+      key: 'product',
+      render: (_, item) => (
+        <div className='d-flex align-items-center'>
+          <div style={{ width: "40px", height: "40px" }} className='border p-1 rounded me-2'>
+            <img style={{ width: "100%", height: "100%", objectFit: "cover" }} src={item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg"} alt="plant" />
+          </div>
+          <a href={`/product/${item.plant?._id || item.plant}`} className='text-decoration-none text-dark fw-bold'>
+            {item.plantName}
+          </a>
+        </div>
+      )
+    },
+    { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+    { title: 'Price', key: 'price', render: (_, item) => `₹${item.price}` }
+  ];
+
+  const expandedVendorOrderRender = (vendorOrder) => {
+    return (
+      <Table 
+        columns={orderItemColumns} 
+        dataSource={vendorOrder.orderItems?.map(item => ({...item, key: item._id})) || []} 
+        pagination={false} 
+        size="small" 
+      />
+    );
+  };
+
+  const expandedRootOrderRender = (order) => {
+    return (
+      <Table 
+        columns={vendorOrderColumns} 
+        dataSource={order.vendorOrders?.map(vo => ({...vo, key: vo._id})) || []} 
+        expandable={{ expandedRowRender: expandedVendorOrderRender }}
+        pagination={false} 
+        size="middle" 
+      />
+    );
+  };
 
   const hasSelected = selectedRowKeys.length > 0;
 
   return (
-    <div className="w-100">
-      <Row justify="space-between" align="middle" className="mb-4 mx-3 my-3">
+    <div className="w-100 p-3 bg-white rounded shadow-sm">
+      <Row justify="space-between" align="middle" className="mb-4">
         <div className="head">
-          <h5 className='h5 fw-bolder'>Orders </h5>
+          <h5 className='h5 fw-bolder'>Global Orders Overview</h5>
         </div>
         <Col xs={24} md={8}>
           <Input
-            placeholder="Search by Order ID or Product..."
+            placeholder="Search by Order ID or User..."
             allowClear
             prefix={<span role="img" aria-label="search">🔍</span>}
             value={localSearch}
@@ -203,19 +245,21 @@ const OrdersTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Approve ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
+          <Popconfirm title={`Approve all vendor orders in ${selectedRowKeys.length} selected global orders?`} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
             <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Approve</button>
           </Popconfirm>
-          <Popconfirm title={`Cancel ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
+          <Popconfirm title={`Cancel all vendor orders in ${selectedRowKeys.length} selected global orders?`} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
             <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Cancel</button>
           </Popconfirm>
         </div>
       )}
+      
       <Table
         rowSelection={rowSelection}
         loading={isLoading}
         dataSource={dataSource}
-        columns={columns}
+        columns={rootColumns}
+        expandable={{ expandedRowRender: expandedRootOrderRender }}
         pagination={{
           ...tableParams.pagination,
           total: ordersTotal,

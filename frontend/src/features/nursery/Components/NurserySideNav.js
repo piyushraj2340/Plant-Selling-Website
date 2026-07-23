@@ -17,7 +17,7 @@ const NurserySideNav = ({ isCollapseSideNav, setIsCollapseSideNav }) => {
                     <div className="">
                         <Link to={"/nursery"}>
                             <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Manage Your Nursery'>
-                                <i class="material-symbols-outlined text-warning">
+                                <i className="material-symbols-outlined text-warning">
                                     compost
                                 </i>
                                 <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Manage Your Nursery</p>
@@ -27,12 +27,6 @@ const NurserySideNav = ({ isCollapseSideNav, setIsCollapseSideNav }) => {
                             <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Manage Your Plants'>
                                 <i className="text-warning material-symbols-outlined">forest</i>
                                 <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Manage Your Plants</p>
-                            </div>
-                        </Link>
-                        <Link to={"/nursery/order/track"}>
-                            <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Track Your Shipment'>
-                                <i className="fas fa-truck fa-lg text-warning"></i>
-                                <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Track Your Shipment</p>
                             </div>
                         </Link>
                         <Link to={"/nursery/order"}>

@@ -30,7 +30,7 @@ const ProfileSideNav = () => {
                     </Link>
                     <Link to={user.role.includes("seller") ? "/nursery" : "/nursery/create"}>
                         <li className="list-group-item d-flex justify-content-between align-items-center p-3">
-                            <i class="material-symbols-outlined text-warning">
+                            <i className="material-symbols-outlined text-warning">
                                 compost
                             </i>
                             <p className="mb-0">{user.role.includes("seller") ? "Manage Your Nursery" : "Add Your Nursery"}</p>
