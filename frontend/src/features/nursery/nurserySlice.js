@@ -1050,6 +1050,6 @@ export const nurserySlice = createSlice({
 });
 
 
-export const { setNurseryActiveTab, setNurseryStoreSectionAddType } = nurserySlice.actions;
+export const { setNurseryActiveTab, setNurseryStoreSectionAddType, setIsCurrentTab } = nurserySlice.actions;
 
 export default nurserySlice.reducer;

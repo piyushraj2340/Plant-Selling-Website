@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Table, Tag, Space, message, Popconfirm, Input, Row, Col } from 'antd';
-import { nurseryOrdersAsync, nurseryUpdateOrderStatusAsync, nurseryBulkUpdateOrderStatusAsync } from '../../nurserySlice';
-import { useTableParams } from '../../../../hooks/useTableParams';
+import { nurseryOrdersAsync, nurseryUpdateOrderStatusAsync, nurseryBulkUpdateOrderStatusAsync } from '../nurserySlice';
+import { useTableParams } from '../../../hooks/useTableParams';
 
 const NurseryOrders = () => {
     const dispatch = useDispatch();
@@ -15,28 +15,18 @@ const NurseryOrders = () => {
 
     useEffect(() => {
         if (ordersData?.data && ordersData.data.length > 0) {
-            const rows = [];
-            ordersData.data.forEach(order => {
-                order.orderItems.forEach(item => {
-                    rows.push({
-                        key: item._id,
-                        vendorOrderId: order._id,
-                        orderId: order.order?._id,
-                        customerName: order.order?.user?.name || 'Unknown',
-                        products: {
-                            productName: item.plantName,
-                            description: `Order ID: ${order._id}`,
-                            imgLink: item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-                            link: `/product/${item.plant?._id || item.plant}`,
-                        },
-                        sale: item.quantity,
-                        amount: `₹${item.price}`,
-                        tag: order.orderStatus?.status || 'Processing',
-                        status: order.orderStatus?.message || 'Order is processing',
-                        action: order.orderStatus?.status || 'Processing',
-                    });
-                });
-            });
+            const rows = ordersData.data.map(vendorOrder => ({
+                key: vendorOrder._id,
+                vendorOrderId: vendorOrder._id,
+                orderId: vendorOrder.order?._id,
+                customerName: vendorOrder.order?.user?.name || 'Unknown',
+                totalItems: vendorOrder.orderItems?.length || 0,
+                subTotal: `₹${vendorOrder.pricing?.subTotal || 0}`,
+                tag: vendorOrder.orderStatus?.status || 'Processing',
+                status: vendorOrder.orderStatus?.message || 'Order is processing',
+                action: vendorOrder.orderStatus?.status || 'Processing',
+                orderItems: vendorOrder.orderItems || []
+            }));
             setDataSource(rows);
         } else {
             setDataSource([]);
@@ -57,7 +47,7 @@ const NurseryOrders = () => {
 
     const handleBulkUpdateStatus = async (status, statusMessage) => {
         try {
-            const selectedVendorOrderIds = [...new Set(dataSource.filter(row => selectedRowKeys.includes(row.key)).map(row => row.vendorOrderId))];
+            const selectedVendorOrderIds = selectedRowKeys;
             const res = await dispatch(nurseryBulkUpdateOrderStatusAsync({ ids: selectedVendorOrderIds, status, message: statusMessage })).unwrap();
             if (res.status) {
                 message.success(res.message);
@@ -80,23 +70,10 @@ const NurseryOrders = () => {
 
     const columns = [
         {
-            title: 'Product',
-            dataIndex: 'products',
-            key: 'products',
-            fixed: "left",
-            render: ({ productName, description, imgLink, link }) => {
-                return (
-                    <a href={link} className='d-flex text-decoration-none hover-product-name'>
-                        <div style={{ width: "50px", height: "50px" }} className='border p-1 rounded me-1'>
-                            <img style={{ width: "100%", height: "100%", objectFit: "cover" }} src={imgLink} alt="plants flowers" />
-                        </div>
-                        <div className="d-flex flex-column ms-1 justify-content-start mt-1">
-                            <h6 className='h6 fw-bold text-black mb-0'>{productName}</h6>
-                            <p className='text-secondary fw-lighter mb-0' style={{ fontSize: "12px" }}>{description}</p>
-                        </div>
-                    </a>
-                );
-            },
+            title: 'Vendor Order ID',
+            dataIndex: 'vendorOrderId',
+            key: 'vendorOrderId',
+            render: (text) => <span className="fw-bold">{text}</span>
         },
         {
             title: 'Customer',
@@ -104,19 +81,17 @@ const NurseryOrders = () => {
             key: 'customerName',
         },
         {
-            title: 'Quantity',
-            dataIndex: 'sale',
-            key: 'sale',
-            sorter: true,
+            title: 'Items',
+            dataIndex: 'totalItems',
+            key: 'totalItems',
         },
         {
-            title: 'Price',
-            dataIndex: 'amount',
-            key: 'amount',
-            sorter: true,
+            title: 'SubTotal',
+            dataIndex: 'subTotal',
+            key: 'subTotal',
         },
         {
-            title: "Tag",
+            title: "Status",
             dataIndex: 'tag',
             key: 'tag',
             filters: [
@@ -147,7 +122,7 @@ const NurseryOrders = () => {
             }
         },
         {
-            title: 'Status Message',
+            title: 'Message',
             dataIndex: 'status',
             key: 'status',
         },
@@ -173,6 +148,29 @@ const NurseryOrders = () => {
             }
         },
     ];
+
+    const expandedRowRender = (record) => {
+        const itemColumns = [
+            {
+                title: 'Product',
+                key: 'product',
+                render: (_, item) => (
+                    <div className='d-flex align-items-center'>
+                        <div style={{ width: "40px", height: "40px" }} className='border p-1 rounded me-2'>
+                            <img style={{ width: "100%", height: "100%", objectFit: "cover" }} src={item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg"} alt="plant" />
+                        </div>
+                        <a href={`/product/${item.plant?._id || item.plant}`} className='text-decoration-none text-dark fw-bold'>
+                            {item.plantName}
+                        </a>
+                    </div>
+                )
+            },
+            { title: 'Quantity', dataIndex: 'quantity', key: 'quantity' },
+            { title: 'Price', key: 'price', render: (_, item) => `₹${item.price}` }
+        ];
+
+        return <Table columns={itemColumns} dataSource={record.orderItems.map(item => ({ ...item, key: item._id }))} pagination={false} />;
+    };
 
     const hasSelected = selectedRowKeys.length > 0;
 
@@ -212,6 +210,7 @@ const NurseryOrders = () => {
                 loading={isLoading}
                 dataSource={dataSource}
                 columns={columns}
+                expandable={{ expandedRowRender }}
                 pagination={{
                     ...tableParams.pagination,
                     total: ordersTotal,

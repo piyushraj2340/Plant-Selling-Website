@@ -1,11 +1,15 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
+const dns = require('node:dns');
+dns.setDefaultResultOrder('ipv4first');
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
 
 // Because we modified the schema, we will use raw Mongoose collections for some parts to avoid schema validation errors during migration.
 const migrateOrders = async () => {
     try {
+        const DB = `mongodb+srv://${process.env.COLLECTION_NAME}:${process.env.COLLECTION_PASSWORD}@${process.env.COLLECTION_NAME}.cbqsaya.mongodb.net/?retryWrites=true&w=majority`;
         console.log("Connecting to Database...");
-        await mongoose.connect(process.env.DB_URI || 'mongodb://localhost:27017/PlantSelling', {
+        await mongoose.connect(DB, {
             useNewUrlParser: true,
             useUnifiedTopology: true
         });

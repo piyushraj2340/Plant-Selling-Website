@@ -53,9 +53,6 @@ const Footer = () => {
         }
     };
 
-    console.log("re-rendering footer....");
-    
-
     return (
         <footer className="text-light bg-dark p-4 p-md-5 footer-container">
             <div className="container">

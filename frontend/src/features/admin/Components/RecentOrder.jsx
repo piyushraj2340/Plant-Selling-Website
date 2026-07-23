@@ -18,24 +18,26 @@ const RecentOrder = () => {
 
   useEffect(() => {
     if (orders && orders.length > 0) {
-      // Flatten order items into table rows
+      // Flatten order items into table rows through the vendorOrders hierarchy
       const rows = [];
       orders.forEach(order => {
-        order.orderItems.forEach(item => {
-          rows.push({
-            key: `${order._id}-${item._id}`,
-            products: {
-              productName: item.plantName,
-              description: `Order ID: ${order._id}`,
-              imgLink: item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
-              link: `/product/${item.plant}`,
-            },
-            sale: item.quantity,
-            stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
-            amount: `₹${item.price}`,
-            tag: order.orderStatus?.status || 'pending',
-            status: order.orderStatus?.message || 'Processing',
-            action: order.orderStatus?.status || 'pending',
+        order.vendorOrders?.forEach(vendorOrder => {
+          vendorOrder.orderItems?.forEach(item => {
+            rows.push({
+              key: `${vendorOrder._id}-${item._id}`,
+              products: {
+                productName: item.plantName,
+                description: `Vendor Order ID: ${vendorOrder._id}`,
+                imgLink: item.images?.url || "https://upload.wikimedia.org/wikipedia/commons/c/ce/Emojione_1F331.svg",
+                link: `/product/${item.plant?._id || item.plant}`,
+              },
+              sale: item.quantity,
+              stock: item.plant?.stock !== undefined ? item.plant.stock : 'N/A',
+              amount: `₹${item.price}`,
+              tag: vendorOrder.orderStatus?.status || 'Processing',
+              status: vendorOrder.orderStatus?.message || 'Order is processing',
+              action: vendorOrder.orderStatus?.status || 'Processing',
+            });
           });
         });
       });

@@ -92,9 +92,6 @@ const NurseryHeader = () => {
                                     <Link to={`/nursery/plants`} className="d-flex align-items-center"><i className="material-symbols-outlined me-1" style={{ fontSize: "20px" }}>forest</i> View Plants</Link>
                                 </div>
                                 <div className="p-2 border-bottom">
-                                    <Link to={`nursery/order/track`}><i className="fas fa-truck"></i> Track Shipment</Link>
-                                </div>
-                                <div className="p-2 border-bottom">
                                     <Link to={`/nursery/order`}><i className="fas fa-history"></i> Manage Order</Link>
                                 </div>
                                 <div className="p-2 border-bottom">
