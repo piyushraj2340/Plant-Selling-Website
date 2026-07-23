@@ -316,3 +316,35 @@ export function handelFetchDataWithImages(url, method, body) {
     }
     );
 }
+export const getNurseryMessages = async () => {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}/api/v2/nursery/contact-us`, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": localStorageUtil.getItem("session")?.session?.token,
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        return error;
+    }
+};
+
+export const markNurseryMessageAsViewed = async (messageId) => {
+    try {
+        const response = await fetch(`${process.env.REACT_APP_API_URL_BACKEND}/api/v2/nursery/contact-us/${messageId}/viewed`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": localStorageUtil.getItem("session")?.session?.token,
+            },
+        });
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        return error;
+    }
+};
+

@@ -91,6 +91,16 @@ const nurserySchema = new mongoose.Schema({
     state: {
         type: String,
         required: [true, "State is required."],
+    },
+    smtpSettings: {
+        email: {
+            type: String,
+            default: ""
+        },
+        password: {
+            type: String,
+            default: ""
+        }
     }
 });
 

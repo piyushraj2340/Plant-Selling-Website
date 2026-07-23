@@ -3,6 +3,8 @@ const router = express.Router();
 
 const auth = require('../../middleware/auth');
 const {
+
+    getUserMessages, replyUserMessage,
     getUserProfile,
     updateUserProfile,
     deleteUserProfile,
@@ -36,6 +38,11 @@ router.route('/profile/two-factor/update')
 
 router.route('/profile/images')
     .post(uploadProfileImage);
+router.route('/messages')
+    .get(getUserMessages);
+
+router.route('/messages/:id/reply')
+    .post(replyUserMessage);
 
 
 module.exports = router;

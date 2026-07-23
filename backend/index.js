@@ -2,6 +2,8 @@ require('dotenv').config();
 require('./src/config/database/db');
 
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
@@ -88,6 +90,38 @@ app.get('*', (req, res) => {
 
 app.use(errorHandlerMiddleware);
 
-app.listen(port, () => {
-    console.log("listening to port 8000");
-})
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    credentials: true
+  }
+});
+
+app.set('socketio', io); // Attach io to app so it can be accessed in controllers
+
+io.on('connection', (socket) => {
+    console.log('A user connected to socket:', socket.id);
+    
+    socket.on('join_chat', (chatId) => {
+        socket.join(chatId);
+        console.log(`Socket ${socket.id} joined chat: ${chatId}`);
+    });
+
+    socket.on('send_message', (data) => {
+        // data should contain { chatId, message, sender }
+        // Broadcast to others in the room
+        socket.to(data.chatId).emit('receive_message', data);
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+server.listen(port, () => {
+    console.log("listening to port " + port);
+});
+
+

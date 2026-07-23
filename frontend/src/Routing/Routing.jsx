@@ -10,6 +10,8 @@ import SignupPage from "../pages/SignupPage";
 import LogoutPage from "../pages/LogoutPage";
 import ProfilePage from "../pages/ProfilePage";
 import NurseryProfilePage from "../pages/NurseryProfilePage";
+import NurserySettingsPage from "../pages/NurserySettingsPage";
+
 //TODO: ADD NURSERY PUBLIC PROFILE PAGE HERE
 import ManagePlantsPage from "../pages/ManagePlantsPage";
 import ManageOrdersPage from "../pages/ManageOrdersPage";
@@ -39,6 +41,8 @@ import PrivacyPolicyPage from "../pages/PrivacyPolicyPage";
 import FAQPage from "../pages/FAQPage";
 import HelpPage from "../pages/HelpPage";
 import ProfileSettings from "../features/user/Components/ProfileSettings";
+import UserMessages from "../features/user/Components/UserMessages";
+
 import UserProfile from "../features/user/Components/UserProfile";
 import TwoFactorAuthenticationPage from "../pages/TwoFactorAuthenticationPage";
 import MainLayout from "../features/common/MainLayout";
@@ -54,6 +58,9 @@ import AdminCoupon from "../features/admin/Components/Coupon";
 import AdminCategories from "../features/admin/Components/Categories";
 import AdminHelp from "../features/admin/Components/Help";
 import AdminUsers from "../features/admin/Components/Users";
+import NurseryHelpPage from "../pages/NurseryHelpPage";
+import NurseryChatsPage from "../pages/NurseryChatsPage";
+
 
 const Routing = () => {
     return (
@@ -71,6 +78,8 @@ const Routing = () => {
                 <Route exact path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} >
                     <Route index element={<UserProfile />} />
                     <Route exact path="settings" element={<ProfileSettings />} />
+                    <Route exact path="messages" element={<UserMessages />} />
+
                 </Route>
                 <Route exact path="/account/verificationEmail" element={<UserVerificationEmailSent />} />
                 <Route exact path="/account/passwordResetEmail" element={<PasswordResetEmailSentPage />} />
@@ -80,6 +89,9 @@ const Routing = () => {
                 <Route exact path="/nursery" element={<NurseryProfilePage />} />
                 <Route exact path="/nursery/plants" element={<ManagePlantsPage />} />
                 <Route exact path="/nursery/order" element={<ManageOrdersPage />} />
+                <Route exact path="/nursery/help" element={<NurseryHelpPage />} />
+                <Route exact path="/nursery/chats" element={<NurseryChatsPage />} />
+
                 <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
                 <Route exact path="/nursery/create" element={<CreateNurseryPage />} />
                 <Route exact path="/nursery/update" element={<EditNurseryPage />} />
@@ -123,3 +135,5 @@ const Routing = () => {
 }
 
 export default React.memo(Routing);
+
+

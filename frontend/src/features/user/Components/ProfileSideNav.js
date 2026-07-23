@@ -28,6 +28,12 @@ const ProfileSideNav = () => {
                             <p className="mb-0">Manage Your Address</p>
                         </li>
                     </Link>
+                    <Link to={"/profile/messages"}>
+                        <li className="list-group-item d-flex justify-content-between align-items-center p-3">
+                            <i className="fas fa-comments fa-lg text-warning"></i>
+                            <p className="mb-0">My Messages</p>
+                        </li>
+                    </Link>
                     <Link to={user.role.includes("seller") ? "/nursery" : "/nursery/create"}>
                         <li className="list-group-item d-flex justify-content-between align-items-center p-3">
                             <i className="material-symbols-outlined text-warning">

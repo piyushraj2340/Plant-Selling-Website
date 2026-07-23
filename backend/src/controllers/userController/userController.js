@@ -515,3 +515,63 @@ exports.EnableDisableTwoFactorAuthentication = async (req, res, next) => {
         next(error); //! Pass the error to the error handling middleware
     }
 }
+exports.getUserMessages = async (req, res, next) => {
+    try {
+        const messages = await require('../../model/nurseryModel/nurseryStoreContact').find({ user: req.user }).populate('nursery', 'nurseryName avatar').sort({ createdAt: -1 });
+
+        res.status(200).send({
+            status: true,
+            message: "Messages retrieved.",
+            userMessages: messages
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.replyUserMessage = async (req, res, next) => {
+    try {
+        const messageId = req.params.id;
+        const { replyMessage } = req.body;
+
+        if (!replyMessage) {
+            const error = new Error("Reply message is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const result = await require('../../model/nurseryModel/nurseryStoreContact').findOneAndUpdate(
+            { _id: messageId, user: req.user },
+            { 
+                $push: {
+                    replies: {
+                        sender: 'User',
+                        message: replyMessage,
+                        createdAt: new Date()
+                    }
+                }
+            },
+            { new: true }
+        ).populate('nursery', 'nurseryName avatar');
+
+        const io = req.app.get('socketio');
+        if (io) {
+            io.to(messageId).emit('receive_message', { sender: 'User', message: replyMessage, createdAt: new Date() });
+        }
+
+        if (!result) {
+            const error = new Error("Message not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Reply added via chat.",
+            userMessage: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+

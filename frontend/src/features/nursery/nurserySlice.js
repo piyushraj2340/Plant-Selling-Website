@@ -233,6 +233,36 @@ export const nurseryStoreBlockDeleteAsync = createAsyncThunk('/nursery/store/blo
 });
 
 
+export const getNurseryMessagesAsync = createAsyncThunk('/nursery/messages/get', async () => {
+    const response = await handelDataFetch('/api/v2/nursery/contact-us', 'GET');
+    return response.data;
+});
+
+export const markNurseryMessageAsViewedAsync = createAsyncThunk('/nursery/messages/viewed', async (id) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/viewed`, 'PATCH');
+    return response.data;
+});
+
+export const replyNurseryMessageAsync = createAsyncThunk('/nursery/messages/reply', async ({ id, replyMessage }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/reply`, 'POST', { replyMessage });
+    return response.data;
+});
+
+export const updateNurserySMTPSettingsAsync = createAsyncThunk('/nursery/settings/smtp', async (data) => {
+    const response = await handelDataFetch(`/api/v2/nursery/settings/smtp`, 'PATCH', data);
+    return response.data;
+});
+
+export const replyNurseryMessageEmailAsync = createAsyncThunk('/nursery/messages/replyEmail', async ({ id, replyMessage }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/reply-email`, 'POST', { replyMessage });
+    return response.data;
+});
+
+export const updateNurseryMessageStatusAsync = createAsyncThunk('/nursery/messages/status', async ({ id, status }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/status`, 'PATCH', { status });
+    return response.data;
+});
+
 export const nurserySlice = createSlice({
     name: 'nursery',
     initialState,
@@ -1042,9 +1072,30 @@ export const nurserySlice = createSlice({
                         };
                     }
                 });
-            }).addCase(nurseryBulkUpdateOrderStatusAsync.rejected, (state, action) => {
+                        }).addCase(nurseryBulkUpdateOrderStatusAsync.rejected, (state, action) => {
                 state.isLoading = false;
                 state.error = action.error;
+            })
+            .addCase(getNurseryMessagesAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getNurseryMessagesAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.nurseryMessages = action.payload.nurseryMessage || [];
+            })
+            .addCase(getNurseryMessagesAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            .addCase(updateNurseryMessageStatusAsync.fulfilled, (state, action) => {
+                const updatedMsg = action.payload.nurseryMessage;
+                if (updatedMsg) {
+                    const index = state.nurseryMessages.findIndex(m => m._id === updatedMsg._id);
+                    if (index !== -1) {
+                        state.nurseryMessages[index].status = updatedMsg.status;
+                    }
+                }
             })
     }
 });
@@ -1053,3 +1104,5 @@ export const nurserySlice = createSlice({
 export const { setNurseryActiveTab, setNurseryStoreSectionAddType, setIsCurrentTab } = nurserySlice.actions;
 
 export default nurserySlice.reducer;
+
+

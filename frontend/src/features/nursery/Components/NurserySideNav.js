@@ -35,6 +35,18 @@ const NurserySideNav = ({ isCollapseSideNav, setIsCollapseSideNav }) => {
                                 <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Manage Your Orders</p>
                             </div>
                         </Link>
+                                                <Link to={"/nursery/help"}>
+                            <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Help & Messages'>
+                                <i className="fa fa-envelope-o fa-lg text-warning"></i>
+                                <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Help & Messages</p>
+                            </div>
+                        </Link>
+                        <Link to={"/nursery/chats"}>
+                            <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Active Chats'>
+                                <i className="fa fa-comments fa-lg text-warning"></i>
+                                <p className={`m-0 text-nowrap overflow-hidden ${isCollapseSideNav && 'd-none'}`}>Active Chats</p>
+                            </div>
+                        </Link>
                         <Link to={"/nursery/settings"}>
                             <div className="d-flex justify-content-between align-items-center p-3 border-bottom" style={{ height: "57px" }} data-toggle="tooltip" data-bs-placement="right" title='Settings'>
                                 <i className="fa fa-gear fa-lg text-warning"></i>

@@ -11,6 +11,7 @@ const initialState = {
     isLoading: false,
     error: null,
     IsUserDataFetchedError: false,
+    userMessages: [],
 }
 
 // GET User Profile....
@@ -49,6 +50,15 @@ export const userProfileImagesUpload = createAsyncThunk('/user/images/profile/up
 });
 
 
+export const getUserMessagesAsync = createAsyncThunk('user/messages/get', async () => {
+    const response = await handelDataFetch('/api/v2/user/messages', 'GET');
+    return response.data;
+});
+
+export const replyUserMessageAsync = createAsyncThunk('user/messages/reply', async ({ id, replyMessage }) => {
+    const response = await handelDataFetch(`/api/v2/user/messages/${id}/reply`, 'POST', { replyMessage });
+    return response.data;
+});
 export const userSlice = createSlice({
     name: "user",
     initialState,
@@ -241,6 +251,18 @@ export const userSlice = createSlice({
 
                 state.error = null;
 
+            })
+            .addCase(getUserMessagesAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getUserMessagesAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.userMessages = action.payload.userMessages || [];
+            })
+            .addCase(getUserMessagesAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
             })
     }
 });

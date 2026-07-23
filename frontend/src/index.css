@@ -1,4 +1,6 @@
-body, html, * {
+body,
+html,
+* {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -37,18 +39,18 @@ a:hover {
 
 .material-symbols-outlined {
   font-variation-settings:
-  'FILL' 0,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
+    'FILL' 0,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
 }
 
 .material-symbols-sharp {
   font-variation-settings:
-  'FILL' 1,
-  'wght' 400,
-  'GRAD' 0,
-  'opsz' 24
+    'FILL' 1,
+    'wght' 400,
+    'GRAD' 0,
+    'opsz' 24
 }
 
 /* changing the styling of antd */
@@ -56,4 +58,8 @@ a:hover {
 .ant-message-notice-content {
   background-color: black !important;
   color: #fff !important;
+}
+
+button.ant-btn {
+  width: auto !important;
 }
