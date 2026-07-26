@@ -9,9 +9,15 @@ import TemplateTwoSectionAndRightFourSaved from '../TemplatesSaved/TemplateTwoSe
 import TemplateTwoSectionAndLeftVerticalSaved from '../TemplatesSaved/TemplateTwoSectionAndLeftVerticalSaved';
 import TemplateTwoSectionAndLeftFourSaved from '../TemplatesSaved/TemplateTwoSectionAndLeftFourSaved';
 import { nurseryStoreTabDeleteAsync, nurseryStoreTabEditAsync } from '../../nurserySlice';
+import { Link } from 'react-router-dom';
 
 // TODO: CREATE A VIEW FOR PUBLIC STORE RENDERING
-const TabsViewSaved = ({ content, status }) => {
+const TabsViewSaved = ({ content, nurseryStoreTabsSelected }) => {
+
+    const { status, tabName } = nurseryStoreTabsSelected;
+
+    const nurseryId = useSelector(state => state.nursery.nursery._id);
+
 
     const nurseryStoreBlocks = useSelector(state => state.nursery.nurseryStoreBlocks);
     const isCurrentTab = useSelector(state => state.nursery.isCurrentTab);
@@ -48,7 +54,7 @@ const TabsViewSaved = ({ content, status }) => {
             <div key={isCurrentTab} className="p-0 p-md-3">
                 <div className="d-flex flex-wrap justify-content-center align-items-center">
                     <div className="option me-1 me-md-2 my-1">
-                        <button className="btn btn-sm btn-info d-flex align-items-center"><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">preview</span> Preview</button>
+                        <Link to={`/nursery/store/view/${nurseryId}?activeTab=${tabName.split(" ").join("").toLowerCase()}`} className="btn btn-sm btn-info d-flex align-items-center"><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">preview</span> Preview</Link>
                     </div>
 
                     {

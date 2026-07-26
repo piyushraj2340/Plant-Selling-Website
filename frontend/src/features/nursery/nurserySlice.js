@@ -31,6 +31,12 @@ export const nurseryUpdateAsync = createAsyncThunk('/nursery/update', async ({ n
     return { result: response.data, navigate };
 });
 
+//? NURSERY_DELETE
+export const nurseryDeleteAsync = createAsyncThunk('/nursery/delete', async () => {
+    const response = await handelDataFetch('/api/v2/nursery/profile', 'DELETE');
+    return response.data;
+});
+
 //? NURSERY_PROFILE_DATA
 export const nurseryProfileAsync = createAsyncThunk('/nursery/profile', async () => {
     const response = await handelDataFetch('/api/v2/nursery/profile', 'GET');
@@ -341,6 +347,17 @@ export const nurserySlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
 
+                message.error(action.error.message);
+
+            }).addCase(nurseryDeleteAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(nurseryDeleteAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.nursery = null; // Clear nursery data
+                message.success("Nursery deleted successfully");
+            }).addCase(nurseryDeleteAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
                 message.error(action.error.message);
 
             }).addCase(nurseryProfileAsync.pending, (state) => {

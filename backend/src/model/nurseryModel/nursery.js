@@ -101,6 +101,15 @@ const nurserySchema = new mongoose.Schema({
             type: String,
             default: ""
         }
+    },
+    socialLinks: {
+        facebook: { type: String, default: "" },
+        instagram: { type: String, default: "" },
+        website: { type: String, default: "" }
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 });
 

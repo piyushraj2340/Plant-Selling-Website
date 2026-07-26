@@ -16,7 +16,7 @@ import NurserySettingsPage from "../pages/NurserySettingsPage";
 import ManagePlantsPage from "../pages/ManagePlantsPage";
 import ManageOrdersPage from "../pages/ManageOrdersPage";
 import CreateNurseryPage from "../pages/CreateNurseryPage";
-import EditNurseryPage from "../pages/EditNurseryPage";
+// import EditNurseryPage from "../pages/EditNurseryPage";
 import AddressPage from "../pages/AddressPage";
 import AddNewAddressPage from "../pages/AddNewAddressPage";
 import EditAddressPage from "../pages/EditAddressPage";
@@ -94,7 +94,7 @@ const Routing = () => {
 
                 <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
                 <Route exact path="/nursery/create" element={<CreateNurseryPage />} />
-                <Route exact path="/nursery/update" element={<EditNurseryPage />} />
+                <Route exact path="/nursery/settings" element={<NurserySettingsPage />} />
                 <Route exact path="/address" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
                 <Route exact path="/address/add" element={<ProtectedRoute><AddNewAddressPage /></ProtectedRoute>} />
                 <Route exact path="/address/update/:id" element={<ProtectedRoute><EditAddressPage /></ProtectedRoute>} />

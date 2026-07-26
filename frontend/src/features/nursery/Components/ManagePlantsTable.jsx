@@ -5,7 +5,7 @@ import { nurseryPlantsAsync, nurseryPlantUpdateAsync, nurseryPlantDeleteAsync, a
 import { getAllCategoriesAsync } from '../../category/categorySlice';
 import React, { useState, useEffect } from 'react';
 import { useTableParams } from '../../../hooks/useTableParams';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import PlantFormModal from '../../common/Components/PlantFormModal';
 
 const ManagePlantsTable = () => {
@@ -17,10 +17,22 @@ const ManagePlantsTable = () => {
     const { categories } = useSelector(state => state.category);
     const nursery = useSelector(state => state.nursery.nursery);
     
+    const location = useLocation();
+
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [modalMode, setModalMode] = useState('add');
     const [selectedPlant, setSelectedPlant] = useState(null);
+
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        if (searchParams.get('action') === 'add-plant') {
+            setIsModalOpen(true);
+            setModalMode('add');
+            // Remove the query param so it doesn't re-open on refresh unintentionally
+            navigate(location.pathname, { replace: true });
+        }
+    }, [location.search, location.pathname, navigate]);
 
     useEffect(() => {
         dispatch(getAllCategoriesAsync({ status: 'Active' }));
