@@ -17,7 +17,7 @@ const NurserySettingsPage = () => {
     const [isCollapseSideNav, setIsCollapseSideNav] = useState(localStorageUtil.getData("isCollapseSideNav") ?? false);
 
     useEffect(() => {
-        document.title = nursery ? "Settings - ${nursery.nurseryName}" : "Nursery Settings";
+        document.title = nursery ? `Settings - ${nursery.nurseryName}` : "Nursery Settings";
     }, [nursery]);
 
     useEffect(() => {

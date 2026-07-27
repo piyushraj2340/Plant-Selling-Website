@@ -17,7 +17,7 @@ const NurseryHelpPage = () => {
     const [isCollapseSideNav, setIsCollapseSideNav] = useState(localStorageUtil.getData("isCollapseSideNav") ?? false);
 
     useEffect(() => {
-        document.title = nursery ? "Help & Messages - ${nursery.nurseryName}" : "Help & Messages";
+        document.title = nursery ? `Help & Messages - ${nursery.nurseryName}` : "Help & Messages";
     }, [nursery]);
 
     useEffect(() => {
