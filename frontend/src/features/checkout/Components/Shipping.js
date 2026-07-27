@@ -52,7 +52,7 @@ const Shipping = () => {
 
     useEffect(() => {
         dispatch(getValidateCheckoutAsync());
-        if(isSessionError) {
+        if (isSessionError) {
             message.error(isSessionError.message);
             navigate("/");
         }
@@ -62,7 +62,7 @@ const Shipping = () => {
         addressList ?? dispatch(addressListDataFetchAsync());
     }, [addressList]);
 
-    useEffect(() =>{
+    useEffect(() => {
         !selectedAddress && handelGetSelectedAddress();
     }, [selectedAddress]);
 
@@ -87,7 +87,7 @@ const Shipping = () => {
                 <div className='py-2 py-md-4 border-bottom px-2 px-md-4'>
                     <Steps items={stepsOptions} current={activeStep} onChange={handelChangeActiveStep} />
                 </div>
-                <div className="d-flex flex-column justify-content-start align-items-start">
+                <div className="d-flex flex-column justify-content-start align-items-start" style={{ overflowY: "auto", maxHeight: "calc(100% - 70px)" }}>
                     <div className='p-2 p-md-3 w-100'>
                         <Link to={`/address/add/?redirect=/checkout/shipping`} className="btn btn-success btn-lg w-100">Add New Address</Link>
                     </div>

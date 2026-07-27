@@ -1,10 +1,10 @@
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
-    order: {
+    vendorOrder: {
         type: mongoose.Schema.ObjectId,
-        ref: "order",
-        required: [true, "Order Id is required."],
+        ref: "vendorOrder",
+        required: [true, "Vendor Order Id is required."],
         immutable: true
     },
     plant: {

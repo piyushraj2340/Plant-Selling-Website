@@ -41,11 +41,10 @@ const TemplateFourSection = ({ content, index, handelDeleteRendersUpload, handle
                             </div>
                             :
 
-                            <div className="template template-header rounded d-flex justify-content-center align-items-center h-100 w-100 hover-images bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
-                                <div className="template-header-complete rounded ">
-                                    <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                                </div>
-                            </div>
+                            <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
                         }
 
                     </div>
@@ -66,11 +65,10 @@ const TemplateFourSection = ({ content, index, handelDeleteRendersUpload, handle
                                 </div>
                             </div>
                             :
-                            <div className="template template-header rounded d-flex justify-content-center align-items-center h-100 w-100 hover-images bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(1); setIsCurrentTemplates(isCurrentTemplates) }}>
-                                <div className="template-header-complete rounded ">
-                                    <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                                </div>
-                            </div>
+                            <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(1); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
                         }
                     </div>
                     <div className="template-third rounded border border-black position-relative">
@@ -91,11 +89,10 @@ const TemplateFourSection = ({ content, index, handelDeleteRendersUpload, handle
                             </div>
                             :
 
-                            <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images h-100 w-100 bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(2); setIsCurrentTemplates(isCurrentTemplates) }}>
-                                <div className="template-header-complete rounded ">
-                                    <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                                </div>
-                            </div>
+                            <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(2); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
                         }
                     </div>
                     <div className="template-fourth rounded border border-black position-relative">
@@ -115,11 +112,10 @@ const TemplateFourSection = ({ content, index, handelDeleteRendersUpload, handle
                                 </div>
                             </div>
                             :
-                            <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images h-100 w-100 bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(3); setIsCurrentTemplates(isCurrentTemplates) }}>
-                                <div className="template-header-complete rounded ">
-                                    <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                                </div>
-                            </div>
+                            <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(3); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
                         }
                     </div>
                 </div>
@@ -127,26 +123,22 @@ const TemplateFourSection = ({ content, index, handelDeleteRendersUpload, handle
                 :
 
                 <div className="template template-four rounded position-relative hover-images" >
-                    <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
-                        <div className="template-header-complete rounded ">
-                            <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                        </div>
-                    </div>
-                    <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(1); setIsCurrentTemplates(isCurrentTemplates) }}>
-                        <div className="template-header-complete rounded ">
-                            <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                        </div>
-                    </div>
-                    <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(2); setIsCurrentTemplates(isCurrentTemplates) }}>
-                        <div className="template-header-complete rounded ">
-                            <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                        </div>
-                    </div>
-                    <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images bg-secondary" onClick={() => { setIsModelOpen(true); setAtBlockIndex(3); setIsCurrentTemplates(isCurrentTemplates) }}>
-                        <div className="template-header-complete rounded ">
-                            <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                        </div>
-                    </div>
+                    <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
+                    <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(1); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
+                    <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(2); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
+                    <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(3); setIsCurrentTemplates(isCurrentTemplates) }}>
+    <i className="fas fa-plus-circle"></i>
+    <p className="mb-0">Add Content</p>
+</div>
                 </div>
         }
 

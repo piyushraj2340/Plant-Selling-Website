@@ -2,6 +2,8 @@ require('dotenv').config();
 require('./src/config/database/db');
 
 const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
@@ -30,8 +32,6 @@ app.use(fileUpload({
 app.use(express.json({ limit: '50mb' }));  // Increase the JSON body size limit to 50MB
 app.use(express.urlencoded({ limit: '50mb', extended: true }));  // Increase URL-encoded body size limit
 
-
-
 // route 
 const authRoute = require("./src/router/auth");
 const nurseryRoute = require("./src/router/nurseryRoute/nursery");
@@ -41,6 +41,7 @@ const products = require("./src/router/products");
 const orderRoute = require("./src/router/checkoutRoute/orders");
 const user = require("./src/router/userRoute/user");
 const cart = require("./src/router/checkoutRoute/cart");
+const saveForLater = require("./src/router/checkoutRoute/saveForLater");
 const address = require("./src/router/userRoute/address");
 const payment = require("./src/router/checkoutRoute/payment");
 const contactUs = require("./src/router/contact");
@@ -48,11 +49,9 @@ const nurseryPublicStore = require('./src/router/nurseryRoute/nurseryPublicStore
 const subscriberEmail = require("./src/router/subscriberEmail");
 const adminRoute = require("./src/router/adminRoute/adminRouter");
 
-// route middleware
-
 // secured routes 
 app.use('/api/v2/auth', authRoute);
-app.use('/api/v2/user', user, cart, orderRoute, address);
+app.use('/api/v2/user', user, cart, orderRoute, address, saveForLater);
 app.use("/api/v2/nursery", nurseryRoute, nurseryStoreRoute, plantsRoute);
 app.use("/api/v2/checkout", payment);
 app.use("/api/v2/admin", adminRoute);
@@ -88,6 +87,38 @@ app.get('*', (req, res) => {
 
 app.use(errorHandlerMiddleware);
 
-app.listen(port, () => {
-    console.log("listening to port 8000");
-})
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: process.env.FRONTEND_URL,
+    methods: ["GET", "POST", "PATCH", "DELETE", "PUT"],
+    credentials: true
+  }
+});
+
+app.set('socketio', io); // Attach io to app so it can be accessed in controllers
+
+io.on('connection', (socket) => {
+    console.log('A user connected to socket:', socket.id);
+    
+    socket.on('join_chat', (chatId) => {
+        socket.join(chatId);
+        console.log(`Socket ${socket.id} joined chat: ${chatId}`);
+    });
+
+    socket.on('send_message', (data) => {
+        // data should contain { chatId, message, sender }
+        // Broadcast to others in the room
+        socket.to(data.chatId).emit('receive_message', data);
+    });
+    
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
+
+server.listen(port, () => {
+    console.log("listening to port " + port);
+});
+
+

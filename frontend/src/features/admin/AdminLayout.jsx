@@ -8,7 +8,7 @@ const AdminLayout = () => {
 
     return (
         <div className="admin-panel row m-0 vh-100">
-            <div className={`${openSlider ? 'slider-open' : 'slider-close'} col-md-8 d-lg-block col-lg-2 col-xl-2 side-nav-drag bg-dark text-light py-3 px-md-3 px-lg-2 px-xl-3`}>
+            <div className={`${openSlider ? 'slider-open' : 'slider-close'} col-md-8 d-lg-block col-lg-2 col-xl-2 side-nav-drag bg-dark text-light py-3 px-md-3 px-lg-2 px-xl-3`} style={{ overflowY: 'auto', maxHeight: "100vh" }}>
                 <SideMenu openSlider={openSlider} setOpenSlider={setOpenSlider} />
             </div>
             <div className="col-12 col-lg-10 col-xl-10 ps-sm-2 py-3 px-md-3 px-xl-5" style={{ backgroundColor: "antiquewhite", overflowY: 'auto', maxHeight: "100vh" }}>

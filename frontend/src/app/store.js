@@ -10,6 +10,7 @@ import checkoutReducer from '../features/checkout/checkoutSlice';
 import nurseryPublicStoreSlice  from '../features/nursery/nurseryPublicStoreSlice';
 import adminReducer from '../features/admin/adminSlice';
 import categoryReducer from '../features/category/categorySlice';
+import saveForLaterReducer from '../features/cart/saveForLaterSlice';
 
 export default configureStore({
     reducer: {
@@ -24,5 +25,6 @@ export default configureStore({
         order: orderReducer,
         admin: adminReducer,
         category: categoryReducer,
+        saveForLater: saveForLaterReducer,
     },
 });

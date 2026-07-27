@@ -2,70 +2,144 @@ const mongoose = require('mongoose');
 const ordersModel = require('../../model/checkoutModel/orders');
 const cartModel = require('../../model/checkoutModel/cart');
 const OrderItem = require('../../model/checkoutModel/orderItem');
+const VendorOrder = require('../../model/checkoutModel/vendorOrder');
 const { deleteMultipleData } = require('../../utils/redisService');
 exports.createOrder = async (req, res, next) => {
     const session = await mongoose.startSession();
     try {
-        session.startTransaction();
+        let responseInfo = null;
+        await session.withTransaction(async () => {
+            let { shippingInfo, payment } = req.body;
 
-        const { shippingInfo, payment } = req.body;
-        
-        // 1. Fetch user's cart fully populated
-        const cart = await cartModel.findOne({ user: req.user._id }).populate({
-            path: 'cartItems',
-            populate: [
-                { path: 'plant' },
-                { path: 'nursery', select: 'nurseryName' }
-            ]
-        });
+            // Check if order already exists with this paymentId (Prevents React StrictMode double-fire bug)
+            if (payment && payment.paymentId) {
+                const existingOrder = await ordersModel.findOne({ "payment.paymentId": payment.paymentId }).session(session);
+                if (existingOrder) {
+                    const total = await ordersModel.countDocuments({ user: req.user._id, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) } }).session(session);
+                    responseInfo = {
+                        status: true,
+                        message: "Successfully created your order.",
+                        result: existingOrder,
+                        total
+                    };
+                    return;
+                }
+            }
 
-        if (!cart || cart.cartItems.length === 0) {
-            throw new Error("Cart is empty");
-        }
+            if (!shippingInfo || !shippingInfo.address) {
+                if (req.orderUser && req.orderToken) {
+                    const { getData } = require('../../utils/redisService');
+                    shippingInfo = await getData(req.orderUser, req.orderToken, 'shipping');
+                }
+            }
 
-        // 2. Create base order
-        const newOrder = new ordersModel({
-            user: req.user._id,
-            shippingInfo,
-            payment,
-            pricing: cart.pricing
-        });
-        await newOrder.save({ session });
-
-        // 3. Create order items from cart items
-        const orderItemIds = [];
-        for (const item of cart.cartItems) {
-            const newItem = new OrderItem({
-                order: newOrder._id,
-                plant: item.plant._id,
-                nursery: item.nursery,
-                nurseryName: item.nursery?.nurseryName || "Nursery", // Populated from nursery
-                plantName: item.plant.plantName,
-                images: item.plant.images[0],
-                price: item.plant.price,
-                discount: item.plant.discount,
-                quantity: item.quantity
+            if (!shippingInfo || !shippingInfo.address) {
+                throw new Error("Shipping information is missing or session expired.");
+            }
+            
+            // 1. Fetch user's cart fully populated
+            const cart = await cartModel.findOne({ user: req.user._id }).session(session).populate({
+                path: 'cartItems',
+                populate: [
+                    { path: 'plant' },
+                    { path: 'nursery', select: 'nurseryName' }
+                ]
             });
-            await newItem.save({ session });
-            orderItemIds.push(newItem._id);
-        }
 
-        newOrder.orderItems = orderItemIds;
-        const result = await newOrder.save({ session });
-        await session.commitTransaction();
+            if (!cart || cart.cartItems.length === 0) {
+                throw new Error("Cart is empty");
+            }
 
-        const total = await ordersModel.countDocuments({ user: req.user, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) } });
+            // 2. Create base order
+            const newOrder = new ordersModel({
+                user: req.user._id,
+                shippingInfo,
+                payment,
+                pricing: cart.pricing,
+                overallStatus: "Processing"
+            });
+            await newOrder.save({ session });
 
-        const info = {
-            status: true,
-            message: "Successfully created your order.",
-            result,
-            total
-        };
+            // 3. Group cart items by nursery
+            const itemsByNursery = {};
+            for (const item of cart.cartItems) {
+                const nurseryId = item.nursery && item.nursery._id ? item.nursery._id.toString() : "UnknownNursery";
+                if (!itemsByNursery[nurseryId]) {
+                    itemsByNursery[nurseryId] = {
+                        nurseryData: item.nursery,
+                        items: []
+                    };
+                }
+                itemsByNursery[nurseryId].items.push(item);
+            }
 
-        res.status(200).send(info);
+            const nurseryCount = Object.keys(itemsByNursery).length;
+            const deliveryFeePerNursery = cart.pricing && cart.pricing.deliveryFee ? (cart.pricing.deliveryFee / nurseryCount) : 0;
+            
+            const vendorOrderIds = [];
+
+            for (const [nurseryId, nurseryGroup] of Object.entries(itemsByNursery)) {
+                let subTotal = 0;
+                
+                // Calculate subtotal for this vendor
+                for (const item of nurseryGroup.items) {
+                    const price = item.plant.price || 0;
+                    const discount = item.plant.discount || 0;
+                    const quantity = item.quantity || 1;
+                    const itemPriceAfterDiscount = price - Math.round((price * discount) / 100);
+                    subTotal += (itemPriceAfterDiscount * quantity);
+                }
+
+                const newVendorOrder = new VendorOrder({
+                    order: newOrder._id,
+                    nursery: nurseryId !== "UnknownNursery" ? nurseryId : null,
+                    pricing: {
+                        subTotal: subTotal,
+                        shippingFee: deliveryFeePerNursery,
+                        nurseryDiscount: 0,
+                        netAmountOwed: subTotal + deliveryFeePerNursery
+                    }
+                });
+
+                await newVendorOrder.save({ session });
+                vendorOrderIds.push(newVendorOrder._id);
+
+                const orderItemIds = [];
+                for (const item of nurseryGroup.items) {
+                    const newItem = new OrderItem({
+                        vendorOrder: newVendorOrder._id,
+                        plant: item.plant._id,
+                        nursery: item.nursery && item.nursery._id ? item.nursery._id : null,
+                        nurseryName: item.nursery?.nurseryName || "Nursery",
+                        plantName: item.plant.plantName,
+                        images: item.plant.images[0],
+                        price: item.plant.price,
+                        discount: item.plant.discount,
+                        quantity: item.quantity
+                    });
+                    await newItem.save({ session });
+                    orderItemIds.push(newItem._id);
+                }
+
+                newVendorOrder.orderItems = orderItemIds;
+                await newVendorOrder.save({ session });
+            }
+
+            newOrder.vendorOrders = vendorOrderIds;
+            const result = await newOrder.save({ session });
+
+            const total = await ordersModel.countDocuments({ user: req.user, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) } }).session(session);
+
+            responseInfo = {
+                status: true,
+                message: "Successfully created your order.",
+                result,
+                total
+            };
+        });
+
+        res.status(200).send(responseInfo);
     } catch (error) {
-        await session.abortTransaction();
         next(error);
     } finally {
         await session.endSession();
@@ -82,23 +156,51 @@ exports.getOrderHistory = async (req, res, next) => {
 
         const skipData = (page - 1) * limit;
 
-        const total = await ordersModel.countDocuments({
-            user: req.user, orderAt: { $gte: endDate }, $or: [
-                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by order ID
-                { "orderItems.plantName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.nurseryName": { $regex: new RegExp(orderSearch, 'i') } }, //? Search by plant name (case-insensitive)
-                { "orderItems.plant": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
-                { "orderItems.nursery": mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, //? Search by plant name (case-insensitive)
-                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
-            ]
-        });
+        let orderIdsFromSearch = [];
+        if (orderSearch) {
+            const OrderItem = require('../../model/checkoutModel/orderItem');
+            const searchRegex = new RegExp(orderSearch, 'i');
+            const matchedItems = await OrderItem.find({
+                $or: [
+                    { plantName: searchRegex },
+                    { nurseryName: searchRegex }
+                ]
+            }).populate('vendorOrder');
 
-        const result = await ordersModel.find({
-            user: req.user, orderAt: { $gte: endDate }, $or: [
-                { _id: mongoose.isValidObjectId(orderSearch) ? orderSearch : null }, 
-                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } },
-            ]
-        }).populate('orderItems').limit(limit).skip(skipData).select('-payment.paymentId -delivery -shippingInfo -pricing').sort({ _id: -1 });
+            orderIdsFromSearch = matchedItems
+                .filter(item => item.vendorOrder && item.vendorOrder.order)
+                .map(item => item.vendorOrder.order.toString());
+        }
+
+        const queryObj = { user: req.user };
+        if (!isNaN(endDate)) {
+            queryObj.orderAt = { $gte: endDate };
+        }
+        
+        if (orderSearch) {
+            const validIds = [...orderIdsFromSearch];
+            if (mongoose.isValidObjectId(orderSearch)) {
+                validIds.push(orderSearch);
+            }
+            queryObj.$or = [
+                { _id: { $in: validIds } },
+                { "payment.paymentMethods": { $regex: new RegExp(orderSearch, 'i') } }
+            ];
+        }
+
+        const total = await ordersModel.countDocuments(queryObj);
+
+        const result = await ordersModel.find(queryObj)
+            .populate({
+                path: 'vendorOrders',
+                populate: {
+                    path: 'orderItems'
+                }
+            })
+            .limit(limit)
+            .skip(skipData)
+            .select('-payment.paymentId -shippingInfo -pricing')
+            .sort({ _id: -1 });
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -125,7 +227,14 @@ exports.getOrderById = async (req, res, next) => {
     try {
         const _id = req.params.id;
 
-        const result = await ordersModel.findOne({ _id, user: req.user }).populate('orderItems').select('-payment.paymentId -delivery');
+        const result = await ordersModel.findOne({ _id, user: req.user })
+            .populate({
+                path: 'vendorOrders',
+                populate: {
+                    path: 'orderItems'
+                }
+            })
+            .select('-payment.paymentId');
 
         if (!result) {
             const error = new Error("Order not found.");
@@ -149,81 +258,73 @@ exports.getOrderById = async (req, res, next) => {
 exports.confirmOrderPayment = async (req, res, next) => {
     const session = await mongoose.startSession();
     try {
-        session.startTransaction();
+        let responseInfo = null;
+        await session.withTransaction(async () => {
+            const { paymentId, status } = req.body;
 
-        const { paymentId, status } = req.body;
-
-        if (!paymentId || !status || status !== 'succeeded') {
-            const error = new Error("You are not allowed to access this route.");
-            error.statusCode = 403;
-            throw error;
-        }
-
-        const result = await ordersModel.findOneAndUpdate(
-            { "payment.paymentId": paymentId, user: req.user },
-            {
-                $set: {
-                    "payment.status": status,
-                    "payment.message": "Payment Succeeded"
-                }
-            },
-            {
-                new: true,
-                session
+            if (!paymentId || !status || status !== 'succeeded') {
+                const error = new Error("You are not allowed to access this route.");
+                error.statusCode = 403;
+                throw error;
             }
-        ).select('-payment.paymentId -delivery');
 
-        if (!result) {
-            const error = new Error("Order not found.");
-            error.statusCode = 404;
-            throw error;
-        }
+            const result = await ordersModel.findOneAndUpdate(
+                { "payment.paymentId": paymentId, user: req.user },
+                {
+                    $set: {
+                        "payment.status": status,
+                        "payment.message": "Payment Succeeded"
+                    }
+                },
+                {
+                    new: true,
+                    session
+                }
+            ).select('-payment.paymentId -delivery');
 
-        const CartItem = require('../../model/checkoutModel/cartItem');
-        
-        // Find existing cart for user
-        const existingCart = await cartModel.findOne({ user: req.user });
-        
-        if (existingCart) {
-            // Delete all CartItems linked to this cart
-            await CartItem.deleteMany({ cart: existingCart._id }, { session });
+            if (!result) {
+                const error = new Error("Order not found.");
+                error.statusCode = 404;
+                throw error;
+            }
+
+            const CartItem = require('../../model/checkoutModel/cartItem');
             
-            // Delete the cart itself
-            await cartModel.findByIdAndDelete(existingCart._id, { session });
-        }
-        
-        // Initialize fresh cart
-        const freshCart = new cartModel({ user: req.user, cartItems: [] });
-        await freshCart.save({ session });
+            // Find existing cart for user
+            const existingCart = await cartModel.findOne({ user: req.user }).session(session);
+            
+            if (existingCart) {
+                // Delete all CartItems linked to this cart
+                await CartItem.deleteMany({ cart: existingCart._id }, { session });
+                
+                // Delete the cart itself
+                await cartModel.findByIdAndDelete(existingCart._id, { session });
+            }
+            
+            // Initialize fresh cart
+            const freshCart = new cartModel({ user: req.user, cartItems: [] });
+            await freshCart.save({ session });
 
-        //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA
-        const prefix = process.env.REDIS_VERCEL_KV_DB || 'development';
-        const redisKeys = [
-            `${prefix}:${req.user}:${req.orderToken}:cartOrProducts`,
-            `${prefix}:${req.user}:${req.orderToken}:shipping`,
-            `${prefix}:${req.user}:${req.orderToken}:pricing`,
-            `${prefix}:${req.user}:${req.orderToken}:payment`
-        ];
+            //* CLEANUP_TASK:: REMOVE THE DATA FROM THE REDIS_DB OF THE ORDER_SESSION_DATA
+            const prefix = process.env.REDIS_VERCEL_KV_DB || 'development';
+            const redisKeys = [
+                `${prefix}:${req.user}:${req.orderToken}:cartOrProducts`,
+                `${prefix}:${req.user}:${req.orderToken}:shipping`,
+                `${prefix}:${req.user}:${req.orderToken}:pricing`,
+                `${prefix}:${req.user}:${req.orderToken}:payment`
+            ];
 
-        await deleteMultipleData(redisKeys);
+            await deleteMultipleData(redisKeys);
 
-        //* CLEANUP_TASK:: REMOVE THE ORDER_SESSION
-        //? remove the order auth session
-        //? Remove the cookie based authentication and implemented the Bearer authentication in the headers 
-        // res.clearCookie('orderSession', {
-        //     sameSite: 'none',
-        //     secure: true
-        // });
+            responseInfo = {
+                status: true,
+                message: "Payment Succeeded",
+                result
+            };
+        });
 
-        await session.commitTransaction();
-        const info = {
-            status: true,
-            message: "Payment Succeeded",
-            result
-        };
-        res.status(200).send(info);
+        res.status(200).send(responseInfo);
     } catch (error) {
-        await session.abortTransaction();
         next(error);
     } finally {
         await session.endSession();
@@ -232,7 +333,16 @@ exports.confirmOrderPayment = async (req, res, next) => {
 
 exports.getLastOrder = async (req, res, next) => {
     try {
-        const result = await ordersModel.find({ user: req.user }).sort({ _id: -1 }).populate('orderItems').limit(1).select('-payment.paymentId -delivery -shippingInfo -pricing');
+        const result = await ordersModel.find({ user: req.user })
+            .sort({ _id: -1 })
+            .populate({
+                path: 'vendorOrders',
+                populate: {
+                    path: 'orderItems'
+                }
+            })
+            .limit(1)
+            .select('-payment.paymentId -shippingInfo -pricing');
 
         if (!result) {
             const error = new Error("Order not found.");

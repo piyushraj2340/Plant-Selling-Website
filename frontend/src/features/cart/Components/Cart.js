@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
 import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, cartApplyCouponAsync, removeCoupon, cartGetApplicableCouponsAsync } from '../cartSlice';
+import { fetchSaveForLaterAsync, addToSaveForLaterAsync, moveToCartAsync, deleteSaveForLaterAsync } from '../saveForLaterSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 import handelShareProduct from '../../../utils/handelShareProduct';
@@ -10,7 +11,7 @@ import { message } from 'antd';
 import useUserData from '../../../hooks/useUserData';
 
 function Cart() {
-  const {userData:user} = useUserData();
+  const { userData: user } = useUserData();
   const cart = useSelector(state => state.cart.carts);
   const addressList = useSelector(state => state.address.addressList);
   const selectedAddress = useSelector(state => state.address.selectedAddress);
@@ -18,6 +19,7 @@ function Cart() {
   const appliedCoupon = useSelector(state => state.cart.appliedCoupon);
   const applicableCoupons = useSelector(state => state.cart.applicableCoupons);
   const priceWarnings = useSelector(state => state.cart.priceWarnings);
+  const saveForLaterItems = useSelector(state => state.saveForLater.saveForLaterItems);
 
   const dispatch = useDispatch();
 
@@ -33,10 +35,11 @@ function Cart() {
     dispatch(cartDataFetchAsync()).then(() => {
       dispatch(cartGetApplicableCouponsAsync());
     });
+    dispatch(fetchSaveForLaterAsync());
   }, [dispatch]);
 
   useEffect(() => {
-       user && (addressList ?? dispatch(addressListDataFetchAsync()))
+    user && (addressList ?? dispatch(addressListDataFetchAsync()))
   }, [dispatch, user]);
 
 
@@ -56,31 +59,64 @@ function Cart() {
 
   const handleDeleteFromCart = async (cartId) => {
     dispatch(cartDataDeleteAsync(cartId)).then(() => {
-        dispatch(cartGetApplicableCouponsAsync());
+      dispatch(cartGetApplicableCouponsAsync());
     });
   }
 
   const handleUpdateCart = async (cartId, quantity) => {
     dispatch(cartDataUpdateQuantityAsync({ cartId, quantity })).then(() => {
-        dispatch(cartGetApplicableCouponsAsync());
+      dispatch(cartGetApplicableCouponsAsync());
     });
   }
-  
+
+  const handleSaveForLater = (cartId) => {
+    dispatch(addToSaveForLaterAsync(cartId)).then((res) => {
+      if (res.error) {
+        message.error(res.error.message || "Failed to save item for later");
+      } else {
+        message.success("Item saved for later");
+        dispatch(cartDataFetchAsync()); // Refresh cart to update totals
+      }
+    });
+  }
+
+  const handleMoveToCart = (saveForLaterId) => {
+    dispatch(moveToCartAsync(saveForLaterId)).then((res) => {
+      if (res.error) {
+        message.error(res.error.message || "Failed to move item to cart");
+      } else {
+        message.success("Item moved to cart");
+        dispatch(cartDataFetchAsync()); // Refresh cart
+        dispatch(fetchSaveForLaterAsync()); // Refresh saved list
+      }
+    });
+  }
+
+  const handleDeleteSaveForLater = (saveForLaterId) => {
+    dispatch(deleteSaveForLaterAsync(saveForLaterId)).then((res) => {
+      if (res.error) {
+        message.error(res.error.message || "Failed to remove item");
+      } else {
+        message.success("Item removed from saved list");
+      }
+    });
+  }
+
   const handleApplyCoupon = (code) => {
     if (!code) return;
     dispatch(cartApplyCouponAsync(code)).then((res) => {
-        if (res.payload && res.payload.status) {
-            message.success(res.payload.message || "Coupon applied successfully!");
-        } else if (res.payload && !res.payload.status) {
-            message.error(res.payload.message || "Invalid or inapplicable coupon code.");
-        } else if (res.error) {
-            message.error("Failed to apply coupon.");
-        }
+      if (res.payload && res.payload.status) {
+        message.success(res.payload.message || "Coupon applied successfully!");
+      } else if (res.payload && !res.payload.status) {
+        message.error(res.payload.message || "Invalid or inapplicable coupon code.");
+      } else if (res.error) {
+        message.error("Failed to apply coupon.");
+      }
     });
   }
 
   const handelBuyProduct = async () => {
-    if(!cart || cart.length === 0) {
+    if (!cart || cart.length === 0) {
       message.error("Your Cart is Empty!");
       return;
     }
@@ -88,7 +124,7 @@ function Cart() {
     const data = {
       data: {
         cartOrProducts: cart,
-        pricing: appliedCoupon ? { ...cartPriceDetails, totalPrice: appliedCoupon.newTotal, couponDiscount: appliedCoupon.discountAmount } : cartPriceDetails,
+        pricing: appliedCoupon ? { ...cartPriceDetails, totalPrice: appliedCoupon.newTotal, couponDiscount: appliedCoupon.discountAmount } : { ...cartPriceDetails, totalPrice: cartPriceDetails.finalPrice },
         shippingInfo: selectedAddress,
         couponId: appliedCoupon ? appliedCoupon.couponId : null
       },
@@ -175,7 +211,7 @@ function Cart() {
                                   <i className='fas fa-trash-alt p-2'></i>
                                   <span className='menu-text p-1 center'>Delete</span>
                                 </p>
-                                <p className="m-0 menu p-2">
+                                <p className="m-0 menu p-2" onClick={() => handleSaveForLater(elem._id)}>
                                   <i className='fas fa-bookmark p-2'></i>
                                   <span className='menu-text p-1 center'>Save for later</span>
                                 </p>
@@ -194,11 +230,11 @@ function Cart() {
                                 <i className='fas fa-trash-alt p-2'></i>
                                 <span className='p-1 center'>Delete</span>
                               </p>
-                              <p className="m-0 small">
+                              <p className="m-0 small" style={{ cursor: 'pointer' }} onClick={() => handleSaveForLater(elem._id)}>
                                 <i className='fas fa-bookmark p-2'></i>
                                 <span className='p-1 center'>Save for later</span>
                               </p>
-                              <p className="m-0 small">
+                              <p className="m-0 small" style={{ cursor: 'pointer' }} onClick={() => handelShareProduct(productData, message)}>
                                 <i className='fas fa-share-alt p-2'></i>
                                 <span className='p-1 center'>Share</span>
                               </p>
@@ -219,6 +255,89 @@ function Cart() {
               <div className="d-flex flex-row-reverse p-3">
                 <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee).toFixed(2)}</b></p>
               </div>
+
+              {/* Save For Later Section */}
+              <div className="mt-5 border-top pt-4">
+                <h4 className="h4 mb-3">Saved for later ({(saveForLaterItems || []).length} items)</h4>
+
+                {(!saveForLaterItems || saveForLaterItems.length === 0) ? (
+                  <div className="p-4 text-center text-muted border rounded bg-white">
+                    <i className="fas fa-bookmark fs-1 mb-3 text-light"></i>
+                    <p className="mb-0">You have no items saved for later.</p>
+                  </div>
+                ) : (
+                  saveForLaterItems.map((elem) => {
+                    const savedProductData = {
+                      title: "Share " + elem.plant?.plantName + " Plants",
+                      text: "Check out this plant",
+                      url: window.location.origin + `/product/${elem.plant?._id}`,
+                    }
+
+                    if (!elem.plant) return null;
+
+                    return (
+                      <div key={elem._id} className="item mt-4 pt-2 pb-2 border-bottom">
+                        <div className="row">
+                          <div className="item-img col-5 col-md-4 col-xl-3 m-0 p-0">
+                            <div className="img border">
+                              <img src={elem.plant.images[0].url} alt="flowering plant" />
+                            </div>
+                          </div>
+                          <div className="item-content col-7 col-md-8 col-xl-9">
+                            <div className="row">
+                              <div className='m-0'>
+                                <div className='m-0'>
+                                  <Link to={`/product/${elem.plant._id}`} className='link-dark link-underline-hover'><h3 className='h5 mb-0'>{elem.plant.plantName}</h3></Link>
+                                </div>
+                                {elem.plant.nursery && (
+                                  <p className='m-0'><small><Link to={`/nursery/store/view/${elem.plant.nursery._id || elem.plant.nursery}`} className='small link-secondary link-underline-hover'><i className="fas fa-store"></i> Visit Store</Link></small></p>
+                                )}
+                                <p className="card-text h5 m-0 mt-2">
+                                  <span className="text-success">-{elem.plant.discount}%</span> ₹{((elem.plant.price - elem.plant.discount / 100 * elem.plant.price)).toFixed(2)}
+                                </p>
+                                <p className="text-muted small m-0" style={{ fontSize: "14px", margin: "0" }}>
+                                  Price: <small className='text-decoration-line-through'>₹ {elem.plant.price}</small>
+                                </p>
+                                <p className="card-text m-0 text-success small"><small>In Stock</small></p>
+                              </div>
+                            </div>
+                            <div className="item-content-menu d-none-lg mt-3">
+                              <div className="d-flex">
+                                <p className="m-0 menu p-2" onClick={() => handleDeleteSaveForLater(elem._id)}>
+                                  <i className='fas fa-trash-alt p-2'></i>
+                                  <span className='menu-text p-1 center'>Delete</span>
+                                </p>
+                                <p className="m-0 menu p-2" onClick={() => handleMoveToCart(elem._id)}>
+                                  <i className='fas fa-shopping-cart p-2'></i>
+                                  <span className='menu-text p-1 center'>Move to cart</span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="menu-control d-lg">
+                            <div className="d-flex justify-content-around mt-3 mb-3">
+                              <p className="m-0 small" style={{ cursor: 'pointer' }} onClick={() => handleDeleteSaveForLater(elem._id)}>
+                                <i className='fas fa-trash-alt p-2'></i>
+                                <span className='p-1 center'>Delete</span>
+                              </p>
+                              <p className="m-0 small" style={{ cursor: 'pointer' }} onClick={() => handleMoveToCart(elem._id)}>
+                                <i className='fas fa-shopping-cart p-2'></i>
+                                <span className='p-1 center'>Move to cart</span>
+                              </p>
+                              <p className="m-0 small" style={{ cursor: 'pointer' }} onClick={() => handelShareProduct(savedProductData, message)}>
+                                <i className='fas fa-share-alt p-2'></i>
+                                <span className='p-1 center'>Share</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
+                )}
+              </div>
             </div>
             <div className="m-0 p-0 col-md-4 summary">
               <div className="p-3">
@@ -230,10 +349,10 @@ function Cart() {
                     <small>ITEMS {(cart ?? 0) && Number(cart.length)}</small>
                     <span><small className='small'>Subtotal ₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee).toFixed(2)}</b></span>
                   </p>
-                  <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }} style={{cursor: 'pointer'}}>
+                  <p className="text-muted small link-underline-hover" onClick={() => { setViewAddressList(!viewAddressList) }} style={{ cursor: 'pointer' }}>
                     <small><i className="fas fa-map-marker-alt"></i> {selectedAddress ? `Deliver to ${selectedAddress.name.substring(0, selectedAddress.name.indexOf(" "))} - ${selectedAddress.city} ${selectedAddress.pinCode}` : "Select delivery location"}</small>
                   </p>
-                  
+
                   <p className="text-muted mb-0 mt-3">
                     <small className='small'>Have Coupon?</small>
                   </p>
@@ -241,7 +360,7 @@ function Cart() {
                     appliedCoupon ? (
                       <div className="alert alert-success d-flex justify-content-between p-2 mt-1 mb-3 align-items-center">
                         <small><strong>Applied:</strong> ₹{appliedCoupon.discountAmount} Off</small>
-                        <button onClick={() => dispatch(removeCoupon())} className="btn-close" style={{fontSize: '10px'}}></button>
+                        <button onClick={() => dispatch(removeCoupon())} className="btn-close" style={{ fontSize: '10px' }}></button>
                       </div>
                     ) : (
                       <div className="mt-1">
@@ -254,20 +373,20 @@ function Cart() {
                             <p className="text-muted small mb-1"><i className="fas fa-tags"></i> Available Coupons:</p>
                             {applicableCoupons.map(coupon => (
                               <div key={coupon._id} className="border rounded p-2 mb-2 d-flex justify-content-between align-items-center">
-                                <div style={{maxWidth: '70%'}}>
-                                  <div className={`fw-bold ${coupon.isApplicable ? 'text-success' : 'text-muted'}`} style={{fontSize: '0.9rem'}}>{coupon.code}</div>
-                                  <div className="text-muted" style={{fontSize: '0.75rem'}}>{coupon.description}</div>
+                                <div style={{ maxWidth: '70%' }}>
+                                  <div className={`fw-bold ${coupon.isApplicable ? 'text-success' : 'text-muted'}`} style={{ fontSize: '0.9rem' }}>{coupon.code}</div>
+                                  <div className="text-muted" style={{ fontSize: '0.75rem' }}>{coupon.description}</div>
                                   {!coupon.isApplicable && coupon.reason && (
-                                      <div className="text-danger mt-1" style={{fontSize: '0.65rem', fontStyle: 'italic'}}>{coupon.reason}</div>
+                                    <div className="text-danger mt-1" style={{ fontSize: '0.65rem', fontStyle: 'italic' }}>{coupon.reason}</div>
                                   )}
                                 </div>
-                                <button 
-                                    className={`btn btn-sm ${coupon.isApplicable ? 'btn-outline-info' : 'btn-outline-secondary'}`} 
-                                    style={{fontSize: '0.7rem'}} 
-                                    disabled={!coupon.isApplicable}
-                                    onClick={() => { setCouponInput(coupon.code); handleApplyCoupon(coupon.code); }}
+                                <button
+                                  className={`btn btn-sm ${coupon.isApplicable ? 'btn-outline-info' : 'btn-outline-secondary'}`}
+                                  style={{ fontSize: '0.7rem' }}
+                                  disabled={!coupon.isApplicable}
+                                  onClick={() => { setCouponInput(coupon.code); handleApplyCoupon(coupon.code); }}
                                 >
-                                    Apply
+                                  Apply
                                 </button>
                               </div>
                             ))}
@@ -302,9 +421,9 @@ function Cart() {
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Delivery : </small>
-                      { appliedCoupon?.freeDelivery || (cartPriceDetails && cartPriceDetails.deliveryFee === 0) ? 
+                      {appliedCoupon?.freeDelivery || (cartPriceDetails && cartPriceDetails.deliveryFee === 0) ?
                         <span><del className="text-muted">₹90.00</del> <b className="text-success">FREE</b></span>
-                      : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryFee.toFixed(2)}</b></span> }
+                        : <span>₹<b>{cartPriceDetails && cartPriceDetails.deliveryFee.toFixed(2)}</b></span>}
                     </p>
                     <p className="text-muted d-flex justify-content-between">
                       <small>Subtotal : </small>
@@ -315,7 +434,11 @@ function Cart() {
                     <p className="h5">Total: <sup>₹</sup>{cartPriceDetails && cartPriceDetails.finalPrice.toFixed(2)}</p>
                   </div>
                   <div className="row m-0">
-                    <button onClick={handelBuyProduct} className="btn btn-success">Checkout</button>
+                    {
+                      !cart || cart.length === 0 ?
+                        <Link to='/products' className="btn btn-lg btn-success">Explore Products</Link> :
+                        <button onClick={handelBuyProduct} className="btn btn-lg btn-success">Checkout</button>
+                    }
                   </div>
                 </div>
               </div>

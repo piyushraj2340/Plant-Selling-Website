@@ -8,7 +8,7 @@ const TemplateCompleteSectionSaved = ({ content }) => {
             {
                 content.length && content[0].image.url !== "" ?
                     <div className='p-0 template template-images rounded position-relative'>
-                        <div className="hover-images w-100 h-100">
+                        <div className="hover-images w-100 h-100 premium-image-hover">
                             <a href={content[0].url} target="_blank" rel="noopener noreferrer">
                                 <img src={content[0].image.url} className='w-100 img-fluid rounded' alt={content[0].title} />
                             </a>

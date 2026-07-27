@@ -24,13 +24,6 @@ router.route("/store/view/:nurseryId/getAllBlocks/:tabId")
 router.route("/store/view/:id/contactUs")
     .post(nurseryStoreContactUs);
 
-router.route("/store/view/:id/contactUs")
-    .get(getNurseryStoreMessage);
-
-
-router.route("/store/view/:nurseryId/contactUs/:messageId")
-    .get(NurseryStoreMessageMarkAsViewed);
-
 router.route("/details/:id")
     .get(getNurseryDetail);
 

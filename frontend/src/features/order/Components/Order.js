@@ -154,7 +154,7 @@ const Order = () => {
                     </div>
                     <div className="d-flex align-items-center">
                         <p className='p-2 m-0'>Total Order: <b>{total}</b></p>
-                        <select name="filter-order" id="filter-order" className='p-1' onChange={(e) => handelFilterOrderHistoryByDate(e)}>
+                        <select name="filter-order" id="filter-order" className='p-1' defaultValue="allTime" onChange={(e) => handelFilterOrderHistoryByDate(e)}>
                             <option value="last3Months">Last 3 months</option>
                             <option value="last6Months">Last 6 months</option>
                             <option value="last1Year">Last 1 Year</option>
@@ -168,21 +168,26 @@ const Order = () => {
                         orderHistory.map(order => {
                             return (
                                 <div className="card mb-2 p-0" key={order._id}>
-                                    <div className="card-header p-2 p-md-3">
+                                    <div className="card-header p-3 p-md-4 bg-light border-bottom">
                                         <div className="d-flex flex-column flex-md-row align-items-start justify-content-between align-items-md-center">
                                             <div>
-                                                <p className="text-muted mb-2"> Order ID <span className="fw-bold text-body">{order._id}</span></p>
-                                                <p className="text-muted mb-0"> Place On <span className="fw-bold text-body">{formatTimestamp(order.orderAt)}</span> </p>
+                                                <p className="text-muted mb-2"> Order ID: <span className="fw-bold text-body">{order._id}</span></p>
+                                                <p className="text-muted mb-2"> Place On: <span className="fw-bold text-body">{formatTimestamp(order.orderAt)}</span> </p>
+                                                <p className="text-muted mb-0"> Order Status: 
+                                                    <span className={`badge ms-2 ${order.overallStatus === 'Cancelled' ? 'bg-danger' : order.overallStatus === 'Delivered' ? 'bg-success' : 'bg-primary'}`}>
+                                                        {order.overallStatus || 'Processing'}
+                                                    </span>
+                                                </p>
                                             </div>
-                                            <div className='mt-2 mt-md-0'>
-                                                <h6 className="mb-0"> <Link to={`/orders/details/${order._id}`}>View Details </Link> </h6>
+                                            <div className='mt-3 mt-md-0 d-flex flex-column align-items-md-end'>
+                                                <h6 className="mb-2"> <Link to={`/orders/details/${order._id}`} className="btn btn-outline-primary btn-sm">View Details</Link> </h6>
+                                                <span className="text-muted small">Payment: <b>{order.payment.paymentMethods}</b> ({order.payment.status})</span>
                                             </div>
                                         </div>
                                     </div>
                                     <div className="card-body p-3 p-md-4 mb-3">
                                         {
-                                            order.orderItems && order.orderItems.map(items => {
-
+                                            order.vendorOrders && order.vendorOrders.map(vendorOrder => {
                                                 const stepsOptions = [
                                                     {
                                                         title: order.payment.status === 'pending' ? "Order Pending" : "Order Placed",
@@ -190,43 +195,46 @@ const Order = () => {
                                                         description: <span className='text-muted'>{formatTimestamp(order.orderAt)} <br /> <i className="fw-bold">{order.payment.status === 'pending' && order.payment.message}</i></span>
                                                     },
                                                     {
-                                                        title: 'Order Shipped',
+                                                        title: 'Dispatched',
                                                         icon: <span className='	fas fa-shipping-fast'></span>,
-                                                        description: order.orderStatus.state === "shipped" && <span className='text-muted'>{formatTimestamp(order.orderStatus.statusAt)} <br /> {order.orderStatus.message}</span>
+                                                        description: ['Approved', 'Dispatched'].includes(vendorOrder.orderStatus?.status) && <span className='text-muted'>{formatTimestamp(vendorOrder.orderStatus.statusAt)} <br /> {vendorOrder.orderStatus.message}</span>
                                                     },
                                                     {
-                                                        title: 'Order Delivered',
+                                                        title: 'Delivered',
                                                         icon: <span className='fas fa-home'></span>,
-                                                        description: order.orderStatus.state === "delivered" && <span className='text-muted'>{formatTimestamp(order.orderStatus.statusAt)} <br /> {order.orderStatus.message}</span>
+                                                        description: vendorOrder.orderStatus?.status === "Delivered" && <span className='text-muted'>{formatTimestamp(vendorOrder.orderStatus.statusAt)} <br /> {vendorOrder.orderStatus.message}</span>
                                                     },
-                                                ]
+                                                ];
 
                                                 let activeStep = 0;
 
-                                                if (order.orderStatus.status === 'delivered') {
+                                                if (vendorOrder.orderStatus?.status === 'Delivered') {
                                                     activeStep = 2;
-                                                } else if (order.orderStatus.status === 'shipped') {
+                                                } else if (['Approved', 'Dispatched'].includes(vendorOrder.orderStatus?.status)) {
                                                     activeStep = 1;
                                                 } else {
                                                     activeStep = 0;
                                                 }
 
-                                                return (
-                                                    <div key={items._id} className='mb-4 pb-4 border-bottom'>
-                                                        <div className="d-flex flex-row">
-                                                            <div className="flex-fill">
-                                                                <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
-                                                                <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
-                                                                <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({order.payment.paymentMethods}) </span></h4>
-                                                                <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(order.orderStatus.statusAt)}</span></p>
+                                                return vendorOrder.orderItems && vendorOrder.orderItems.map(items => {
+                                                    return (
+                                                        <div key={items._id} className='mb-4 pb-4 border-bottom'>
+                                                            <div className="d-flex flex-row">
+                                                                <div className="flex-fill">
+                                                                    <h5 className="bold"><Link to={`/product/${items.plant}`} className='link-dark link-underline-hover'>{items.plantName}</Link></h5>
+                                                                    <p className="text-muted"> Qt: {items.quantity} {items.quantity > 1 ? "items" : "item"}</p>
+                                                                    <h4 className="mb-3"> ₹ {(items.price - items.discount / 100 * items.price).toFixed(2)} <span className="small text-muted"> via ({order.payment.paymentMethods}) </span></h4>
+                                                                    <p className="text-muted">Tracking Status on: <span className="text-body">{formatTimestamp(vendorOrder.orderStatus?.statusAt)}</span></p>
+                                                                    <p className="text-muted">Vendor Status: <span className={`badge ${vendorOrder.orderStatus?.status === 'Cancelled' ? 'bg-danger' : 'bg-primary'}`}>{vendorOrder.orderStatus?.status || 'Processing'}</span></p>
+                                                                </div>
+                                                                <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
+                                                                    <img className="align-self-center img-fluid" src={items.images?.url} width="250" alt="product" />
+                                                                </div>
                                                             </div>
-                                                            <div className='mb-4 rounded overflow-hidden' style={{ width: "200px" }}>
-                                                                <img className="align-self-center img-fluid" src={items.images.url} width="250" alt="product" />
-                                                            </div>
+                                                            <Steps items={stepsOptions} current={activeStep} labelPlacement='vertical' />
                                                         </div>
-                                                        <Steps items={stepsOptions} current={activeStep} labelPlacement='vertical' />
-                                                    </div>
-                                                )
+                                                    )
+                                                })
                                             })
                                         }
                                     </div>

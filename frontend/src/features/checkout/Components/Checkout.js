@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import { Elements } from '@stripe/react-stripe-js'
 import { loadStripe } from '@stripe/stripe-js'
 import Payment from './Payment'
@@ -89,9 +89,14 @@ const Checkout = () => {
   }
 
 
+  const isInitialized = useRef(false);
+
   useEffect(() => {
-    handelGetClientKey();
-    handelClientSecretKey();
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      handelGetClientKey();
+      handelClientSecretKey();
+    }
   }, []);
 
   return (

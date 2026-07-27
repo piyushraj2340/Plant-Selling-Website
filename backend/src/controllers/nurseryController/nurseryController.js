@@ -357,3 +357,267 @@ exports.deleteNurseryImage = async (req, res, next) => {
         next(error);
     }
 };
+const nurseryStoreContact = require('../../model/nurseryModel/nurseryStoreContact');
+
+exports.getNurseryMessages = async (req, res, next) => {
+    try {
+        if (!req.nursery || !req.role.includes('seller')) {
+            const error = new Error("You Are Not Allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const messages = await nurseryStoreContact.find({ nursery: req.nursery }).sort({ createdAt: -1 });
+
+        res.status(200).send({
+            status: true,
+            message: "Messages retrieved.",
+            nurseryMessage: messages
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.markNurseryMessageAsViewed = async (req, res, next) => {
+    try {
+        if (!req.nursery || !req.role.includes('seller')) {
+            const error = new Error("You Are Not Allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const messageId = req.params.id;
+        const result = await nurseryStoreContact.findOneAndUpdate(
+            { _id: messageId, nursery: req.nursery },
+            { isMessageViewed: true },
+            { new: true }
+        );
+
+        if (!result) {
+            const error = new Error("Message not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Message marked as viewed.",
+            nurseryMessage: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.replyNurseryMessage = async (req, res, next) => {
+    try {
+        if (!req.nursery || !req.role.includes('seller')) {
+            const error = new Error("You Are Not Allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const messageId = req.params.id;
+        const { replyMessage } = req.body;
+
+        if (!replyMessage) {
+            const error = new Error("Reply message is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const result = await nurseryStoreContact.findOneAndUpdate(
+            { _id: messageId, nursery: req.nursery },
+            { 
+                $push: {
+                    replies: {
+                        sender: 'Nursery',
+                        message: replyMessage,
+                        createdAt: new Date()
+                    }
+                },
+                isMessageViewed: true 
+            },
+            { new: true }
+        );
+
+        const io = req.app.get('socketio');
+        if (io) {
+            io.to(messageId).emit('receive_message', { sender: 'Nursery', message: replyMessage, createdAt: new Date() });
+        }
+
+        if (!result) {
+            const error = new Error("Message not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Reply added via chat.",
+            nurseryMessage: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+const { encrypt } = require('../../utils/cryptoUtils');
+
+exports.updateNurserySMTPSettings = async (req, res, next) => {
+    try {
+        if (!req.nursery || !req.role.includes('seller')) {
+            const error = new Error("You Are Not Allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const { email, password } = req.body;
+        if (!email || !password) {
+            const error = new Error("Email and Password are required for SMTP configuration.");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const encryptedPassword = encrypt(password);
+
+        const result = await nurseryModel.findOneAndUpdate(
+            { user: req.user, _id: req.nursery },
+            { smtpSettings: { email, password: encryptedPassword } },
+            { new: true }
+        );
+
+        res.status(200).send({
+            status: true,
+            message: "SMTP Settings updated successfully.",
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+const nodemailer = require('nodemailer');
+const { decrypt } = require('../../utils/cryptoUtils');
+
+exports.replyNurseryMessageEmail = async (req, res, next) => {
+    try {
+        if (!req.nursery || !req.role.includes('seller')) {
+            const error = new Error("You Are Not Allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const messageId = req.params.id;
+        const { replyMessage } = req.body;
+
+        if (!replyMessage) {
+            const error = new Error("Reply message is required");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const nurseryInfo = await nurseryModel.findOne({ user: req.user, _id: req.nursery });
+        if (!nurseryInfo || !nurseryInfo.smtpSettings || !nurseryInfo.smtpSettings.email || !nurseryInfo.smtpSettings.password) {
+            const error = new Error("SMTP Settings are not configured. Please configure them in Nursery Settings.");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const decryptedPassword = decrypt(nurseryInfo.smtpSettings.password);
+        if (!decryptedPassword) {
+            const error = new Error("Invalid SMTP configuration. Please update your settings.");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const contactMsg = await nurseryStoreContact.findOne({ _id: messageId, nursery: req.nursery });
+        if (!contactMsg) {
+            const error = new Error("Message not found.");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        // Configure Nodemailer
+        const transporter = nodemailer.createTransport({
+            service: 'gmail', // Standard fallback, assuming Gmail App Password is used.
+            auth: {
+                user: nurseryInfo.smtpSettings.email,
+                pass: decryptedPassword
+            }
+        });
+
+        const mailOptions = {
+            from: nurseryInfo.smtpSettings.email,
+            to: contactMsg.email,
+            subject: "Reply to your inquiry at ${nurseryInfo.nurseryName}",
+            text: replyMessage,
+            html: "<p>Dear ${contactMsg.name},</p><p>${replyMessage.replace(/\n/g, '<br>')}</p><p>Regards,<br>${nurseryInfo.nurseryName}</p>"
+        };
+
+        await transporter.sendMail(mailOptions);
+
+        // Also save to DB chat history
+        const result = await nurseryStoreContact.findOneAndUpdate(
+            { _id: messageId, nursery: req.nursery },
+            { 
+                $push: {
+                    replies: {
+                        sender: 'Nursery',
+                        message: replyMessage + " (Sent via Email)",
+                        createdAt: new Date()
+                    }
+                },
+                isMessageViewed: true 
+            },
+            { new: true }
+        );
+
+        const io = req.app.get('socketio');
+        if (io) {
+            io.to(messageId).emit('receive_message', { sender: 'Nursery', message: replyMessage + " (Sent via Email)", createdAt: new Date() });
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Reply sent via Email.",
+            nurseryMessage: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.updateNurseryMessageStatus = async (req, res, next) => {
+    try {
+        if (!req.nursery || !req.role.includes('seller')) {
+            const error = new Error("You Are Not Allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const messageId = req.params.id;
+        const { status } = req.body;
+
+        if (!status || !['open', 'resolved', 'closed'].includes(status)) {
+            const error = new Error("Invalid status");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const result = await nurseryStoreContact.findOneAndUpdate(
+            { _id: messageId, nursery: req.nursery },
+            { status: status },
+            { new: true }
+        );
+
+        res.status(200).send({
+            status: true,
+            message: "Status updated successfully.",
+            nurseryMessage: result
+        });
+    } catch (error) {
+        next(error);
+    }
+};

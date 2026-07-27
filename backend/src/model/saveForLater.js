@@ -11,7 +11,6 @@ const saveForLaterSchema = new mongoose.Schema({
         type: mongoose.Schema.ObjectId,
         ref: "plant",
         required: [true, "PlantId is required"],
-        unique: [true, "Plant is already in your save for later database"],
         immutable: true
     },
     addedAtPrice: {
@@ -24,6 +23,9 @@ const saveForLaterSchema = new mongoose.Schema({
         required: true
     }
 });
+
+// Add compound unique index so each user can save a specific plant only once
+saveForLaterSchema.index({ user: 1, plant: 1 }, { unique: true });
 
 const saveForLater = new mongoose.model('saveForLater', saveForLaterSchema);
 

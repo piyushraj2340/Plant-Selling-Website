@@ -10,6 +10,8 @@ const initialState = {
     nurseryStoreTabs: [],
     nurseryStoreTemplates: [],
     nurseryStoreBlocks: [],
+    plantsData: { plants: [], total: 0 },
+    ordersData: { data: [], total: 0 },
     error: null,
     isLoading: false,
     isCurrentTab: "info",
@@ -27,6 +29,12 @@ export const nurseryCreateAsync = createAsyncThunk('/nursery/create', async (dat
 export const nurseryUpdateAsync = createAsyncThunk('/nursery/update', async ({ nurseryData, navigate }) => {
     const response = await handelDataFetch('/api/v2/nursery/profile', 'PATCH', nurseryData);
     return { result: response.data, navigate };
+});
+
+//? NURSERY_DELETE
+export const nurseryDeleteAsync = createAsyncThunk('/nursery/delete', async () => {
+    const response = await handelDataFetch('/api/v2/nursery/profile', 'DELETE');
+    return response.data;
 });
 
 //? NURSERY_PROFILE_DATA
@@ -47,6 +55,40 @@ export const addNewPlantsToNurseryAsync = createAsyncThunk('/nursery/plants/add'
     const response = await handelAddNewPlantToNursery(data.data);
     return { result: response.data, redirect: data.redirect, navigate: data.navigate };
 });
+
+export const nurseryPlantsAsync = createAsyncThunk('/nursery/plants/get', async (params) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/nursery/plants?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const nurseryPlantUpdateAsync = createAsyncThunk('/nursery/plants/update', async ({ id, data }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/plants/${id}`, 'PATCH', data);
+    return response.data;
+});
+
+export const nurseryPlantDeleteAsync = createAsyncThunk('/nursery/plants/delete', async (id) => {
+    const response = await handelDataFetch(`/api/v2/nursery/plants/${id}`, 'DELETE');
+    return response.data;
+});
+
+//* ALL ASYNC OF NURSERY_ORDERS GOES HERE
+export const nurseryOrdersAsync = createAsyncThunk('/nursery/orders/get', async (params = {}) => {
+    const queryStr = new URLSearchParams(params).toString();
+    const response = await handelDataFetch(`/api/v2/nursery/order?${queryStr}`, 'GET');
+    return response.data;
+});
+
+export const nurseryUpdateOrderStatusAsync = createAsyncThunk('/nursery/orders/updateStatus', async ({ id, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/order/status/${id}`, 'PATCH', { status, message });
+    return { ...response.data, id, status, statusMessage: message };
+});
+
+export const nurseryBulkUpdateOrderStatusAsync = createAsyncThunk('/nursery/orders/bulkUpdateStatus', async ({ ids, status, message }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/order/status/bulk`, 'PATCH', { ids, status, message });
+    return { ...response.data, ids, status, statusMessage: message };
+});
+
 
 
 //* ALL THE ASYNC FOR THE NURSERY_STORE_DATA
@@ -197,6 +239,36 @@ export const nurseryStoreBlockDeleteAsync = createAsyncThunk('/nursery/store/blo
 });
 
 
+export const getNurseryMessagesAsync = createAsyncThunk('/nursery/messages/get', async () => {
+    const response = await handelDataFetch('/api/v2/nursery/contact-us', 'GET');
+    return response.data;
+});
+
+export const markNurseryMessageAsViewedAsync = createAsyncThunk('/nursery/messages/viewed', async (id) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/viewed`, 'PATCH');
+    return response.data;
+});
+
+export const replyNurseryMessageAsync = createAsyncThunk('/nursery/messages/reply', async ({ id, replyMessage }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/reply`, 'POST', { replyMessage });
+    return response.data;
+});
+
+export const updateNurserySMTPSettingsAsync = createAsyncThunk('/nursery/settings/smtp', async (data) => {
+    const response = await handelDataFetch(`/api/v2/nursery/settings/smtp`, 'PATCH', data);
+    return response.data;
+});
+
+export const replyNurseryMessageEmailAsync = createAsyncThunk('/nursery/messages/replyEmail', async ({ id, replyMessage }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/reply-email`, 'POST', { replyMessage });
+    return response.data;
+});
+
+export const updateNurseryMessageStatusAsync = createAsyncThunk('/nursery/messages/status', async ({ id, status }) => {
+    const response = await handelDataFetch(`/api/v2/nursery/contact-us/${id}/status`, 'PATCH', { status });
+    return response.data;
+});
+
 export const nurserySlice = createSlice({
     name: 'nursery',
     initialState,
@@ -214,6 +286,19 @@ export const nurserySlice = createSlice({
 
                 return initialState;
 
+            })
+            .addCase(nurseryPlantsAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(nurseryPlantsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.plantsData.plants = action.payload.result;
+                state.plantsData.total = action.payload.count;
+            })
+            .addCase(nurseryPlantsAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
             })
             .addCase(nurseryCreateAsync.pending, (state) => {
                 //^ PENDING: NURSERY_CREATE
@@ -262,6 +347,17 @@ export const nurserySlice = createSlice({
                 state.isLoading = false;
                 state.error = action.error;
 
+                message.error(action.error.message);
+
+            }).addCase(nurseryDeleteAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(nurseryDeleteAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.nursery = null; // Clear nursery data
+                message.success("Nursery deleted successfully");
+            }).addCase(nurseryDeleteAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
                 message.error(action.error.message);
 
             }).addCase(nurseryProfileAsync.pending, (state) => {
@@ -954,9 +1050,76 @@ export const nurserySlice = createSlice({
                 state.error = action.error;
 
             })
+            .addCase(nurseryOrdersAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            }).addCase(nurseryOrdersAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.ordersData.data = action.payload.orders;
+                state.ordersData.total = action.payload.total;
+            }).addCase(nurseryOrdersAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(nurseryUpdateOrderStatusAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(nurseryUpdateOrderStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                const index = state.ordersData.data.findIndex(order => order._id === action.payload.id);
+                if (index !== -1) {
+                    state.ordersData.data[index].orderStatus = {
+                        status: action.payload.status,
+                        message: action.payload.statusMessage,
+                        statusAt: new Date().toISOString()
+                    };
+                }
+            }).addCase(nurseryUpdateOrderStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            }).addCase(nurseryBulkUpdateOrderStatusAsync.pending, (state) => {
+                state.isLoading = true;
+            }).addCase(nurseryBulkUpdateOrderStatusAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                action.payload.ids.forEach(id => {
+                    const index = state.ordersData.data.findIndex(order => order._id === id);
+                    if (index !== -1) {
+                        state.ordersData.data[index].orderStatus = {
+                            status: action.payload.status,
+                            message: action.payload.statusMessage,
+                            statusAt: new Date().toISOString()
+                        };
+                    }
+                });
+                        }).addCase(nurseryBulkUpdateOrderStatusAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            .addCase(getNurseryMessagesAsync.pending, (state) => {
+                state.isLoading = true;
+                state.error = null;
+            })
+            .addCase(getNurseryMessagesAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.nurseryMessages = action.payload.nurseryMessage || [];
+            })
+            .addCase(getNurseryMessagesAsync.rejected, (state, action) => {
+                state.isLoading = false;
+                state.error = action.error;
+            })
+            .addCase(updateNurseryMessageStatusAsync.fulfilled, (state, action) => {
+                const updatedMsg = action.payload.nurseryMessage;
+                if (updatedMsg) {
+                    const index = state.nurseryMessages.findIndex(m => m._id === updatedMsg._id);
+                    if (index !== -1) {
+                        state.nurseryMessages[index].status = updatedMsg.status;
+                    }
+                }
+            })
     }
 });
 
 
-export const { setIsCurrentTab } = nurserySlice.actions;
-export default nurserySlice.reducer; 
+export const { setNurseryActiveTab, setNurseryStoreSectionAddType, setIsCurrentTab } = nurserySlice.actions;
+
+export default nurserySlice.reducer;
+
+

@@ -17,8 +17,11 @@ router.patch('/users/:id/password', adminController.updateUserPassword);
 router.patch('/users/:id/block', adminController.toggleBlockUser);
 router.patch('/users/:id/verify', adminController.toggleVerifyUser);
 router.get('/plants', adminController.getPlants);
+router.post('/plants', adminController.adminAddPlant);
+router.put('/plants/:id', adminController.adminUpdatePlant);
 router.get('/plants/charts/line', adminController.getPlantsLineChart);
 router.get('/plants/charts/polar', adminController.getPlantsPolarChart);
+router.get('/nurseries', adminController.getNurseries);
 router.get('/orders', adminController.getOrders);
 router.get('/orders/charts/bar', adminController.getOrdersBarChart);
 router.get('/orders/charts/pie', adminController.getOrdersPieChart);
@@ -34,7 +37,7 @@ router.patch('/plants/bulk-status', adminController.bulkUpdatePlantStatus);
 router.patch('/plants/:id/status', adminController.updatePlantStatus);
 
 router.patch('/orders/bulk-status', adminController.bulkUpdateOrderItemStatus);
-router.patch('/orders/:orderId/items/:itemId/status', adminController.updateOrderItemStatus);
+router.patch('/orders/:id/status', adminController.updateOrderItemStatus);
 
 router.get('/income', adminController.getIncome);
 router.get('/income/charts/bar', adminController.getIncomeBarChart);

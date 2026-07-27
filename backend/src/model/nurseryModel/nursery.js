@@ -91,6 +91,25 @@ const nurserySchema = new mongoose.Schema({
     state: {
         type: String,
         required: [true, "State is required."],
+    },
+    smtpSettings: {
+        email: {
+            type: String,
+            default: ""
+        },
+        password: {
+            type: String,
+            default: ""
+        }
+    },
+    socialLinks: {
+        facebook: { type: String, default: "" },
+        instagram: { type: String, default: "" },
+        website: { type: String, default: "" }
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 });
 

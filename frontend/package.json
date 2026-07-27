@@ -19,11 +19,13 @@
     "react": "^18.2.0",
     "react-chartjs-2": "^5.3.1",
     "react-dom": "^18.2.0",
+    "react-quill": "^2.0.0",
     "react-redux": "^9.1.0",
     "react-router-dom": "^6.8.1",
     "react-scripts": "5.0.1",
     "react-simple-star-rating": "^5.1.7",
     "sass": "^1.62.1",
+    "socket.io-client": "^4.8.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

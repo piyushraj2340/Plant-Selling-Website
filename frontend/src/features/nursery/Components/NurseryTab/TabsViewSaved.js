@@ -9,9 +9,15 @@ import TemplateTwoSectionAndRightFourSaved from '../TemplatesSaved/TemplateTwoSe
 import TemplateTwoSectionAndLeftVerticalSaved from '../TemplatesSaved/TemplateTwoSectionAndLeftVerticalSaved';
 import TemplateTwoSectionAndLeftFourSaved from '../TemplatesSaved/TemplateTwoSectionAndLeftFourSaved';
 import { nurseryStoreTabDeleteAsync, nurseryStoreTabEditAsync } from '../../nurserySlice';
+import { Link } from 'react-router-dom';
 
 // TODO: CREATE A VIEW FOR PUBLIC STORE RENDERING
-const TabsViewSaved = ({ content, status }) => {
+const TabsViewSaved = ({ content, nurseryStoreTabsSelected }) => {
+
+    const { status, tabName } = nurseryStoreTabsSelected;
+
+    const nurseryId = useSelector(state => state.nursery.nursery._id);
+
 
     const nurseryStoreBlocks = useSelector(state => state.nursery.nurseryStoreBlocks);
     const isCurrentTab = useSelector(state => state.nursery.isCurrentTab);
@@ -46,33 +52,28 @@ const TabsViewSaved = ({ content, status }) => {
     return (
         <>
             <div key={isCurrentTab} className="p-0 p-md-3">
-                <div className="d-flex flex-wrap justify-content-center align-items-center">
-                    <div className="option me-1 me-md-2 my-1">
-                        <button className="btn btn-sm btn-info d-flex align-items-center"><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">preview</span> Preview</button>
-                    </div>
+                <div className="d-flex justify-content-center mb-4 mt-2">
+                    <div className="workflow-action-bar">
+                        <div className={`workflow-status-badge ${status.toLowerCase()}`}>
+                            <div className="workflow-status-dot"></div>
+                            {status}
+                        </div>
+                        
+                        <div style={{ width: '1px', height: '24px', backgroundColor: '#eaeaea', margin: '0 4px' }}></div>
 
-                    {
-                        status.toLocaleLowerCase() === 'draft' ?
-                            <div className="option me-1 me-md-2 my-1">
-                                <button className="btn btn-sm btn-success d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "publish" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">public</span> Publish</button>
-                            </div>
-                            :
+                        <Link to={`/nursery/store/view/${nurseryId}?activeTab=${tabName.split(" ").join("").toLowerCase()}`} className="btn btn-sm btn-outline-info workflow-btn"><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">open_in_new</span> Public Store</Link>
 
-                            status.toLocaleLowerCase() === 'publish' &&
-                            <div className="option me-1 me-md-2 my-1">
-                                <button className="btn btn-sm btn-primary d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "draft" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">edit</span> Edit</button>
-                            </div>
-                    }
+                        {
+                            status.toLocaleLowerCase() === 'draft' ?
+                                <button className="btn btn-sm btn-success workflow-btn" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "publish" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">public</span> Publish</button>
+                                :
+                                status.toLocaleLowerCase() === 'publish' &&
+                                <button className="btn btn-sm btn-outline-primary workflow-btn" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "draft" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">edit</span> Switch to Draft</button>
+                        }
 
-                    {/* <div className="option me-1 me-md-2 my-1">
-                        <button className="btn btn-sm btn-secondary d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "draft" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">edit</span> Edit</button>
-                    </div> */}
-
-                    <div className="option my-1">
-                        <button className="btn btn-sm btn-danger d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabDeleteAsync(isCurrentTab))}><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">delete</span> Delete</button>
+                        <button className="btn btn-sm btn-outline-danger workflow-btn" onClick={() => dispatch(nurseryStoreTabDeleteAsync(isCurrentTab))}><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">delete</span> Delete Tab</button>
                     </div>
                 </div>
-                <div className="border mt-1 mb-3"></div>
 
                 <div className='template-in-use-container'>
                     {renderContents}

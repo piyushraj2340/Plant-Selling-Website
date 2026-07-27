@@ -18,7 +18,7 @@ exports.getNurseryDetail = async function (req, res, next) {
         }
 
         //* Getting the data from the database
-        const nurseryDetails = await nursery.findById(id).select("-user -nurseryOwnerName -avatarList -coverList");
+        const nurseryDetails = await nursery.findById(id).select("-user -nurseryOwnerName -avatarList -coverList -smtpSettings -nurseryEmail -nurseryPhone");
 
         //! Data Not found
         if (!nurseryDetails) {

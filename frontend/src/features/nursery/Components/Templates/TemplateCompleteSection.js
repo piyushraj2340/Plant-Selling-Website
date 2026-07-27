@@ -41,10 +41,9 @@ const TemplateCompleteSection = ({ content, mergedArrow, setIsModelOpen, setAtBl
                     :
 
 
-                    <div className="template template-header rounded d-flex justify-content-center align-items-center hover-images" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
-                        <div className="template template-header-complete rounded bg-secondary w-100">
-                            <p className='text-center user-select-none'><i className='fas fa-images'></i> Add Content</p>
-                        </div>
+                    <div className="nursery-store-placeholder w-100 h-100" onClick={() => { setIsModelOpen(true); setAtBlockIndex(0); setIsCurrentTemplates(isCurrentTemplates) }}>
+                        <i className="fas fa-plus-circle"></i>
+                        <p className="mb-0">Add Content</p>
                     </div>
 
             }

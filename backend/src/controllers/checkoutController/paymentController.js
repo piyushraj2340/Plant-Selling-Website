@@ -185,7 +185,7 @@ exports.processPayment = async (req, res, next) => {
                     country: "India", // Setting the default country.
                 },
             },
-            amount: pricing.totalPrice * 100,
+            amount: Math.round((pricing.totalPrice ?? pricing.finalPrice) * 100),
             currency: "inr",
             metadata: {
                 company: "PlantSeller",
@@ -196,7 +196,7 @@ exports.processPayment = async (req, res, next) => {
         const paymentData = {
             paymentId: myPayment.id,
             client_secret: myPayment.client_secret,
-            amount: pricing.totalPrice * 100,
+            amount: Math.round((pricing.totalPrice ?? pricing.finalPrice) * 100),
             paymentMethods: myPayment.payment_method_types[0]
         }
 

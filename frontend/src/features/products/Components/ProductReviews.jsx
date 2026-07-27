@@ -8,7 +8,7 @@ const ProductReviews = ({ plantId }) => {
     const dispatch = useDispatch();
     const { productReviews, isLoading } = useSelector(state => state.products);
     const user = useSelector(state => state.user.data); // User is in state.user.data
-    
+
     const [rating, setRating] = useState(0);
     const [reviewText, setReviewText] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -29,7 +29,7 @@ const ProductReviews = ({ plantId }) => {
             message.warning("Please provide a rating before submitting.");
             return;
         }
-        
+
         setIsSubmitting(true);
         try {
             const res = await dispatch(addProductReviewAsync({ plantId, rating, reviewText })).unwrap();
@@ -47,15 +47,15 @@ const ProductReviews = ({ plantId }) => {
 
     return (
         <div className="col-12 mt-5">
-            <h4 className="h4 fw-bold border-bottom pb-2 mb-4">Customer Reviews</h4>
-            
+            <h4 id="product-reviews" className="h4 fw-bold border-bottom pb-2 mb-4">Customer Reviews</h4>
+
             <div className="row">
                 <div className="col-md-7 mb-4">
                     {isLoading && <p>Loading reviews...</p>}
                     {!isLoading && productReviews.length === 0 && (
                         <p className="text-muted">No reviews yet. Be the first to review this plant!</p>
                     )}
-                    
+
                     {productReviews.map(review => (
                         <div key={review._id} className="card border-0 border-bottom mb-3 pb-3 rounded-0">
                             <div className="d-flex align-items-center mb-2">
@@ -94,10 +94,10 @@ const ProductReviews = ({ plantId }) => {
                                 </div>
                                 <div className="mb-3">
                                     <label htmlFor="reviewText" className="form-label text-muted">Your Review (Optional)</label>
-                                    <textarea 
-                                        className="form-control" 
-                                        id="reviewText" 
-                                        rows="4" 
+                                    <textarea
+                                        className="form-control"
+                                        id="reviewText"
+                                        rows="4"
                                         placeholder="What did you like or dislike?"
                                         value={reviewText}
                                         onChange={(e) => setReviewText(e.target.value)}

@@ -13,14 +13,20 @@ import ChooseTemplate from '../../../common/ChooseTemplate';
 import { message, Tooltip } from 'antd';
 import AddBlocksModel from '../Blocks/AddBlocksModel';
 import EditBlocksModel from '../Blocks/EditBlocksModel';
+import { Link } from 'react-router-dom';
 
-const TabsViewEditing = ({ content, status }) => {
+const TabsViewEditing = ({ content, nurseryStoreTabsSelected }) => {
+
+    const { status, tabName } = nurseryStoreTabsSelected;
+    const nurseryId = useSelector(state => state.nursery.nursery._id);
+
 
     const nurseryStoreBlocks = useSelector(state => state.nursery.nurseryStoreBlocks);
     const isCurrentTab = useSelector(state => state.nursery.isCurrentTab);
 
     const dispatch = useDispatch();
 
+    const [isViewMode, setIsViewMode] = useState(false);
     const [isChooseModeOpen, setIsChooseModeOpen] = useState(false);
     const [atIndex, setAtIndex] = useState(null);
     const [atBlockIndex, setAtBlockIndex] = useState(null);
@@ -139,7 +145,7 @@ const TabsViewEditing = ({ content, status }) => {
         });
 
         return (
-            <div key={elem._id}>
+            <div key={elem._id} className="mb-4 nursery-store-card p-3 p-md-4 position-relative template-images">
                 <div className='row flex-column-reverse flex-md-row'>
                     {elem.templateName === "completeSection" && <TemplateCompleteSection content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
                     {elem.templateName === "twoSection" && <TemplateTwoSection content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
@@ -148,17 +154,10 @@ const TabsViewEditing = ({ content, status }) => {
                     {elem.templateName === "twoSectionAndRightFour" && <TemplateTwoSectionAndRightFour content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
                     {elem.templateName === "twoSectionAndLeftVertical" && <TemplateTwoSectionAndLeftVertical content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
                     {elem.templateName === "twoSectionAndLeftFour" && <TemplateTwoSectionAndLeftFour content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
-                    <div className="col-12 col-md-1 justify-content-end justify-content-md-center d-flex flex-md-column my-3 my-md-0" style={{ transform: 'translate: (-100%, -50%)' }}> 
-                        <div className='d-md-none'>
-                            <Tooltip className='btn btn-sm btn-danger' placement="bottomRight" title={'Delete Template'} arrow={mergedArrow}  onClick={() => dispatch(deleteNurseryStoreTemplatesAsync(elem._id))}>
-                                <span className="fas fa-trash text-light p-2" onClick={() => handelDeleteRendersUpload(index)}></span> DELETE TEMPLATE
-                            </Tooltip>
-                        </div>
-                        <div className='d-none d-md-block'>
-                            <Tooltip placement="left" title={'Delete Template'} arrow={mergedArrow} onClick={() => dispatch(deleteNurseryStoreTemplatesAsync(elem._id))}>
-                                <span className="fas fa-trash text-danger p-2 cursor-pointer" onClick={() => handelDeleteRendersUpload(index)}></span>
-                            </Tooltip>
-                        </div>
+                    <div className="position-absolute top-0 end-0 p-2 builder-actions-overlay m-3 shadow-sm d-flex justify-content-center align-items-center" style={{ width: 'max-content', zIndex: 10 }}>
+                        <Tooltip placement="left" title={'Delete Template'} arrow={mergedArrow} onClick={() => dispatch(deleteNurseryStoreTemplatesAsync(elem._id))}>
+                            <button className="btn btn-sm btn-outline-danger border-0 rounded-circle"><i className="fas fa-trash cursor-pointer"></i></button>
+                        </Tooltip>
                     </div>
 
                 </div>
@@ -188,36 +187,42 @@ const TabsViewEditing = ({ content, status }) => {
 
     return (
         <>
-            <div key={isCurrentTab} className="p-0 p-md-3">
-                <div className="d-flex flex-wrap justify-content-center align-items-center">
-                    <div className="option me-1 me-md-2 my-1">
-                        <button className="btn btn-sm btn-info d-flex align-items-center"><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">preview</span> Preview</button>
-                    </div>
+            <div key={isCurrentTab} className={`p-0 p-md-3 ${isViewMode ? 'builder-view-mode' : ''}`}>
+                <div className="d-flex justify-content-center mb-4 mt-2">
+                    <div className="workflow-action-bar">
+                        <div className={`workflow-status-badge ${status.toLowerCase()}`}>
+                            <div className="workflow-status-dot"></div>
+                            {status}
+                        </div>
+                        
+                        <div style={{ width: '1px', height: '24px', backgroundColor: '#eaeaea', margin: '0 4px' }}></div>
 
-                    {
-                        status.toLocaleLowerCase() === 'draft' ?
-                            <div className="option me-1 me-md-2 my-1">
-                                <button className="btn btn-sm btn-success d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabEditAsync({id: isCurrentTab, data: {status: "publish"}}))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">public</span> Publish</button>
-                            </div>
-                            :
+                        <button className={`btn btn-sm ${isViewMode ? 'btn-info' : 'btn-outline-info'} workflow-btn`} onClick={() => setIsViewMode(!isViewMode)}>
+                            <span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">visibility</span> {isViewMode ? 'Exit View Mode' : 'View Mode'}
+                        </button>
 
-                            status.toLocaleLowerCase() === 'publish' && 
-                            <div className="option me-1 me-md-2 my-1">
-                                <button className="btn btn-sm btn-primary d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabEditAsync({id: isCurrentTab, data: {status: "draft"}}))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">edit</span> Edit</button>
-                            </div>
-                    }
+                        <Link to={`/nursery/store/view/${nurseryId}?activeTab=${tabName.split(" ").join("").toLowerCase()}`} className="btn btn-sm btn-outline-info workflow-btn"><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">open_in_new</span> Public Store</Link>
 
-                    <div className="option my-1">
-                        <button className="btn btn-sm btn-danger d-flex align-items-center" onClick={() => dispatch(nurseryStoreTabDeleteAsync(isCurrentTab))}><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">delete</span> Delete</button>
+                        {
+                            status.toLocaleLowerCase() === 'draft' ?
+                                <button className="btn btn-sm btn-success workflow-btn" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "publish" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">public</span> Publish</button>
+                                :
+                                status.toLocaleLowerCase() === 'publish' &&
+                                <button className="btn btn-sm btn-outline-primary workflow-btn" onClick={() => dispatch(nurseryStoreTabEditAsync({ id: isCurrentTab, data: { status: "draft" } }))} ><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">edit</span> Switch to Draft</button>
+                        }
+
+                        <button className="btn btn-sm btn-outline-danger workflow-btn" onClick={() => dispatch(nurseryStoreTabDeleteAsync(isCurrentTab))}><span style={{ fontSize: "16px" }} className="material-symbols-outlined me-1">delete</span> Delete Tab</button>
                     </div>
                 </div>
-                <div className="border mt-1 mb-3"></div>
 
 
                 {
                     content && content.length === 0 ?
-                        <div className="row p-5">
-                            <button className='btn btn-lg btn-light border-black d-flex align-items-center justify-content-center p-4 p-md-5' onClick={() => { setIsChooseModeOpen(true); setAtIndex(0) }}><span style={{ fontSize: "28px" }} className="material-symbols-outlined me-1">add</span><span>Add Contents</span></button>
+                        <div className="p-4 p-md-5">
+                            <div className='nursery-store-placeholder' onClick={() => { setIsChooseModeOpen(true); setAtIndex(0) }}>
+                                <i className="fas fa-plus-circle"></i>
+                                <h4>Add Your First Content Block</h4>
+                            </div>
                         </div>
                         :
                         <div className='template-in-use-container'>
@@ -239,10 +244,10 @@ const TabsViewEditing = ({ content, status }) => {
                 <AddBlocksModel isModelOpen={isModelOpen} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} atBlockIndex={atBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={isCurrentTemplates} isCurrentTab={isCurrentTab} />
             }
 
-            
+
             {
-                isModelOpenEdit && 
-                <EditBlocksModel isModelOpenEdit={isModelOpenEdit} setIsModelOpenEdit={setIsModelOpenEdit}  setIsCurrentBlock={setIsCurrentBlock} isCurrentBlock={isCurrentBlock} setIsCurrentTemplates={setIsCurrentTemplates}  isCurrentTemplates={isCurrentTemplates} isCurrentTab={isCurrentTab} />
+                isModelOpenEdit &&
+                <EditBlocksModel isModelOpenEdit={isModelOpenEdit} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} isCurrentBlock={isCurrentBlock} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={isCurrentTemplates} isCurrentTab={isCurrentTab} />
             }
         </>
     );

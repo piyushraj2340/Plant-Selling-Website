@@ -26,6 +26,7 @@ $z-index: 1030;
             font-size: 43px;
             width: fit-content;
             position: relative;
+
             @media screen and (min-width: $large) {
                 font-size: 64px;
             }
@@ -54,9 +55,10 @@ $z-index: 1030;
             }
         }
 
-        
 
-        .greeting-text, .highlight-desc {
+
+        .greeting-text,
+        .highlight-desc {
             font-size: 16px;
             font-weight: 600;
 
@@ -82,6 +84,7 @@ $z-index: 1030;
             padding: 8px 16px;
             width: max-content;
             transition: 1s transform ease-in-out;
+
             span {
                 margin-left: 5px;
             }
@@ -107,9 +110,11 @@ $z-index: 1030;
         @media screen and (min-width: calc($small - 100px)) {
             grid-template-columns: 50% 50%;
         }
+
         @media screen and (min-width: $medium) {
             grid-template-columns: 33.33% 33.33% 33.33%;
         }
+
         @media screen and (min-width: $large) {
             grid-template-columns: 25% 25% 25% 25%;
         }
@@ -147,7 +152,7 @@ a:hover {
     border-radius: 6px;
     margin: 0 5px;
     cursor: pointer;
-    padding: 0;
+    padding: 5px;
 
     a {
         width: 100%;
@@ -273,7 +278,7 @@ a:hover {
         background-color: #fff;
         cursor: pointer
     }
-    
+
     .address-list:hover {
         background-color: #eeeeee;
     }
@@ -1138,6 +1143,7 @@ a:hover {
 
 .footer-container {
     font-size: 14px;
+
     @media screen and (min-width: $medium) {
         font-size: 16px;
     }
@@ -1165,16 +1171,20 @@ a:hover {
     background-color: #f9f9f9;
     margin-top: 80px;
 }
+
 .verification-plant-theme {
     background-color: #e6f5ea;
     border-color: #98c1a2;
 }
+
 .verification h1 {
     color: #2d6a4f;
 }
+
 .verification p {
     color: #3a5a40;
 }
+
 .verification .highlight {
     color: #40916c;
     font-weight: bold;
@@ -1192,24 +1202,30 @@ a:hover {
     background-color: #f9f9f9;
     margin-top: 80px;
 }
+
 .confirmation-plant-theme {
     background-color: #e6f5ea;
     border-color: #98c1a2;
 }
+
 .confirmation h1 {
     color: #2d6a4f;
 }
+
 .confirmation p {
     color: #3a5a40;
 }
+
 .confirmation .highlight {
     color: #40916c;
     font-weight: bold;
 }
+
 .confirmation .btn-confirm {
     background-color: #40916c;
     color: white;
 }
+
 .confirmation .btn-confirm:hover {
     background-color: #2d6a4f;
 }
@@ -1224,27 +1240,32 @@ a:hover {
     border: 1px solid #ddd;
     border-radius: 10px;
     background-color: #f9f9f9;
-    background-color: #e6f5ea; /* Plant theme background */
+    background-color: #e6f5ea;
+    /* Plant theme background */
     margin-top: 80px;
 }
 
 .invalid-token-heading {
-    color: #d9534f; /* Error color */
+    color: #d9534f;
+    /* Error color */
     text-align: center;
 }
 
 .invalid-token-message {
-    color: #a94442; /* Lighter color for error message text */
+    color: #a94442;
+    /* Lighter color for error message text */
     text-align: center;
 }
 
 .btn-invalid-token {
-    background-color: #d9534f; /* Button color for error */
+    background-color: #d9534f;
+    /* Button color for error */
     color: white;
 }
 
 .btn-invalid-token:hover {
-    background-color: #c9302c; /* Darker shade on hover */
+    background-color: #c9302c;
+    /* Darker shade on hover */
 }
 
 
@@ -1259,22 +1280,27 @@ a:hover {
     background-color: #f9f9f9;
     margin-top: 80px;
 }
+
 .plant-theme {
     background-color: #e6f5ea;
     border-color: #98c1a2;
 }
+
 .confirmation-heading {
     color: #2d6a4f;
     text-align: center;
 }
+
 .confirmation-message {
     color: #3a5a40;
     text-align: center;
 }
+
 .btn-confirmation {
     background-color: #40916c;
     color: white;
 }
+
 .btn-confirmation:hover {
     background-color: #2d6a4f;
 }
@@ -1299,7 +1325,8 @@ a:hover {
 
 /* Heading styles */
 .reset-password-title {
-    color: #2d6a4f; /* Deep green heading */
+    color: #2d6a4f;
+    /* Deep green heading */
     font-family: 'Arial', sans-serif;
     text-align: center;
     margin-bottom: 20px;
@@ -1312,34 +1339,41 @@ a:hover {
 
 /* Custom button style */
 .reset-password-btn {
-    background-color: #40916c; /* Plant-themed green button */
+    background-color: #40916c;
+    /* Plant-themed green button */
     color: white;
     border-radius: 5px;
     border: none;
 }
 
 .reset-password-btn:hover {
-    background-color: #2d6a4f; /* Darker green on hover */
+    background-color: #2d6a4f;
+    /* Darker green on hover */
 }
 
 /* Input styling */
 .reset-password-input {
-    border-radius: 0; /* Rectangular inputs */
-    border-color: #98c1a2; /* Greenish border */
+    border-radius: 0;
+    /* Rectangular inputs */
+    border-color: #98c1a2;
+    /* Greenish border */
 }
 
 /* Invalid/valid feedback */
 .reset-password-error {
-    color: #d9534f; /* Red feedback for invalid input */
+    color: #d9534f;
+    /* Red feedback for invalid input */
 }
 
 /* Validation states */
 .is-invalid {
-    border-color: #d9534f; /* Red border on invalid input */
+    border-color: #d9534f;
+    /* Red border on invalid input */
 }
 
 .is-valid {
-    border-color: #28a745; /* Green border on valid input */
+    border-color: #28a745;
+    /* Green border on valid input */
 }
 
 
@@ -1359,19 +1393,23 @@ a:hover {
 
 /* Box styles */
 .reset-password-invalid-box {
-    background-color: #e6f5ea; /* Light green background */
-    border: 1px solid #98c1a2; /* Plant-like border */
+    background-color: #e6f5ea;
+    /* Light green background */
+    border: 1px solid #98c1a2;
+    /* Plant-like border */
     padding: 30px;
     border-radius: 10px;
     max-width: 500px;
     text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
 }
 
 /* Title styles */
 .reset-password-invalid-title {
     font-family: 'Arial', sans-serif;
-    color: #2d6a4f; /* Dark green */
+    color: #2d6a4f;
+    /* Dark green */
     margin-bottom: 20px;
 }
 
@@ -1384,7 +1422,8 @@ a:hover {
 
 /* Button styles */
 .reset-password-invalid-btn {
-    background-color: #40916c; /* Green themed button */
+    background-color: #40916c;
+    /* Green themed button */
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -1393,7 +1432,8 @@ a:hover {
 }
 
 .reset-password-invalid-btn:hover {
-    background-color: #2d6a4f; /* Darker green on hover */
+    background-color: #2d6a4f;
+    /* Darker green on hover */
 }
 
 
@@ -1410,19 +1450,23 @@ a:hover {
 
 /* Box styles */
 .password-reset-success-box {
-    background-color: #e6f5ea; /* Light green background */
-    border: 1px solid #98c1a2; /* Plant-like border */
+    background-color: #e6f5ea;
+    /* Light green background */
+    border: 1px solid #98c1a2;
+    /* Plant-like border */
     padding: 30px;
     border-radius: 10px;
     max-width: 500px;
     text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
 }
 
 /* Title styles */
 .password-reset-success-title {
     font-family: 'Arial', sans-serif;
-    color: #2d6a4f; /* Dark green */
+    color: #2d6a4f;
+    /* Dark green */
     margin-bottom: 20px;
 }
 
@@ -1435,7 +1479,8 @@ a:hover {
 
 /* Button styles */
 .password-reset-success-btn {
-    background-color: #40916c; /* Green themed button */
+    background-color: #40916c;
+    /* Green themed button */
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -1444,7 +1489,8 @@ a:hover {
 }
 
 .password-reset-success-btn:hover {
-    background-color: #2d6a4f; /* Darker green on hover */
+    background-color: #2d6a4f;
+    /* Darker green on hover */
 }
 
 
@@ -1461,19 +1507,23 @@ a:hover {
 
 /* Box styles */
 .password-reset-email-sent-box {
-    background-color: #e6f5ea; /* Light green background */
-    border: 1px solid #98c1a2; /* Plant-like border */
+    background-color: #e6f5ea;
+    /* Light green background */
+    border: 1px solid #98c1a2;
+    /* Plant-like border */
     padding: 30px;
     border-radius: 10px;
     max-width: 500px;
     text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
 }
 
 /* Title styles */
 .password-reset-email-sent-title {
     font-family: 'Arial', sans-serif;
-    color: #2d6a4f; /* Dark green */
+    color: #2d6a4f;
+    /* Dark green */
     margin-bottom: 20px;
 }
 
@@ -1486,7 +1536,8 @@ a:hover {
 
 /* Button styles */
 .password-reset-email-sent-btn {
-    background-color: #40916c; /* Green themed button */
+    background-color: #40916c;
+    /* Green themed button */
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -1495,7 +1546,8 @@ a:hover {
 }
 
 .password-reset-email-sent-btn:hover {
-    background-color: #2d6a4f; /* Darker green on hover */
+    background-color: #2d6a4f;
+    /* Darker green on hover */
 }
 
 .password-reset-email-sent-container .highlight {
@@ -1508,7 +1560,7 @@ a:hover {
 .contact-us .rounded-corner {
     border-radius: 0px;
 
-    @media screen and (min-width: $small) { 
+    @media screen and (min-width: $small) {
         border-radius: 6px;
     }
 }
@@ -1529,19 +1581,23 @@ a:hover {
 
 /* Box styles */
 .two-factor-auth-box {
-    background-color: #e6f5ea; /* Light green background */
-    border: 1px solid #98c1a2; /* Plant-like border */
+    background-color: #e6f5ea;
+    /* Light green background */
+    border: 1px solid #98c1a2;
+    /* Plant-like border */
     padding: 30px;
     border-radius: 10px;
     max-width: 500px;
     text-align: center;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    /* Subtle shadow */
 }
 
 /* Title styles */
 .two-factor-auth-title {
     font-family: 'Arial', sans-serif;
-    color: #2d6a4f; /* Dark green */
+    color: #2d6a4f;
+    /* Dark green */
     margin-bottom: 20px;
 }
 
@@ -1561,13 +1617,16 @@ a:hover {
 
 /* Input styles */
 .two-factor-auth-input {
-    border-radius: 0; /* Rectangular inputs */
-    border-color: #98c1a2; /* Greenish border */
+    border-radius: 0;
+    /* Rectangular inputs */
+    border-color: #98c1a2;
+    /* Greenish border */
 }
 
 /* Button styles */
 .two-factor-auth-submit-btn {
-    background-color: #40916c; /* Green themed button */
+    background-color: #40916c;
+    /* Green themed button */
     color: white;
     padding: 10px 20px;
     border-radius: 5px;
@@ -1575,11 +1634,13 @@ a:hover {
 }
 
 .two-factor-auth-submit-btn:hover {
-    background-color: #2d6a4f; /* Darker green on hover */
+    background-color: #2d6a4f;
+    /* Darker green on hover */
 }
 
 .two-factor-auth-resend-btn {
-    background-color: #51b588; /* Lighter green for resend */
+    background-color: #51b588;
+    /* Lighter green for resend */
     color: white;
     padding: 5px 10px;
     border-radius: 5px;
@@ -1587,11 +1648,13 @@ a:hover {
 }
 
 .two-factor-auth-resend-btn:hover {
-    background-color: #5aa986; /* Lighter green for resend */
+    background-color: #5aa986;
+    /* Lighter green for resend */
 }
 
 .two-factor-auth-resend-btn:disabled {
-    background-color: #c8e1d7; /* Disabled lighter green */
+    background-color: #c8e1d7;
+    /* Disabled lighter green */
     cursor: not-allowed;
 }
 
@@ -1600,3 +1663,14 @@ a:hover {
     color: #2d6a4f;
     font-size: 0.9em;
 }
+@media print {
+  .no-print, header, footer, nav {
+    display: none !important;
+  }
+  body {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+

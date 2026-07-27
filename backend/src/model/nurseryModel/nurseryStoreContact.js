@@ -18,14 +18,38 @@ const nurseryStoreContactSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    category: {
+        type: String,
+        default: 'General Inquiry'
+    },
     message: {
         type: String,
         required: true
     },
+    replies: [{
+        sender: {
+            type: String,
+            enum: ['User', 'Nursery'],
+            required: true
+        },
+        message: {
+            type: String,
+            required: true
+        },
+        createdAt: {
+            type: Date,
+            default: Date.now
+        }
+    }],
     isMessageViewed: {
         type: Boolean,
         required: true,
         default: false
+    },
+    status: {
+        type: String,
+        enum: ['open', 'resolved', 'closed'],
+        default: 'open'
     },
     createdAt: {
         type: Date,

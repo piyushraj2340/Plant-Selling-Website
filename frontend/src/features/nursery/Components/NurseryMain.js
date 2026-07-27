@@ -26,7 +26,6 @@ const NurseryMain = ({ isCollapseSideNav }) => {
     //? FILTER_OUT_TEMPLATES_WITH_TABS_ID
     const content = nurseryStoreTemplates.filter(data => data.nurseryStoreTabs.toLocaleLowerCase() === isCurrentTab.toLocaleLowerCase()).sort((obj1, obj2) => obj1.index - obj2.index);
 
-
     return (
         <div className='nursery-main-content' style={isCollapseSideNav ? { width: 'calc(100% - 58px)' } : { width: '75%' }}>
             <div className='p-2 p-md-3 p-lg-4 border rounded bg-light'>
@@ -37,10 +36,10 @@ const NurseryMain = ({ isCollapseSideNav }) => {
 
                             nurseryStoreTabsSelected ?
                                 nurseryStoreTabsSelected.status.toLocaleLowerCase() === "draft" ?
-                                    <TabsViewEditing content={content} status={nurseryStoreTabsSelected.status} />
+                                    <TabsViewEditing content={content} nurseryStoreTabsSelected={nurseryStoreTabsSelected} />
                                     :
 
-                                    <TabsViewSaved content={content} status={nurseryStoreTabsSelected.status} />
+                                    <TabsViewSaved content={content} nurseryStoreTabsSelected={nurseryStoreTabsSelected} />
                                 :
 
                                 <Info />

@@ -20,7 +20,7 @@ const NurseryTabsPublicView = ({ content, isCurrentTab, currentTabDynamic }) => 
         dispatch(nurseryPublicStoreGetPublishBlocks({nurseryId: currentTabDynamic.nursery, nurseryTabId: currentTabDynamic._id}));
     }, [nurseryPublicStoreGetPublishBlocks]);
 
-    const renderContents = content && content.map((elem) => {
+    const renderContents = content && content.map((elem, index) => {
         const blocksData = nurseryStoreBlocks && nurseryStoreBlocks.filter(blockData => (blockData.nurseryStoreTabs.toLowerCase() === currentTabDynamic._id.toLowerCase()) && blockData.nurseryStoreTemplates.toLocaleLowerCase() === elem._id.toLocaleLowerCase());
 
         const blocks = []; //? creating empty blocks of arrays....
@@ -34,8 +34,8 @@ const NurseryTabsPublicView = ({ content, isCurrentTab, currentTabDynamic }) => 
 
 
         return (
-            <div key={elem._id}>
-                <div className='row flex-column-reverse flex-md-row my-2'>
+            <div key={elem._id} className="py-4 py-md-5 animate-fade-in-up" style={{ animationDelay: `${index * 0.15}s` }}>
+                <div className='row flex-column-reverse flex-md-row'>
                     {elem.templateName === "completeSection" && <TemplateCompleteSectionSaved content={blocks} />}
                     {elem.templateName === "twoSection" && <TemplateTwoSectionSaved content={blocks} />}
                     {elem.templateName === "fourSection" && <TemplateFourSectionSaved content={blocks} />}

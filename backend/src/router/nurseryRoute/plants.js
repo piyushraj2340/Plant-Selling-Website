@@ -2,7 +2,7 @@ const express = require('express');
 
 const auth = require('../../middleware/auth');
 
-const { addNewPlant, getAllPlantsOfNursery, getPlantById, updatePlantById, deletePlantById } = require('../../controllers/nurseryController/plantsController');
+const { addNewPlant, uploadDescriptionImage, getAllPlantsOfNursery, getPlantById, updatePlantById, deletePlantById } = require('../../controllers/nurseryController/plantsController');
 
 const router = express.Router();
 
@@ -12,6 +12,8 @@ router.route('/plants')
     .post(addNewPlant)
     .get(getAllPlantsOfNursery);
 
+router.route('/plants/:id/description-image')
+    .post(uploadDescriptionImage);
 
 router.route("/plants/:id")
     .get(getPlantById)
@@ -19,3 +21,4 @@ router.route("/plants/:id")
     .delete(deletePlantById);
 
 module.exports = router;
+

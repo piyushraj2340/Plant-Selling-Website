@@ -10,11 +10,13 @@ import SignupPage from "../pages/SignupPage";
 import LogoutPage from "../pages/LogoutPage";
 import ProfilePage from "../pages/ProfilePage";
 import NurseryProfilePage from "../pages/NurseryProfilePage";
+import NurserySettingsPage from "../pages/NurserySettingsPage";
+
 //TODO: ADD NURSERY PUBLIC PROFILE PAGE HERE
+import ManagePlantsPage from "../pages/ManagePlantsPage";
+import ManageOrdersPage from "../pages/ManageOrdersPage";
 import CreateNurseryPage from "../pages/CreateNurseryPage";
-import EditNurseryPage from "../pages/EditNurseryPage";
-import AddNewPlants from "../pages/AddNewPlants";
-import EditPlantsPage from "../pages/EditPlantsPage";
+// import EditNurseryPage from "../pages/EditNurseryPage";
 import AddressPage from "../pages/AddressPage";
 import AddNewAddressPage from "../pages/AddNewAddressPage";
 import EditAddressPage from "../pages/EditAddressPage";
@@ -30,6 +32,7 @@ import NurseryPublicStorePage from "../pages/NurseryPublicStorePage";
 import OrderHistoryPages from "../pages/OrderHistoryPages";
 import SuccessPage from "../pages/SuccessPage";
 import OrderDetailsPages from "../pages/OrderDetailsPages";
+import InvoicePages from "../pages/InvoicePages";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import UserVerificationEmailSent from "../pages/UserVerificationEmailSent";
 import UserVerificationConfirmAccount from "../pages/UserVerificationConfirmAccount";
@@ -39,6 +42,8 @@ import PrivacyPolicyPage from "../pages/PrivacyPolicyPage";
 import FAQPage from "../pages/FAQPage";
 import HelpPage from "../pages/HelpPage";
 import ProfileSettings from "../features/user/Components/ProfileSettings";
+import UserMessages from "../features/user/Components/UserMessages";
+
 import UserProfile from "../features/user/Components/UserProfile";
 import TwoFactorAuthenticationPage from "../pages/TwoFactorAuthenticationPage";
 import MainLayout from "../features/common/MainLayout";
@@ -54,6 +59,9 @@ import AdminCoupon from "../features/admin/Components/Coupon";
 import AdminCategories from "../features/admin/Components/Categories";
 import AdminHelp from "../features/admin/Components/Help";
 import AdminUsers from "../features/admin/Components/Users";
+import NurseryHelpPage from "../pages/NurseryHelpPage";
+import NurseryChatsPage from "../pages/NurseryChatsPage";
+
 
 const Routing = () => {
     return (
@@ -71,6 +79,8 @@ const Routing = () => {
                 <Route exact path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} >
                     <Route index element={<UserProfile />} />
                     <Route exact path="settings" element={<ProfileSettings />} />
+                    <Route exact path="messages" element={<UserMessages />} />
+
                 </Route>
                 <Route exact path="/account/verificationEmail" element={<UserVerificationEmailSent />} />
                 <Route exact path="/account/passwordResetEmail" element={<PasswordResetEmailSentPage />} />
@@ -78,11 +88,14 @@ const Routing = () => {
                 <Route exact path="/account/ResetYourPassword/:token" element={<ResetYourPasswordPage />} />
                 <Route exact path="/account/twoFactorAuthentication/:token" element={<TwoFactorAuthenticationPage />} />
                 <Route exact path="/nursery" element={<NurseryProfilePage />} />
+                <Route exact path="/nursery/plants" element={<ManagePlantsPage />} />
+                <Route exact path="/nursery/order" element={<ManageOrdersPage />} />
+                <Route exact path="/nursery/help" element={<NurseryHelpPage />} />
+                <Route exact path="/nursery/chats" element={<NurseryChatsPage />} />
+
                 <Route exact path="/nursery/store/view/:id" element={<NurseryPublicStorePage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
                 <Route exact path="/nursery/create" element={<CreateNurseryPage />} />
-                <Route exact path="/nursery/update" element={<EditNurseryPage />} />
-                <Route exact path="/nursery/plant/new" element={<AddNewPlants />} />
-                <Route exact path="/nursery/plant/update/:id" element={<EditPlantsPage />} /> {/* //TODO: NEED TO IMPLEMENTS THIS */}
+                <Route exact path="/nursery/settings" element={<NurserySettingsPage />} />
                 <Route exact path="/address" element={<ProtectedRoute><AddressPage /></ProtectedRoute>} />
                 <Route exact path="/address/add" element={<ProtectedRoute><AddNewAddressPage /></ProtectedRoute>} />
                 <Route exact path="/address/update/:id" element={<ProtectedRoute><EditAddressPage /></ProtectedRoute>} />
@@ -98,6 +111,7 @@ const Routing = () => {
 
                 <Route path="/orders/history" element={<OrderHistoryPages />} />
                 <Route path="/orders/details/:id" element={<OrderDetailsPages />} />
+                <Route path="/orders/invoice/:id" element={<InvoicePages />} />
 
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/FAQ" element={<FAQPage />} />
@@ -123,3 +137,5 @@ const Routing = () => {
 }
 
 export default React.memo(Routing);
+
+
