@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { useParams } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getProductAsync, fetchProductCouponsAsync } from '../features/products/productsSlice';
 import ProductImages from '../features/products/Components/ProductImages';
@@ -18,12 +18,25 @@ const ProductPage = () => {
   document.title = product ? product.plantName : "Plant info";
 
   const params = useParams();
+  const location = useLocation();
   const _id = params.id;
 
   useEffect(() => {
     dispatch(getProductAsync(_id));
     dispatch(fetchProductCouponsAsync(_id));
   }, []);
+
+  useEffect(() => {
+    // Wait until the product is loaded and rendered
+    if (product && location.hash) {
+      setTimeout(() => {
+        const element = document.getElementById(location.hash.replace('#', ''));
+        if (element) {
+          element.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 300); // Give a tiny delay for React to finish painting
+    }
+  }, [product, location.hash]);
 
   return (
     <>

@@ -3,18 +3,42 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import formatTimestamp from '../../../utils/formatTimestamp'
 import { useDispatch, useSelector } from 'react-redux'
 import { getOrderDetailsByIdAsync } from '../orderSlice'
+import { addToCartAsync } from '../../cart/cartSlice'
+import { message } from 'antd'
 
 const OrderDetails = () => {
 
     const orderDetails = useSelector((order) => order.order.orderDetails);
-
-    console.log("orderDetails" + orderDetails);
+    const user = useSelector((state) => state.user.data);
 
     const dispatch = useDispatch();
 
     const noPlantsImage = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/no-data-found";
 
     const { id } = useParams();
+
+    const handleBuyAgain = (item) => {
+        if (!user) {
+            message.warning("Please sign in to buy plants!");
+            return;
+        }
+
+        const data = {
+            user: user._id,
+            nursery: item.nursery,
+            plant: item.plant,
+            quantity: 1,
+            pricing: {
+                priceWithoutDiscount: item.price,
+                priceAfterDiscount: item.price - (item.discount / 100 * item.price),
+                discount: item.discount,
+                discountPrice: (item.discount / 100 * item.price)
+            }
+        };
+
+        dispatch(addToCartAsync(data));
+        message.success("Added to cart!");
+    };
 
 
     const handelGetOrderDetails = () => {
@@ -136,9 +160,8 @@ const OrderDetails = () => {
                                                                 </div>
                                                             </div>
                                                             <div className='p-2 p-md-3 d-flex flex-column'>
-                                                                <Link to="#" className='btn btn-warning mb-2'><i className="fas fa-comment-dots"></i> Write a review</Link>
-                                                                <Link to="#" className='btn btn-info mb-2'><i className='fa fa-refresh'></i> Buy it again</Link>
-                                                                <Link to="#" className='btn btn-primary'><i className='fas fa-shipping-fast'></i> Track order</Link>
+                                                                <Link to={`/product/${orderItems.plant}#product-reviews`} className='btn btn-warning mb-2'><i className="fas fa-comment-dots"></i> Write a review</Link>
+                                                                <button onClick={() => handleBuyAgain(orderItems)} className='btn btn-info mb-2'><i className='fa fa-refresh'></i> Buy it again</button>
                                                             </div>
                                                         </div>
                                                     )
