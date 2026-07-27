@@ -40,6 +40,10 @@ const cartSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    isGuestData: {
+        type: Boolean,
+        default: false
     }
 });
 

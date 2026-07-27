@@ -2,7 +2,7 @@ const router = require('express').Router();
 
 const auth = require('../middleware/auth');
 
-const { signUp, checkUser, logout, signIn, resetUserPassword, refreshToken, validateOtp, validateOtpToken, resendOtp } = require('../controllers/authController');
+const { signUp, checkUser, logout, signIn, guestLogin, resetUserPassword, refreshToken, validateOtp, validateOtpToken, resendOtp } = require('../controllers/authController');
 const validateSignup = require('../controllers/userController/Validations/validateSignup');
 
 router.post('/resetPassword', resetUserPassword);
@@ -10,6 +10,8 @@ router.post('/resetPassword', resetUserPassword);
 router.post('/sign-up',validateSignup, signUp);
 
 router.post('/sign-in', signIn);
+
+router.post('/guest-login', guestLogin);
 
 router.post('/refresh-token', refreshToken);
 

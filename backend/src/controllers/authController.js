@@ -175,6 +175,64 @@ exports.signIn = async (req, res, next) => {
     }
 };
 
+//* POST Routes
+exports.guestLogin = async (req, res, next) => {
+    try {
+        const { role } = req.body;
+        let email = "";
+
+        if (role === "admin") {
+            email = process.env.GUEST_ADMIN_EMAIL || 'guest-admin@plantseller.com';
+        } else if (role === "seller") {
+            email = process.env.GUEST_NURSERY_EMAIL || 'guest-seller@plantseller.com';
+        } else {
+            email = process.env.GUEST_USER_EMAIL || 'guest-user@plantseller.com';
+        }
+
+        const result = await userModel.findOne({ email });
+
+        if (!result) {
+            const error = new Error(`Guest ${role} account is currently being reset or unavailable. Please try again in a moment.`);
+            error.statusCode = 404;
+            throw error;
+        }
+
+        if (result.isBlocked) {
+            const error = new Error("Guest account is currently blocked.");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        //* Generate Auth Token
+        const token = await result.generateAuthToken();
+        const { refreshToken, accessToken } = token;
+
+        if (!refreshToken) {
+            const error = new Error("Failed to generate refresh token");
+            error.statusCode = 500;
+            throw error;
+        }
+
+        const userInfo = { ...result._doc };
+        delete userInfo.password;
+        delete userInfo.__v;
+
+        const info = {
+            status: true,
+            message: `Logged in as Guest ${role.charAt(0).toUpperCase() + role.slice(1)}`,
+            result: userInfo,
+            token: {
+                accessToken: accessToken,
+                refreshToken: refreshToken
+            }
+        }
+
+        res.status(200).send(info);
+    } catch (error) {
+        next(error);
+    }
+};
+
 //* GET Routes
 exports.logout = async (req, res, next) => {
     try {

@@ -6,7 +6,9 @@ const { addNewPlant, uploadDescriptionImage, getAllPlantsOfNursery, getPlantById
 
 const router = express.Router();
 
-router.use(auth);
+const { guestProtection } = require('../../middleware/guestProtection');
+
+router.use(auth, guestProtection);
 
 router.route('/plants')
     .post(addNewPlant)

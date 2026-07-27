@@ -7,7 +7,9 @@ const auth = require('../../middleware/auth');
 const { createNurseryProfile, getNurseryDetail, updateNurseryDetail, deleteNurseryDetail, uploadNurseryImage, deleteNurseryImage, updateNurseryImages, getNurseryImages, getNurseryMessages, markNurseryMessageAsViewed, replyNurseryMessage, updateNurserySMTPSettings, replyNurseryMessageEmail, updateNurseryMessageStatus } = require('../../controllers/nurseryController/nurseryController');
 const { getOrders, getOrdersBarChart, getOrdersPieChart, updateOrderStatus, bulkUpdateOrderStatus } = require('../../controllers/nurseryController/nurseryOrderController');
 
-router.use(auth);
+const { guestProtection } = require('../../middleware/guestProtection');
+
+router.use(auth, guestProtection);
 
 router.route('/settings/smtp')
     .patch(updateNurserySMTPSettings);

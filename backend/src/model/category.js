@@ -40,6 +40,10 @@ const categorySchema = new mongoose.Schema({
         type: String,
         enum: ['Pending', 'Active', 'Disabled'],
         default: 'Pending'
+    },
+    isGuestData: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

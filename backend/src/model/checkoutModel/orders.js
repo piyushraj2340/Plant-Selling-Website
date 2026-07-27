@@ -100,6 +100,10 @@ const orderSchema = new mongoose.Schema({
             required: true,
         }
     },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    }
 
 });
 

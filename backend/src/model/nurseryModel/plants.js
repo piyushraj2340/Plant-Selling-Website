@@ -105,6 +105,10 @@ const plantsSchema = new mongoose.Schema({
         default: Date.now,
         required: [true, "Plant added at is required."]
     },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
     status: {
         type: String,
         enum: ['Published', 'Draft', 'On Hold'],
