@@ -3,20 +3,31 @@ const queryHelper = require('../../utils/queryHelper');
 const plantsModel = require('../../model/nurseryModel/plants');
 const { default: mongoose } = require('mongoose');
 
+const sanitizeHtml = require('sanitize-html');
+const sanitizeOptions = {
+    allowedTags: sanitizeHtml.defaults.allowedTags.concat(['img']),
+    allowedAttributes: {
+        ...sanitizeHtml.defaults.allowedAttributes,
+        img: ['src', 'alt', 'width', 'height']
+    },
+    allowedSchemes: ['http', 'https']
+};
+
 exports.addNewPlant = async (req, res, next) => {
     try {
-        const sanitizeHtml = require('sanitize-html');
         const { user, role, nursery, body, files } = req;
 
         if (body.description) {
-            body.description = sanitizeHtml(body.description);
+            body.description = sanitizeHtml(body.description, sanitizeOptions);
         }
 
         if (!nursery || !role.includes('seller')) {
             const error = new Error("You are not allowed to access this route");
             error.statusCode = 403;
             throw error;
-        }        const images = [files.image_0, files.image_1, files.image_2].filter(Boolean);
+        }
+        
+        const images = [files?.image_0, files?.image_1, files?.image_2].filter(Boolean);
         
         const plant = new plantsModel(body);
 
@@ -30,7 +41,7 @@ exports.addNewPlant = async (req, res, next) => {
 
         if (images.length > 0) {
             const resultImage = await uploadImages(images, {
-                folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${plant._id}`,
+                folder: `PlantSeller/user//nursery//plants/`,
                 width: 550,
                 height: 650,
                 crop: "fit"
@@ -57,11 +68,9 @@ exports.addNewPlant = async (req, res, next) => {
         res.status(200).send(info);
 
     } catch (error) {
-        // Pass error to error handling middleware
         next(error);
     }
 };
-
 
 exports.getAllPlantsOfNursery = async (req, res, next) => {
     try {
@@ -119,7 +128,6 @@ exports.getAllPlantsOfNursery = async (req, res, next) => {
     }
 };
 
-
 exports.getPlantById = async (req, res, next) => {
     try {
         const { user, role, nursery } = req;
@@ -152,14 +160,12 @@ exports.getPlantById = async (req, res, next) => {
     }
 };
 
-
 exports.updatePlantById = async (req, res, next) => {
     try {
-        const sanitizeHtml = require('sanitize-html');
         const { user, nursery, role, body, files } = req;
 
         if (body.description) {
-            body.description = sanitizeHtml(body.description);
+            body.description = sanitizeHtml(body.description, sanitizeOptions);
         }
 
         if (!nursery || !role.includes('seller')) {
@@ -188,13 +194,11 @@ exports.updatePlantById = async (req, res, next) => {
         }
 
         if (files) {
-            const { uploadImages } = require('../../utils/uploadImages');
-            
             const imagesRaw = [files.image_0, files.image_1, files.image_2].filter(Boolean);
 
             if (imagesRaw.length > 0) {
                 const resultImage = await uploadImages(imagesRaw, {
-                    folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`,
+                    folder: `PlantSeller/user//nursery//plants/`,
                     width: 550,
                     height: 650,
                     crop: "fit"
@@ -227,13 +231,11 @@ exports.updatePlantById = async (req, res, next) => {
     }
 };
 
-
 exports.deletePlantById = async (req, res, next) => {
     const session = await mongoose.startSession();
+    session.startTransaction();
 
     try {
-        session.startTransaction();
-
         const { user, role, nursery } = req;
 
         if (!nursery || !role.includes('seller')) {
@@ -251,13 +253,13 @@ exports.deletePlantById = async (req, res, next) => {
             throw error;
         }
 
-        await deleteResourcesByPrefix(`PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`, {
+        await deleteResourcesByPrefix(`PlantSeller/user//nursery//plants/`, {
             type: 'upload',
             resource_type: 'image',
             invalidate: true
         });
 
-        await deleteFolder(`PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`);
+        await deleteFolder(`PlantSeller/user//nursery//plants/`);
 
         await session.commitTransaction();
 
@@ -271,14 +273,11 @@ exports.deletePlantById = async (req, res, next) => {
 
     } catch (error) {
         await session.abortTransaction();
-
         next(error);
     } finally {
         await session.endSession();
     }
 };
-
-
 
 exports.uploadDescriptionImage = async (req, res, next) => {
     try {
@@ -300,7 +299,7 @@ exports.uploadDescriptionImage = async (req, res, next) => {
         const { uploadImage } = require('../../utils/uploadImages');
 
         const resultImage = await uploadImage(files.image, {
-            folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${id}/descriptions`,
+            folder: `PlantSeller/user//nursery//plants//descriptions`,
             crop: "scale"
         });
 
@@ -319,5 +318,3 @@ exports.uploadDescriptionImage = async (req, res, next) => {
         next(error);
     }
 };
-
-

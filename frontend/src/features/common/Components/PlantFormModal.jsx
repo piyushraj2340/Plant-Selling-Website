@@ -101,7 +101,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 file.url = res.data.url; // Append url to file object so it can be used in gallery
                 onSuccess("ok");
                 message.success('Description image uploaded successfully!');
-                
+
                 // Update file list with new url
                 setDescFileList(prev => prev.map(f => {
                     if (f.uid === file.uid) {
@@ -113,7 +113,6 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 throw new Error((res && res.data && res.data.message) || 'Upload failed');
             }
         } catch (error) {
-            debugger;
             onError(error);
             message.error('Failed to upload description image.');
         }
