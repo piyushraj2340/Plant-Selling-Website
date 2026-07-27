@@ -12,6 +12,9 @@ router.route('/plants')
     .post(addNewPlant)
     .get(getAllPlantsOfNursery);
 
+router.route('/plants/:id/description-image')
+    .post(uploadDescriptionImage);
+
 router.route("/plants/:id")
     .get(getPlantById)
     .patch(updatePlantById)
