@@ -32,6 +32,7 @@ import NurseryPublicStorePage from "../pages/NurseryPublicStorePage";
 import OrderHistoryPages from "../pages/OrderHistoryPages";
 import SuccessPage from "../pages/SuccessPage";
 import OrderDetailsPages from "../pages/OrderDetailsPages";
+import InvoicePages from "../pages/InvoicePages";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import UserVerificationEmailSent from "../pages/UserVerificationEmailSent";
 import UserVerificationConfirmAccount from "../pages/UserVerificationConfirmAccount";
@@ -110,6 +111,7 @@ const Routing = () => {
 
                 <Route path="/orders/history" element={<OrderHistoryPages />} />
                 <Route path="/orders/details/:id" element={<OrderDetailsPages />} />
+                <Route path="/orders/invoice/:id" element={<InvoicePages />} />
 
                 <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="/FAQ" element={<FAQPage />} />

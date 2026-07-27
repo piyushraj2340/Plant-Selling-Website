@@ -154,7 +154,7 @@ const Order = () => {
                     </div>
                     <div className="d-flex align-items-center">
                         <p className='p-2 m-0'>Total Order: <b>{total}</b></p>
-                        <select name="filter-order" id="filter-order" className='p-1' onChange={(e) => handelFilterOrderHistoryByDate(e)}>
+                        <select name="filter-order" id="filter-order" className='p-1' defaultValue="allTime" onChange={(e) => handelFilterOrderHistoryByDate(e)}>
                             <option value="last3Months">Last 3 months</option>
                             <option value="last6Months">Last 6 months</option>
                             <option value="last1Year">Last 1 Year</option>
@@ -168,14 +168,20 @@ const Order = () => {
                         orderHistory.map(order => {
                             return (
                                 <div className="card mb-2 p-0" key={order._id}>
-                                    <div className="card-header p-2 p-md-3">
+                                    <div className="card-header p-3 p-md-4 bg-light border-bottom">
                                         <div className="d-flex flex-column flex-md-row align-items-start justify-content-between align-items-md-center">
                                             <div>
-                                                <p className="text-muted mb-2"> Order ID <span className="fw-bold text-body">{order._id}</span></p>
-                                                <p className="text-muted mb-0"> Place On <span className="fw-bold text-body">{formatTimestamp(order.orderAt)}</span> </p>
+                                                <p className="text-muted mb-2"> Order ID: <span className="fw-bold text-body">{order._id}</span></p>
+                                                <p className="text-muted mb-2"> Place On: <span className="fw-bold text-body">{formatTimestamp(order.orderAt)}</span> </p>
+                                                <p className="text-muted mb-0"> Order Status: 
+                                                    <span className={`badge ms-2 ${order.overallStatus === 'Cancelled' ? 'bg-danger' : order.overallStatus === 'Delivered' ? 'bg-success' : 'bg-primary'}`}>
+                                                        {order.overallStatus || 'Processing'}
+                                                    </span>
+                                                </p>
                                             </div>
-                                            <div className='mt-2 mt-md-0'>
-                                                <h6 className="mb-0"> <Link to={`/orders/details/${order._id}`}>View Details </Link> </h6>
+                                            <div className='mt-3 mt-md-0 d-flex flex-column align-items-md-end'>
+                                                <h6 className="mb-2"> <Link to={`/orders/details/${order._id}`} className="btn btn-outline-primary btn-sm">View Details</Link> </h6>
+                                                <span className="text-muted small">Payment: <b>{order.payment.paymentMethods}</b> ({order.payment.status})</span>
                                             </div>
                                         </div>
                                     </div>

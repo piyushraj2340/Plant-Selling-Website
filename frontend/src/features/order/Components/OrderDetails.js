@@ -48,8 +48,8 @@ const OrderDetails = () => {
                                             <p className='mx-1 d-none d-md-block'> | </p>
                                             <p className='ms-md-2'>Order Id: <span>{orderDetails._id}</span></p>
                                         </div>
-                                        <div className='ms-2'>
-                                            <Link to='#' className='btn btn-secondary'>Payment Invoice</Link>
+                                        <div className='ms-2 mt-2 mt-md-0'>
+                                            <Link to={`/orders/invoice/${orderDetails._id}`} className='btn btn-outline-dark'><i className="fas fa-print me-2"></i> Payment Invoice</Link>
                                         </div>
                                     </div>
                                 </div>

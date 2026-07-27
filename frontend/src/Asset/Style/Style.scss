@@ -1663,3 +1663,14 @@ a:hover {
     color: #2d6a4f;
     font-size: 0.9em;
 }
+@media print {
+  .no-print, header, footer, nav {
+    display: none !important;
+  }
+  body {
+    background-color: white !important;
+    -webkit-print-color-adjust: exact;
+  }
+}
+
+
