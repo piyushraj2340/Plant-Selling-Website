@@ -25,6 +25,11 @@ export const userLoginAsync = createAsyncThunk('/auth/loginUser', async (body) =
     return response.data;
 });
 
+export const guestLoginAsync = createAsyncThunk('/auth/guestLogin', async (body) => {
+    const response = await handelDataFetch('/api/v2/auth/guest-login', 'POST', body);
+    return response.data;
+});
+
 export const userSignupAsync = createAsyncThunk('/auth/signupUser', async (body) => {
     const response = await handelDataFetch('/api/v2/auth/sign-up', 'POST', body);
     return response.data;
@@ -139,15 +144,41 @@ export const authSlice = createSlice({
                 message.success(action.payload.message);
 
             }).addCase(userSignupAsync.rejected, (state, action) => {
-                //! REJECTED: USER_SIGN-UP
+            state.isLoading = false;
+            state.error = action.error;
+            message.error(action.error.message);
+        });
 
-                state.error = action.error;
-                state.isLoading = false;
+        // guestLoginAsync
+        builder.addCase(guestLoginAsync.pending, (state) => {
+            state.isLoading = true;
+            state.error = null;
+        });
 
-                message.error(action.error.message);
+        builder.addCase(guestLoginAsync.fulfilled, (state, action) => {
+            state.isLoading = false;
+            if (action.payload.status) {
+                const { result, token, message: msg } = action.payload;
+                localStorageUtil.setItem('accessToken', token.accessToken);
+                localStorageUtil.setItem('refreshToken', token.refreshToken);
+                localStorageUtil.setItem('user', result);
+                message.success(msg);
+                setTimeout(() => {
+                    window.location.reload(); // Refresh to update states globally just like login
+                }, 1000);
+            } else {
+                state.error = action.payload;
+                message.error(action.payload.message);
+            }
+        });
 
-            })
-            .addCase(userLogoutAsync.pending, (state) => {
+        builder.addCase(guestLoginAsync.rejected, (state, action) => {
+            state.isLoading = false;
+            state.error = action.error;
+            message.error(action.error.message);
+        });
+
+        builder.addCase(userLogoutAsync.pending, (state) => {
                 //^ PENDING: USER_LOGOUT
 
                 state.isLoading = true;

@@ -6,6 +6,7 @@ import { getAllCategoriesAsync } from '../../category/categorySlice';
 import React, { useState, useEffect } from 'react';
 import PlantFormModal from '../../common/Components/PlantFormModal';
 import { useTableParams } from '../../../hooks/useTableParams';
+import useUserData from '../../../hooks/useUserData';
 
 const ProductsTable = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,9 @@ const ProductsTable = () => {
   const isLoading = useSelector(state => state.admin.isLoading);
   const nurseries = useSelector(state => state.admin.nurseriesList) || [];
   const { categories } = useSelector(state => state.category);
+
+  const { userData } = useUserData();
+  const isGuestAdmin = userData?.isGuestData;
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +44,7 @@ const ProductsTable = () => {
     tags: plant.category ? [plant.category.categoryName || plant.category.name || (typeof plant.category === 'string' ? plant.category : 'Unknown')] : [],
     status: plant.status || "Draft",
     action: plant.status || "Draft",
+    isGuestData: plant.isGuestData,
   }));
 
   const handleUpdateStatus = async (id, status) => {
@@ -194,29 +199,31 @@ const ProductsTable = () => {
       key: 'action',
       render: (_, record) => {
         const status = record.status;
+        const disabledForGuest = isGuestAdmin && !record.isGuestData;
+
         return (
           <Space size={'small'}>
             {
               status.toLowerCase() !== 'published' &&
-              <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')}>
-                <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Publish</button>
+              <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')} disabled={disabledForGuest}>
+                <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>Publish</button>
               </Popconfirm>
             }
             {
               status.toLowerCase() !== 'draft' &&
-              <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')}>
-                <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Draft</button>
+              <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')} disabled={disabledForGuest}>
+                <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>Draft</button>
               </Popconfirm>
             }
             {
               status.toLowerCase() !== 'on hold' &&
-              <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>On Hold</button>
+              <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')} disabled={disabledForGuest}>
+                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>On Hold</button>
               </Popconfirm>
             }
 
 
-            <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Edit</button>
+            <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>Edit</button>
           </Space>
         )
       }

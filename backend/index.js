@@ -7,6 +7,8 @@ const { Server } = require('socket.io');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const fileUpload = require('express-fileupload');
+const cron = require('node-cron');
+const seedGuestData = require('./scripts/guestSeed');
 
 
 const port = process.env.port || 8000;
@@ -119,6 +121,12 @@ io.on('connection', (socket) => {
 
 server.listen(port, () => {
     console.log("listening to port " + port);
+});
+
+// Run Guest Data Seed at 12:00 AM (Midnight) Every Day
+cron.schedule('0 0 * * *', () => {
+    console.log("Running scheduled nightly guest data reset at midnight...");
+    seedGuestData();
 });
 
 

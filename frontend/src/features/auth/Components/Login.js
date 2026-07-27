@@ -2,9 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { message } from 'antd';
 import useUserLogin from '../../../hooks/auth/useUserLogin';
-import useUserData from '../../../hooks/useUserData';
-import { useDispatch } from 'react-redux';
-import { resetState } from '../authSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { resetState, guestLoginAsync } from '../authSlice';
 // import { setCart } from '../../cart/cartSlice'; // TODO: IMPLEMENTATION: CART FUNCTIONALITY
 
 
@@ -41,6 +40,12 @@ function Login() {
             return;
         }
         userLogin(userFormData);
+    }
+
+    const { isLoading: guestLoading } = useSelector(state => state.auth);
+
+    const handleGuestLogin = (role) => {
+        dispatch(guestLoginAsync({ role }));
     }
 
     return (
@@ -103,6 +108,33 @@ function Login() {
                         </div>
                     </div>
                 </form>
+
+                <div className="row mt-4">
+                    <p className="text-center">Or try our Guest Accounts:</p>
+                </div>
+                <div className="d-flex flex-column gap-2">
+                    <button 
+                        onClick={() => handleGuestLogin('user')} 
+                        disabled={guestLoading || isLoading} 
+                        className='btn btn-outline-primary w-100'
+                    >
+                        Login as Guest User
+                    </button>
+                    <button 
+                        onClick={() => handleGuestLogin('seller')} 
+                        disabled={guestLoading || isLoading} 
+                        className='btn btn-outline-success w-100'
+                    >
+                        Login as Guest Nursery
+                    </button>
+                    <button 
+                        onClick={() => handleGuestLogin('admin')} 
+                        disabled={guestLoading || isLoading} 
+                        className='btn btn-outline-danger w-100'
+                    >
+                        Login as Guest Admin
+                    </button>
+                </div>
             </div>
         </div>
     )

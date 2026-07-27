@@ -4,6 +4,7 @@ import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkb
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useTableParams } from '../../../hooks/useTableParams';
 import localStorageUtil from '../../../utils/localStorage';
+import useUserData from '../../../hooks/useUserData';
 import {
     adminUsersAsync,
     adminImpersonateAsync,
@@ -19,6 +20,9 @@ const Users = () => {
     const dispatch = useDispatch();
     const { users, usersTotal, isLoading } = useSelector((state) => state.admin);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    
+    const { userData } = useUserData();
+    const isGuestAdmin = userData?.isGuestData;
 
     const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminUsersAsync);
 
@@ -168,24 +172,25 @@ const Users = () => {
             key: 'actions',
             render: (_, record) => {
                 const isAdmin = record.role.includes('admin');
+                const disabledForGuest = isGuestAdmin && !record.isGuestData;
 
                 const items = [
                     {
                         key: '1',
                         label: 'Impersonate',
-                        disabled: isAdmin || record.isBlocked,
+                        disabled: isAdmin || record.isBlocked || disabledForGuest,
                         onClick: () => handleImpersonate(record._id)
                     },
                     {
                         key: '2',
                         label: 'Assign Roles',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         onClick: () => openRoleModal(record)
                     },
                     {
                         key: '3',
                         label: 'Change Password',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         onClick: () => openPasswordModal(record)
                     },
                     {
@@ -194,7 +199,7 @@ const Users = () => {
                     {
                         key: '4',
                         label: record.isBlocked ? 'Unblock User' : 'Block User',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         danger: !record.isBlocked,
                         onClick: () => {
                             Modal.confirm({
@@ -209,7 +214,7 @@ const Users = () => {
                     {
                         key: '5',
                         label: record.isUserVerified ? 'Unverify User' : 'Verify User',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         onClick: () => {
                             Modal.confirm({
                                 title: record.isUserVerified ? 'Unverify User?' : 'Verify User?',
@@ -223,7 +228,7 @@ const Users = () => {
                     {
                         key: '6',
                         label: 'Delete User',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         danger: true,
                         onClick: () => {
                             Modal.confirm({
@@ -240,7 +245,7 @@ const Users = () => {
 
                 return (
                     <Dropdown menu={{ items }} trigger={['click']}>
-                        <Button icon={<EllipsisOutlined />} size="small" />
+                        <Button icon={<EllipsisOutlined />} size="small" title={disabledForGuest ? "Action restricted for guest accounts" : ""} />
                     </Dropdown>
                 );
             },
