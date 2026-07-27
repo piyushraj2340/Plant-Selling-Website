@@ -8,9 +8,9 @@ dns.setServers(["8.8.8.8", "8.8.4.4"]);
 // Load env vars
 dotenv.config({ path: './.env' });
 
-const ordersModel = require('./src/model/checkoutModel/orders');
-const OrderItem = require('./src/model/checkoutModel/orderItem');
-const cartModel = require('./src/model/checkoutModel/cart');
+const ordersModel = require('../src/model/checkoutModel/orders');
+const OrderItem = require('../src/model/checkoutModel/orderItem');
+const cartModel = require('../src/model/checkoutModel/cart');
 
 const connectDB = async () => {
     try {
