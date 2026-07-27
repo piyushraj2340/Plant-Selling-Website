@@ -1,14 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Upload, Button, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import handelDataFetch from '../../../utils/handelDataFetch';
 
 const { Option } = Select;
+
+// Helper to generate a valid MongoDB ObjectId hex string in frontend
+const generateObjectId = () => {
+    const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
+    const objectId = timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => {
+        return Math.floor(Math.random() * 16).toString(16);
+    }).toLowerCase();
+    return objectId;
+};
 
 const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categories, nurseries, loading }) => {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState([]);
+    const [tempId, setTempId] = useState('');
+    const quillRef = useRef(null);
 
     useEffect(() => {
         if (isOpen) {
@@ -38,6 +50,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
             } else {
                 form.resetFields();
                 setFileList([]);
+                setTempId(generateObjectId()); // Pre-generate ID for Cloudinary uploads during Add mode
             }
         }
     }, [isOpen, initialData, mode, form]);
@@ -58,6 +71,65 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
         return false; // Prevent auto upload
     };
 
+    const imageHandler = () => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (!file) return;
+
+            const isLt5M = file.size / 1024 / 1024 < 5;
+            if (!isLt5M) {
+                message.error('Image must be smaller than 5MB!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('image', file);
+
+            // Use initialData._id for edits, tempId for new
+            const currentPlantId = (mode === 'edit' && initialData) ? initialData._id : tempId;
+
+            const hide = message.loading('Uploading image...', 0);
+            try {
+                const data = await handelDataFetch(`/api/v2/nursery/plants/${currentPlantId}/description-image`, 'POST', formData);
+                
+                if (data.status) {
+                    const quill = quillRef.current.getEditor();
+                    const range = quill.getSelection();
+                    const index = range ? range.index : 0;
+                    quill.insertEmbed(index, 'image', data.url);
+                    hide();
+                    message.success('Image uploaded successfully!');
+                } else {
+                    throw new Error(data.message || 'Upload failed');
+                }
+            } catch (error) {
+                hide();
+                console.error('Error uploading image:', error);
+                message.error('Failed to upload image. Please try again.');
+            }
+        };
+    };
+
+    const modules = useMemo(() => ({
+        toolbar: {
+            container: [
+                [{ 'header': [1, 2, false] }],
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
+                ['link', 'image'],
+                ['clean']
+            ],
+            handlers: {
+                image: imageHandler
+            }
+        }
+    }), [mode, initialData, tempId]); // Added dependencies to ensure handler gets latest IDs
+
     const handleOk = async () => {
         try {
             const values = await form.validateFields();
@@ -73,6 +145,11 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
 
             if (values.nursery) {
                 formData.append('nursery', values.nursery);
+            }
+
+            // Append pre-generated ID if adding new plant
+            if (mode === 'add' && tempId) {
+                formData.append('_id', tempId);
             }
 
             // Append new files
@@ -132,7 +209,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     <div className="col-md-4">
                         <Form.Item
                             name="price"
-                            label="Price (₹)"
+                            label="Price (?)"
                             rules={[{ required: true, message: 'Please enter price' }]}
                         >
                             <InputNumber min={0} style={{ width: '100%' }} placeholder="0" />
@@ -195,7 +272,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     rules={[{ required: true, message: 'Please enter plant description' }]}
                     getValueFromEvent={(content) => content}
                 >
-                    <ReactQuill theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
+                    <ReactQuill ref={quillRef} modules={modules} theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
                 </Form.Item>
 
                 <Form.Item label="Plant Images (Max 3, Max 5MB each)">

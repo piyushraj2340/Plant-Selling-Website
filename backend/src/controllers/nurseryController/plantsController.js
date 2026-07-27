@@ -235,3 +235,43 @@ exports.deletePlantById = async (req, res, next) => {
         await session.endSession();
     }
 };
+
+exports.uploadDescriptionImage = async (req, res, next) => {
+    try {
+        const { user, role, nursery, params, files } = req;
+        const { id } = params;
+
+        if (!nursery || !role.includes('seller')) {
+            const error = new Error("You are not allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        if (!files || !files.image) {
+            const error = new Error("No image file uploaded");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const { uploadImage } = require('../../utils/uploadImages');
+
+        const resultImage = await uploadImage(files.image, {
+            folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${id}/descriptions`,
+            crop: "scale"
+        });
+
+        if (!resultImage || !resultImage.secure_url) {
+            const error = new Error("Failed to upload image");
+            error.statusCode = 500;
+            throw error;
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Description image uploaded successfully",
+            url: resultImage.secure_url
+        });
+    } catch (error) {
+        next(error);
+    }
+};
