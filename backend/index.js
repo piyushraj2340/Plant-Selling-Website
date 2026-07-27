@@ -32,8 +32,6 @@ app.use(fileUpload({
 app.use(express.json({ limit: '50mb' }));  // Increase the JSON body size limit to 50MB
 app.use(express.urlencoded({ limit: '50mb', extended: true }));  // Increase URL-encoded body size limit
 
-
-
 // route 
 const authRoute = require("./src/router/auth");
 const nurseryRoute = require("./src/router/nurseryRoute/nursery");
@@ -43,6 +41,7 @@ const products = require("./src/router/products");
 const orderRoute = require("./src/router/checkoutRoute/orders");
 const user = require("./src/router/userRoute/user");
 const cart = require("./src/router/checkoutRoute/cart");
+const saveForLater = require("./src/router/checkoutRoute/saveForLater");
 const address = require("./src/router/userRoute/address");
 const payment = require("./src/router/checkoutRoute/payment");
 const contactUs = require("./src/router/contact");
@@ -50,11 +49,9 @@ const nurseryPublicStore = require('./src/router/nurseryRoute/nurseryPublicStore
 const subscriberEmail = require("./src/router/subscriberEmail");
 const adminRoute = require("./src/router/adminRoute/adminRouter");
 
-// route middleware
-
 // secured routes 
 app.use('/api/v2/auth', authRoute);
-app.use('/api/v2/user', user, cart, orderRoute, address);
+app.use('/api/v2/user', user, cart, orderRoute, address, saveForLater);
 app.use("/api/v2/nursery", nurseryRoute, nurseryStoreRoute, plantsRoute);
 app.use("/api/v2/checkout", payment);
 app.use("/api/v2/admin", adminRoute);

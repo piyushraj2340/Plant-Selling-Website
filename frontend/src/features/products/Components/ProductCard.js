@@ -4,12 +4,14 @@ import { Link, useNavigate } from 'react-router-dom';
 import { transformImageUrl } from '../../../utils/imageUtils';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCartAsync } from '../../cart/cartSlice';
+import { initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
+import { handelCalculatePricing } from './utils/productHelper';
 import { message } from 'antd';
 
 const ProductCard = ({ product }) => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
-    const user = useSelector(state => state.user.user);
+    const user = useSelector(state => state.user.data);
 
     // Strip HTML from description
     const rawDescription = product.description || '';
@@ -22,11 +24,19 @@ const ProductCard = ({ product }) => {
             return;
         }
 
+        const pricing = handelCalculatePricing(1, product);
+
         const data = {
             user: user._id,
             nursery: product.nursery._id || product.nursery,
             plant: product._id,
             quantity: 1,
+            pricing: {
+                priceWithoutDiscount: pricing.totalPriceWithoutDiscount,
+                priceAfterDiscount: pricing.actualPriceAfterDiscount,
+                discount: product.discount,
+                discountPrice: pricing.discountPrice
+            }
         };
 
         dispatch(addToCartAsync(data));
@@ -40,25 +50,45 @@ const ProductCard = ({ product }) => {
             return;
         }
 
+        const pricing = handelCalculatePricing(1, product);
+
         // Also add to cart behind the scenes as fallback
         const data = {
             user: user._id,
             nursery: product.nursery._id || product.nursery,
             plant: product._id,
             quantity: 1,
+            pricing: {
+                priceWithoutDiscount: pricing.totalPriceWithoutDiscount,
+                priceAfterDiscount: pricing.actualPriceAfterDiscount,
+                discount: product.discount,
+                discountPrice: pricing.discountPrice
+            }
         };
         dispatch(addToCartAsync(data));
 
-        navigate('/checkout', {
-            state: {
+        const checkoutData = {
+            data: {
                 cartOrProducts: [
                     {
-                        product: product,
+                        plant: {
+                            _id: product._id,
+                            plantName: product.plantName,
+                            images: product.images,
+                            discount: product.discount,
+                            price: product.price,
+                        },
+                        nursery: product.nursery._id || product.nursery,
                         quantity: 1
                     }
-                ]
-            }
-        });
+                ],
+                pricing,
+                shippingInfo: null
+            },
+            navigate
+        };
+
+        dispatch(initCheckoutProcessAsync(checkoutData));
     };
 
     return (

@@ -169,7 +169,7 @@ const Footer = () => {
                 </section>
                 <div className="text-center" style={{ backgroundColor: "rgba(0, 0, 0, 0.025)" }}>
                     <p className='text-left'>
-                        <span>&copy; 2021-2024</span>
+                        <span>&copy;{new Date().getFullYear()}</span>
                         <Link className="text-reset fw-bold" to="/"> PlantSeller</Link>
                         <span> All rights reserved.</span>
                     </p>

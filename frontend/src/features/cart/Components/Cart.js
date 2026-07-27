@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import AddressList from '../../common/AddressList';
 import { useDispatch, useSelector } from 'react-redux';
 import { cartDataDeleteAsync, cartDataFetchAsync, cartDataUpdateQuantityAsync, cartApplyCouponAsync, removeCoupon, cartGetApplicableCouponsAsync } from '../cartSlice';
+import { fetchSaveForLaterAsync, addToSaveForLaterAsync, moveToCartAsync, deleteSaveForLaterAsync } from '../saveForLaterSlice';
 import { addressListDataFetchAsync, setSelectedAddress } from '../../address/addressSlice';
 import { clearIsSessionError, initCheckoutProcessAsync } from '../../checkout/checkoutSlice';
 import handelShareProduct from '../../../utils/handelShareProduct';
@@ -18,6 +19,7 @@ function Cart() {
   const appliedCoupon = useSelector(state => state.cart.appliedCoupon);
   const applicableCoupons = useSelector(state => state.cart.applicableCoupons);
   const priceWarnings = useSelector(state => state.cart.priceWarnings);
+  const saveForLaterItems = useSelector(state => state.saveForLater.saveForLaterItems);
 
   const dispatch = useDispatch();
 
@@ -33,7 +35,10 @@ function Cart() {
     dispatch(cartDataFetchAsync()).then(() => {
       dispatch(cartGetApplicableCouponsAsync());
     });
-  }, [dispatch]);
+    if (user) {
+        dispatch(fetchSaveForLaterAsync());
+    }
+  }, [dispatch, user]);
 
   useEffect(() => {
        user && (addressList ?? dispatch(addressListDataFetchAsync()))
@@ -64,6 +69,27 @@ function Cart() {
     dispatch(cartDataUpdateQuantityAsync({ cartId, quantity })).then(() => {
         dispatch(cartGetApplicableCouponsAsync());
     });
+  }
+
+  const handleSaveForLater = (cartId) => {
+      dispatch(addToSaveForLaterAsync(cartId)).then(() => {
+          message.success("Item saved for later");
+          dispatch(cartDataFetchAsync()); // Refresh cart to update totals
+      });
+  }
+
+  const handleMoveToCart = (saveForLaterId) => {
+      dispatch(moveToCartAsync(saveForLaterId)).then(() => {
+          message.success("Item moved to cart");
+          dispatch(cartDataFetchAsync()); // Refresh cart
+          dispatch(fetchSaveForLaterAsync()); // Refresh saved list
+      });
+  }
+
+  const handleDeleteSaveForLater = (saveForLaterId) => {
+      dispatch(deleteSaveForLaterAsync(saveForLaterId)).then(() => {
+          message.success("Item removed from saved list");
+      });
   }
   
   const handleApplyCoupon = (code) => {
@@ -175,7 +201,7 @@ function Cart() {
                                   <i className='fas fa-trash-alt p-2'></i>
                                   <span className='menu-text p-1 center'>Delete</span>
                                 </p>
-                                <p className="m-0 menu p-2">
+                                <p className="m-0 menu p-2" onClick={() => handleSaveForLater(elem._id)}>
                                   <i className='fas fa-bookmark p-2'></i>
                                   <span className='menu-text p-1 center'>Save for later</span>
                                 </p>
@@ -194,11 +220,11 @@ function Cart() {
                                 <i className='fas fa-trash-alt p-2'></i>
                                 <span className='p-1 center'>Delete</span>
                               </p>
-                              <p className="m-0 small">
+                              <p className="m-0 small" style={{cursor: 'pointer'}} onClick={() => handleSaveForLater(elem._id)}>
                                 <i className='fas fa-bookmark p-2'></i>
                                 <span className='p-1 center'>Save for later</span>
                               </p>
-                              <p className="m-0 small">
+                              <p className="m-0 small" style={{cursor: 'pointer'}} onClick={() => handelShareProduct(productData, message)}>
                                 <i className='fas fa-share-alt p-2'></i>
                                 <span className='p-1 center'>Share</span>
                               </p>
@@ -219,6 +245,83 @@ function Cart() {
               <div className="d-flex flex-row-reverse p-3">
                 <p className='h5'>Subtotal ({(cart ?? 0) && Number(cart.length)} item): <small className='small'>₹</small><b>{cartPriceDetails && (cartPriceDetails.finalPrice - cartPriceDetails.deliveryFee).toFixed(2)}</b></p>
               </div>
+
+              {/* Save For Later Section */}
+              {saveForLaterItems && saveForLaterItems.length > 0 && (
+                <div className="mt-5 border-top pt-4">
+                  <h4 className="h4 mb-3">Saved for later ({saveForLaterItems.length} items)</h4>
+                  {saveForLaterItems.map((elem) => {
+                    const savedProductData = {
+                      title: "Share " + elem.plant?.plantName + " Plants",
+                      text: "Check out this plant",
+                      url: window.location.origin + `/product/${elem.plant?._id}`,
+                    }
+
+                    if (!elem.plant) return null;
+
+                    return (
+                      <div key={elem._id} className="item mt-4 pt-2 pb-2 border-bottom">
+                        <div className="row">
+                          <div className="item-img col-5 col-md-4 col-xl-3 m-0 p-0">
+                            <div className="img border">
+                              <img src={elem.plant.images[0].url} alt="flowering plant" />
+                            </div>
+                          </div>
+                          <div className="item-content col-7 col-md-8 col-xl-9">
+                            <div className="row">
+                              <div className='m-0'>
+                                <div className='m-0'>
+                                  <Link to={`/product/${elem.plant._id}`} className='link-dark link-underline-hover'><h3 className='h5 mb-0'>{elem.plant.plantName}</h3></Link>
+                                </div>
+                                {elem.plant.nursery && (
+                                   <p className='m-0'><small><Link to={`/nursery/store/view/${elem.plant.nursery._id || elem.plant.nursery}`} className='small link-secondary link-underline-hover'><i className="fas fa-store"></i> Visit Store</Link></small></p>
+                                )}
+                                <p className="card-text h5 m-0 mt-2">
+                                  <span className="text-success">-{elem.plant.discount}%</span> ₹{((elem.plant.price - elem.plant.discount / 100 * elem.plant.price)).toFixed(2)}
+                                </p>
+                                <p className="text-muted small m-0" style={{ fontSize: "14px", margin: "0" }}>
+                                  Price: <small className='text-decoration-line-through'>₹ {elem.plant.price}</small>
+                                </p>
+                                <p className="card-text m-0 text-success small"><small>In Stock</small></p>
+                              </div>
+                            </div>
+                            <div className="item-content-menu d-none-lg mt-3">
+                              <div className="d-flex">
+                                <p className="m-0 menu p-2" onClick={() => handleDeleteSaveForLater(elem._id)}>
+                                  <i className='fas fa-trash-alt p-2'></i>
+                                  <span className='menu-text p-1 center'>Delete</span>
+                                </p>
+                                <p className="m-0 menu p-2" onClick={() => handleMoveToCart(elem._id)}>
+                                  <i className='fas fa-shopping-cart p-2'></i>
+                                  <span className='menu-text p-1 center'>Move to cart</span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="row">
+                          <div className="menu-control d-lg">
+                            <div className="d-flex justify-content-around mt-3 mb-3">
+                              <p className="m-0 small" style={{cursor: 'pointer'}} onClick={() => handleDeleteSaveForLater(elem._id)}>
+                                <i className='fas fa-trash-alt p-2'></i>
+                                <span className='p-1 center'>Delete</span>
+                              </p>
+                              <p className="m-0 small" style={{cursor: 'pointer'}} onClick={() => handleMoveToCart(elem._id)}>
+                                <i className='fas fa-shopping-cart p-2'></i>
+                                <span className='p-1 center'>Move to cart</span>
+                              </p>
+                              <p className="m-0 small" style={{cursor: 'pointer'}} onClick={() => handelShareProduct(savedProductData, message)}>
+                                <i className='fas fa-share-alt p-2'></i>
+                                <span className='p-1 center'>Share</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
             </div>
             <div className="m-0 p-0 col-md-4 summary">
               <div className="p-3">

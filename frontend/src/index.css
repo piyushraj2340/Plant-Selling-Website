@@ -564,3 +564,34 @@ button.ant-btn {
     min-width: 120px;
 }
 
+/* ========================================================================= */
+/* Custom Scrollbar Styles for the Entire Website */
+/* ========================================================================= */
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px; /* For horizontal scrollbars */
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c1c1c1;
+  border-radius: 4px;
+  transition: background 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #90c88a; /* A subtle plant-green hover effect */
+}
+
+/* Firefox */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
