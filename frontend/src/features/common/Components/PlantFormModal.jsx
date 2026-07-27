@@ -90,29 +90,30 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
 
     const uploadDescImageCustomRequest = async (options) => {
         const { onSuccess, onError, file, onProgress } = options;
-        
+
         const currentPlantId = (mode === 'edit' && initialData) ? initialData._id : tempId;
         const formData = new FormData();
         formData.append('image', file);
 
         try {
-            const data = await handelDataFetch(`/api/v2/nursery/plants/${currentPlantId}/description-image`, 'POST', formData);
-            if (data.status) {
-                file.url = data.url; // Append url to file object so it can be used in gallery
+            const res = await handelDataFetch(`/api/v2/nursery/plants/${currentPlantId}/description-image`, 'POST', formData);
+            if (res && res.data && res.data.status) {
+                file.url = res.data.url; // Append url to file object so it can be used in gallery
                 onSuccess("ok");
                 message.success('Description image uploaded successfully!');
                 
                 // Update file list with new url
                 setDescFileList(prev => prev.map(f => {
                     if (f.uid === file.uid) {
-                        return { ...f, status: 'done', url: data.url };
+                        return { ...f, status: 'done', url: res.data.url };
                     }
                     return f;
                 }));
             } else {
-                throw new Error(data.message || 'Upload failed');
+                throw new Error((res && res.data && res.data.message) || 'Upload failed');
             }
         } catch (error) {
+            debugger;
             onError(error);
             message.error('Failed to upload description image.');
         }
@@ -123,8 +124,8 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
             container: [
                 [{ 'header': [1, 2, false] }],
                 ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-                ['link'], 
+                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+                ['link'],
                 ['clean']
             ]
         }
@@ -172,7 +173,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 url: f.url
             }));
             formData.append('descriptionImagesUrls', JSON.stringify(descImageUrls));
-            
+
             if (mode === 'add' && newFiles.length === 0) {
                 message.error('Please upload at least one main image.');
                 return;
@@ -283,10 +284,10 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
 
                 <div className="d-flex justify-content-between align-items-end mb-2">
                     <label className="mb-0" style={{ fontWeight: 500 }}>Description</label>
-                    <Button 
-                        type="dashed" 
-                        size="small" 
-                        icon={<PictureOutlined />} 
+                    <Button
+                        type="dashed"
+                        size="small"
+                        icon={<PictureOutlined />}
                         onClick={() => setIsGalleryOpen(true)}
                     >
                         Insert Image from Gallery
@@ -356,8 +357,8 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     <Row gutter={[16, 16]}>
                         {descFileList.filter(f => f.url).map((file, idx) => (
                             <Col span={8} key={idx}>
-                                <Card 
-                                    hoverable 
+                                <Card
+                                    hoverable
                                     cover={<img alt="gallery" src={file.url} style={{ height: '100px', objectFit: 'cover' }} />}
                                     onClick={() => insertImageIntoEditor(file.url)}
                                     bodyStyle={{ padding: '8px', textAlign: 'center' }}
