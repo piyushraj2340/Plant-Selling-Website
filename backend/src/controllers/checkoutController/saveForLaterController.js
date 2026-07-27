@@ -1,12 +1,14 @@
-const cartModel = require('../../model/checkoutModel/cart');
+const Cart = require('../../model/checkoutModel/cart');
+const CartItem = require('../../model/checkoutModel/cartItem');
 const saveForLaterModel = require('../../model/saveForLater');
+const Plant = require('../../model/nurseryModel/plants');
 
 exports.addToSaveForLater = async (req, res, next) => {
     try {
-        const { cartId } = req.body;
+        const { cartId } = req.body; // This is actually the CartItem ID
         const userId = req.user._id;
 
-        const cartItem = await cartModel.findOne({ _id: cartId, user: userId }).populate('plant');
+        const cartItem = await CartItem.findOne({ _id: cartId, user: userId }).populate('plant');
         
         if (!cartItem) {
             return res.status(404).json({ status: false, message: "Cart item not found or you don't have permission." });
@@ -17,7 +19,8 @@ exports.addToSaveForLater = async (req, res, next) => {
         
         if (existingSavedItem) {
             // If it's already saved, just remove it from the cart so there are no duplicates.
-            await cartModel.findByIdAndDelete(cartId);
+            await CartItem.findByIdAndDelete(cartId);
+            await Cart.updateOne({ _id: cartItem.cart }, { $pull: { cartItems: cartItem._id } });
             
             await existingSavedItem.populate({
                 path: 'plant',
@@ -25,7 +28,7 @@ exports.addToSaveForLater = async (req, res, next) => {
             });
 
             return res.status(200).json({
-                success: true,
+                status: true,
                 message: "Item was already saved for later. Removed from cart.",
                 data: existingSavedItem
             });
@@ -44,10 +47,11 @@ exports.addToSaveForLater = async (req, res, next) => {
         });
 
         // Remove from cart
-        await cartModel.findByIdAndDelete(cartId);
+        await CartItem.findByIdAndDelete(cartId);
+        await Cart.updateOne({ _id: cartItem.cart }, { $pull: { cartItems: cartItem._id } });
 
         res.status(201).json({
-            success: true,
+            status: true,
             message: "Item saved for later and removed from cart.",
             data: savedItem
         });
@@ -66,7 +70,7 @@ exports.getSaveForLaterItems = async (req, res, next) => {
         }).sort({ addedAt: -1 });
 
         res.status(200).json({
-            success: true,
+            status: true,
             data: savedItems
         });
     } catch (err) {
@@ -86,7 +90,7 @@ exports.deleteSaveForLaterItem = async (req, res, next) => {
         }
 
         res.status(200).json({
-            success: true,
+            status: true,
             message: "Item removed from saved list.",
             data: savedItem
         });
@@ -106,42 +110,45 @@ exports.moveToCart = async (req, res, next) => {
             return res.status(404).json({ status: false, message: "Saved item not found." });
         }
 
-        // Add to cart
-        const cartItemData = {
-            user: userId,
-            plant: savedItem.plant._id,
-            nursery: req.body.nursery || null, // Best if passed from frontend, otherwise cart might lack nursery. We'll try to fetch it if missing.
-            quantity: 1,
-        };
-
-        // If nursery isn't provided, fetch the plant to find its nursery
-        if (!cartItemData.nursery) {
-            if (savedItem.plant && savedItem.plant.nursery) {
-                cartItemData.nursery = savedItem.plant.nursery;
-            } else {
-                 const plantModel = require('../../model/nurseryModel/plants');
-                 const plant = await plantModel.findById(savedItem.plant._id);
-                 if (plant) {
-                     cartItemData.nursery = plant.nursery;
-                 }
-            }
+        // 1. Get or Create Cart
+        let cart = await Cart.findOne({ user: userId });
+        if (!cart) {
+            cart = new Cart({ user: userId });
+            await cart.save();
         }
 
-        // Check if it already exists in cart
-        let cartItem = await cartModel.findOne({ user: userId, plant: savedItem.plant._id });
+        // 2. Fetch the plant to get its nursery
+        let nurseryId = req.body.nursery || (savedItem.plant && savedItem.plant.nursery);
+        if (!nurseryId) {
+             const plantDoc = await Plant.findById(savedItem.plant._id);
+             if (plantDoc) nurseryId = plantDoc.nursery;
+        }
+
+        // 3. Upsert Cart Item
+        let cartItem = await CartItem.findOne({ cart: cart._id, plant: savedItem.plant._id });
         
         if (cartItem) {
             cartItem.quantity += 1;
             await cartItem.save();
         } else {
-            cartItem = await cartModel.create(cartItemData);
+            cartItem = new CartItem({
+                cart: cart._id,
+                user: userId,
+                nursery: nurseryId,
+                plant: savedItem.plant._id,
+                quantity: 1,
+                addedAtPrice: savedItem.plant.price
+            });
+            await cartItem.save();
+            cart.cartItems.push(cartItem._id);
+            await cart.save();
         }
 
         // Remove from Save For Later
         await saveForLaterModel.findByIdAndDelete(id);
 
         res.status(200).json({
-            success: true,
+            status: true,
             message: "Item moved to cart.",
             data: cartItem
         });
