@@ -108,7 +108,8 @@ const recalculateCart = async (userId) => {
         isModified = true;
     }
 
-    if (JSON.stringify(cart.priceWarnings) !== JSON.stringify(priceWarnings)) {
+    const currentWarnings = (cart.priceWarnings || []).map(w => ({ type: w.type, message: w.message }));
+    if (JSON.stringify(currentWarnings) !== JSON.stringify(priceWarnings)) {
         cart.priceWarnings = priceWarnings;
         isModified = true;
     }

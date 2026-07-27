@@ -30,7 +30,7 @@ const errorHandlerMiddleware = (err, req, res, next) => {
     }
 
     if (err.name === "MongoServerError") {
-        message = "Error On Server";
+        message = "Something went wrong!";
         statusCode = 500;
     }
 
