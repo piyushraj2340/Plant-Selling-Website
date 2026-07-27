@@ -1,15 +1,28 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { Modal, Form, Input, InputNumber, Select, Upload, Button, message, Space, Card, Row, Col } from 'antd';
+import { UploadOutlined, PictureOutlined } from '@ant-design/icons';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import handelDataFetch from '../../../utils/handelDataFetch';
 
 const { Option } = Select;
+
+// Helper to generate a valid MongoDB ObjectId hex string in frontend
+const generateObjectId = () => {
+    const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
+    const objectId = timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => {
+        return Math.floor(Math.random() * 16).toString(16);
+    }).toLowerCase();
+    return objectId;
+};
 
 const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categories, nurseries, loading }) => {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState([]);
     const [descFileList, setDescFileList] = useState([]);
+    const [tempId, setTempId] = useState('');
+    const quillRef = useRef(null);
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
 
     useEffect(() => {
         if (isOpen) {
@@ -25,7 +38,6 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     nursery: initialData.nursery?._id || initialData.nursery
                 });
 
-                // Set existing images
                 if (initialData.images && initialData.images.length > 0) {
                     setFileList(initialData.images.map((img, index) => ({
                         uid: img.public_id || index.toString(),
@@ -37,7 +49,6 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     setFileList([]);
                 }
 
-                // Set existing description images
                 if (initialData.descriptionImages && initialData.descriptionImages.length > 0) {
                     setDescFileList(initialData.descriptionImages.map((img, index) => ({
                         uid: img.public_id || index.toString(),
@@ -52,6 +63,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 form.resetFields();
                 setFileList([]);
                 setDescFileList([]);
+                setTempId(generateObjectId());
             }
         }
     }, [isOpen, initialData, mode, form]);
@@ -76,17 +88,57 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
         return false; // Prevent auto upload
     };
 
+    const uploadDescImageCustomRequest = async (options) => {
+        const { onSuccess, onError, file, onProgress } = options;
+        
+        const currentPlantId = (mode === 'edit' && initialData) ? initialData._id : tempId;
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const data = await handelDataFetch(`/api/v2/nursery/plants/${currentPlantId}/description-image`, 'POST', formData);
+            if (data.status) {
+                file.url = data.url; // Append url to file object so it can be used in gallery
+                onSuccess("ok");
+                message.success('Description image uploaded successfully!');
+                
+                // Update file list with new url
+                setDescFileList(prev => prev.map(f => {
+                    if (f.uid === file.uid) {
+                        return { ...f, status: 'done', url: data.url };
+                    }
+                    return f;
+                }));
+            } else {
+                throw new Error(data.message || 'Upload failed');
+            }
+        } catch (error) {
+            onError(error);
+            message.error('Failed to upload description image.');
+        }
+    };
+
     const modules = useMemo(() => ({
         toolbar: {
             container: [
                 [{ 'header': [1, 2, false] }],
                 ['bold', 'italic', 'underline', 'strike', 'blockquote'],
                 [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-                ['link'], // Removed 'image' button as requested
+                ['link'], 
                 ['clean']
             ]
         }
     }), []);
+
+    const insertImageIntoEditor = (url) => {
+        const quill = quillRef.current?.getEditor();
+        if (quill) {
+            const range = quill.getSelection(true); // true focuses the editor
+            const index = range ? range.index : quill.getLength();
+            quill.insertEmbed(index, 'image', url);
+            setIsGalleryOpen(false);
+        }
+    };
 
     const handleOk = async () => {
         try {
@@ -105,18 +157,22 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 formData.append('nursery', values.nursery);
             }
 
+            if (mode === 'add' && tempId) {
+                formData.append('_id', tempId);
+            }
+
             // Append main files
             const newFiles = fileList.filter(file => file.originFileObj);
             newFiles.forEach((file, index) => {
                 formData.append(`image_${index}`, file.originFileObj);
             });
 
-            // Append description files
-            const newDescFiles = descFileList.filter(file => file.originFileObj);
-            newDescFiles.forEach((file, index) => {
-                formData.append(`descriptionImage_${index}`, file.originFileObj);
-            });
-
+            const descImageUrls = descFileList.filter(f => f.url).map(f => ({
+                public_id: f.uid,
+                url: f.url
+            }));
+            formData.append('descriptionImagesUrls', JSON.stringify(descImageUrls));
+            
             if (mode === 'add' && newFiles.length === 0) {
                 message.error('Please upload at least one main image.');
                 return;
@@ -225,13 +281,23 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     </div>
                 </div>
 
+                <div className="d-flex justify-content-between align-items-end mb-2">
+                    <label className="mb-0" style={{ fontWeight: 500 }}>Description</label>
+                    <Button 
+                        type="dashed" 
+                        size="small" 
+                        icon={<PictureOutlined />} 
+                        onClick={() => setIsGalleryOpen(true)}
+                    >
+                        Insert Image from Gallery
+                    </Button>
+                </div>
                 <Form.Item
                     name="description"
-                    label="Description"
                     rules={[{ required: true, message: 'Please enter plant description' }]}
                     getValueFromEvent={(content) => content}
                 >
-                    <ReactQuill modules={modules} theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
+                    <ReactQuill ref={quillRef} modules={modules} theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
                 </Form.Item>
 
                 <div className="row">
@@ -260,7 +326,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                                 listType="picture-card"
                                 fileList={descFileList}
                                 onChange={handleDescUploadChange}
-                                beforeUpload={beforeUpload}
+                                customRequest={uploadDescImageCustomRequest}
                                 maxCount={5}
                                 accept="image/png, image/jpeg, image/webp"
                             >
@@ -274,12 +340,38 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                         </Form.Item>
                     </div>
                 </div>
-                <small className="text-muted d-block mt-1">
-                    Note: Existing images cannot be deleted in edit mode. New images uploaded will be appended.
-                </small>
             </Form>
+
+            {/* Gallery Modal */}
+            <Modal
+                title="Insert from Description Media"
+                open={isGalleryOpen}
+                onCancel={() => setIsGalleryOpen(false)}
+                footer={null}
+                width={500}
+            >
+                {descFileList.filter(f => f.url).length === 0 ? (
+                    <p className="text-center text-muted my-4">No images uploaded to Description Media yet.</p>
+                ) : (
+                    <Row gutter={[16, 16]}>
+                        {descFileList.filter(f => f.url).map((file, idx) => (
+                            <Col span={8} key={idx}>
+                                <Card 
+                                    hoverable 
+                                    cover={<img alt="gallery" src={file.url} style={{ height: '100px', objectFit: 'cover' }} />}
+                                    onClick={() => insertImageIntoEditor(file.url)}
+                                    bodyStyle={{ padding: '8px', textAlign: 'center' }}
+                                >
+                                    <span style={{ fontSize: '12px', color: '#1890ff' }}>Click to Insert</span>
+                                </Card>
+                            </Col>
+                        ))}
+                    </Row>
+                )}
+            </Modal>
         </Modal>
     );
 };
 
 export default PlantFormModal;
+

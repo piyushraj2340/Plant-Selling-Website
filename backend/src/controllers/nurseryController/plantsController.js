@@ -16,41 +16,36 @@ exports.addNewPlant = async (req, res, next) => {
             const error = new Error("You are not allowed to access this route");
             error.statusCode = 403;
             throw error;
-        }
-
-        const images = [files.image_0, files.image_1, files.image_2];
-        const descriptionImagesRaw = [files.descriptionImage_0, files.descriptionImage_1, files.descriptionImage_2, files.descriptionImage_3, files.descriptionImage_4].filter(Boolean);
+        }        const images = [files.image_0, files.image_1, files.image_2].filter(Boolean);
         
         const plant = new plantsModel(body);
 
-        const resultImage = await uploadImages(images, {
-            folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${plant._id}`,
-            width: 550,
-            height: 650,
-            crop: "fit"
-        });
+        if (body.descriptionImagesUrls) {
+            try {
+                plant.descriptionImages = JSON.parse(body.descriptionImagesUrls);
+            } catch (e) {
+                console.error("Failed to parse descriptionImagesUrls", e);
+            }
+        }
 
-
-        plant.images = resultImage.map((elem) => ({
-            public_id: elem.public_id,
-            url: elem.secure_url
-        }));
-
-        if (descriptionImagesRaw.length > 0) {
-            const descResultImages = await uploadImages(descriptionImagesRaw, {
-                folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${plant._id}/descriptions`,
-                crop: "scale"
+        if (images.length > 0) {
+            const resultImage = await uploadImages(images, {
+                folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${plant._id}`,
+                width: 550,
+                height: 650,
+                crop: "fit"
             });
-            plant.descriptionImages = descResultImages.map((elem) => ({
+
+            plant.images = resultImage.map((elem) => ({
                 public_id: elem.public_id,
                 url: elem.secure_url
             }));
-        }
 
-        plant.imageList = resultImage.map((elem) => ({
-            public_id: elem.public_id,
-            url: elem.url
-        }));
+            plant.imageList = resultImage.map((elem) => ({
+                public_id: elem.public_id,
+                url: elem.url
+            }));
+        }
 
         await plant.save();
 
@@ -174,15 +169,50 @@ exports.updatePlantById = async (req, res, next) => {
         }
 
         const _id = req.params.id;
-        const result = await plantsModel.findOneAndUpdate({ user, nursery, _id }, req.body, {
-            new: true
-        });
+        
+        let updateData = { ...req.body };
+        const plant = await plantsModel.findOne({ user, nursery, _id });
 
-        if (!result) {
+        if (!plant) {
             const error = new Error("No Plant Found.");
             error.statusCode = 404;
             throw error;
         }
+
+        if (body.descriptionImagesUrls) {
+            try {
+                updateData.descriptionImages = JSON.parse(body.descriptionImagesUrls);
+            } catch (e) {
+                console.error("Failed to parse descriptionImagesUrls", e);
+            }
+        }
+
+        if (files) {
+            const { uploadImages } = require('../../utils/uploadImages');
+            
+            const imagesRaw = [files.image_0, files.image_1, files.image_2].filter(Boolean);
+
+            if (imagesRaw.length > 0) {
+                const resultImage = await uploadImages(imagesRaw, {
+                    folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`,
+                    width: 550,
+                    height: 650,
+                    crop: "fit"
+                });
+                
+                const newImages = resultImage.map((elem) => ({
+                    public_id: elem.public_id,
+                    url: elem.secure_url
+                }));
+                
+                updateData.images = [...(plant.images || []), ...newImages];
+                updateData.imageList = [...(plant.imageList || []), ...newImages.map(img => ({ public_id: img.public_id, url: img.url }))];
+            }
+        }
+
+        const result = await plantsModel.findOneAndUpdate({ user, nursery, _id }, updateData, {
+            new: true
+        });
 
         const info = {
             status: true,
@@ -245,6 +275,48 @@ exports.deletePlantById = async (req, res, next) => {
         next(error);
     } finally {
         await session.endSession();
+    }
+};
+
+
+
+exports.uploadDescriptionImage = async (req, res, next) => {
+    try {
+        const { user, role, nursery, params, files } = req;
+        const { id } = params;
+
+        if (!nursery || !role.includes('seller')) {
+            const error = new Error("You are not allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        if (!files || !files.image) {
+            const error = new Error("No image file uploaded");
+            error.statusCode = 400;
+            throw error;
+        }
+
+        const { uploadImage } = require('../../utils/uploadImages');
+
+        const resultImage = await uploadImage(files.image, {
+            folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${id}/descriptions`,
+            crop: "scale"
+        });
+
+        if (!resultImage || !resultImage.secure_url) {
+            const error = new Error("Failed to upload image");
+            error.statusCode = 500;
+            throw error;
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Description image uploaded successfully",
+            url: resultImage.secure_url
+        });
+    } catch (error) {
+        next(error);
     }
 };
 
