@@ -65,6 +65,19 @@ const plantsSchema = new mongoose.Schema({
             },
         }
     ],
+
+    descriptionImages: [
+        {
+            public_id: {
+                type: String,
+                required: [true, "Description Image public id is required."]
+            },
+            url: {
+                type: String,
+                required: [true, "Description Image public url is required."]
+            },
+        }
+    ],
     imagesList: [
         {
             public_id: {

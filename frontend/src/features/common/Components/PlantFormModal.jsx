@@ -1,26 +1,15 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { Modal, Form, Input, InputNumber, Select, Upload, Button, message } from 'antd';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Modal, Form, Input, InputNumber, Select, Upload, message } from 'antd';
 import { UploadOutlined } from '@ant-design/icons';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
-import handelDataFetch from '../../../utils/handelDataFetch';
 
 const { Option } = Select;
-
-// Helper to generate a valid MongoDB ObjectId hex string in frontend
-const generateObjectId = () => {
-    const timestamp = Math.floor(new Date().getTime() / 1000).toString(16);
-    const objectId = timestamp + 'xxxxxxxxxxxxxxxx'.replace(/[x]/g, () => {
-        return Math.floor(Math.random() * 16).toString(16);
-    }).toLowerCase();
-    return objectId;
-};
 
 const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categories, nurseries, loading }) => {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState([]);
-    const [tempId, setTempId] = useState('');
-    const quillRef = useRef(null);
+    const [descFileList, setDescFileList] = useState([]);
 
     useEffect(() => {
         if (isOpen) {
@@ -47,16 +36,32 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 } else {
                     setFileList([]);
                 }
+
+                // Set existing description images
+                if (initialData.descriptionImages && initialData.descriptionImages.length > 0) {
+                    setDescFileList(initialData.descriptionImages.map((img, index) => ({
+                        uid: img.public_id || index.toString(),
+                        name: `desc-image-${index}.png`,
+                        status: 'done',
+                        url: img.url,
+                    })));
+                } else {
+                    setDescFileList([]);
+                }
             } else {
                 form.resetFields();
                 setFileList([]);
-                setTempId(generateObjectId()); // Pre-generate ID for Cloudinary uploads during Add mode
+                setDescFileList([]);
             }
         }
     }, [isOpen, initialData, mode, form]);
 
     const handleUploadChange = ({ fileList: newFileList }) => {
         setFileList(newFileList);
+    };
+
+    const handleDescUploadChange = ({ fileList: newFileList }) => {
+        setDescFileList(newFileList);
     };
 
     const beforeUpload = (file) => {
@@ -71,64 +76,17 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
         return false; // Prevent auto upload
     };
 
-    const imageHandler = () => {
-        const input = document.createElement('input');
-        input.setAttribute('type', 'file');
-        input.setAttribute('accept', 'image/*');
-        input.click();
-
-        input.onchange = async () => {
-            const file = input.files[0];
-            if (!file) return;
-
-            const isLt5M = file.size / 1024 / 1024 < 5;
-            if (!isLt5M) {
-                message.error('Image must be smaller than 5MB!');
-                return;
-            }
-
-            const formData = new FormData();
-            formData.append('image', file);
-
-            // Use initialData._id for edits, tempId for new
-            const currentPlantId = (mode === 'edit' && initialData) ? initialData._id : tempId;
-
-            const hide = message.loading('Uploading image...', 0);
-            try {
-                const data = await handelDataFetch(`/api/v2/nursery/plants/${currentPlantId}/description-image`, 'POST', formData);
-                
-                if (data.status) {
-                    const quill = quillRef.current.getEditor();
-                    const range = quill.getSelection();
-                    const index = range ? range.index : 0;
-                    quill.insertEmbed(index, 'image', data.url);
-                    hide();
-                    message.success('Image uploaded successfully!');
-                } else {
-                    throw new Error(data.message || 'Upload failed');
-                }
-            } catch (error) {
-                hide();
-                console.error('Error uploading image:', error);
-                message.error('Failed to upload image. Please try again.');
-            }
-        };
-    };
-
     const modules = useMemo(() => ({
         toolbar: {
             container: [
                 [{ 'header': [1, 2, false] }],
                 ['bold', 'italic', 'underline', 'strike', 'blockquote'],
                 [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-                ['link', 'image'],
+                ['link'], // Removed 'image' button as requested
                 ['clean']
-            ],
-            handlers: {
-                image: imageHandler
-            }
+            ]
         }
-    }), [mode, initialData, tempId]); // Added dependencies to ensure handler gets latest IDs
+    }), []);
 
     const handleOk = async () => {
         try {
@@ -147,19 +105,20 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                 formData.append('nursery', values.nursery);
             }
 
-            // Append pre-generated ID if adding new plant
-            if (mode === 'add' && tempId) {
-                formData.append('_id', tempId);
-            }
-
-            // Append new files
+            // Append main files
             const newFiles = fileList.filter(file => file.originFileObj);
             newFiles.forEach((file, index) => {
                 formData.append(`image_${index}`, file.originFileObj);
             });
 
+            // Append description files
+            const newDescFiles = descFileList.filter(file => file.originFileObj);
+            newDescFiles.forEach((file, index) => {
+                formData.append(`descriptionImage_${index}`, file.originFileObj);
+            });
+
             if (mode === 'add' && newFiles.length === 0) {
-                message.error('Please upload at least one image.');
+                message.error('Please upload at least one main image.');
                 return;
             }
 
@@ -272,29 +231,52 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                     rules={[{ required: true, message: 'Please enter plant description' }]}
                     getValueFromEvent={(content) => content}
                 >
-                    <ReactQuill ref={quillRef} modules={modules} theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
+                    <ReactQuill modules={modules} theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
                 </Form.Item>
 
-                <Form.Item label="Plant Images (Max 3, Max 5MB each)">
-                    <Upload
-                        listType="picture-card"
-                        fileList={fileList}
-                        onChange={handleUploadChange}
-                        beforeUpload={beforeUpload}
-                        maxCount={3}
-                        accept="image/png, image/jpeg, image/webp"
-                    >
-                        {fileList.length < 3 && (
-                            <div>
-                                <UploadOutlined />
-                                <div style={{ marginTop: 8 }}>Upload</div>
-                            </div>
-                        )}
-                    </Upload>
-                    <small className="text-muted d-block mt-1">
-                        Note: Existing images cannot be deleted in edit mode. New images uploaded will append or overwrite depending on backend logic.
-                    </small>
-                </Form.Item>
+                <div className="row">
+                    <div className="col-md-6">
+                        <Form.Item label="Main Plant Images (Max 3)">
+                            <Upload
+                                listType="picture-card"
+                                fileList={fileList}
+                                onChange={handleUploadChange}
+                                beforeUpload={beforeUpload}
+                                maxCount={3}
+                                accept="image/png, image/jpeg, image/webp"
+                            >
+                                {fileList.length < 3 && (
+                                    <div>
+                                        <UploadOutlined />
+                                        <div style={{ marginTop: 8 }}>Upload</div>
+                                    </div>
+                                )}
+                            </Upload>
+                        </Form.Item>
+                    </div>
+                    <div className="col-md-6">
+                        <Form.Item label="Description Media (Max 5)">
+                            <Upload
+                                listType="picture-card"
+                                fileList={descFileList}
+                                onChange={handleDescUploadChange}
+                                beforeUpload={beforeUpload}
+                                maxCount={5}
+                                accept="image/png, image/jpeg, image/webp"
+                            >
+                                {descFileList.length < 5 && (
+                                    <div>
+                                        <UploadOutlined />
+                                        <div style={{ marginTop: 8 }}>Upload</div>
+                                    </div>
+                                )}
+                            </Upload>
+                        </Form.Item>
+                    </div>
+                </div>
+                <small className="text-muted d-block mt-1">
+                    Note: Existing images cannot be deleted in edit mode. New images uploaded will be appended.
+                </small>
             </Form>
         </Modal>
     );

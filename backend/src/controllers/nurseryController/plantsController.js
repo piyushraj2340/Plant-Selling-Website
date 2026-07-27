@@ -19,6 +19,7 @@ exports.addNewPlant = async (req, res, next) => {
         }
 
         const images = [files.image_0, files.image_1, files.image_2];
+        const descriptionImagesRaw = [files.descriptionImage_0, files.descriptionImage_1, files.descriptionImage_2, files.descriptionImage_3, files.descriptionImage_4].filter(Boolean);
         
         const plant = new plantsModel(body);
 
@@ -34,6 +35,17 @@ exports.addNewPlant = async (req, res, next) => {
             public_id: elem.public_id,
             url: elem.secure_url
         }));
+
+        if (descriptionImagesRaw.length > 0) {
+            const descResultImages = await uploadImages(descriptionImagesRaw, {
+                folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${plant._id}/descriptions`,
+                crop: "scale"
+            });
+            plant.descriptionImages = descResultImages.map((elem) => ({
+                public_id: elem.public_id,
+                url: elem.secure_url
+            }));
+        }
 
         plant.imageList = resultImage.map((elem) => ({
             public_id: elem.public_id,
@@ -236,42 +248,4 @@ exports.deletePlantById = async (req, res, next) => {
     }
 };
 
-exports.uploadDescriptionImage = async (req, res, next) => {
-    try {
-        const { user, role, nursery, params, files } = req;
-        const { id } = params;
 
-        if (!nursery || !role.includes('seller')) {
-            const error = new Error("You are not allowed to access this route");
-            error.statusCode = 403;
-            throw error;
-        }
-
-        if (!files || !files.image) {
-            const error = new Error("No image file uploaded");
-            error.statusCode = 400;
-            throw error;
-        }
-
-        const { uploadImage } = require('../../utils/uploadImages');
-
-        const resultImage = await uploadImage(files.image, {
-            folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${id}/descriptions`,
-            crop: "scale"
-        });
-
-        if (!resultImage || !resultImage.secure_url) {
-            const error = new Error("Failed to upload image");
-            error.statusCode = 500;
-            throw error;
-        }
-
-        res.status(200).send({
-            status: true,
-            message: "Description image uploaded successfully",
-            url: resultImage.secure_url
-        });
-    } catch (error) {
-        next(error);
-    }
-};
