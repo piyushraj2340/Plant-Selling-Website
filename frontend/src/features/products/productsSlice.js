@@ -13,6 +13,7 @@ const initialState = {
     },
     productReviews: [],
     productCoupons: [],
+    similarProducts: [],
     isLoading: false
 }
 
@@ -38,6 +39,11 @@ export const getProductReviewsAsync = createAsyncThunk('products/fetchReviews', 
 
 export const fetchProductCouponsAsync = createAsyncThunk('products/fetchCoupons', async (plantId) => {
     const response = await handelDataFetch(`/api/v2/products/plant/${plantId}/coupons`, 'GET');
+    return response.data;
+});
+
+export const getSimilarProductsAsync = createAsyncThunk('products/similarProducts', async (categoryId) => {
+    const response = await handelDataFetch(`/api/v2/products/plantsByCategory/${categoryId}`, 'GET');
     return response.data;
 });
 
@@ -97,6 +103,16 @@ export const productsSlice = createSlice({
                 state.productCoupons = action.payload.coupons || [];
             })
             .addCase(fetchProductCouponsAsync.rejected, (state) => {
+                state.isLoading = false;
+            })
+            .addCase(getSimilarProductsAsync.pending, (state) => {
+                state.isLoading = true;
+            })
+            .addCase(getSimilarProductsAsync.fulfilled, (state, action) => {
+                state.isLoading = false;
+                state.similarProducts = action.payload.result || [];
+            })
+            .addCase(getSimilarProductsAsync.rejected, (state) => {
                 state.isLoading = false;
             });
     }
