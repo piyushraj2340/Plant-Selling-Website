@@ -9,7 +9,7 @@ const recalculateCart = async (userId) => {
     let cart = await Cart.findOne({ user: userId }).populate({
         path: 'cartItems',
         populate: { path: 'plant' }
-    });
+    }).populate('couponApplied');
 
     if (!cart) {
         cart = new Cart({ user: userId });
@@ -87,17 +87,53 @@ const recalculateCart = async (userId) => {
     totalDiscount = Math.round(totalDiscount * 100) / 100;
     finalPrice = Math.round(finalPrice * 100) / 100;
 
-    cart.pricing = {
+    const newPricing = {
         totalPriceWithoutDiscount,
         totalDiscount,
         deliveryFee,
         finalPrice,
         couponDiscountAmount: Math.round(couponDiscountAmount * 100) / 100
     };
-    
-    cart.priceWarnings = priceWarnings;
 
-    await cart.save();
+    let isModified = false;
+
+    if (!cart.pricing || 
+        cart.pricing.totalPriceWithoutDiscount !== newPricing.totalPriceWithoutDiscount ||
+        cart.pricing.totalDiscount !== newPricing.totalDiscount ||
+        cart.pricing.deliveryFee !== newPricing.deliveryFee ||
+        cart.pricing.finalPrice !== newPricing.finalPrice ||
+        cart.pricing.couponDiscountAmount !== newPricing.couponDiscountAmount) {
+        
+        cart.pricing = newPricing;
+        isModified = true;
+    }
+
+    if (JSON.stringify(cart.priceWarnings) !== JSON.stringify(priceWarnings)) {
+        cart.priceWarnings = priceWarnings;
+        isModified = true;
+    }
+
+    if (isModified) {
+        try {
+            await cart.save();
+        } catch (err) {
+            if (err.name === 'DocumentNotFoundError' || err.message.includes('Write conflict')) {
+                // Document was deleted concurrently (e.g. by order placement), fetch the newly created fresh cart
+                cart = await Cart.findOne({ user: userId }).populate({
+                    path: 'cartItems',
+                    populate: { path: 'plant' }
+                }).populate('couponApplied');
+                
+                if (!cart) {
+                    cart = new Cart({ user: userId });
+                    await cart.save();
+                }
+                return cart;
+            }
+            throw err;
+        }
+    }
+
     return cart;
 };
 

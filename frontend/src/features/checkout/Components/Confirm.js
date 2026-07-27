@@ -136,38 +136,45 @@ const Confirm = () => {
                             <p className="text-muted border-bottom pb-3">
                                 <i className='fas fa-info-circle'></i>
                                 {
-                                    Math.round(pricing && pricing.actualPriceAfterDiscount) > 500 ?
+                                    (pricing && pricing.deliveryFee === 0) ?
                                         <span className="m-0">
                                             <small className='small'> Eligible for FREE Delivery. <Link>Detail</Link></small>
                                         </span>
                                         :
                                         <span className="m-0">
-                                            <small className='small'> Add items of </small><small>₹</small><b>{pricing && (500 - pricing.actualPriceAfterDiscount).toFixed(2)}</b><small> to get the for FREE Delivery <Link>Detail</Link></small>
+                                            <small className='small'> Add items of </small><small>₹</small><b>{pricing && (500 - (pricing.finalPrice - pricing.deliveryFee)).toFixed(2)}</b><small> to get the for FREE Delivery <Link>Detail</Link></small>
                                         </span>
                                 }
 
                             </p>
                             <div className="row border-bottom pb-2">
                                 <p className="text-muted d-flex justify-content-between">
-                                    <small>Subtotal : </small>
-                                    <span>₹<b>{pricing && pricing.totalPriceWithoutDiscount}</b></span>
+                                    <small>Price ({checkoutCart ? checkoutCart.length : 0} items) : </small>
+                                    <span>₹<b>{pricing && pricing.totalPriceWithoutDiscount?.toFixed(2)}</b></span>
                                 </p>
                                 <p className="text-muted d-flex justify-content-between">
                                     <small>Discount : </small>
-                                    <span>- ₹<b>{pricing && pricing.discountPrice}</b></span>
+                                    <span>- ₹<b>{pricing && pricing.totalDiscount?.toFixed(2)}</b></span>
                                 </p>
+                                { pricing?.couponDiscount && (
+                                    <p className="text-muted d-flex justify-content-between text-success">
+                                        <small>Coupon Savings : </small>
+                                        <span>- ₹<b>{pricing.couponDiscount.toFixed(2)}</b></span>
+                                    </p>
+                                )}
                                 <p className="text-muted d-flex justify-content-between">
                                     <small>Delivery : </small>
-                                    <span>₹<b>{pricing && pricing.deliveryPrice}</b></span>
+                                    { (pricing?.couponDiscount && pricing?.deliveryFee === 0) || (pricing && pricing.deliveryFee === 0) ? 
+                                        <span><del className="text-muted">₹90.00</del> <b className="text-success">FREE</b></span>
+                                    : <span>₹<b>{pricing && pricing.deliveryFee?.toFixed(2)}</b></span> }
                                 </p>
                                 <p className="text-muted d-flex justify-content-between">
-                                    <small>Total : </small>
-                                    <span>₹<b>{pricing && pricing.totalPrice}</b></span>
+                                    <small>Subtotal : </small>
+                                    <span>₹<b>{pricing && ((pricing.totalPrice ?? pricing.finalPrice) - pricing.deliveryFee).toFixed(2)}</b></span>
                                 </p>
-
                             </div>
                             <div className="d-flex flex-row-reverse p-3">
-                                <p className="h5">Total: <sup>₹</sup>{pricing && pricing.totalPrice}</p>
+                                <p className="h5">Total: <sup>₹</sup>{pricing && (pricing.totalPrice ?? pricing.finalPrice)?.toFixed(2)}</p>
                             </div>
                             <div className="row m-0">
                                 <button onClick={handelCheckout} className="btn btn-success">Checkout</button>

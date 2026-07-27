@@ -147,7 +147,10 @@ exports.getOrderHistory = async (req, res, next) => {
                 .map(item => item.vendorOrder.order.toString());
         }
 
-        const queryObj = { user: req.user, orderAt: { $gte: endDate } };
+        const queryObj = { user: req.user };
+        if (!isNaN(endDate)) {
+            queryObj.orderAt = { $gte: endDate };
+        }
         
         if (orderSearch) {
             const validIds = [...orderIdsFromSearch];

@@ -124,7 +124,7 @@ function Cart() {
     const data = {
       data: {
         cartOrProducts: cart,
-        pricing: appliedCoupon ? { ...cartPriceDetails, totalPrice: appliedCoupon.newTotal, couponDiscount: appliedCoupon.discountAmount } : cartPriceDetails,
+        pricing: appliedCoupon ? { ...cartPriceDetails, totalPrice: appliedCoupon.newTotal, couponDiscount: appliedCoupon.discountAmount } : { ...cartPriceDetails, totalPrice: cartPriceDetails.finalPrice },
         shippingInfo: selectedAddress,
         couponId: appliedCoupon ? appliedCoupon.couponId : null
       },
