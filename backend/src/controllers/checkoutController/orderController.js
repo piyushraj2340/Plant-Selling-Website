@@ -9,7 +9,33 @@ exports.createOrder = async (req, res, next) => {
     try {
         let responseInfo = null;
         await session.withTransaction(async () => {
-            const { shippingInfo, payment } = req.body;
+            let { shippingInfo, payment } = req.body;
+
+            // Check if order already exists with this paymentId (Prevents React StrictMode double-fire bug)
+            if (payment && payment.paymentId) {
+                const existingOrder = await ordersModel.findOne({ "payment.paymentId": payment.paymentId }).session(session);
+                if (existingOrder) {
+                    const total = await ordersModel.countDocuments({ user: req.user._id, orderAt: { $gte: Date.now() - (3 * 30 * 24 * 60 * 60 * 1000) } }).session(session);
+                    responseInfo = {
+                        status: true,
+                        message: "Successfully created your order.",
+                        result: existingOrder,
+                        total
+                    };
+                    return;
+                }
+            }
+
+            if (!shippingInfo || !shippingInfo.address) {
+                if (req.orderUser && req.orderToken) {
+                    const { getData } = require('../../utils/redisService');
+                    shippingInfo = await getData(req.orderUser, req.orderToken, 'shipping');
+                }
+            }
+
+            if (!shippingInfo || !shippingInfo.address) {
+                throw new Error("Shipping information is missing or session expired.");
+            }
             
             // 1. Fetch user's cart fully populated
             const cart = await cartModel.findOne({ user: req.user._id }).session(session).populate({
