@@ -6,10 +6,14 @@ const Coupon = require('../model/nurseryModel/coupon');
 
 exports.getAllPlants = async (req, res, next) => {
     try {
-        const { search, category, sort, page = 1, limit = 12 } = req.query;
+        const { search, category, sort, page = 1, limit = 12, nursery } = req.query;
 
         // Build the base query
         const query = { status: 'Published' };
+
+        if (nursery) {
+            query.nursery = nursery;
+        }
 
         // Handle category filter
         if (category && category.toLowerCase() !== 'all') {

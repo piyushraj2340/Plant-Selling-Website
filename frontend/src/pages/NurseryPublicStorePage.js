@@ -13,9 +13,10 @@ import NurseryPublicViewMain from '../features/nursery/Components/NurseryPublicS
 import NoDataFound from '../features/common/NoDataFound';
 
 const NurseryPublicStorePage = () => {
-  const [activeTab, ...to] = window.location.search && window.location.search.split("=");
+  const queryParams = new URLSearchParams(window.location.search);
+  const initialActiveTab = queryParams.get('activeTab') || 'products';
 
-  const [isCurrentTab, setIsCurrentTab] = useState(activeTab === "?activeTab" ? to.join("=") : "products")
+  const [isCurrentTab, setIsCurrentTab] = useState(initialActiveTab);
 
   const [currentTabDynamic, setCurrentTabDynamic] = useState(null);
 
