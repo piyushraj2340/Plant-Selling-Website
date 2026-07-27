@@ -12,7 +12,7 @@ const TemplateTwoSectionAndLeftFourSaved = ({ content }) => {
                                 <div className='col-6 rounded position-relative'>
                                     {
                                         content[0] && content[0].image.url !== "" ?
-                                            <div className="hover-images w-100 h-100">
+                                            <div className="hover-images w-100 h-100 premium-image-hover">
                                                 <a href={content[0].url} target="_blank" rel="noopener noreferrer">
                                                     <img src={content[0].image.url} className='w-100 img-fluid rounded' alt={content[0].title} />
                                                 </a>
@@ -25,7 +25,7 @@ const TemplateTwoSectionAndLeftFourSaved = ({ content }) => {
                                 <div className='col-6 rounded position-relative'>
                                     {
                                         content[1] && content[1].image.url !== "" ?
-                                            <div className="hover-images w-100 h-100">
+                                            <div className="hover-images w-100 h-100 premium-image-hover">
                                                 <a href={content[1].url} target="_blank" rel="noopener noreferrer">
                                                     <img src={content[1].image.url} className='w-100 img-fluid rounded' alt={content[1].title} />
                                                 </a>
@@ -40,7 +40,7 @@ const TemplateTwoSectionAndLeftFourSaved = ({ content }) => {
                                 <div className='col-6 rounded position-relative h-100'>
                                     {
                                         content[2] && content[2].image.url !== "" ?
-                                            <div className="hover-images w-100 h-100">
+                                            <div className="hover-images w-100 h-100 premium-image-hover">
                                                 <a href={content[2].url} target="_blank" rel="noopener noreferrer">
                                                     <img src={content[2].image.url} className='w-100 img-fluid rounded' alt={content[2].title} />
                                                 </a>
@@ -53,7 +53,7 @@ const TemplateTwoSectionAndLeftFourSaved = ({ content }) => {
                                 <div className='col-6 rounded position-relative h-100'>
                                     {
                                         content[3] && content[3].image.url !== "" ?
-                                            <div className="hover-images w-100 h-100">
+                                            <div className="hover-images w-100 h-100 premium-image-hover">
                                                 <a href={content[3].url} target="_blank" rel="noopener noreferrer">
                                                     <img src={content[3].image.url} className='w-100 img-fluid rounded' alt={content[3].title} />
                                                 </a>
@@ -67,7 +67,7 @@ const TemplateTwoSectionAndLeftFourSaved = ({ content }) => {
                         <div className="col-6 rounded position-relative">
                             {
                                 content[4] && content[4].image.url !== "" ?
-                                    <div className="hover-images w-100 h-100">
+                                    <div className="hover-images w-100 h-100 premium-image-hover">
                                         <a href={content[4].url} target="_blank" rel="noopener noreferrer">
                                             <img src={content[4].image.url} className='w-100 img-fluid rounded' alt={content[4].title} />
                                         </a>

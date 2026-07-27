@@ -63,3 +63,155 @@ a:hover {
 button.ant-btn {
   width: auto !important;
 }
+/* =========================================
+   Nursery Store Builder & Public Enhancements
+   ========================================= */
+
+/* Glassmorphism & Modern Card */
+.nursery-store-card {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    border: 1px solid rgba(0,0,0,0.03);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
+    overflow: hidden;
+}
+
+.nursery-store-card:hover {
+    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+}
+
+/* Builder Dashed Dropzone Placeholder */
+.nursery-store-placeholder {
+    border: 2px dashed #cfd8dc;
+    border-radius: 12px;
+    background-color: #f8f9fa;
+    min-height: 200px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #90a4ae;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    animation: pulsePlaceholder 3s infinite alternate;
+}
+
+.nursery-store-placeholder i {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    color: #b0bec5;
+    transition: color 0.3s ease;
+}
+
+.nursery-store-placeholder:hover {
+    border-color: #28a745;
+    background-color: #f1fdf3;
+    color: #28a745;
+}
+
+.nursery-store-placeholder:hover i {
+    color: #28a745;
+}
+
+@keyframes pulsePlaceholder {
+    0% { background-color: #f8f9fa; }
+    100% { background-color: #f1f3f5; }
+}
+
+/* Premium Image Hovers */
+.premium-image-hover {
+    overflow: hidden;
+    position: relative;
+    border-radius: 8px;
+}
+
+.premium-image-hover img {
+    transition: transform 0.4s ease;
+}
+
+.premium-image-hover:hover img {
+    transform: scale(1.05);
+}
+
+/* Sleek Navigation Tabs (Public Store) */
+.nursery-sleek-tabs {
+    display: flex;
+    gap: 1.5rem;
+    border-bottom: 2px solid #e9ecef;
+    padding-bottom: 0;
+    margin-bottom: 2rem;
+    overflow-x: auto;
+    scrollbar-width: none; /* Firefox */
+}
+
+.nursery-sleek-tabs::-webkit-scrollbar {
+    display: none; /* Chrome/Safari */
+}
+
+.nursery-sleek-tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.75rem 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #6c757d;
+    position: relative;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.nursery-sleek-tab-btn:hover {
+    color: #212529;
+}
+
+.nursery-sleek-tab-btn.active {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.nursery-sleek-tab-btn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px; /* cover the border */
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #28a745;
+    transform: scaleX(0);
+    transform-origin: center;
+    transition: transform 0.3s ease;
+}
+
+.nursery-sleek-tab-btn.active::after {
+    transform: scaleX(1);
+}
+
+/* Builder Overlay Actions */
+.builder-actions-overlay {
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: rgba(255,255,255,0.8);
+    backdrop-filter: blur(4px);
+    border-radius: 8px;
+}
+
+.template-images:hover .builder-actions-overlay {
+    opacity: 1;
+}
+
+/* Fade In Scroll Animation */
+.animate-fade-in-up {
+    animation: fadeInUp 0.8s ease forwards;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

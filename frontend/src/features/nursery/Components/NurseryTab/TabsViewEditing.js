@@ -144,7 +144,7 @@ const TabsViewEditing = ({ content, nurseryStoreTabsSelected }) => {
         });
 
         return (
-            <div key={elem._id}>
+            <div key={elem._id} className="mb-4 nursery-store-card p-3 p-md-4 position-relative template-images">
                 <div className='row flex-column-reverse flex-md-row'>
                     {elem.templateName === "completeSection" && <TemplateCompleteSection content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
                     {elem.templateName === "twoSection" && <TemplateTwoSection content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
@@ -153,17 +153,10 @@ const TabsViewEditing = ({ content, nurseryStoreTabsSelected }) => {
                     {elem.templateName === "twoSectionAndRightFour" && <TemplateTwoSectionAndRightFour content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
                     {elem.templateName === "twoSectionAndLeftVertical" && <TemplateTwoSectionAndLeftVertical content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
                     {elem.templateName === "twoSectionAndLeftFour" && <TemplateTwoSectionAndLeftFour content={blocks} index={elem.index} handelDeleteRendersUpload={handelDeleteRendersUpload} handleImageUploadNurseryStore={handleImageUploadNurseryStore} mergedArrow={mergedArrow} setIsModelOpen={setIsModelOpen} setAtBlockIndex={setAtBlockIndex} setIsCurrentTemplates={setIsCurrentTemplates} isCurrentTemplates={elem._id} setIsModelOpenEdit={setIsModelOpenEdit} setIsCurrentBlock={setIsCurrentBlock} />}
-                    <div className="col-12 col-md-1 justify-content-end justify-content-md-center d-flex flex-md-column my-3 my-md-0" style={{ transform: 'translate: (-100%, -50%)' }}>
-                        <div className='d-md-none'>
-                            <Tooltip className='btn btn-sm btn-danger' placement="bottomRight" title={'Delete Template'} arrow={mergedArrow} onClick={() => dispatch(deleteNurseryStoreTemplatesAsync(elem._id))}>
-                                <span className="fas fa-trash text-light p-2" onClick={() => handelDeleteRendersUpload(index)}></span> DELETE TEMPLATE
-                            </Tooltip>
-                        </div>
-                        <div className='d-none d-md-block'>
-                            <Tooltip placement="left" title={'Delete Template'} arrow={mergedArrow} onClick={() => dispatch(deleteNurseryStoreTemplatesAsync(elem._id))}>
-                                <span className="fas fa-trash text-danger p-2 cursor-pointer" onClick={() => handelDeleteRendersUpload(index)}></span>
-                            </Tooltip>
-                        </div>
+                    <div className="position-absolute top-0 end-0 p-2 builder-actions-overlay m-3 shadow-sm d-flex justify-content-center align-items-center" style={{ width: 'max-content', zIndex: 10 }}>
+                        <Tooltip placement="left" title={'Delete Template'} arrow={mergedArrow} onClick={() => dispatch(deleteNurseryStoreTemplatesAsync(elem._id))}>
+                            <button className="btn btn-sm btn-outline-danger border-0 rounded-circle"><i className="fas fa-trash cursor-pointer"></i></button>
+                        </Tooltip>
                     </div>
 
                 </div>
@@ -221,8 +214,11 @@ const TabsViewEditing = ({ content, nurseryStoreTabsSelected }) => {
 
                 {
                     content && content.length === 0 ?
-                        <div className="row p-5">
-                            <button className='btn btn-lg btn-light border-black d-flex align-items-center justify-content-center p-4 p-md-5' onClick={() => { setIsChooseModeOpen(true); setAtIndex(0) }}><span style={{ fontSize: "28px" }} className="material-symbols-outlined me-1">add</span><span>Add Contents</span></button>
+                        <div className="p-4 p-md-5">
+                            <div className='nursery-store-placeholder' onClick={() => { setIsChooseModeOpen(true); setAtIndex(0) }}>
+                                <i className="fas fa-plus-circle"></i>
+                                <h4>Add Your First Content Block</h4>
+                            </div>
                         </div>
                         :
                         <div className='template-in-use-container'>

@@ -15,8 +15,12 @@ const NurseryTabsPublic = ({_id, isCurrentTab, setIsCurrentTab, setCurrentTabDyn
   useEffect(() => {
 
     if(nurseryPublicStoreTabs && nurseryPublicStoreTabs.length > 0) {
-      if(nurseryPublicStoreTabs.findIndex(t => t.tabName.split(' ').join('').toLowerCase() === isCurrentTab.toLowerCase()) === -1 && isCurrentTab.toLowerCase() !== "aboutus" && isCurrentTab.toLowerCase() !== "contactus") {
+      const activeTabIndex = nurseryPublicStoreTabs.findIndex(t => t.tabName.split(' ').join('').toLowerCase() === isCurrentTab.toLowerCase());
+      
+      if(activeTabIndex === -1 && isCurrentTab.toLowerCase() !== "aboutus" && isCurrentTab.toLowerCase() !== "contactus") {
         setIsCurrentTab("products");
+      } else if (activeTabIndex !== -1) {
+        setCurrentTabDynamic(nurseryPublicStoreTabs[activeTabIndex]);
       }
     }
 

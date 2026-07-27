@@ -25,7 +25,7 @@ const TemplateFourSectionSaved = ({ content }) => {
                     <div className="template-second rounded position-relative col-3">
                         {content[1] && content[1].image.url !== "" ?
 
-                            <div className="hover-images w-100 h-100">
+                            <div className="hover-images w-100 h-100 premium-image-hover">
                                 <a href={content[1].url} target="_blank" rel="noopener noreferrer">
                                     <img src={content[1].image.url} className='w-100 img-fluid rounded' alt={content[1].title} />
                                 </a>
@@ -37,7 +37,7 @@ const TemplateFourSectionSaved = ({ content }) => {
                     <div className="template-third rounded position-relative col-3">
                         {content[2] && content[2].image.url !== "" ?
 
-                            <div className="hover-images w-100 h-100">
+                            <div className="hover-images w-100 h-100 premium-image-hover">
                                 <a href={content[2].url} target="_blank" rel="noopener noreferrer">
                                     <img src={content[2].image.url} className='w-100 img-fluid rounded' alt={content[2].title} />
                                 </a>
@@ -51,7 +51,7 @@ const TemplateFourSectionSaved = ({ content }) => {
                     <div className="template-fourth rounded position-relative col-3">
                         {content[3] && content[3].image.url !== "" ?
 
-                            <div className="hover-images w-100 h-100">
+                            <div className="hover-images w-100 h-100 premium-image-hover">
                                 <a href={content[3].url} target="_blank" rel="noopener noreferrer">
                                     <img src={content[3].image.url} className='w-100 img-fluid rounded' alt={content[3].title} />
                                 </a>
