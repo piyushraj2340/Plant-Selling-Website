@@ -38,6 +38,7 @@ exports.getAllPlants = async (req, res, next) => {
 
         // Handle sorting
         let sortQuery = {};
+        console.log("getAllPlants executing query:", JSON.stringify(query));
         if (sort === 'price_asc') {
             sortQuery.price = 1;
         } else if (sort === 'price_desc') {
@@ -69,6 +70,7 @@ exports.getAllPlants = async (req, res, next) => {
         const info = {
             status: true,
             message: "Data of products",
+            query: query,
             result,
             pagination: {
                 totalProducts,

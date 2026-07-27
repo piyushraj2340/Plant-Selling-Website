@@ -127,7 +127,7 @@ const Navigation = () => {
                                     {categories && categories.map(cat => (
                                         <div key={cat._id} className="form-check font-weight-bold">
                                             <input type="checkbox" name={cat._id} id={cat._id} className='form-check-input' onChange={() => handleCategoryChange(cat._id)} checked={selectedCategories.includes(cat._id) || selectedCategories.includes('all')}/>
-                                            <label htmlFor={cat._id} className='form-check-label '>{cat.name}</label>
+                                            <label htmlFor={cat._id} className='form-check-label' style={{ width: "max-content"}}>{cat.name}</label>
                                         </div>
                                     ))}
                                 </div>
