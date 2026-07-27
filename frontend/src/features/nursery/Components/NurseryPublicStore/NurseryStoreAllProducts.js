@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Rating } from 'react-simple-star-rating'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux';
@@ -7,10 +7,19 @@ import { getAllCategoriesAsync } from '../../../category/categorySlice';
 import NoDataFound from '../../../common/NoDataFound';
 import { transformImageUrl } from '../../../../utils/imageUtils';
 import { Pagination, Select } from 'antd';
+import ProductCard from '../../../products/Components/ProductCard';
 
 
 const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
     document.title = nurseryPublicStore.nurseryName + " - Products";
+
+    const [viewMode, setViewMode] = useState(() => {
+        return localStorage.getItem('productViewMode') || 'grid';
+    });
+    const handleViewModeChange = (mode) => {
+        setViewMode(mode);
+        localStorage.setItem('productViewMode', mode);
+    };
 
     const { products, pagination } = useSelector((state) => state.products);
     const { categories } = useSelector((state) => state.category);
@@ -83,7 +92,7 @@ const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
                 <h1 className='text-center p-2 mb-0'>Available Plants at {nurseryPublicStore.nurseryName}</h1>
                 <div className="d-flex align-items-center mt-3 mt-md-0">
                     <span className="me-2 fw-bold">Sort By:</span>
-                    <Select value={sort} onChange={handleSortChange} style={{ width: 160 }}>
+                    <Select value={sort} onChange={handleSortChange} style={{ width: 160 }} className="me-3">
                         <Select.Option value="recommended">Recommended</Select.Option>
                         <Select.Option value="price_asc">Price: Low to High</Select.Option>
                         <Select.Option value="price_desc">Price: High to Low</Select.Option>
@@ -91,6 +100,23 @@ const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
                         <Select.Option value="name_desc">Name: Z to A</Select.Option>
                         <Select.Option value="newest">Newest Arrivals</Select.Option>
                     </Select>
+
+                    <div className="view-toggle-group">
+                        <button 
+                            className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
+                            onClick={() => handleViewModeChange('grid')}
+                            title="Grid View"
+                        >
+                            <span className="material-symbols-outlined">grid_view</span>
+                        </button>
+                        <button 
+                            className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
+                            onClick={() => handleViewModeChange('list')}
+                            title="List View"
+                        >
+                            <span className="material-symbols-outlined">view_list</span>
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -102,37 +128,14 @@ const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
                     </button>
                 ))}
             </div>
-            <div className="product-content px-2">
+            <div className={`px-2 mt-4 ${viewMode === 'grid' ? 'product-grid-layout' : 'product-list-layout'}`}>
                 {
                     products &&
-                    products.map((elem) => {
-                        return (
-                            <div key={elem._id} className="px-1 d-flex center-text overflow-hidden">
-                                <Link className='text-dark' style={{ textDecoration: "none" }} to={`/product/${elem._id}`}>
-                                    <div className="card my-1">
-                                        <img className="img-fluid" src={transformImageUrl(elem.images[0].url)} alt="Card plants" />
-                                        <div className="card-body">
-                                            <h4 className="card-title">{elem.plantName}</h4>
-                                            <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>price</p>
-                                            <p className="card-text">₹ {Math.round(elem.price - elem.discount / 100 * elem.price)}</p>
-                                            <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>category</p>
-                                            <p className="card-text">{elem.category ? (elem.category.name || "N/A") : "N/A"}</p>
-                                            <p className="text-muted" style={{ fontSize: "14px", margin: "0" }}>ratings</p>
-                                            <p className="card-text">
-                                                <Rating
-                                                    initialValue={3 + Math.random() * 2}
-                                                    readonly={true}
-                                                    size={20}
-                                                    allowFraction="true"
-                                                />
-                                                <small style={{ position: "relative", top: "4px" }}>{elem.noOfRatings}</small>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </Link>
-                            </div>
-                        )
-                    })
+                    products.map((elem) => (
+                        <div key={elem._id}>
+                            <ProductCard product={elem} />
+                        </div>
+                    ))
                 }
             </div>
 
