@@ -17,6 +17,7 @@ function Login() {
         email: "",
         password: ""
     });
+    const [showPassword, setShowPassword] = useState(false);
 
     useEffect(() => {
         if (isError || errorData) {
@@ -65,91 +66,85 @@ function Login() {
     }
 
     return (
-        <div className='d-flex justify-content-center py-2 px-2 mb-4 mb-md-5'>
-            <div className='col-12 col-md-8 col-lg-6 col-xl-4 shadow border rounded px-2 py-2 p-md-5'>
-                <div className="d-flex flex-column flex-md-row justify-content-center">
-                    <div className='col-12 col-md-6 text-center p-0 mb-2 mb-md-0 me-md-2 bg-primary rounded'>
-                        <Link to={"/login"} className='btn text-light w-100'>Login</Link>
+        <div className="container-fluid bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
+            <div className="row bg-white shadow-lg rounded-4 overflow-hidden" style={{ maxWidth: '900px', width: '100%' }}>
+                {/* Image Section */}
+                <div className="col-md-6 d-none d-md-block p-0" style={{ background: 'linear-gradient(135deg, #43a047, #1b5e20)' }}>
+                    <div className="h-100 d-flex flex-column justify-content-center align-items-center text-white p-5 text-center">
+                        <i className="material-symbols-outlined display-1 mb-3">eco</i>
+                        <h2 className="fw-bold mb-3">Welcome Back!</h2>
+                        <p className="lead">Sign in to continue exploring our vast collection of beautiful plants for your home and garden.</p>
                     </div>
-                    <div className='col-12 col-md-6 text-center p-0 ms-md-2 bg-secondary rounded'>
-                        <Link to={"/signup"} className='btn text-light w-100'>Signup</Link>
-                    </div>
-                </div>
-                <div className="row p-3">
-                    <p className="text-center m-0 ">Connect With Social Account: </p>
-                </div>
-                <div className="row p-3">
-                    <p className="text-center login-social-link m-0">
-                        <i className="fab fa-facebook-f ms-4 cursor-pointer"></i>
-                        <i className="fab fa-google ms-4"></i>
-                        <i className="fab fa-twitter ms-4"></i>
-                        <i className="fab fa-github ms-4"></i>
-                    </p>
-                </div>
-                <div className="row">
-                    <p className="text-center">Or:</p>
                 </div>
 
-                <form onSubmit={handleUserLogin}>
-                    <div className="d-flex justify-content-center">
-                        <div className="col-12">
-                            <div className="form-floating mb-3">
-                                <input type="email" className="form-control" id="email" name="email" placeholder="Enter Email" onChange={handleInputs} />
-                                <label htmlFor="email">Enter Email</label>
-                            </div>
-                            <div className="form-floating mb-3">
-                                <input type="password" className="form-control" id="password" name="password" placeholder="Enter Password" onChange={handleInputs} value={userFormData.password} />
-                                <label htmlFor="password">Enter Password</label>
-                            </div>
-                        </div>
+                {/* Form Section */}
+                <div className="col-md-6 p-4 p-md-5">
+                    <div className="text-center mb-4">
+                        <h3 className="fw-bold text-success">Plant Seller</h3>
+                        <p className="text-muted">Sign in to your account</p>
                     </div>
-                    <div className="d-flex justify-content-end p-2">
-                        <p className="m-0">
-                            <Link to={"/forgot-password"}>Forgot Password?</Link>
-                        </p>
-                    </div>
-                    <div className="justify-content-center mt-2">
-                        <div className="col-12">
-                            <button disabled={isLoading} className='btn btn-primary w-100' type="submit">
-                                {
-                                    isLoading ?
-                                        <>
-                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                            <span className='ms-1'>Verifying...</span>
-                                        </>
-                                        :
-                                        <span>Login</span>
-                                }
-                            </button>
-                        </div>
-                    </div>
-                </form>
 
-                <div className="row mt-4">
-                    <p className="text-center">Or try our Guest Accounts:</p>
-                </div>
-                <div className="d-flex flex-column gap-2">
-                    <button 
-                        onClick={() => handleGuestLogin('user')} 
-                        disabled={guestLoading || isLoading} 
-                        className='btn btn-outline-primary w-100'
-                    >
-                        Login as Guest User
-                    </button>
-                    <button 
-                        onClick={() => handleGuestLogin('seller')} 
-                        disabled={guestLoading || isLoading} 
-                        className='btn btn-outline-success w-100'
-                    >
-                        Login as Guest Nursery
-                    </button>
-                    <button 
-                        onClick={() => handleGuestLogin('admin')} 
-                        disabled={guestLoading || isLoading} 
-                        className='btn btn-outline-danger w-100'
-                    >
-                        Login as Guest Admin
-                    </button>
+                    <div className="d-flex mb-4 gap-2">
+                        <Link to={"/login"} className="btn btn-success flex-grow-1 fw-bold rounded-pill shadow-sm">Login</Link>
+                        <Link to={"/signup"} className="btn btn-outline-success flex-grow-1 fw-bold rounded-pill shadow-sm">Signup</Link>
+                    </div>
+
+                    <form onSubmit={handleUserLogin}>
+                        <div className="form-floating mb-3">
+                            <input type="email" className="form-control rounded-4 bg-light border-0" id="email" name="email" placeholder="Enter Email" onChange={handleInputs} />
+                            <label htmlFor="email" className="text-muted">Email address</label>
+                        </div>
+                        <div className="position-relative mb-3">
+                            <div className="form-floating">
+                                <input type={showPassword ? "text" : "password"} className="form-control rounded-4 bg-light border-0 pe-5" id="password" name="password" placeholder="Enter Password" onChange={handleInputs} value={userFormData.password} />
+                                <label htmlFor="password" className="text-muted">Password</label>
+                            </div>
+                            <span 
+                                className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ zIndex: 10, cursor: 'pointer' }}
+                            >
+                                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </span>
+                        </div>
+
+                        <div className="d-flex justify-content-between align-items-center mb-4 px-1">
+                            <div className="form-check">
+                                <input className="form-check-input" type="checkbox" id="rememberMe" />
+                                <label className="form-check-label text-muted small" htmlFor="rememberMe">Remember me</label>
+                            </div>
+                            <Link to={"/forgot-password"} className="text-success small fw-bold text-decoration-none">Forgot Password?</Link>
+                        </div>
+
+                        <button disabled={isLoading} className="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm mb-4" type="submit">
+                            {
+                                isLoading ?
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Verifying...
+                                    </>
+                                    :
+                                    <span>Sign In</span>
+                            }
+                        </button>
+                    </form>
+
+                    <div className="position-relative mb-4">
+                        <hr className="text-muted" />
+                        <span className="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">OR TRY GUEST TOUR</span>
+                    </div>
+
+                    <div className="d-flex flex-column gap-2">
+                        <button onClick={() => handleGuestLogin('user')} disabled={guestLoading || isLoading} className="btn btn-outline-secondary rounded-pill w-100 fw-bold">
+                            Login as Guest User
+                        </button>
+                        <button onClick={() => handleGuestLogin('seller')} disabled={guestLoading || isLoading} className="btn btn-outline-success rounded-pill w-100 fw-bold">
+                            Login as Guest Nursery
+                        </button>
+                        <button onClick={() => handleGuestLogin('admin')} disabled={guestLoading || isLoading} className="btn btn-outline-danger rounded-pill w-100 fw-bold">
+                            Login as Guest Admin
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
