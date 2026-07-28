@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input, Row, Col } from 'antd';
+import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input, Row, Col, Tooltip } from 'antd';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useTableParams } from '../../../hooks/useTableParams';
 import localStorageUtil from '../../../utils/localStorage';
@@ -243,11 +243,23 @@ const Users = () => {
                     }
                 ];
 
-                return (
-                    <Dropdown menu={{ items }} trigger={['click']}>
-                        <Button icon={<EllipsisOutlined />} size="small" title={disabledForGuest ? "Action restricted for guest accounts" : ""} />
+                const dropdownButton = (
+                    <Dropdown menu={{ items }} trigger={['click']} disabled={disabledForGuest}>
+                        <Button icon={<EllipsisOutlined />} size="small" style={{ pointerEvents: disabledForGuest ? 'none' : 'auto' }} />
                     </Dropdown>
                 );
+
+                if (disabledForGuest) {
+                    return (
+                        <Tooltip title="Action restricted for guest accounts">
+                            <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                                {dropdownButton}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                return dropdownButton;
             },
         },
     ];

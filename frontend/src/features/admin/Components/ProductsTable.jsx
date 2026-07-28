@@ -1,5 +1,5 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm, Input, Row, Col, Button } from 'antd';
+import { Table, Tag, Space, message, Popconfirm, Input, Row, Col, Button, Tooltip } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync, adminProductsAsync, adminNurseriesAsync, adminAddPlantAsync, adminUpdatePlantAsync } from '../adminSlice';
 import { getAllCategoriesAsync } from '../../category/categorySlice';
@@ -201,29 +201,50 @@ const ProductsTable = () => {
         const status = record.status;
         const disabledForGuest = isGuestAdmin && !record.isGuestData;
 
+        const renderButton = (content) => {
+          if (disabledForGuest) {
+            return (
+              <Tooltip title="Action restricted for guest accounts">
+                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                  {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+                </span>
+              </Tooltip>
+            );
+          }
+          return content;
+        };
+
         return (
           <Space size={'small'}>
             {
               status.toLowerCase() !== 'published' &&
-              <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')} disabled={disabledForGuest}>
-                <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>Publish</button>
-              </Popconfirm>
+              renderButton(
+                <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')} disabled={disabledForGuest}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>Publish</button>
+                </Popconfirm>
+              )
             }
             {
               status.toLowerCase() !== 'draft' &&
-              <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')} disabled={disabledForGuest}>
-                <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>Draft</button>
-              </Popconfirm>
+              renderButton(
+                <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')} disabled={disabledForGuest}>
+                  <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>Draft</button>
+                </Popconfirm>
+              )
             }
             {
               status.toLowerCase() !== 'on hold' &&
-              <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')} disabled={disabledForGuest}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>On Hold</button>
-              </Popconfirm>
+              renderButton(
+                <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')} disabled={disabledForGuest}>
+                  <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>On Hold</button>
+                </Popconfirm>
+              )
             }
 
 
-            <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest} title={disabledForGuest ? "Action restricted for guest accounts" : ""}>Edit</button>
+            {renderButton(
+              <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>Edit</button>
+            )}
           </Space>
         )
       }

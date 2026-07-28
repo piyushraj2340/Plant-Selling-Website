@@ -99,8 +99,8 @@ function Login() {
                                 <input type={showPassword ? "text" : "password"} className="form-control rounded-4 bg-light border-0 pe-5" id="password" name="password" placeholder="Enter Password" onChange={handleInputs} value={userFormData.password} />
                                 <label htmlFor="password" className="text-muted">Password</label>
                             </div>
-                            <span 
-                                className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
+                            <span
+                                className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted"
                                 onClick={() => setShowPassword(!showPassword)}
                                 style={{ zIndex: 10, cursor: 'pointer' }}
                             >
@@ -109,10 +109,6 @@ function Login() {
                         </div>
 
                         <div className="d-flex justify-content-between align-items-center mb-4 px-1">
-                            <div className="form-check">
-                                <input className="form-check-input" type="checkbox" id="rememberMe" />
-                                <label className="form-check-label text-muted small" htmlFor="rememberMe">Remember me</label>
-                            </div>
                             <Link to={"/forgot-password"} className="text-success small fw-bold text-decoration-none">Forgot Password?</Link>
                         </div>
 
