@@ -44,6 +44,10 @@ const categorySchema = new mongoose.Schema({
     isGuestData: {
         type: Boolean,
         default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

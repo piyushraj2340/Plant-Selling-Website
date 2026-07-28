@@ -96,6 +96,10 @@ const nurserySchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
+    isSeedData: {
+        type: Boolean,
+        default: false
+    },
     smtpSettings: {
         email: {
             type: String,
