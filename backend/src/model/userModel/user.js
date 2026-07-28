@@ -70,6 +70,14 @@ const userSchema = new mongoose.Schema({
             type: String,
         }
     }],
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
+    },
     gender: {
         type: String,
         required: [true, "Gender is required"],

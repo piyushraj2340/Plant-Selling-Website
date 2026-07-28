@@ -100,9 +100,26 @@ const orderSchema = new mongoose.Schema({
             required: true,
         }
     },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
+    }
 
 });
 
 const orders = new mongoose.model('orders', orderSchema);
+
+orderSchema.pre(/^find/, function(next) {
+    this.where({ isDeleted: { $ne: true } });
+    next();
+});
 
 module.exports = orders;

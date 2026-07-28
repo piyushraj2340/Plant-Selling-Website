@@ -1,13 +1,17 @@
 import React, { useEffect } from 'react';
-import { Table, Space, Tag, Popconfirm, Input, Row, Col } from 'antd';
+import { Table, Space, Tag, Popconfirm, Input, Row, Col, Tooltip } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminCouponsAsync, adminUpdateCouponStatusAsync, adminDeleteCouponAsync } from '../adminSlice';
 import { useTableParams } from '../../../hooks/useTableParams';
+import useUserData from '../../../hooks/useUserData';
 
 const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const dispatch = useDispatch();
     const { couponsData, isLoading } = useSelector(state => state.admin);
     const couponsTotal = useSelector(state => state.admin.couponsData?.total) || 0;
+    
+    const { userData } = useUserData();
+    const isGuestAdmin = userData?.isGuestData;
 
     const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminCouponsAsync);
 
@@ -37,7 +41,8 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
         createdAt: new Date(coupon.createdAt).toLocaleDateString(),
         'rules.validUntil': new Date(coupon.rules.validUntil).toLocaleDateString(),
         redemptionLimit: coupon.usage.maxUsageCount ? `${coupon.usage.currentUsageCount}/${coupon.usage.maxUsageCount}` : 'Unlimited',
-        status: coupon.status
+        status: coupon.status,
+        isGuestData: coupon.isGuestData
     }));
 
     const columns = [
@@ -84,37 +89,60 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
         {
             title: 'Action',
             dataIndex: 'status',
-            key: 'status',
-            render: (status, record) => {
+            key: 'action',
+            render: (_, record) => {
+                const disabledForGuest = isGuestAdmin && !record.isGuestData;
+
+                const disableAction = (content) => {
+                    if (disabledForGuest) {
+                        return (
+                            <Tooltip title="Action restricted for guest accounts">
+                                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                                    {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+                                </span>
+                            </Tooltip>
+                        );
+                    }
+                    return content;
+                };
+
                 return (
                     <>
                         <Space size={'small'} className='mb-1'>
-                            <Tag color={status === 'Active' ? 'green' : status === 'Expired' ? 'red' : 'default'}>{status}</Tag>
+                            <Tag color={record.status === 'Active' ? 'green' : record.status === 'Expired' ? 'red' : 'default'}>{record.status}</Tag>
                         </Space>
                         <br />
                         {
-                            status !== 'Disabled' && status !== 'Expired' &&
+                            record.status === 'Active' &&
                             <Space size={'small'} className='mt-2'>
-                                <Popconfirm title="Disable this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Disabled')}>
-                                    <button className='btn btn-sm btn-warning py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><span>Disable</span></button>
-                                </Popconfirm>
+                                {disableAction(
+                                    <Popconfirm title="Disable this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Disabled')} disabled={disabledForGuest}>
+                                        <button className='btn btn-sm btn-secondary py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} disabled={disabledForGuest}><span>Disable</span></button>
+                                    </Popconfirm>
+                                )}
                             </Space>
                         }
                         {
-                            status === 'Disabled' &&
+                            record.status === 'Disabled' &&
                             <Space size={'small'} className='mt-2'>
-                                <Popconfirm title="Activate this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Active')}>
-                                    <button className='btn btn-sm btn-success py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><span>Activate</span></button>
-                                </Popconfirm>
+                                {disableAction(
+                                    <Popconfirm title="Activate this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Active')} disabled={disabledForGuest}>
+                                        <button className='btn btn-sm btn-success py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} disabled={disabledForGuest}><span>Activate</span></button>
+                                    </Popconfirm>
+                                )}
                             </Space>
                         }
                         <Space size={'small'} className='mt-2'>
-                            <button className='btn btn-sm btn-info py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} onClick={() => onEditCoupon(record._id)}><span>Edit</span></button>
+                            {disableAction(
+                                <button className='btn btn-sm btn-info py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} onClick={() => onEditCoupon(record._id)} disabled={disabledForGuest}><span>Edit</span></button>
+                            )}
                         </Space>
                         <Space size={'small'} className='mt-2'>
-                            <Popconfirm title="Permanently delete this coupon?" onConfirm={() => handleDelete(record._id)}>
-                                <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><span>Delete</span></button>
-                            </Popconfirm>
+                            {disableAction(
+                                <Popconfirm title="Permanently delete this coupon?" onConfirm={() => handleDelete(record._id)} disabled={disabledForGuest}>
+                                    <button className='btn btn-sm btn-danger py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} disabled={disabledForGuest}><span>Delete</span></button>
+                                </Popconfirm>
+                            )}
                         </Space>
                     </>
                 )

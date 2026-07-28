@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Table, Space, Tag, Button, Form, Input, Select, message, Row, Col } from 'antd';
+import { Modal, Table, Space, Tag, Button, Form, Input, Select, message, Row, Col, Tooltip } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllCategoriesAsync, createCategoryAsync, updateCategoryAsync, deleteCategoryAsync } from '../../category/categorySlice';
 import { useTableParams } from '../../../hooks/useTableParams';
+import useUserData from '../../../hooks/useUserData';
 
 const { Option } = Select;
 
@@ -12,6 +13,8 @@ const Categories = () => {
     const [isModalVisible, setIsModalVisible] = useState(false);
     const [editingCategory, setEditingCategory] = useState(null);
     const [form] = Form.useForm();
+    const { userData } = useUserData();
+    const isGuestAdmin = userData?.isGuestData;
 
     const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(getAllCategoriesAsync);
     const showModal = (category = null) => {
@@ -108,12 +111,37 @@ const Categories = () => {
         {
             title: 'Action',
             key: 'action',
-            render: (_, record) => (
-                <Space size='middle'>
-                    <Button type='primary' size="small" onClick={() => showModal(record)}>Edit</Button>
-                    <Button type='primary' danger size="small" onClick={() => handleDelete(record._id)}>Delete</Button>
-                </Space>
-            ),
+            render: (_, record) => {
+                const disabledForGuest = isGuestAdmin && !record.isGuestData;
+
+                const editButton = (
+                    <Button type='primary' size="small" onClick={() => showModal(record)} style={{ pointerEvents: disabledForGuest ? 'none' : 'auto' }} disabled={disabledForGuest}>Edit</Button>
+                );
+                
+                const deleteButton = (
+                    <Button type='primary' danger size="small" onClick={() => handleDelete(record._id)} style={{ pointerEvents: disabledForGuest ? 'none' : 'auto' }} disabled={disabledForGuest}>Delete</Button>
+                );
+
+                if (disabledForGuest) {
+                    return (
+                        <Space size='middle'>
+                            <Tooltip title="Action restricted for guest accounts">
+                                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>{editButton}</span>
+                            </Tooltip>
+                            <Tooltip title="Action restricted for guest accounts">
+                                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>{deleteButton}</span>
+                            </Tooltip>
+                        </Space>
+                    );
+                }
+
+                return (
+                    <Space size='middle'>
+                        {editButton}
+                        {deleteButton}
+                    </Space>
+                );
+            }
         },
     ];
 

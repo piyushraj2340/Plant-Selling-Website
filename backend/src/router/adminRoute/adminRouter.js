@@ -4,8 +4,10 @@ const auth = require('../../middleware/auth');
 const isAdmin = require('../../middleware/adminMiddleware');
 const adminController = require('../../controllers/adminController');
 
+const { guestProtection } = require('../../middleware/guestProtection');
+
 // All admin routes must be protected by auth and isAdmin middleware
-router.use(auth, isAdmin);
+router.use(auth, isAdmin, guestProtection);
 
 router.get('/stats', adminController.getStats);
 // Users Endpoints

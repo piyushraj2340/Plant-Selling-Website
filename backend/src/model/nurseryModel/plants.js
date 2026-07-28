@@ -105,6 +105,10 @@ const plantsSchema = new mongoose.Schema({
         default: Date.now,
         required: [true, "Plant added at is required."]
     },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
     status: {
         type: String,
         enum: ['Published', 'Draft', 'On Hold'],
@@ -117,6 +121,14 @@ const plantsSchema = new mongoose.Schema({
     numOfReviews: {
         type: Number,
         default: 0
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
     }
 });
 
@@ -130,5 +142,10 @@ plantsSchema.methods.increaseVisit = async function () {
 }
 
 const plant = new mongoose.model('plant', plantsSchema);
+
+plantsSchema.pre(/^find/, function(next) {
+    this.where({ isDeleted: { $ne: true } });
+    next();
+});
 
 module.exports = plant;

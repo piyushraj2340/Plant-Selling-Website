@@ -1,68 +1,69 @@
 body,
 html,
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 /* Chrome, Safari, Edge, Opera */
 input::-webkit-outer-spin-button,
 input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 /* Firefox */
 input[type=number] {
-  -moz-appearance: textfield;
+    -moz-appearance: textfield;
 }
 
 a {
-  text-decoration: none;
-  color: #0b3c87;
+    text-decoration: none;
+    color: #0b3c87;
 }
 
 a:hover {
-  text-decoration: underline;
+    text-decoration: underline;
 }
 
 .logo-img {
-  width: 110px;
-  height: 45px;
-  /* mix-blend-mode: multiply; */
+    width: 110px;
+    height: 45px;
+    /* mix-blend-mode: multiply; */
 }
 
 .bg-section {
-  background-color: #EEEEEE;
+    background-color: #EEEEEE;
 }
 
 .material-symbols-outlined {
-  font-variation-settings:
-    'FILL' 0,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24
+    font-variation-settings:
+        'FILL' 0,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
 }
 
 .material-symbols-sharp {
-  font-variation-settings:
-    'FILL' 1,
-    'wght' 400,
-    'GRAD' 0,
-    'opsz' 24
+    font-variation-settings:
+        'FILL' 1,
+        'wght' 400,
+        'GRAD' 0,
+        'opsz' 24
 }
 
 /* changing the styling of antd */
 
 .ant-message-notice-content {
-  background-color: black !important;
-  color: #fff !important;
+    background-color: black !important;
+    color: #fff !important;
 }
 
 button.ant-btn {
-  width: auto !important;
+    width: auto !important;
 }
+
 /* =========================================
    Nursery Store Builder & Public Enhancements
    ========================================= */
@@ -71,14 +72,14 @@ button.ant-btn {
 .nursery-store-card {
     background: rgba(255, 255, 255, 0.95);
     border-radius: 12px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-    border: 1px solid rgba(0,0,0,0.03);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.03);
     transition: box-shadow 0.3s ease, transform 0.3s ease;
     overflow: hidden;
 }
 
 .nursery-store-card:hover {
-    box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 }
 
 /* Builder Dashed Dropzone Placeholder */
@@ -115,8 +116,13 @@ button.ant-btn {
 }
 
 @keyframes pulsePlaceholder {
-    0% { background-color: #f8f9fa; }
-    100% { background-color: #f1f3f5; }
+    0% {
+        background-color: #f8f9fa;
+    }
+
+    100% {
+        background-color: #f1f3f5;
+    }
 }
 
 /* Premium Image Hovers */
@@ -142,11 +148,13 @@ button.ant-btn {
     padding-bottom: 0;
     margin-bottom: 2rem;
     overflow-x: auto;
-    scrollbar-width: none; /* Firefox */
+    scrollbar-width: none;
+    /* Firefox */
 }
 
 .nursery-sleek-tabs::-webkit-scrollbar {
-    display: none; /* Chrome/Safari */
+    display: none;
+    /* Chrome/Safari */
 }
 
 .nursery-sleek-tab-btn {
@@ -173,7 +181,8 @@ button.ant-btn {
 .nursery-sleek-tab-btn::after {
     content: '';
     position: absolute;
-    bottom: -2px; /* cover the border */
+    bottom: -2px;
+    /* cover the border */
     left: 0;
     width: 100%;
     height: 2px;
@@ -191,7 +200,7 @@ button.ant-btn {
 .builder-actions-overlay {
     opacity: 0;
     transition: opacity 0.3s ease;
-    background: rgba(255,255,255,0.8);
+    background: rgba(255, 255, 255, 0.8);
     backdrop-filter: blur(4px);
     border-radius: 8px;
 }
@@ -210,6 +219,7 @@ button.ant-btn {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -254,9 +264,11 @@ button.ant-btn {
     border-radius: 50%;
     margin-right: 6px;
 }
+
 .workflow-status-badge.draft .workflow-status-dot {
     background-color: #ffc107;
 }
+
 .workflow-status-badge.publish .workflow-status-dot {
     background-color: #28a745;
 }
@@ -269,9 +281,10 @@ button.ant-btn {
     display: flex;
     align-items: center;
 }
+
 .workflow-btn:hover {
     transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Builder View Mode overrides */
@@ -290,10 +303,57 @@ button.ant-btn {
     margin-bottom: 0 !important;
 }
 
+/* Category Chip UI */
+.category-chip-container {
+    display: flex;
+    overflow-x: auto;
+    white-space: nowrap;
+    gap: 12px;
+    padding: 10px 5px;
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 10px;
+}
+
+.category-chip-container::-webkit-scrollbar {
+    display: none;
+    /* Chrome, Safari, Opera */
+}
+
+.category-chip-btn {
+    border-radius: 50rem;
+    padding: 8px 20px;
+    flex: 0 0 auto;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background-color: #f8f9fa;
+    color: #495057;
+    border: 1px solid #e9ecef;
+    cursor: pointer;
+}
+
+.category-chip-btn:hover {
+    background-color: #e2e6ea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.category-chip-btn.active {
+    background-color: #198754;
+    color: white;
+    border-color: #198754;
+    box-shadow: 0 4px 10px rgba(25, 135, 84, 0.3);
+    padding: 8px 16px;
+}
+
 /* Product Grid & List Layouts */
 .product-grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 24px;
     width: 100%;
 }
@@ -311,7 +371,7 @@ button.ant-btn {
     border-radius: 16px;
     overflow: hidden;
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-    border: 1px solid rgba(0,0,0,0.05);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
     position: relative;
     height: 100%;
@@ -418,6 +478,7 @@ button.ant-btn {
     border-radius: 8px;
     padding: 4px;
 }
+
 .view-toggle-btn {
     background: transparent;
     border: none;
@@ -430,13 +491,15 @@ button.ant-btn {
     align-items: center;
     justify-content: center;
 }
+
 .view-toggle-btn:hover {
     color: #212529;
 }
+
 .view-toggle-btn.active {
     background: #ffffff;
     color: #0d6efd;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
 @media (max-width: 768px) {
@@ -444,23 +507,29 @@ button.ant-btn {
         flex-direction: column;
         height: auto;
     }
+
     .product-list-layout .modern-product-card .card-img-wrapper {
         width: 100%;
         height: 200px;
     }
+
     .product-list-layout .modern-product-card .card-body-content {
         width: 100%;
     }
+
     .product-grid-layout {
         grid-template-columns: repeat(2, 1fr);
         gap: 12px;
     }
+
     .modern-product-card .card-body-content {
         padding: 12px;
     }
+
     .modern-product-card .plant-name {
         font-size: 1rem;
     }
+
     .modern-product-card .card-img-wrapper {
         height: 160px;
     }
@@ -469,7 +538,7 @@ button.ant-btn {
 /* Enhanced Product Grid Layout */
 .product-grid-layout {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
     gap: 24px;
     width: 100%;
 }
@@ -486,7 +555,8 @@ button.ant-btn {
 /* Hover Action Overlay */
 .modern-product-card .card-hover-actions {
     position: absolute;
-    bottom: -60px; /* Hidden below */
+    bottom: -60px;
+    /* Hidden below */
     left: 0;
     right: 0;
     display: flex;
@@ -496,7 +566,7 @@ button.ant-btn {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(4px);
     transition: bottom 0.3s ease-in-out;
-    border-top: 1px solid rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
     z-index: 10;
 }
 
@@ -510,7 +580,8 @@ button.ant-btn {
 }
 
 .modern-product-card:hover .card-body-content {
-    padding-bottom: 60px; /* Make room for buttons */
+    padding-bottom: 60px;
+    /* Make room for buttons */
 }
 
 /* Buttons inside hover overlay */
@@ -533,6 +604,7 @@ button.ant-btn {
     background: #e9ecef;
     color: #212529;
 }
+
 .card-hover-actions .btn-add-cart:hover {
     background: #dee2e6;
 }
@@ -541,6 +613,7 @@ button.ant-btn {
     background: #28a745;
     color: #ffffff;
 }
+
 .card-hover-actions .btn-buy-now:hover {
     background: #218838;
 }
@@ -556,7 +629,8 @@ button.ant-btn {
 }
 
 .product-list-layout .modern-product-card:hover .card-body-content {
-    padding-bottom: 24px; /* Reset padding override for list view */
+    padding-bottom: 24px;
+    /* Reset padding override for list view */
 }
 
 .product-list-layout .card-hover-actions .btn-action {
@@ -570,28 +644,29 @@ button.ant-btn {
 
 /* Webkit browsers (Chrome, Safari, Edge) */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px; /* For horizontal scrollbars */
+    width: 8px;
+    height: 8px;
+    /* For horizontal scrollbars */
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+    background: #f1f1f1;
+    border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
-  transition: background 0.3s ease;
+    background: #c1c1c1;
+    border-radius: 4px;
+    transition: background 0.3s ease;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #90c88a; /* A subtle plant-green hover effect */
+    background: #90c88a;
+    /* A subtle plant-green hover effect */
 }
 
 /* Firefox */
 * {
-  scrollbar-width: thin;
-  scrollbar-color: #c1c1c1 #f1f1f1;
+    scrollbar-width: thin;
+    scrollbar-color: #c1c1c1 #f1f1f1;
 }
-

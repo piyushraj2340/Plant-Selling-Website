@@ -43,6 +43,14 @@ const reviewSchema = new mongoose.Schema({
     isBuyer: {
         type: Boolean,
         default: false
+    },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
     }
 }, { timestamps: true });
 

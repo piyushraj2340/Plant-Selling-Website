@@ -23,6 +23,8 @@ function Signup() {
     const [passwordError, setPasswordError] = useState("");
     const [confirmPasswordError, setConfirmPasswordError] = useState("");
     const [emailError, setEmailError] = useState("");
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
 
     const dispatch = useDispatch();
@@ -118,126 +120,149 @@ function Signup() {
 
 
     return (
-        <div className='d-flex justify-content-center py-2 px-2 mb-4 mb-md-5'>
-            <div className='col-12 col-md-8 col-lg-6 col-xl-4 shadow border rounded px-2 py-2 p-md-5'>
-                <div className="d-flex flex-column flex-md-row justify-content-center mb-3">
-                    <div className='col-12 col-md-6 text-center p-0 mb-2 mb-md-0 me-md-2 bg-secondary rounded'>
-                        <Link to={"/login"} className='btn text-light w-100'>Login</Link>
+        <div className="container-fluid bg-light min-vh-100 d-flex align-items-center justify-content-center py-5">
+            <div className="row bg-white shadow-lg rounded-4 overflow-hidden" style={{ maxWidth: '1000px', width: '100%' }}>
+                
+                {/* Form Section */}
+                <div className="col-md-7 p-4 p-md-5 order-2 order-md-1">
+                    <div className="text-center mb-4">
+                        <h3 className="fw-bold text-success">Create an Account</h3>
+                        <p className="text-muted">Join our community of plant lovers</p>
                     </div>
-                    <div className='col-12 col-md-6 text-center p-0 ms-md-2 bg-primary rounded'>
-                        <Link to={"/signup"} className='btn text-light w-100'>Signup</Link>
+
+                    <div className="d-flex mb-4 gap-2">
+                        <Link to={"/login"} className="btn btn-outline-success flex-grow-1 fw-bold rounded-pill shadow-sm">Login</Link>
+                        <Link to={"/signup"} className="btn btn-success flex-grow-1 fw-bold rounded-pill shadow-sm">Signup</Link>
+                    </div>
+
+                    <form onSubmit={handleUserSignUp}>
+                        <div className="row g-3 mb-3">
+                            <div className="col-md-6">
+                                <div className="form-floating">
+                                    <input type="text" className="form-control rounded-4 bg-light border-0" id="name" name="name" placeholder="Enter Name" onChange={handleInputs} />
+                                    <label htmlFor="name" className="text-muted">Full Name</label>
+                                </div>
+                            </div>
+                            <div className="col-md-6">
+                                <div className="form-floating">
+                                    <input type="tel" className="form-control rounded-4 bg-light border-0" id="phone" name="phone" placeholder="Enter Phone" onChange={handleInputs} />
+                                    <label htmlFor="phone" className="text-muted">Phone Number</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="form-floating mb-3">
+                            <input
+                                type="email"
+                                className={`form-control rounded-4 bg-light border-0 ${emailError ? 'is-invalid' : ''}`}
+                                id="email"
+                                name="email"
+                                placeholder="Enter Email"
+                                onChange={handleInputs}
+                                value={userFormData.email}
+                            />
+                            <label htmlFor="email" className="text-muted">Email address</label>
+                            {emailError && <div className="invalid-feedback ms-2">{emailError}</div>}
+                        </div>
+
+                        <div className="row g-3 mb-3 align-items-center">
+                            <div className="col-md-4">
+                                <div className="form-floating">
+                                    <input type="number" className="form-control rounded-4 bg-light border-0" id="age" name="age" placeholder="Enter Age" onChange={handleInputs} />
+                                    <label htmlFor="age" className="text-muted">Age</label>
+                                </div>
+                            </div>
+                            <div className="col-md-8">
+                                <div className="d-flex justify-content-around align-items-center bg-light rounded-4 p-3 h-100 border-0">
+                                    <span className="text-muted me-2">Gender:</span>
+                                    <div className="form-check form-check-inline m-0">
+                                        <input className="form-check-input text-success" type="radio" onChange={handleInputs} name="gender" id="gender-male" value="male" />
+                                        <label className="form-check-label text-muted" htmlFor="gender-male">Male</label>
+                                    </div>
+                                    <div className="form-check form-check-inline m-0">
+                                        <input className="form-check-input text-success" type="radio" onChange={handleInputs} name="gender" id="gender-female" value="female" />
+                                        <label className="form-check-label text-muted" htmlFor="gender-female">Female</label>
+                                    </div>
+                                    <div className="form-check form-check-inline m-0">
+                                        <input className="form-check-input text-success" type="radio" onChange={handleInputs} name="gender" id="gender-other" value="other" />
+                                        <label className="form-check-label text-muted" htmlFor="gender-other">Other</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="position-relative mb-3">
+                            <div className="form-floating">
+                                <input
+                                    type={showPassword ? "text" : "password"}
+                                    className={`form-control rounded-4 bg-light border-0 pe-5 ${passwordError ? 'is-invalid' : ''}`}
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter Password"
+                                    onChange={handleInputs}
+                                    value={userFormData.password}
+                                />
+                                <label htmlFor="password" className="text-muted">Password</label>
+                            </div>
+                            <span 
+                                className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
+                                onClick={() => setShowPassword(!showPassword)}
+                                style={{ zIndex: 10, cursor: 'pointer' }}
+                            >
+                                <i className={`fas ${showPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </span>
+                            {passwordError && <div className="invalid-feedback d-block ms-2">{passwordError}</div>}
+                        </div>
+
+                        <div className="position-relative mb-4">
+                            <div className="form-floating">
+                                <input
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    className={`form-control rounded-4 bg-light border-0 pe-5 ${confirmPasswordError ? 'is-invalid' : ''}`}
+                                    id="confirmPassword"
+                                    name="confirmPassword"
+                                    placeholder="Confirm Password"
+                                    onChange={handleInputs}
+                                    value={userFormData.confirmPassword}
+                                />
+                                <label htmlFor="confirmPassword" className="text-muted">Confirm Password</label>
+                            </div>
+                            <span 
+                                className="position-absolute top-50 end-0 translate-middle-y me-3 text-muted" 
+                                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                style={{ zIndex: 10, cursor: 'pointer' }}
+                            >
+                                <i className={`fas ${showConfirmPassword ? 'fa-eye-slash' : 'fa-eye'}`}></i>
+                            </span>
+                            {confirmPasswordError && <div className="invalid-feedback d-block ms-2">{confirmPasswordError}</div>}
+                        </div>
+
+                        <button disabled={isLoading} className="btn btn-success w-100 py-3 rounded-pill fw-bold shadow-sm" type="submit">
+                            {
+                                isLoading ? (
+                                    <>
+                                        <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                        Registering...
+                                    </>
+                                ) : (
+                                    <span>Create Account</span>
+                                )
+                            }
+                        </button>
+                    </form>
+                </div>
+
+                {/* Image Section */}
+                <div className="col-md-5 d-none d-md-block p-0 order-1 order-md-2" style={{ background: 'linear-gradient(135deg, #1b5e20, #43a047)' }}>
+                    <div className="h-100 d-flex flex-column justify-content-center align-items-center text-white p-5 text-center">
+                        <i className="material-symbols-outlined display-1 mb-3">yard</i>
+                        <h2 className="fw-bold mb-3">Join Us Today</h2>
+                        <p className="lead">Start your green journey! Create an account to shop, sell, and manage your plant collection all in one place.</p>
                     </div>
                 </div>
 
-                <div className="text-center mb-3">
-                    <p className="m-0">Connect With Social Account:</p>
-                    <div>
-                        <i className="fab fa-facebook-f mx-2 cursor-pointer"></i>
-                        <i className="fab fa-google mx-2"></i>
-                        <i className="fab fa-twitter mx-2"></i>
-                        <i className="fab fa-github mx-2"></i>
-                    </div>
-                </div>
-
-                <div className="text-center mb-3"><p>Or:</p></div>
-
-                <form onSubmit={handleUserSignUp}>
-                    <div className="form-floating mb-3">
-                        <input type="text" className="form-control" id="name" name="name" placeholder="Enter Name" onChange={handleInputs} />
-                        <label htmlFor="name">Enter Name</label>
-                    </div>
-
-                    <div className="form-floating mb-1">
-                        <input
-                            type="email"
-                            className={`form-control ${emailError ? 'is-invalid' : ''}`}
-                            id="email"
-                            name="email"
-                            placeholder="Enter Email"
-                            onChange={handleInputs}
-                            value={userFormData.email}
-                        />
-                        <label htmlFor="email">Enter Email</label>
-                        {emailError && <div className="invalid-feedback d-block">{emailError}</div>}
-                    </div>
-
-                    <div className="form-floating mb-3">
-                        <input type="tel" className="form-control" id="phone" name="phone" placeholder="Enter Phone" onChange={handleInputs} />
-                        <label htmlFor="phone">Enter Phone</label>
-                    </div>
-
-                    <div className="form-floating mb-3">
-                        <input type="number" className="form-control" id="age" name="age" placeholder="Enter Age" onChange={handleInputs} />
-                        <label htmlFor="age">Enter Age</label>
-                    </div>
-
-                    <div className="mb-3">
-                        <label className="form-label">Gender</label>
-                        <div className="row ms-1 mt-1">
-                            <label className="m-1 radio-label-container text-muted" htmlFor="gender-male">Male
-                                <input type="radio" onChange={handleInputs} className="m-2" id="gender-male" name="gender" value="male" />
-                                <span className="check-mark-span"></span>
-                            </label>
-                        </div>
-                        <div className="row ms-1 mt-1">
-                            <label className="m-1 radio-label-container text-muted" htmlFor="gender-female">Female
-                                <input type="radio" onChange={handleInputs} className="m-2" id="gender-female" name="gender" value="female" />
-                                <span className="check-mark-span"></span>
-                            </label>
-                        </div>
-                        <div className="row ms-1 mt-1">
-                            <label className="m-1 radio-label-container text-muted">Other
-                                <input type="radio" onChange={handleInputs} className="m-2" id="gender-other" name="gender" value="other" />
-                                <span className="check-mark-span"></span>
-                            </label>
-                        </div>
-
-                    </div>
-
-                    <div className="form-floating mb-1">
-                        <input
-                            type="password"
-                            className={`form-control ${passwordError ? 'is-invalid' : ''}`}
-                            id="password"
-                            name="password"
-                            placeholder="Enter Password"
-                            onChange={handleInputs}
-                            value={userFormData.password}
-                        />
-                        <label htmlFor="password">Enter Password</label>
-                        {passwordError && <div className="invalid-feedback d-block">{passwordError}</div>}
-                    </div>
-
-                    <div className="form-floating mb-3">
-                        <input
-                            type="password"
-                            className={`form-control ${confirmPasswordError ? 'is-invalid' : ''}`}
-                            id="confirmPassword"
-                            name="confirmPassword"
-                            placeholder="Confirm Password"
-                            onChange={handleInputs}
-                            value={userFormData.confirmPassword}
-                        />
-                        <label htmlFor="confirmPassword">Confirm Password</label>
-                        {confirmPasswordError && <div className="invalid-feedback d-block">{confirmPasswordError}</div>}
-                    </div>
-
-                    <button disabled={isLoading} className='btn btn-primary w-100' type="submit">
-                        {
-                            isLoading ? (
-                                <>
-                                    <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                                    <span className='ms-1'>Registering...</span>
-                                </>
-                            ) : (
-                                <span>Sign Up</span>
-                            )
-                        }
-                    </button>
-                </form>
             </div>
         </div>
-
     )
 }
 

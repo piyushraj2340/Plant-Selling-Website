@@ -1,11 +1,12 @@
 import { useDispatch, useSelector } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm, Input, Row, Col, Button } from 'antd';
+import { Table, Tag, Space, message, Popconfirm, Input, Row, Col, Button, Tooltip } from 'antd';
 import { PlusOutlined } from '@ant-design/icons';
 import { adminUpdatePlantStatusAsync, adminBulkUpdatePlantStatusAsync, adminProductsAsync, adminNurseriesAsync, adminAddPlantAsync, adminUpdatePlantAsync } from '../adminSlice';
 import { getAllCategoriesAsync } from '../../category/categorySlice';
 import React, { useState, useEffect } from 'react';
 import PlantFormModal from '../../common/Components/PlantFormModal';
 import { useTableParams } from '../../../hooks/useTableParams';
+import useUserData from '../../../hooks/useUserData';
 
 const ProductsTable = () => {
   const dispatch = useDispatch();
@@ -14,6 +15,9 @@ const ProductsTable = () => {
   const isLoading = useSelector(state => state.admin.isLoading);
   const nurseries = useSelector(state => state.admin.nurseriesList) || [];
   const { categories } = useSelector(state => state.category);
+
+  const { userData } = useUserData();
+  const isGuestAdmin = userData?.isGuestData;
 
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -40,6 +44,7 @@ const ProductsTable = () => {
     tags: plant.category ? [plant.category.categoryName || plant.category.name || (typeof plant.category === 'string' ? plant.category : 'Unknown')] : [],
     status: plant.status || "Draft",
     action: plant.status || "Draft",
+    isGuestData: plant.isGuestData,
   }));
 
   const handleUpdateStatus = async (id, status) => {
@@ -194,34 +199,75 @@ const ProductsTable = () => {
       key: 'action',
       render: (_, record) => {
         const status = record.status;
+        const disabledForGuest = isGuestAdmin && !record.isGuestData;
+
+        const renderButton = (content) => {
+          if (disabledForGuest) {
+            return (
+              <Tooltip title="Action restricted for guest accounts">
+                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                  {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+                </span>
+              </Tooltip>
+            );
+          }
+          return content;
+        };
+
         return (
           <Space size={'small'}>
             {
               status.toLowerCase() !== 'published' &&
-              <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')}>
-                <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Publish</button>
-              </Popconfirm>
+              renderButton(
+                <Popconfirm title="Publish this product?" onConfirm={() => handleUpdateStatus(record.key, 'Published')} disabled={disabledForGuest}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>Publish</button>
+                </Popconfirm>
+              )
             }
             {
               status.toLowerCase() !== 'draft' &&
-              <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')}>
-                <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Draft</button>
-              </Popconfirm>
+              renderButton(
+                <Popconfirm title="Move this product to draft?" onConfirm={() => handleUpdateStatus(record.key, 'Draft')} disabled={disabledForGuest}>
+                  <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>Draft</button>
+                </Popconfirm>
+              )
             }
             {
               status.toLowerCase() !== 'on hold' &&
-              <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>On Hold</button>
-              </Popconfirm>
+              renderButton(
+                <Popconfirm title="Put this product on hold?" onConfirm={() => handleUpdateStatus(record.key, 'On Hold')} disabled={disabledForGuest}>
+                  <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>On Hold</button>
+                </Popconfirm>
+              )
             }
 
 
-            <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Edit</button>
+            {renderButton(
+              <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }} disabled={disabledForGuest}>Edit</button>
+            )}
           </Space>
         )
       }
     },
   ];
+
+  const disableBulkForGuest = isGuestAdmin && selectedRowKeys.some(key => {
+    const item = plants.find(p => p._id === key);
+    return item && !item.isGuestData;
+  });
+
+  const renderBulkButton = (content) => {
+    if (disableBulkForGuest) {
+      return (
+        <Tooltip title="Bulk action restricted: selection contains non-guest data">
+          <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+            {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+          </span>
+        </Tooltip>
+      );
+    }
+    return content;
+  };
 
   const hasSelected = selectedRowKeys.length > 0;
 
@@ -251,15 +297,21 @@ const ProductsTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Publish ${selectedRowKeys.length} selected products?`} onConfirm={() => handleBulkStatusUpdate('Published')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Publish</button>
-          </Popconfirm>
-          <Popconfirm title={`Move ${selectedRowKeys.length} selected products to draft?`} onConfirm={() => handleBulkStatusUpdate('Draft')}>
-            <button className="btn btn-sm btn-secondary py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Draft</button>
-          </Popconfirm>
-          <Popconfirm title={`Put ${selectedRowKeys.length} selected products on hold?`} onConfirm={() => handleBulkStatusUpdate('On Hold')}>
-            <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk On Hold</button>
-          </Popconfirm>
+          {renderBulkButton(
+            <Popconfirm title={`Publish ${selectedRowKeys.length} selected products?`} onConfirm={() => handleBulkStatusUpdate('Published')} disabled={disableBulkForGuest}>
+              <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }} disabled={disableBulkForGuest}>Bulk Publish</button>
+            </Popconfirm>
+          )}
+          {renderBulkButton(
+            <Popconfirm title={`Move ${selectedRowKeys.length} selected products to draft?`} onConfirm={() => handleBulkStatusUpdate('Draft')} disabled={disableBulkForGuest}>
+              <button className="btn btn-sm btn-secondary py-1 px-2 text-white" style={{ fontSize: "12px" }} disabled={disableBulkForGuest}>Bulk Draft</button>
+            </Popconfirm>
+          )}
+          {renderBulkButton(
+            <Popconfirm title={`Put ${selectedRowKeys.length} selected products on hold?`} onConfirm={() => handleBulkStatusUpdate('On Hold')} disabled={disableBulkForGuest}>
+              <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }} disabled={disableBulkForGuest}>Bulk On Hold</button>
+            </Popconfirm>
+          )}
         </div>
       )}
       <Table

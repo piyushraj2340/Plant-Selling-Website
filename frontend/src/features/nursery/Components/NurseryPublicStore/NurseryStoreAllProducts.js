@@ -120,10 +120,10 @@ const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
                 </div>
             </div>
             
-            <div className="p-2 d-flex flex-wrap justify-content-center align-item-center">
-                <button onClick={() => handelSearchProductsByCategory("all")} className={`btn ${categoryList.includes('all') || categoryList.length === 0 ? 'btn-primary' : 'btn-secondary'} m-1`}>All</button>
+            <div className="category-chip-container">
+                <button onClick={() => handelSearchProductsByCategory("all")} className={`category-chip-btn ${categoryList.includes('all') || categoryList.length === 0 ? 'active' : ''}`}>All</button>
                 {categories && categories.map(cat => (
-                    <button key={cat._id} onClick={() => handelSearchProductsByCategory(cat._id)} className={`btn ${categoryList.includes(cat._id) ? 'btn-primary' : 'btn-secondary'} m-1`}>
+                    <button key={cat._id} onClick={() => handelSearchProductsByCategory(cat._id)} className={`category-chip-btn ${categoryList.includes(cat._id) && !categoryList.includes('all') ? 'active' : ''}`}>
                         {cat.name}
                     </button>
                 ))}

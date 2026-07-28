@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input, Row, Col } from 'antd';
+import { message, Table, Space, Popconfirm, Tag, Button, Dropdown, Modal, Checkbox, Input, Row, Col, Tooltip } from 'antd';
 import { EllipsisOutlined } from '@ant-design/icons';
 import { useTableParams } from '../../../hooks/useTableParams';
 import localStorageUtil from '../../../utils/localStorage';
+import useUserData from '../../../hooks/useUserData';
 import {
     adminUsersAsync,
     adminImpersonateAsync,
@@ -19,6 +20,9 @@ const Users = () => {
     const dispatch = useDispatch();
     const { users, usersTotal, isLoading } = useSelector((state) => state.admin);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+    
+    const { userData } = useUserData();
+    const isGuestAdmin = userData?.isGuestData;
 
     const { tableParams, localSearch, handleTableChange, handleSearchChange, fetchData } = useTableParams(adminUsersAsync);
 
@@ -168,24 +172,25 @@ const Users = () => {
             key: 'actions',
             render: (_, record) => {
                 const isAdmin = record.role.includes('admin');
+                const disabledForGuest = isGuestAdmin && !record.isGuestData;
 
                 const items = [
                     {
                         key: '1',
                         label: 'Impersonate',
-                        disabled: isAdmin || record.isBlocked,
+                        disabled: isAdmin || record.isBlocked || disabledForGuest,
                         onClick: () => handleImpersonate(record._id)
                     },
                     {
                         key: '2',
                         label: 'Assign Roles',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         onClick: () => openRoleModal(record)
                     },
                     {
                         key: '3',
                         label: 'Change Password',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         onClick: () => openPasswordModal(record)
                     },
                     {
@@ -194,7 +199,7 @@ const Users = () => {
                     {
                         key: '4',
                         label: record.isBlocked ? 'Unblock User' : 'Block User',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         danger: !record.isBlocked,
                         onClick: () => {
                             Modal.confirm({
@@ -209,7 +214,7 @@ const Users = () => {
                     {
                         key: '5',
                         label: record.isUserVerified ? 'Unverify User' : 'Verify User',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         onClick: () => {
                             Modal.confirm({
                                 title: record.isUserVerified ? 'Unverify User?' : 'Verify User?',
@@ -223,7 +228,7 @@ const Users = () => {
                     {
                         key: '6',
                         label: 'Delete User',
-                        disabled: isAdmin,
+                        disabled: isAdmin || disabledForGuest,
                         danger: true,
                         onClick: () => {
                             Modal.confirm({
@@ -238,11 +243,23 @@ const Users = () => {
                     }
                 ];
 
-                return (
-                    <Dropdown menu={{ items }} trigger={['click']}>
-                        <Button icon={<EllipsisOutlined />} size="small" />
+                const dropdownButton = (
+                    <Dropdown menu={{ items }} trigger={['click']} disabled={disabledForGuest}>
+                        <Button icon={<EllipsisOutlined />} size="small" style={{ pointerEvents: disabledForGuest ? 'none' : 'auto' }} />
                     </Dropdown>
                 );
+
+                if (disabledForGuest) {
+                    return (
+                        <Tooltip title="Action restricted for guest accounts">
+                            <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                                {dropdownButton}
+                            </span>
+                        </Tooltip>
+                    );
+                }
+
+                return dropdownButton;
             },
         },
     ];
@@ -253,6 +270,24 @@ const Users = () => {
         { label: 'Nursery', value: 'nursery' },
         { label: 'Admin', value: 'admin' },
     ];
+
+    const disableBulkForGuest = isGuestAdmin && selectedRowKeys.some(key => {
+        const item = users.find(u => u._id === key);
+        return item && !item.isGuestData;
+    });
+
+    const renderBulkButton = (content) => {
+        if (disableBulkForGuest) {
+            return (
+                <Tooltip title="Bulk action restricted: selection contains non-guest data">
+                    <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                        {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+                    </span>
+                </Tooltip>
+            );
+        }
+        return content;
+    };
 
     return (
         <div className="container-fluid p-2 p-md-4 bg-white rounded border">
@@ -269,7 +304,7 @@ const Users = () => {
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}
                     />
-                    {hasSelected && (
+                    {hasSelected && renderBulkButton(
                         <Popconfirm
                             title={`Delete ${selectedRowKeys.length} users?`}
                             description="Are you sure you want to permanently delete these selected users?"
@@ -277,8 +312,9 @@ const Users = () => {
                             okText="Yes, Delete All"
                             cancelText="No"
                             okButtonProps={{ danger: true }}
+                            disabled={disableBulkForGuest}
                         >
-                            <Button danger type="primary">
+                            <Button danger type="primary" disabled={disableBulkForGuest}>
                                 Bulk Delete ({selectedRowKeys.length})
                             </Button>
                         </Popconfirm>

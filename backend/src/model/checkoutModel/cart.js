@@ -40,9 +40,26 @@ const cartSchema = new mongoose.Schema({
     updatedAt: {
         type: Date,
         default: Date.now
+    },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
     }
 });
 
 const cart = new mongoose.model('cart', cartSchema);
+
+cartSchema.pre(/^find/, function(next) {
+    this.where({ isDeleted: { $ne: true } });
+    next();
+});
 
 module.exports = cart;

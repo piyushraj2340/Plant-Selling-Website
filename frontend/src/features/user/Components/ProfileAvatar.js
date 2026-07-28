@@ -24,7 +24,7 @@ const ProfileAvatar = () => {
                 {/* Avatar Image */}
                 <div className="position-relative d-inline-block rounded-circle avatar mx-1 mx-sm-2 mx-md-3 bg-secondary border border-dark p-1 border-4 rounded-circle" style={{ width: "140px", height: "140px"}}>
                     <img
-                        src={user?.avatar?.url || "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"}
+                        src={user?.avatar?.url || (user?.gender?.toLowerCase() === 'female' ? "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785235103/PlantSeller/UI%20Images/female_avatar_eie1ky.png" : "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785235099/PlantSeller/UI%20Images/avatar_lvizsr.png")}
                         alt="avatar"
                         className="rounded-circle img-fluid w-100 h-100"
                         style={{ width: "150px", cursor: "pointer" }}
