@@ -31,19 +31,29 @@ async function seedGuestData() {
         const guestIds = existingGuests.map(g => g._id);
 
         if (guestIds.length > 0) {
+            // Soft delete user-created data
             await Address.updateMany({ user: { $in: guestIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
             await Cart.updateMany({ user: { $in: guestIds } }, { $set: { isDeleted: true } });
             await Order.updateMany({ user: { $in: guestIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
+            
+            // Restore any seed data that users may have deleted
+            await Address.updateMany({ user: { $in: guestIds }, isSeedData: true }, { $set: { isDeleted: false } });
+            await Order.updateMany({ user: { $in: guestIds }, isSeedData: true }, { $set: { isDeleted: false } });
         }
 
         const existingGuestNurseries = await Nursery.find({ nurseryEmail: GUEST_NURSERY_EMAIL });
         const guestNurseryIds = existingGuestNurseries.map(n => n._id);
 
         if (guestNurseryIds.length > 0) {
+            // Soft delete user-created data
             await Plant.updateMany({ nursery: { $in: guestNurseryIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
             await NurseryStoreBlocks.deleteMany({ nursery: { $in: guestNurseryIds } }); // Optional cleanup
             await NurseryStoreTemplates.deleteMany({ nursery: { $in: guestNurseryIds } }); // Optional cleanup
             await Order.updateMany({ "orderItems.nursery": { $in: guestNurseryIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
+            
+            // Restore any seed data that sellers may have deleted
+            await Plant.updateMany({ nursery: { $in: guestNurseryIds }, isSeedData: true }, { $set: { isDeleted: false } });
+            await Order.updateMany({ "orderItems.nursery": { $in: guestNurseryIds }, isSeedData: true }, { $set: { isDeleted: false } });
         }
 
         if (guestIds.length === 3 && guestNurseryIds.length > 0) {

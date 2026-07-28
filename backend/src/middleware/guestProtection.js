@@ -60,11 +60,18 @@ const guestProtection = async (req, res, next) => {
             if (resourceType === 'coupon') model = require('../model/nurseryModel/coupon');
 
             if (model) {
-                const doc = await model.findById(resourceId).select('isGuestData');
-                if (doc && doc.isGuestData !== true) {
-                    const error = new Error("Guest accounts are not allowed to modify or delete real user data.");
-                    error.statusCode = 403;
-                    return next(error);
+                const doc = await model.findById(resourceId).select('isGuestData isSeedData');
+                if (doc) {
+                    if (doc.isGuestData !== true) {
+                        const error = new Error("Guest accounts are not allowed to modify or delete real user data.");
+                        error.statusCode = 403;
+                        return next(error);
+                    }
+                    if (doc.isSeedData === true) {
+                        const error = new Error("This is a core demonstration item and cannot be modified or deleted. Feel free to create new items to test these features!");
+                        error.statusCode = 403;
+                        return next(error);
+                    }
                 }
             }
         }

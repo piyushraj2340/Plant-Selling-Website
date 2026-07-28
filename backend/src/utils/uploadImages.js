@@ -29,7 +29,9 @@ const deleteImages = async (images, options) => {
     try {
         return await cloudinary.api.delete_resources(images, options);
     } catch (error) {
-        console.log(error);
+        if (error && error.http_code !== 404) {
+            console.log("Cloudinary deleteImages Error:", error);
+        }
     }
 }
 
@@ -37,7 +39,9 @@ const deleteFolder = async (path) => {
     try {
         return await cloudinary.api.delete_folder(path);
     } catch (error) {
-        console.log(error);
+        if (error && error.http_code !== 404) {
+            console.log("Cloudinary deleteFolder Error:", error);
+        }
     }
 }
 
@@ -45,7 +49,9 @@ const deleteResourcesByPrefix = async (prefix, options) => {
     try {
         return await cloudinary.api.delete_resources_by_prefix(prefix, options);
     } catch (error) {
-        console.log(error);
+        if (error && error.http_code !== 404) {
+            console.log("Cloudinary deleteResourcesByPrefix Error:", error);
+        }
     }
 }
 
