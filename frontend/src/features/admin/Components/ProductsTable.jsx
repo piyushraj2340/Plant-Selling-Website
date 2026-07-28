@@ -251,7 +251,23 @@ const ProductsTable = () => {
     },
   ];
 
-  const hasSelected = selectedRowKeys.length > 0;
+  const disableBulkForGuest = isGuestAdmin && selectedRowKeys.some(key => {
+    const item = plants.find(p => p._id === key);
+    return item && !item.isGuestData;
+  });
+
+  const renderBulkButton = (content) => {
+    if (disableBulkForGuest) {
+      return (
+        <Tooltip title="Bulk action restricted: selection contains non-guest data">
+          <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+            {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+          </span>
+        </Tooltip>
+      );
+    }
+    return content;
+  };
 
   return (
     <div className="w-100">
@@ -279,15 +295,21 @@ const ProductsTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Publish ${selectedRowKeys.length} selected products?`} onConfirm={() => handleBulkStatusUpdate('Published')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Publish</button>
-          </Popconfirm>
-          <Popconfirm title={`Move ${selectedRowKeys.length} selected products to draft?`} onConfirm={() => handleBulkStatusUpdate('Draft')}>
-            <button className="btn btn-sm btn-secondary py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Draft</button>
-          </Popconfirm>
-          <Popconfirm title={`Put ${selectedRowKeys.length} selected products on hold?`} onConfirm={() => handleBulkStatusUpdate('On Hold')}>
-            <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk On Hold</button>
-          </Popconfirm>
+          {renderBulkButton(
+            <Popconfirm title={`Publish ${selectedRowKeys.length} selected products?`} onConfirm={() => handleBulkStatusUpdate('Published')} disabled={disableBulkForGuest}>
+              <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }} disabled={disableBulkForGuest}>Bulk Publish</button>
+            </Popconfirm>
+          )}
+          {renderBulkButton(
+            <Popconfirm title={`Move ${selectedRowKeys.length} selected products to draft?`} onConfirm={() => handleBulkStatusUpdate('Draft')} disabled={disableBulkForGuest}>
+              <button className="btn btn-sm btn-secondary py-1 px-2 text-white" style={{ fontSize: "12px" }} disabled={disableBulkForGuest}>Bulk Draft</button>
+            </Popconfirm>
+          )}
+          {renderBulkButton(
+            <Popconfirm title={`Put ${selectedRowKeys.length} selected products on hold?`} onConfirm={() => handleBulkStatusUpdate('On Hold')} disabled={disableBulkForGuest}>
+              <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }} disabled={disableBulkForGuest}>Bulk On Hold</button>
+            </Popconfirm>
+          )}
         </div>
       )}
       <Table

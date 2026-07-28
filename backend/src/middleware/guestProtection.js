@@ -42,6 +42,7 @@ const guestProtection = async (req, res, next) => {
         // typical path: api/v2/admin/users/12345 or api/v2/nursery/plants/12345
         let resourceType = '';
         let resourceId = req.params.id || req.body._id || req.body.id;
+        let resourceIds = req.body.ids || req.body.keys;
 
         if (pathSegments.includes('users')) resourceType = 'user';
         else if (pathSegments.includes('plants')) resourceType = 'plant';
@@ -50,7 +51,12 @@ const guestProtection = async (req, res, next) => {
         else if (pathSegments.includes('categories')) resourceType = 'category';
         else if (pathSegments.includes('coupons')) resourceType = 'coupon';
 
-        if (resourceType && resourceId) {
+        // Normalize into an array of IDs to check
+        let idsToCheck = [];
+        if (resourceId) idsToCheck.push(resourceId);
+        if (resourceIds && Array.isArray(resourceIds)) idsToCheck.push(...resourceIds);
+
+        if (resourceType && idsToCheck.length > 0) {
             let model;
             if (resourceType === 'user') model = require('../model/userModel/user');
             if (resourceType === 'plant') model = require('../model/nurseryModel/plants');
@@ -60,15 +66,15 @@ const guestProtection = async (req, res, next) => {
             if (resourceType === 'coupon') model = require('../model/nurseryModel/coupon');
 
             if (model) {
-                const doc = await model.findById(resourceId).select('isGuestData isSeedData');
-                if (doc) {
+                const docs = await model.find({ _id: { $in: idsToCheck } }).select('isGuestData isSeedData');
+                for (let doc of docs) {
                     if (doc.isGuestData !== true) {
-                        const error = new Error("Guest accounts are not allowed to modify or delete real user data.");
+                        const error = new Error("Guest accounts are not allowed to modify or delete real user data. Bulk operation aborted.");
                         error.statusCode = 403;
                         return next(error);
                     }
                     if (doc.isSeedData === true) {
-                        const error = new Error("This is a core demonstration item and cannot be modified or deleted. Feel free to create new items to test these features!");
+                        const error = new Error("This is a core demonstration item and cannot be modified or deleted. Bulk operation aborted.");
                         error.statusCode = 403;
                         return next(error);
                     }

@@ -271,6 +271,24 @@ const Users = () => {
         { label: 'Admin', value: 'admin' },
     ];
 
+    const disableBulkForGuest = isGuestAdmin && selectedRowKeys.some(key => {
+        const item = users.find(u => u._id === key);
+        return item && !item.isGuestData;
+    });
+
+    const renderBulkButton = (content) => {
+        if (disableBulkForGuest) {
+            return (
+                <Tooltip title="Bulk action restricted: selection contains non-guest data">
+                    <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                        {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+                    </span>
+                </Tooltip>
+            );
+        }
+        return content;
+    };
+
     return (
         <div className="container-fluid p-2 p-md-4 bg-white rounded border">
             <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
@@ -286,7 +304,7 @@ const Users = () => {
                         onChange={handleSearchChange}
                         style={{ width: '100%', maxWidth: '300px' }}
                     />
-                    {hasSelected && (
+                    {hasSelected && renderBulkButton(
                         <Popconfirm
                             title={`Delete ${selectedRowKeys.length} users?`}
                             description="Are you sure you want to permanently delete these selected users?"
@@ -294,8 +312,9 @@ const Users = () => {
                             okText="Yes, Delete All"
                             cancelText="No"
                             okButtonProps={{ danger: true }}
+                            disabled={disableBulkForGuest}
                         >
-                            <Button danger type="primary">
+                            <Button danger type="primary" disabled={disableBulkForGuest}>
                                 Bulk Delete ({selectedRowKeys.length})
                             </Button>
                         </Popconfirm>
