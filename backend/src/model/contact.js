@@ -28,6 +28,14 @@ const contactSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
+    }
 });
 
 module.exports = mongoose.model('Contact', contactSchema);

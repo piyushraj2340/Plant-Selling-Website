@@ -269,6 +269,8 @@ const ProductsTable = () => {
     return content;
   };
 
+  const hasSelected = selectedRowKeys.length > 0;
+
   return (
     <div className="w-100">
       <Row justify="space-between" align="middle" className="mb-4 mx-3 my-3">

@@ -50,6 +50,14 @@ function SideMenu({ openSlider, setOpenSlider }) {
                             </div>
                         </Link>
                     </div>
+                    <div className="nav-item m-2">
+                        <Link to={'/logout'} className='text-decoration-none hover-side-nav-link'>
+                            <div className={`nav-link py-2 rounded px-3 text-white`}>
+                                <i className="fas fa-sign-out-alt text-center" style={{ width: '20px' }}></i>
+                                {(openSlider || window.innerWidth > 992) && <span className="item ms-2">Logout</span>}
+                            </div>
+                        </Link>
+                    </div>
                 </div>
             </div >
         </div >

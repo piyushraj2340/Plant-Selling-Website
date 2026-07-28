@@ -50,6 +50,8 @@ const guestProtection = async (req, res, next) => {
         else if (pathSegments.includes('orders')) resourceType = 'order';
         else if (pathSegments.includes('categories')) resourceType = 'category';
         else if (pathSegments.includes('coupons')) resourceType = 'coupon';
+        else if (pathSegments.includes('reviews')) resourceType = 'review';
+        else if (pathSegments.includes('contact') || pathSegments.includes('support')) resourceType = 'help';
 
         // Normalize into an array of IDs to check
         let idsToCheck = [];
@@ -64,6 +66,8 @@ const guestProtection = async (req, res, next) => {
             if (resourceType === 'order') model = require('../model/checkoutModel/orders');
             if (resourceType === 'category') model = require('../model/category');
             if (resourceType === 'coupon') model = require('../model/nurseryModel/coupon');
+            if (resourceType === 'review') model = require('../model/nurseryModel/review');
+            if (resourceType === 'help') model = require('../model/contact');
 
             if (model) {
                 const docs = await model.find({ _id: { $in: idsToCheck } }).select('isGuestData isSeedData');

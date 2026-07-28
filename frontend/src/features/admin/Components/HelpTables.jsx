@@ -1,8 +1,10 @@
 import React from 'react';
-import { Table, Tag, Space } from 'antd';
-
+import { Table, Tag, Space, Tooltip } from 'antd';
+import useUserData from '../../../hooks/useUserData';
 
 const HelpTables = () => {
+    const { userData } = useUserData();
+    const isGuestAdmin = userData?.isGuestData;
     const dataSource = [
         {
             key: '1',
@@ -90,14 +92,30 @@ const HelpTables = () => {
             title: 'Action',
             dataIndex: 'action',
             key: 'action',
-            render: (action) => {
+            render: (_, record) => {
+                const disabledForGuest = isGuestAdmin && !record.isGuestData;
+
+                const disableAction = (content) => {
+                    if (disabledForGuest) {
+                        return (
+                            <Tooltip title="Action restricted for guest accounts">
+                                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                                    {React.cloneElement(content, { style: { ...content.props.style, pointerEvents: 'none' } })}
+                                </span>
+                            </Tooltip>
+                        );
+                    }
+                    return content;
+                };
+
                 return (
                     <>
                         <Space size={'small'} className='mb-1'>
-                            <button className='btn btn-sm btn-primary py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>chat</i> <span>Chat</span></button>
+                            {disableAction(
+                                <button className='btn btn-sm btn-primary py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} disabled={disabledForGuest}><i className='material-symbols-outlined' style={{ fontSize: "18px" }}>chat</i> <span>Chat</span></button>
+                            )}
                         </Space>
                     </>
-
                 )
             },
             width: 150
