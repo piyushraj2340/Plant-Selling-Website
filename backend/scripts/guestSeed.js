@@ -151,8 +151,9 @@ async function seedGuestData() {
                 stock: 25,
                 category: indoorCategory._id,
                 nursery: guestNursery._id,
+                user: sellerUser._id,
                 isGuestData: true,
-                imagesList: [{ public_id: "demo_m1", url: "https://images.unsplash.com/photo-1614594975525-e45190c55d40?q=80&w=400&auto=format&fit=crop" }],
+                images: [{ public_id: "demo_m1", url: "https://images.unsplash.com/photo-1614594975525-e45190c55d40?q=80&w=400&auto=format&fit=crop" }],
                 status: "Published"
             },
             {
@@ -163,8 +164,9 @@ async function seedGuestData() {
                 stock: 50,
                 category: indoorCategory._id,
                 nursery: guestNursery._id,
+                user: sellerUser._id,
                 isGuestData: true,
-                imagesList: [{ public_id: "demo_m2", url: "https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?q=80&w=400&auto=format&fit=crop" }],
+                images: [{ public_id: "demo_m2", url: "https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?q=80&w=400&auto=format&fit=crop" }],
                 status: "Published"
             },
             {
@@ -175,8 +177,9 @@ async function seedGuestData() {
                 stock: 10,
                 category: indoorCategory._id,
                 nursery: guestNursery._id,
+                user: sellerUser._id,
                 isGuestData: true,
-                imagesList: [{ public_id: "demo_m3", url: "https://images.unsplash.com/photo-1597055964864-1596541f5358?q=80&w=400&auto=format&fit=crop" }],
+                images: [{ public_id: "demo_m3", url: "https://images.unsplash.com/photo-1597055964864-1596541f5358?q=80&w=400&auto=format&fit=crop" }],
                 status: "Published"
             },
             {
@@ -187,8 +190,9 @@ async function seedGuestData() {
                 stock: 30,
                 category: indoorCategory._id,
                 nursery: guestNursery._id,
+                user: sellerUser._id,
                 isGuestData: true,
-                imagesList: [{ public_id: "demo_m4", url: "https://images.unsplash.com/photo-1598886364375-7b1897d2870c?q=80&w=400&auto=format&fit=crop" }],
+                images: [{ public_id: "demo_m4", url: "https://images.unsplash.com/photo-1598886364375-7b1897d2870c?q=80&w=400&auto=format&fit=crop" }],
                 status: "Published"
             },
             {
@@ -199,8 +203,9 @@ async function seedGuestData() {
                 stock: 100,
                 category: indoorCategory._id,
                 nursery: guestNursery._id,
+                user: sellerUser._id,
                 isGuestData: true,
-                imagesList: [{ public_id: "demo_m5", url: "https://images.unsplash.com/photo-1596547609652-9fc5d8d4285b?q=80&w=400&auto=format&fit=crop" }],
+                images: [{ public_id: "demo_m5", url: "https://images.unsplash.com/photo-1596547609652-9fc5d8d4285b?q=80&w=400&auto=format&fit=crop" }],
                 status: "Published"
             }
         ];
@@ -279,9 +284,13 @@ async function seedGuestData() {
 if (require.main === module) {
     require('dotenv').config({ path: __dirname + '/../.env' });
     require('../src/config/database/db'); // connect to DB
+    
     seedGuestData().then(() => {
         console.log("Exiting seed script...");
         process.exit(0);
+    }).catch(err => {
+        console.error("Seed script Error:", err);
+        process.exit(1);
     });
 }
 

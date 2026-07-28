@@ -159,9 +159,13 @@ export const authSlice = createSlice({
             state.isLoading = false;
             if (action.payload.status) {
                 const { result, token, message: msg } = action.payload;
-                localStorageUtil.setItem('accessToken', token.accessToken);
-                localStorageUtil.setItem('refreshToken', token.refreshToken);
-                localStorageUtil.setItem('user', result);
+                localStorageUtil.setData('accessToken', token.accessToken);
+                localStorageUtil.setData('refreshToken', token.refreshToken);
+                localStorageUtil.setData('user', result);
+                
+                resetToDefaultAuthStore(state);
+                trueAuthCheckResetAuthStore(state);
+
                 message.success(msg);
                 setTimeout(() => {
                     window.location.reload(); // Refresh to update states globally just like login
