@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { message } from 'antd';
+import { message, Modal } from 'antd';
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import useUserLogin from '../../../hooks/auth/useUserLogin';
 import { useDispatch, useSelector } from 'react-redux';
 import { resetState, guestLoginAsync } from '../authSlice';
@@ -45,7 +46,22 @@ function Login() {
     const { isLoading: guestLoading } = useSelector(state => state.auth);
 
     const handleGuestLogin = (role) => {
-        dispatch(guestLoginAsync({ role }));
+        Modal.confirm({
+            title: 'Welcome to the Guest Tour!',
+            icon: <ExclamationCircleOutlined style={{ color: '#faad14' }} />,
+            content: (
+                <div>
+                    <p>Guest Accounts are temporary demonstration accounts.</p>
+                    <p><strong>Note:</strong> Any data you create (orders, plants, cart items) will be automatically cleaned up every 24 hours.</p>
+                    <p>Upon logging in, you will receive a guided tour of the application!</p>
+                </div>
+            ),
+            okText: 'Confirm & Login',
+            cancelText: 'Cancel',
+            onOk() {
+                dispatch(guestLoginAsync({ role }));
+            },
+        });
     }
 
     return (

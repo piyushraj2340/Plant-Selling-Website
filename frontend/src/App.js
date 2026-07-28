@@ -7,6 +7,7 @@ import "./Asset/Style/Style.scss"
 import useScrollToTop from "./hooks/useScrollToTop";
 import Routing from "./Routing/Routing";
 import localStorageUtil from "./utils/localStorage";
+import AppTour from "./components/AppTour/AppTour";
 
 function App() {
   useScrollToTop();
@@ -61,6 +62,7 @@ function App() {
           </div>
         </>
       )}
+      <AppTour />
       <Routing />
     </ConfigProvider>
   );
