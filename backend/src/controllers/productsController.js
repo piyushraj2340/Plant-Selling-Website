@@ -48,10 +48,13 @@ exports.getAllPlants = async (req, res, next) => {
         } else if (sort === 'name_desc') {
             sortQuery.plantName = -1;
         } else if (sort === 'newest') {
-            sortQuery.createdAt = -1;
+            sortQuery.postedAt = -1;
         } else {
-            sortQuery.createdAt = -1; // Default
+            sortQuery.postedAt = -1; // Default
         }
+
+        // Always add a tie-breaker for pagination stability
+        sortQuery._id = 1;
 
         // Handle pagination
         const skip = (page - 1) * limit;
