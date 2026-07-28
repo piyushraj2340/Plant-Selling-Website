@@ -22,8 +22,8 @@ async function seedGuestData() {
     console.log("Starting Guest Data Wipe & Re-seed Process...");
 
     try {
-        // 1. WIPE PHASE
-        console.log("Wiping existing guest data...");
+        // 1. SOFT-DELETE PHASE
+        console.log("Cleaning up guest activity (Soft-Delete)...");
 
         // Find existing guest users
         const guestEmails = [GUEST_USER_EMAIL, GUEST_NURSERY_EMAIL, GUEST_ADMIN_EMAIL];
@@ -31,30 +31,30 @@ async function seedGuestData() {
         const guestIds = existingGuests.map(g => g._id);
 
         if (guestIds.length > 0) {
-            await Address.deleteMany({ user: { $in: guestIds } });
-            await Cart.deleteMany({ user: { $in: guestIds } });
-            await Order.deleteMany({ user: { $in: guestIds } });
+            await Address.updateMany({ user: { $in: guestIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
+            await Cart.updateMany({ user: { $in: guestIds } }, { $set: { isDeleted: true } });
+            await Order.updateMany({ user: { $in: guestIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
         }
 
         const existingGuestNurseries = await Nursery.find({ nurseryEmail: GUEST_NURSERY_EMAIL });
         const guestNurseryIds = existingGuestNurseries.map(n => n._id);
 
         if (guestNurseryIds.length > 0) {
-            await Plant.deleteMany({ nursery: { $in: guestNurseryIds } });
-            await NurseryStoreBlocks.deleteMany({ nursery: { $in: guestNurseryIds } });
-            await NurseryStoreTemplates.deleteMany({ nursery: { $in: guestNurseryIds } });
-            await Order.deleteMany({ "orderItems.nursery": { $in: guestNurseryIds } }); // Wipe orders for this nursery
+            await Plant.updateMany({ nursery: { $in: guestNurseryIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
+            await NurseryStoreBlocks.deleteMany({ nursery: { $in: guestNurseryIds } }); // Optional cleanup
+            await NurseryStoreTemplates.deleteMany({ nursery: { $in: guestNurseryIds } }); // Optional cleanup
+            await Order.updateMany({ "orderItems.nursery": { $in: guestNurseryIds }, isSeedData: { $ne: true } }, { $set: { isDeleted: true } });
         }
 
-        // Delete all data manually tagged as isGuestData: true
-        await Category.deleteMany({ isGuestData: true });
-        await Plant.deleteMany({ isGuestData: true });
-        await Order.deleteMany({ isGuestData: true });
-        await Nursery.deleteMany({ isGuestData: true });
-        await User.deleteMany({ isGuestData: true });
-        await User.deleteMany({ email: { $in: guestEmails } }); // Ensure exact wipe
+        if (guestIds.length === 3 && guestNurseryIds.length > 0) {
+            const seedPlantsExist = await Plant.countDocuments({ isGuestData: true, isSeedData: true });
+            if (seedPlantsExist > 0) {
+                console.log("Guest accounts and seed data already exist. Soft-delete complete. Skipping Seed phase...");
+                return;
+            }
+        }
 
-        console.log("Wipe completed. Starting Seed phase...");
+        console.log("Initial setup required. Starting Seed phase...");
 
         // 2. SEED PHASE - USERS
         const hashedPassword = await bcrypt.hash(GUEST_PASSWORD, 12);
@@ -110,7 +110,8 @@ async function seedGuestData() {
             address: "123 Demo Street, Suite 4B",
             city: "New Delhi",
             state: "Delhi",
-            isGuestData: true
+            isGuestData: true,
+            isSeedData: true
         });
         await guestAddress.save();
 
@@ -138,7 +139,8 @@ async function seedGuestData() {
             description: "Beautiful indoor plants for your home.",
             createdBy: adminUser._id,
             status: "Active",
-            isGuestData: true
+            isGuestData: true,
+            isSeedData: true
         });
         await indoorCategory.save();
 
@@ -173,6 +175,7 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
+                isSeedData: true,
                 images: [
                     { public_id: "demo_md_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785240309/PlantSeller/UI%20Images/guest-data/Monstera_Deliciosa_2_x7pen1.avif" },
                     { public_id: "demo_md_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785240308/PlantSeller/UI%20Images/guest-data/Monstera_Deliciosa_iii8mh.avif" }
@@ -189,6 +192,7 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
+                isSeedData: true,
                 images: [
                     { public_id: "demo_lnn_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241578/PlantSeller/UI%20Images/guest-data/Lotus_01_fujsay.avif" },
                     { public_id: "demo_lnn_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241581/PlantSeller/UI%20Images/guest-data/Lotus_02_tpsaxn.avif" }
@@ -205,6 +209,7 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
+                isSeedData: true,
                 images: [
                     { public_id: "demo_flf_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241001/PlantSeller/UI%20Images/guest-data/Fiddle_Leaf_Fig_01_zvoavp.avif" },
                     { public_id: "demo_flf_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241002/PlantSeller/UI%20Images/guest-data/Fiddle_Leaf_Fig_02_ovs6ni.avif" },
@@ -222,6 +227,7 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
+                isSeedData: true,
                 images: [
                     { public_id: "demo_pl_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241226/PlantSeller/UI%20Images/guest-data/Peace_Lily_01_vfzgdt.avif" },
                     { public_id: "demo_pl_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241229/PlantSeller/UI%20Images/guest-data/Peace_Lily_02_uk460h.avif" }
@@ -238,6 +244,7 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
+                isSeedData: true,
                 images: [
                     { public_id: "demo_av_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241376/PlantSeller/UI%20Images/guest-data/Aloe_Vera_02_nz1dhl.avif" },
                     { public_id: "demo_av_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241373/PlantSeller/UI%20Images/guest-data/Aloe_Vera_01_vrv64t.avif" }
@@ -246,62 +253,7 @@ async function seedGuestData() {
             }
         ];
 
-        const insertedPlants = await Plant.insertMany(plantsData);
-
-        // 5. SEED PHASE - STORE BLOCKS (Templates)
-        // (Skipping blocks for now as it requires complex relations to tabs and templates)
-
-
-        // 6. SEED PHASE - ORDERS
-        const sampleOrder = new Order({
-            user: standardUser._id,
-            orderItems: [
-                {
-                    plant: insertedPlants[0]._id,
-                    plantName: insertedPlants[0].plantName,
-                    nursery: guestNursery._id,
-                    nurseryName: guestNursery.nurseryName,
-                    quantity: 2,
-                    price: 499,
-                    discount: 10,
-                    images: { url: insertedPlants[0].images[0].url },
-                    orderStatus: { status: "Approved" }
-                },
-                {
-                    plant: insertedPlants[1]._id,
-                    plantName: insertedPlants[1].plantName,
-                    nursery: guestNursery._id,
-                    nurseryName: guestNursery.nurseryName,
-                    quantity: 1,
-                    price: 299,
-                    discount: 5,
-                    images: { url: insertedPlants[1].images[0].url },
-                    orderStatus: { status: "Processing" }
-                }
-            ],
-            shippingInfo: {
-                name: "Guest User Home",
-                phone: "9999999992",
-                pinCode: 110001,
-                address: "123 Demo Street",
-                city: "New Delhi",
-                state: "Delhi",
-            },
-            pricing: {
-                totalPriceWithoutDiscount: 1297,
-                totalDiscount: 64.85,
-                deliveryFee: 50,
-                finalPrice: 1282.15
-            },
-            payment: {
-                paymentId: "pi_demo_" + crypto.randomBytes(8).toString('hex'),
-                status: "succeeded",
-                message: "Paid via Guest Demo",
-                paymentMethods: "card"
-            },
-            isGuestData: true
-        });
-        await sampleOrder.save();
+        await Plant.insertMany(plantsData);
 
         console.log("✅ Guest Data Seed Completed Successfully!");
 

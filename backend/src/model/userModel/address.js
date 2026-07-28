@@ -49,9 +49,26 @@ const addressSchema = new mongoose.Schema({
     setAsDefault: {
         type: Boolean,
         default: false
+    },
+    isGuestData: {
+        type: Boolean,
+        default: false
+    },
+    isDeleted: {
+        type: Boolean,
+        default: false
+    },
+    isSeedData: {
+        type: Boolean,
+        default: false
     }
 });
 
 const address = new mongoose.model('address', addressSchema);
+
+addressSchema.pre(/^find/, function(next) {
+    this.where({ isDeleted: { $ne: true } });
+    next();
+});
 
 module.exports = address;
