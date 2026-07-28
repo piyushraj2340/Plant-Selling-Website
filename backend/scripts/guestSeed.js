@@ -147,39 +147,45 @@ async function seedGuestData() {
 
         // 4. SEED PHASE - CATEGORIES & PLANTS
         const indoorCategory = await Category.findOneAndUpdate(
-            { slug: "guest-indoor-plants" },
+            { _id: "650a2b4f9d8c7e6a5b4c3c01" },
             {
                 name: "Guest Indoor Plants",
+                slug: "guest-indoor-plants",
                 description: "Beautiful indoor plants for your home.",
                 createdBy: adminUser._id,
                 status: "Active",
                 isGuestData: true,
+                isSeedData: true,
                 isDeleted: false
             },
             { upsert: true, new: true }
         );
 
         const aquaticCategory = await Category.findOneAndUpdate(
-            { slug: "guest-aquatic-plants" },
+            { _id: "650a2b4f9d8c7e6a5b4c3c02" },
             {
                 name: "Guest Aquatic Plants",
+                slug: "guest-aquatic-plants",
                 description: "Beautiful aquatic plants for your home.",
                 createdBy: adminUser._id,
                 status: "Active",
                 isGuestData: true,
+                isSeedData: true,
                 isDeleted: false
             },
             { upsert: true, new: true }
         );
 
         const medicinalCategory = await Category.findOneAndUpdate(
-            { slug: "guest-medicinal-plants" },
+            { _id: "650a2b4f9d8c7e6a5b4c3c03" },
             {
                 name: "Guest Medicinal Plants",
+                slug: "guest-medicinal-plants",
                 description: "Beautiful medicinal plants for your home.",
                 createdBy: adminUser._id,
                 status: "Active",
                 isGuestData: true,
+                isSeedData: true,
                 isDeleted: false
             },
             { upsert: true, new: true }
