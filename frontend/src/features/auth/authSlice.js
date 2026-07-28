@@ -168,7 +168,19 @@ export const authSlice = createSlice({
 
                 message.success(msg);
                 setTimeout(() => {
-                    window.location.reload(); // Refresh to update states globally just like login
+                    // Clear flags so the tour plays again for this guest login
+                    localStorage.removeItem('hasSeenGuestTour_admin');
+                    localStorage.removeItem('hasSeenGuestTour_nursery');
+                    localStorage.removeItem('hasSeenGuestTour_user');
+
+                    // Redirect based on role so they land on a page with the side nav
+                    if (result.role.includes('admin')) {
+                        window.location.href = '/dashboard';
+                    } else if (result.role.includes('seller')) {
+                        window.location.href = '/nursery';
+                    } else {
+                        window.location.href = '/profile';
+                    }
                 }, 1000);
             } else {
                 state.error = action.payload;

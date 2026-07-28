@@ -1,95 +1,143 @@
 import React, { useState, useEffect } from 'react';
-import { Joyride, STATUS } from 'react-joyride';
-import { useSelector } from 'react-redux';
+import { Tour } from 'antd';
 import { useLocation } from 'react-router-dom';
 
+import localStorageUtil from '../../utils/localStorage';
+
 const AppTour = () => {
-    const { user } = useSelector((state) => state.auth);
+    const user = localStorageUtil.getData('user');
     const location = useLocation();
 
-    // Only show tour to Guest users who haven't seen it yet
-    const shouldShowTour = user && user.isGuestData && !localStorage.getItem('hasSeenGuestTour');
+    // Safety check - only for guest accounts
+    const isGuest = user && user.isGuestData;
 
-    const [run, setRun] = useState(false);
-    
-    // Steps for the tour
-    const [steps, setSteps] = useState([
-        {
-            target: 'body',
-            content: 'Welcome to the Guest Tour! Let us show you around the application. Note: All guest data is automatically reset every 24 hours.',
-            placement: 'center',
-            disableBeacon: true,
-        },
-        {
-            target: '.navbar',
-            content: 'This is the navigation bar. You can use it to browse products, access your profile, or view your cart.',
-            placement: 'bottom',
-        }
-    ]);
+    // Determine specific role
+    let activeRole = null;
+    if (isGuest && user.role) {
+        if (user.role.includes('admin')) activeRole = 'admin';
+        else if (user.role.includes('seller')) activeRole = 'nursery';
+        else activeRole = 'user';
+    }
+
+    // Check localStorage for the specific role's tour flag
+    const storageKey = `hasSeenGuestTour_${activeRole}`;
+    const hasSeenTour = localStorage.getItem(storageKey);
+
+    const shouldShowTour = isGuest && activeRole && !hasSeenTour;
+
+    const [open, setOpen] = useState(false);
+    const [steps, setSteps] = useState([]);
 
     useEffect(() => {
         if (shouldShowTour) {
-            
-            // Add conditional steps based on user role
-            let customSteps = [...steps];
-            
-            if (user.role.includes('admin')) {
-                customSteps.push({
-                    target: 'body',
-                    content: 'As a Guest Admin, you have access to the Admin Dashboard. Try clicking on the Admin panel to see analytics, user management, and product management.',
-                    placement: 'center'
-                });
-            } else if (user.role.includes('seller')) {
-                customSteps.push({
-                    target: 'body',
-                    content: 'As a Guest Nursery, you can manage your store! You can add products, customize your store layout, and view your sales.',
-                    placement: 'center'
-                });
+
+            // Immediately mark it as seen so that if the page refreshes midway, it doesn't show again!
+            localStorage.setItem(storageKey, 'true');
+
+            let roleSteps = [];
+
+            if (activeRole === 'admin') {
+                roleSteps = [
+                    {
+                        title: 'Welcome!',
+                        description: 'Welcome to the Guest Admin Tour! You have complete administrative control over the platform.',
+                        target: null,
+                    },
+                    { title: 'Admin Dashboard', description: 'This is the main Admin Dashboard overview.', target: () => document.querySelector('a[href="/dashboard"]') },
+                    { title: 'Manage Products', description: 'Manage all platform products and global inventory here.', target: () => document.querySelector('a[href="/dashboard/products"]') },
+                    { title: 'Global Orders', description: 'Monitor all incoming global orders.', target: () => document.querySelector('a[href="/dashboard/orders"]') },
+                    { title: 'User Reviews', description: 'Moderate and manage user reviews across the platform.', target: () => document.querySelector('a[href="/dashboard/review"]') },
+                    { title: 'Income & Revenue', description: 'View detailed income and revenue analytics.', target: () => document.querySelector('a[href="/dashboard/income"]') },
+                    { title: 'Coupons', description: 'Create and manage discount coupons.', target: () => document.querySelector('a[href="/dashboard/coupon"]') },
+                    { title: 'Categories', description: 'Manage the product categories available on the store.', target: () => document.querySelector('a[href="/dashboard/categories"]') },
+                    { title: 'Help Requests', description: 'View and respond to support tickets and help requests.', target: () => document.querySelector('a[href="/dashboard/help"]') },
+                    { title: 'User Management', description: 'Manage, edit, or block users on the platform.', target: () => document.querySelector('a[href="/dashboard/users"]') }
+                ];
+            } else if (activeRole === 'nursery') {
+                roleSteps = [
+                    {
+                        title: 'Welcome!',
+                        description: 'Welcome to the Guest Nursery Tour! Here you can manage your plant store and see incoming orders.',
+                        target: null,
+                    },
+                    { title: 'Nursery Dashboard', description: 'This is your main Seller Dashboard overview.', target: () => document.querySelector('[title="Manage Your Nursery"]') },
+                    { title: 'Manage Plants', description: 'Add new plants, edit existing stock, and manage inventory.', target: () => document.querySelector('[title="Manage Your Plants"]') },
+                    { title: 'Process Orders', description: 'Process and manage your incoming customer orders.', target: () => document.querySelector('[title="Manage Your Orders"]') },
+                    { title: 'Help & Messages', description: 'Access seller help and support.', target: () => document.querySelector('[title="Help & Messages"]') },
+                    { title: 'Active Chats', description: 'Chat directly with your customers.', target: () => document.querySelector('[title="Active Chats"]') },
+                    { title: 'Settings', description: 'Customize your nursery storefront details and settings.', target: () => document.querySelector('[title="Settings"]') }
+                ];
             } else {
-                customSteps.push({
-                    target: 'body',
-                    content: 'As a standard Guest User, you can browse plants, add them to your cart, and place demo orders.',
-                    placement: 'center'
-                });
+                roleSteps = [
+                    {
+                        title: 'Welcome!',
+                        description: 'Welcome to the Guest User Tour! Explore our plant catalog and place demo orders.',
+                        target: null,
+                    },
+                    { title: 'Order History', description: 'Track all your demo orders and view their history here.', target: () => document.querySelector('a[href="/orders/history"]') },
+                    { title: 'Shipping Addresses', description: 'Manage your shipping addresses here.', target: () => document.querySelector('a[href="/address"]') },
+                    { title: 'Direct Messages', description: 'View your direct messages with nurseries.', target: () => document.querySelector('a[href="/profile/messages"]') },
+                    { title: 'Become a Seller', description: 'Want to sell plants? You can apply to become a seller here!', target: () => document.querySelector('a[href="/nursery/create"]') },
+                    { title: 'Profile Settings', description: 'Manage your account settings and profile details.', target: () => document.querySelector('a[href="/profile/settings"]') }
+                ];
             }
 
-            setSteps(customSteps);
-            
-            // Small delay to ensure DOM elements are loaded
+            // Universal Nav Steps
+            roleSteps.push(
+                {
+                    title: 'Plant Catalog',
+                    description: 'Browse all of our available plants and products here.',
+                    target: () => document.querySelector('a[href="/products"]'),
+                },
+                {
+                    title: 'Search & Filters',
+                    description: 'Looking for something specific? Use the search bar and category filters to find exactly what you need.',
+                    target: () => document.querySelector('.input-group'),
+                },
+                {
+                    title: 'Contact Us',
+                    description: 'Have a question? Reach out to our support team anytime.',
+                    target: () => document.querySelector('a[href="/contact-us"]'),
+                },
+                {
+                    title: 'Your Profile',
+                    description: 'Quickly access your user profile or login from here.',
+                    target: () => document.querySelector('a[href="/profile"], a[href="/login"]'),
+                },
+                {
+                    title: 'Shopping Cart',
+                    description: 'Your Shopping Cart is here. Add products to your cart and checkout using fake demo credit cards.',
+                    target: () => document.querySelector('a[href="/cart"]'),
+                },
+                {
+                    title: 'Temporary Guest Session',
+                    description: 'Important Reminder: This is a temporary guest account. Any data you create or modify will be automatically soft-deleted after 24 hours to keep the platform clean!',
+                    target: null
+                }
+            );
+
+            setSteps(roleSteps);
+
+            // Small delay to let the DOM settle before running the tour
             setTimeout(() => {
-                setRun(true);
+                setOpen(true);
             }, 1000);
         }
-    }, [shouldShowTour, user]);
+    }, [shouldShowTour, activeRole, storageKey, location.pathname]); // Added location.pathname to re-check if route changed
 
-    const handleJoyrideCallback = (data) => {
-        const { status } = data;
-        const finishedStatuses = [STATUS.FINISHED, STATUS.SKIPPED];
-
-        if (finishedStatuses.includes(status)) {
-            // Tour is over, save flag to local storage so they don't see it again on refresh
-            localStorage.setItem('hasSeenGuestTour', 'true');
-            setRun(false);
-        }
+    const handleClose = () => {
+        setOpen(false);
     };
 
-    if (!shouldShowTour) return null;
+    if (!shouldShowTour && !open) return null;
+    if (steps.length === 0) return null;
 
     return (
-        <Joyride
-            callback={handleJoyrideCallback}
-            continuous={true}
-            run={run}
-            scrollToFirstStep={true}
-            showProgress={true}
-            showSkipButton={true}
+        <Tour
+            open={open}
+            onClose={handleClose}
             steps={steps}
-            styles={{
-                options: {
-                    zIndex: 10000,
-                    primaryColor: '#198754',
-                },
-            }}
+            type="primary"
         />
     );
 };

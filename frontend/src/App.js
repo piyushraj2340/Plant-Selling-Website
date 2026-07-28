@@ -62,8 +62,8 @@ function App() {
           </div>
         </>
       )}
-      <AppTour />
       <Routing />
+      <AppTour />
     </ConfigProvider>
   );
 }
