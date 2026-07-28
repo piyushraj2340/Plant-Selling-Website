@@ -24,7 +24,7 @@ async function seedGuestData() {
     try {
         // 1. WIPE PHASE
         console.log("Wiping existing guest data...");
-        
+
         // Find existing guest users
         const guestEmails = [GUEST_USER_EMAIL, GUEST_NURSERY_EMAIL, GUEST_ADMIN_EMAIL];
         const existingGuests = await User.find({ email: { $in: guestEmails } });
@@ -35,7 +35,7 @@ async function seedGuestData() {
             await Cart.deleteMany({ user: { $in: guestIds } });
             await Order.deleteMany({ user: { $in: guestIds } });
         }
-        
+
         const existingGuestNurseries = await Nursery.find({ nurseryEmail: GUEST_NURSERY_EMAIL });
         const guestNurseryIds = existingGuestNurseries.map(n => n._id);
 
@@ -126,8 +126,8 @@ async function seedGuestData() {
             state: "Maharashtra",
             pinCode: 411001,
             isGuestData: true,
-            avatar: { url: "https://images.unsplash.com/photo-1585320806297-9794b3e4ce88?q=80&w=150&auto=format&fit=crop" },
-            cover: { url: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=1200&auto=format&fit=crop" }
+            avatar: { url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785239935/PlantSeller/UI%20Images/nursary_avatar_ey00ge.png" },
+            cover: { url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785239933/PlantSeller/UI%20Images/4-1_cover_image_wyqt7a.png" }
         });
         await guestNursery.save();
 
@@ -142,10 +142,30 @@ async function seedGuestData() {
         });
         await indoorCategory.save();
 
+        const aquaticCategory = new Category({
+            name: "Guest Aquatic Plants",
+            slug: "guest-aquatic-plants",
+            description: "Beautiful aquatic plants for your home.",
+            createdBy: adminUser._id,
+            status: "Active",
+            isGuestData: true
+        });
+        await aquaticCategory.save();
+
+        const medicinalCategory = new Category({
+            name: "Guest Medicinal Plants",
+            slug: "guest-medicinal-plants",
+            description: "Beautiful medicinal plants for your home.",
+            createdBy: adminUser._id,
+            status: "Active",
+            isGuestData: true
+        });
+        await medicinalCategory.save();
+
         const plantsData = [
             {
                 plantName: "Monstera Deliciosa",
-                description: "<h4>The Swiss Cheese Plant</h4><p>A classic, easy-to-grow houseplant known for its natural leaf holes.</p>",
+                description: "<p><strong>Monstera Deliciosa</strong>, commonly known as the Swiss Cheese Plant, is a popular tropical houseplant admired for its large, glossy green leaves with distinctive natural splits and holes. Native to the rainforests of Central America, it brings a lush, exotic look to homes and offices.</p><p>This low-maintenance plant thrives in bright, indirect sunlight and prefers well-draining soil with moderate watering. Its air-purifying qualities and rapid growth make it an excellent choice for both beginner and experienced plant enthusiasts.</p><h2>Key Features</h2><ul><li>Large, split, heart-shaped green leaves</li><li>Easy to grow and maintain</li><li>Prefers bright, indirect light</li><li>Helps improve indoor air quality</li><li>Perfect for homes, offices, and indoor spaces</li></ul><p>With proper care, Monstera Deliciosa can grow into a stunning statement plant, adding natural beauty and a tropical atmosphere to any interior space.</p>",
                 price: 499,
                 discount: 10,
                 stock: 25,
@@ -153,25 +173,31 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
-                images: [{ public_id: "demo_m1", url: "https://images.unsplash.com/photo-1614594975525-e45190c55d40?q=80&w=400&auto=format&fit=crop" }],
+                images: [
+                    { public_id: "demo_md_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785240309/PlantSeller/UI%20Images/guest-data/Monstera_Deliciosa_2_x7pen1.avif" },
+                    { public_id: "demo_md_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785240308/PlantSeller/UI%20Images/guest-data/Monstera_Deliciosa_iii8mh.avif" }
+                ],
                 status: "Published"
             },
             {
-                plantName: "Snake Plant (Sansevieria)",
-                description: "<h4>Perfect for Beginners</h4><p>Extremely resilient and great for air purification.</p>",
+                plantName: "Lotus (Nelumbo nucifera)",
+                description: "<p><strong>Lotus (Nelumbo nucifera)</strong> is a beautiful aquatic flowering plant revered for its elegant blooms and deep cultural significance. Native to Asia, it grows in ponds, lakes, and other calm freshwater bodies, producing large fragrant flowers in shades of pink, white, and occasionally yellow.</p><p>The lotus thrives in full sunlight and nutrient-rich soil submerged beneath water. Its broad, circular leaves float gracefully on the water's surface, while its flowers rise above the water, symbolizing purity, resilience, and spiritual enlightenment.</p><h2>Key Features</h2><ul><li>Large, fragrant pink or white flowers</li><li>Thrives in ponds and freshwater gardens</li><li>Requires full sunlight for optimal blooming</li><li>Symbolizes purity, peace, and spiritual growth</li><li>Ideal for water gardens and ornamental landscapes</li></ul><p>With proper care, Lotus (Nelumbo nucifera) produces stunning seasonal blooms that enhance the beauty of any aquatic garden while attracting pollinators such as bees and butterflies.</p>",
                 price: 299,
                 discount: 5,
                 stock: 50,
-                category: indoorCategory._id,
+                category: aquaticCategory._id,
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
-                images: [{ public_id: "demo_m2", url: "https://images.unsplash.com/photo-1593482892290-f54927ae1b7e?q=80&w=400&auto=format&fit=crop" }],
+                images: [
+                    { public_id: "demo_lnn_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241578/PlantSeller/UI%20Images/guest-data/Lotus_01_fujsay.avif" },
+                    { public_id: "demo_lnn_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241581/PlantSeller/UI%20Images/guest-data/Lotus_02_tpsaxn.avif" }
+                ],
                 status: "Published"
             },
             {
                 plantName: "Fiddle Leaf Fig",
-                description: "<h4>Trendy & Elegant</h4><p>Features broad, beautifully textured leaves.</p>",
+                description: "<p><strong>Fiddle Leaf Fig</strong> is a popular indoor ornamental plant known for its large, glossy, violin-shaped leaves and striking architectural appearance. Native to the tropical rainforests of West Africa, it is a favorite choice for homes, offices, and modern interior spaces.</p><p>This elegant plant thrives in bright, indirect sunlight and prefers well-draining soil with moderate watering. With proper care and consistent conditions, the Fiddle Leaf Fig can grow into a stunning focal point, adding height, greenery, and sophistication to any room.</p><h2>Key Features</h2><ul><li>Large, glossy, fiddle-shaped green leaves</li><li>Ideal for bright indoor spaces</li><li>Easy to maintain with proper care</li><li>Enhances interior décor with a bold tropical look</li><li>Perfect for homes, offices, and commercial interiors</li></ul><p>The Fiddle Leaf Fig is an excellent choice for plant enthusiasts seeking a stylish, long-lasting houseplant that brings natural beauty and a refreshing ambiance to indoor environments.</p>",
                 price: 899,
                 discount: 15,
                 stock: 10,
@@ -179,12 +205,16 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
-                images: [{ public_id: "demo_m3", url: "https://images.unsplash.com/photo-1597055964864-1596541f5358?q=80&w=400&auto=format&fit=crop" }],
+                images: [
+                    { public_id: "demo_flf_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241001/PlantSeller/UI%20Images/guest-data/Fiddle_Leaf_Fig_01_zvoavp.avif" },
+                    { public_id: "demo_flf_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241002/PlantSeller/UI%20Images/guest-data/Fiddle_Leaf_Fig_02_ovs6ni.avif" },
+                    { public_id: "demo_flf_3", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241004/PlantSeller/UI%20Images/guest-data/Fiddle_Leaf_Fig_03_fxqjxs.avif" }
+                ],
                 status: "Published"
             },
             {
                 plantName: "Peace Lily",
-                description: "<h4>Beautiful White Blooms</h4><p>A gorgeous plant that thrives in low light.</p>",
+                description: "<p><strong>Peace Lily</strong> is a graceful indoor plant cherished for its lush dark green foliage and elegant white blooms. Native to the tropical regions of the Americas and Southeast Asia, it is one of the most popular houseplants due to its beauty, low maintenance, and air-purifying properties.</p><p>This hardy plant thrives in bright, indirect light but can also tolerate low-light conditions. It prefers consistently moist, well-draining soil and rewards proper care with stunning white flowers that bloom throughout the year.</p><h2>Key Features</h2><ul><li>Elegant white flowers and glossy green leaves</li><li>Excellent air-purifying indoor plant</li><li>Thrives in low to bright indirect light</li><li>Easy to care for and beginner-friendly</li><li>Perfect for homes, offices, and indoor spaces</li></ul><p>With minimal care, the Peace Lily adds natural beauty, freshness, and a calming atmosphere to any indoor environment while helping improve indoor air quality.</p>",
                 price: 349,
                 discount: 0,
                 stock: 30,
@@ -192,20 +222,26 @@ async function seedGuestData() {
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
-                images: [{ public_id: "demo_m4", url: "https://images.unsplash.com/photo-1598886364375-7b1897d2870c?q=80&w=400&auto=format&fit=crop" }],
+                images: [
+                    { public_id: "demo_pl_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241226/PlantSeller/UI%20Images/guest-data/Peace_Lily_01_vfzgdt.avif" },
+                    { public_id: "demo_pl_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241229/PlantSeller/UI%20Images/guest-data/Peace_Lily_02_uk460h.avif" }
+                ],
                 status: "Published"
             },
             {
                 plantName: "Aloe Vera",
-                description: "<h4>Healing & Hardy</h4><p>A medicinal succulent that requires very little water.</p>",
+                description: "<p><strong>Aloe Vera</strong> is a popular succulent plant known for its thick, fleshy green leaves filled with a soothing gel commonly used in skincare and wellness products. Native to the Arabian Peninsula, it is widely grown as an indoor and outdoor plant for its medicinal, ornamental, and easy-care qualities.</p><p>This low-maintenance plant thrives in bright, indirect sunlight and prefers dry, well-draining soil with minimal watering. Its drought-resistant nature makes Aloe Vera an excellent choice for beginners and plant enthusiasts looking for a hardy and attractive succulent.</p><h2>Key Features</h2><ul><li>Thick, pointed leaves containing soothing gel</li><li>Requires minimal watering and care</li><li>Thrives in bright light and dry conditions</li><li>Popular for skincare and wellness uses</li><li>Ideal for homes, offices, and indoor gardens</li></ul><p>With proper care, Aloe Vera grows into a healthy, attractive plant that adds greenery to any space while providing natural benefits and a refreshing touch to indoor environments.</p>",
                 price: 199,
                 discount: 0,
                 stock: 100,
-                category: indoorCategory._id,
+                category: medicinalCategory._id,
                 nursery: guestNursery._id,
                 user: sellerUser._id,
                 isGuestData: true,
-                images: [{ public_id: "demo_m5", url: "https://images.unsplash.com/photo-1596547609652-9fc5d8d4285b?q=80&w=400&auto=format&fit=crop" }],
+                images: [
+                    { public_id: "demo_av_1", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241376/PlantSeller/UI%20Images/guest-data/Aloe_Vera_02_nz1dhl.avif" },
+                    { public_id: "demo_av_2", url: "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241373/PlantSeller/UI%20Images/guest-data/Aloe_Vera_01_vrv64t.avif" }
+                ],
                 status: "Published"
             }
         ];
@@ -277,7 +313,7 @@ async function seedGuestData() {
 if (require.main === module) {
     require('dotenv').config({ path: __dirname + '/../.env' });
     require('../src/config/database/db'); // connect to DB
-    
+
     seedGuestData().then(() => {
         console.log("Exiting seed script...");
         process.exit(0);
