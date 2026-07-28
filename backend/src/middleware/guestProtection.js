@@ -33,15 +33,24 @@ const guestProtection = async (req, res, next) => {
         }
 
         // If the request is a non-mutating request (GET), allow it.
-        if (req.method === 'GET' || req.method === 'POST') {
+        if (req.method === 'GET' || (req.method === 'POST' && !req.originalUrl.includes('reply'))) {
             return next();
         }
 
-        // For PUT, PATCH, DELETE, we must verify the target entity isGuestData.
+        // For PUT, PATCH, DELETE, and specific POSTs, we must verify the target entity isGuestData.
         const pathSegments = req.originalUrl.split('?')[0].split('/').filter(Boolean);
         // typical path: api/v2/admin/users/12345 or api/v2/nursery/plants/12345
         let resourceType = '';
         let resourceId = req.params.id || req.body._id || req.body.id;
+        
+        // Attempt to extract from path segments if it's a 24-char hex string (ObjectId)
+        if (!resourceId) {
+            const possibleId = pathSegments.find(segment => segment.length === 24 && /^[0-9a-fA-F]{24}$/.test(segment));
+            if (possibleId) {
+                resourceId = possibleId;
+            }
+        }
+
         let resourceIds = req.body.ids || req.body.keys;
 
         if (pathSegments.includes('users')) resourceType = 'user';

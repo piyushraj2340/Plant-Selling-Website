@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Table, Tag, Space, Modal, Input, Form, message, Popconfirm, Row, Col } from 'antd';
+import { Table, Tag, Space, Modal, Input, Form, message, Popconfirm, Row, Col, Tooltip } from 'antd';
 import { useDispatch, useSelector } from 'react-redux';
 import { adminGetContactsAsync, adminReplyToContactAsync, adminDeleteContactAsync } from '../adminSlice';
 import { useTableParams } from '../../../hooks/useTableParams';
+import useUserData from '../../../hooks/useUserData';
 
 const Help = () => {
+  const { userData } = useUserData();
+  const isGuestAdmin = userData?.isGuestData;
+
   const dispatch = useDispatch();
   const { contactsData, isLoading } = useSelector((state) => state.admin);
   const contacts = contactsData?.contacts || [];
@@ -114,30 +118,52 @@ const Help = () => {
     {
       title: 'Action',
       key: 'action',
-      render: (_, record) => (
-        <Space size="middle">
-          <button 
-            className="btn btn-sm btn-primary" 
-            onClick={() => showReplyModal(record)}
-            disabled={record.isReplied}
-          >
-            {record.isReplied ? 'Replied' : 'Reply'}
-          </button>
-          
-          <Popconfirm
-            title="Delete this message?"
-            description="Are you sure to delete this message? This action cannot be undone."
-            onConfirm={() => handleDelete(record._id)}
-            okText="Yes, Delete"
-            cancelText="No"
-            okButtonProps={{ danger: true }}
-          >
-            <button className="btn btn-sm btn-danger">
-              <i className="fas fa-trash"></i>
-            </button>
-          </Popconfirm>
-        </Space>
-      ),
+      render: (_, record) => {
+        const disabledForGuest = isGuestAdmin && !record.isGuestData;
+        
+        const disableAction = (content) => {
+            if (disabledForGuest) {
+                return (
+                    <Tooltip title="Action restricted for guest accounts">
+                        <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                            {React.cloneElement(content, { style: { ...content.props?.style, pointerEvents: 'none' } })}
+                        </span>
+                    </Tooltip>
+                );
+            }
+            return content;
+        };
+
+        return (
+            <Space size="middle">
+              {disableAction(
+                  <button 
+                    className="btn btn-sm btn-primary" 
+                    onClick={() => showReplyModal(record)}
+                    disabled={record.isReplied || disabledForGuest}
+                  >
+                    {record.isReplied ? 'Replied' : 'Reply'}
+                  </button>
+              )}
+              
+              {disableAction(
+                  <Popconfirm
+                    title="Delete this message?"
+                    description="Are you sure to delete this message? This action cannot be undone."
+                    onConfirm={() => handleDelete(record._id)}
+                    okText="Yes, Delete"
+                    cancelText="No"
+                    okButtonProps={{ danger: true }}
+                    disabled={disabledForGuest}
+                  >
+                    <button className="btn btn-sm btn-danger" disabled={disabledForGuest}>
+                      <i className="fas fa-trash"></i>
+                    </button>
+                  </Popconfirm>
+              )}
+            </Space>
+        )
+      },
     },
   ];
 

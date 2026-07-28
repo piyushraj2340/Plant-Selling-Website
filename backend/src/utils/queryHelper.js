@@ -13,7 +13,7 @@ const getQueryOptions = (req) => {
         sortOrder = 1;
     }
 
-    return { page, limit, skip, search, sort: { [sortField]: sortOrder } };
+    return { page, limit, skip, search, sort: { [sortField]: sortOrder, _id: 1 } };
 };
 
 // Helper for generating search regex for specific fields

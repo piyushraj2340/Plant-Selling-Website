@@ -290,7 +290,7 @@ const adminController = {
             if (searchQueryStr) {
                 const keywords = searchQueryStr.trim().split(/\s+/);
                 
-                const matchingCategories = await Category.find({ categoryName: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
+                const matchingCategories = await Category.find({ name: { $regex: keywords.join('|'), $options: 'i' } }).select('_id');
                 const categoryIds = matchingCategories.map(c => c._id);
                 
                 query.$or = [
@@ -315,7 +315,7 @@ const adminController = {
 
             if (tag) {
                 const tagsList = tag.split(',').map(s => new RegExp(`^${s.trim()}$`, 'i'));
-                const matchingCategories = await Category.find({ categoryName: { $in: tagsList } }).select('_id');
+                const matchingCategories = await Category.find({ name: { $in: tagsList } }).select('_id');
                 const categoryIds = matchingCategories.map(c => c._id);
                 
                 if (categoryIds.length > 0) {
@@ -328,7 +328,7 @@ const adminController = {
             const total = await Plant.countDocuments(query);
             const plants = await Plant.find(query)
                 .populate('nursery', 'nurseryName')
-                .populate('category', 'categoryName') // ensure category is populated if it's an objectId
+                .populate('category', 'name') // ensure category is populated if it's an objectId
                 .sort(sort)
                 .skip(skip)
                 .limit(limit);
