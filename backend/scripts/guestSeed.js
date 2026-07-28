@@ -213,15 +213,8 @@ async function seedGuestData() {
         const insertedPlants = await Plant.insertMany(plantsData);
 
         // 5. SEED PHASE - STORE BLOCKS (Templates)
-        const block = new NurseryStoreBlocks({
-            nursery: guestNursery._id,
-            blockName: "Hero Banner",
-            blockType: "header",
-            content: "Welcome to Evergreen Botanicals!",
-            images: [{ url: "https://images.unsplash.com/photo-1466692476868-aef1dfb1e735?q=80&w=1200&auto=format&fit=crop" }],
-            isGuestData: true
-        });
-        await block.save();
+        // (Skipping blocks for now as it requires complex relations to tabs and templates)
+
 
         // 6. SEED PHASE - ORDERS
         const sampleOrder = new Order({
@@ -235,7 +228,7 @@ async function seedGuestData() {
                     quantity: 2,
                     price: 499,
                     discount: 10,
-                    images: { url: insertedPlants[0].imagesList[0].url },
+                    images: { url: insertedPlants[0].images[0].url },
                     orderStatus: { status: "Approved" }
                 },
                 {
@@ -246,7 +239,7 @@ async function seedGuestData() {
                     quantity: 1,
                     price: 299,
                     discount: 5,
-                    images: { url: insertedPlants[1].imagesList[0].url },
+                    images: { url: insertedPlants[1].images[0].url },
                     orderStatus: { status: "Processing" }
                 }
             ],
