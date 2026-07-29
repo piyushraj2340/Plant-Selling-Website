@@ -1,36 +1,40 @@
-[{
-  "_id": {
-    "$oid": "6a68a9324fb50f72fc0ccf4e"
+[
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf4e"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "name": "Guest User Home",
+    "phone": "9999999992",
+    "pinCode": "110001",
+    "address": "123 Demo Street, Suite 4B",
+    "city": "New Delhi",
+    "state": "Delhi",
+    "setAsDefault": false,
+    "__v": 0,
+    "isDeleted": true,
+    "isGuestData": true,
+    "isSeedData": true
   },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4a"
-  },
-  "name": "Guest User Home",
-  "phone": "9999999992",
-  "pinCode": "110001",
-  "address": "123 Demo Street, Suite 4B",
-  "city": "New Delhi",
-  "state": "Delhi",
-  "setAsDefault": false,
-  "__v": 0,
-  "isDeleted": true
-},
-{
-  "_id": {
-    "$oid": "6a68e01ac0500290bad0d2f7"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4a"
-  },
-  "isSeedData": true,
-  "__v": 0,
-  "address": "123 Demo Street, Suite 4B",
-  "city": "New Delhi",
-  "isDeleted": false,
-  "isGuestData": true,
-  "name": "Guest User Home",
-  "phone": "9999999992",
-  "pinCode": "110001",
-  "setAsDefault": false,
-  "state": "Delhi"
-}]
+  {
+    "_id": {
+      "$oid": "6a68e01ac0500290bad0d2f7"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "isSeedData": true,
+    "__v": 0,
+    "address": "123 Demo Street, Suite 4B",
+    "city": "New Delhi",
+    "isDeleted": false,
+    "isGuestData": true,
+    "name": "Guest User Home",
+    "phone": "9999999992",
+    "pinCode": "110001",
+    "setAsDefault": false,
+    "state": "Delhi"
+  }
+]

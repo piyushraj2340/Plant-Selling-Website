@@ -1,0 +1,52 @@
+[
+  {
+    "_id": {
+      "$oid": "6a6975472648b33aedec136d"
+    },
+    "cart": {
+      "$oid": "6a69753e2648b33aedec12f2"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d25"
+    },
+    "quantity": 1,
+    "addedAtPrice": 199,
+    "addedAt": {
+      "$date": "2026-07-29T03:36:39.682Z"
+    },
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a6975492648b33aedec1383"
+    },
+    "cart": {
+      "$oid": "6a69753e2648b33aedec12f2"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d24"
+    },
+    "quantity": 1,
+    "addedAtPrice": 349,
+    "addedAt": {
+      "$date": "2026-07-29T03:36:41.345Z"
+    },
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]

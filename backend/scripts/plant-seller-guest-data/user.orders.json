@@ -1,41 +1,43 @@
-[{
-  "_id": {
-    "$oid": "6a691d0ba9f4584c2389e2f4"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4a"
-  },
-  "vendorOrders": [
-    {
-      "$oid": "6a691d0ba9f4584c2389e2f6"
-    }
-  ],
-  "overallStatus": "Delivered",
-  "shippingInfo": {
-    "name": "Guest User Home",
-    "phone": "9999999992",
-    "pinCode": "110001",
-    "address": "123 Demo Street, Suite 4B",
-    "city": "New Delhi",
-    "state": "Delhi"
-  },
-  "pricing": {
-    "totalPriceWithoutDiscount": 1447,
-    "totalDiscount": 234.85,
-    "deliveryFee": 0,
-    "finalPrice": 1212.15
-  },
-  "payment": {
-    "paymentId": "pi_3TyIQ2SFK1jaF7zC1yjeaMIP",
-    "paymentMethods": "card",
-    "status": "succeeded",
-    "message": "Payment Succeeded"
-  },
-  "isGuestData": false,
-  "isDeleted": false,
-  "isSeedData": false,
-  "orderAt": {
-    "$date": "2026-07-28T21:20:11.011Z"
-  },
-  "__v": 1
-}]
+[
+  {
+    "_id": {
+      "$oid": "6a691d0ba9f4584c2389e2f4"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "vendorOrders": [
+      {
+        "$oid": "6a691d0ba9f4584c2389e2f6"
+      }
+    ],
+    "overallStatus": "Delivered",
+    "shippingInfo": {
+      "name": "Guest User Home",
+      "phone": "9999999992",
+      "pinCode": "110001",
+      "address": "123 Demo Street, Suite 4B",
+      "city": "New Delhi",
+      "state": "Delhi"
+    },
+    "pricing": {
+      "totalPriceWithoutDiscount": 1447,
+      "totalDiscount": 234.85,
+      "deliveryFee": 0,
+      "finalPrice": 1212.15
+    },
+    "payment": {
+      "paymentId": "pi_3TyIQ2SFK1jaF7zC1yjeaMIP",
+      "paymentMethods": "card",
+      "status": "succeeded",
+      "message": "Payment Succeeded"
+    },
+    "isGuestData": true,
+    "isDeleted": false,
+    "isSeedData": true,
+    "orderAt": {
+      "$date": "2026-07-28T21:20:11.011Z"
+    },
+    "__v": 1
+  }
+]

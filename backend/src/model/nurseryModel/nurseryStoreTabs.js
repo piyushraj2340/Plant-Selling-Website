@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const nurseryStoreTabSchema = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     user: {
         type: mongoose.Schema.ObjectId,
         ref: "user",

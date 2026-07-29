@@ -1,36 +1,39 @@
-[{
-  "_id": {
-    "$oid": "6a68a9324fb50f72fc0ccf50"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4c"
-  },
-  "nurseryOwnerName": "Guest Seller",
-  "nurseryName": "Evergreen Botanicals (Demo)",
-  "avatar": {
-    "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785239935/PlantSeller/UI%20Images/nursary_avatar_ey00ge.png"
-  },
-  "cover": {
-    "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785239933/PlantSeller/UI%20Images/4-1_cover_image_wyqt7a.png"
-  },
-  "nurseryEmail": "guest-seller@plantseller.com",
-  "nurseryPhone": "9999999993",
-  "address": "456 Greenhouse Lane",
-  "pinCode": 411001,
-  "city": "Pune",
-  "state": "Maharashtra",
-  "isGuestData": true,
-  "smtpSettings": {
-    "email": "",
-    "password": ""
-  },
-  "socialLinks": {
-    "facebook": "",
-    "instagram": "",
-    "website": ""
-  },
-  "isActive": true,
-  "avatarList": [],
-  "coverList": [],
-  "__v": 0
-}]
+[
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nurseryOwnerName": "Guest Seller",
+    "nurseryName": "Evergreen Botanicals (Demo)",
+    "avatar": {
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785239935/PlantSeller/UI%20Images/nursary_avatar_ey00ge.png"
+    },
+    "cover": {
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785239933/PlantSeller/UI%20Images/4-1_cover_image_wyqt7a.png"
+    },
+    "nurseryEmail": "guest-seller@plantseller.com",
+    "nurseryPhone": "9999999993",
+    "address": "456 Greenhouse Lane",
+    "pinCode": 411001,
+    "city": "Pune",
+    "state": "Maharashtra",
+    "isGuestData": true,
+    "smtpSettings": {
+      "email": "",
+      "password": ""
+    },
+    "socialLinks": {
+      "facebook": "",
+      "instagram": "",
+      "website": ""
+    },
+    "isActive": true,
+    "avatarList": [],
+    "coverList": [],
+    "__v": 0,
+    "isSeedData": true
+  }
+]

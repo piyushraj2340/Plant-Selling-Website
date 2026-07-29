@@ -65,7 +65,8 @@ const couponSchema = new mongoose.Schema({
     // Metadata
     createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'user' },
     isGuestData: { type: Boolean, default: false }
-}, { 
+},
+    isSeedData: { type: Boolean, default: false }, { 
     timestamps: true 
 });
 

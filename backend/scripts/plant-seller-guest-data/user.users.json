@@ -1,20 +1,23 @@
-[{
-  "_id": {
-    "$oid": "6a68a9324fb50f72fc0ccf4a"
-  },
-  "name": "Guest User",
-  "email": "guest-user@plantseller.com",
-  "phone": "9999999992",
-  "password": "$2a$12$e.A1t93guh6n/.yQ9NXbzes/QvVwJkvhosm9YBFV6SE5fW5.gLiWO",
-  "role": [
-    "user"
-  ],
-  "isUserVerified": true,
-  "isTwoFactorAuthEnabled": false,
-  "isBlocked": false,
-  "isGuestData": true,
-  "gender": "Male",
-  "age": 25,
-  "avatarList": [],
-  "__v": 0
-}]
+[
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "name": "Guest User",
+    "email": "guest-user@plantseller.com",
+    "phone": "9999999992",
+    "password": "$2a$12$e.A1t93guh6n/.yQ9NXbzes/QvVwJkvhosm9YBFV6SE5fW5.gLiWO",
+    "role": [
+      "user"
+    ],
+    "isUserVerified": true,
+    "isTwoFactorAuthEnabled": false,
+    "isBlocked": false,
+    "isGuestData": true,
+    "gender": "Male",
+    "age": 25,
+    "avatarList": [],
+    "__v": 0,
+    "isSeedData": true
+  }
+]

@@ -1,0 +1,37 @@
+[
+  {
+    "_id": {
+      "$oid": "6a69753e2648b33aedec12f2"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "cartItems": [
+      {
+        "$oid": "6a6975472648b33aedec136d"
+      },
+      {
+        "$oid": "6a6975492648b33aedec1383"
+      }
+    ],
+    "couponApplied": null,
+    "pricing": {
+      "totalPriceWithoutDiscount": 548,
+      "totalDiscount": 0,
+      "deliveryFee": 0,
+      "finalPrice": 548,
+      "couponDiscountAmount": 0
+    },
+    "isGuestData": true,
+    "isDeleted": false,
+    "isSeedData": true,
+    "priceWarnings": [],
+    "createdAt": {
+      "$date": "2026-07-29T03:36:30.408Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-29T03:36:30.408Z"
+    },
+    "__v": 3
+  }
+]

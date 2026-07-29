@@ -1,85 +1,97 @@
-[{
-  "_id": {
-    "$oid": "6a69584dba5ba5a662e12e38"
+[
+  {
+    "_id": {
+      "$oid": "6a69584dba5ba5a662e12e38"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "index": 0,
+    "templateName": "completeSection",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
   },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4c"
+  {
+    "_id": {
+      "$oid": "6a6958a5ba5ba5a662e12e69"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "index": 1,
+    "templateName": "twoSectionAndRightVertical",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
   },
-  "nursery": {
-    "$oid": "6a68a9324fb50f72fc0ccf50"
+  {
+    "_id": {
+      "$oid": "6a695d1bba5ba5a662e13064"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "index": 2,
+    "templateName": "twoSectionAndLeftVertical",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
   },
-  "nurseryStoreTabs": {
-    "$oid": "6a693f1f53f654d8aa298b67"
+  {
+    "_id": {
+      "$oid": "6a6960d1ba5ba5a662e132ba"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "index": 3,
+    "templateName": "twoSectionAndRightVertical",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
   },
-  "index": 0,
-  "templateName": "completeSection",
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "6a6958a5ba5ba5a662e12e69"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4c"
-  },
-  "nursery": {
-    "$oid": "6a68a9324fb50f72fc0ccf50"
-  },
-  "nurseryStoreTabs": {
-    "$oid": "6a693f1f53f654d8aa298b67"
-  },
-  "index": 1,
-  "templateName": "twoSectionAndRightVertical",
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "6a695d1bba5ba5a662e13064"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4c"
-  },
-  "nursery": {
-    "$oid": "6a68a9324fb50f72fc0ccf50"
-  },
-  "nurseryStoreTabs": {
-    "$oid": "6a693f1f53f654d8aa298b67"
-  },
-  "index": 2,
-  "templateName": "twoSectionAndLeftVertical",
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "6a6960d1ba5ba5a662e132ba"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4c"
-  },
-  "nursery": {
-    "$oid": "6a68a9324fb50f72fc0ccf50"
-  },
-  "nurseryStoreTabs": {
-    "$oid": "6a693f1f53f654d8aa298b67"
-  },
-  "index": 3,
-  "templateName": "twoSectionAndRightVertical",
-  "__v": 0
-},
-{
-  "_id": {
-    "$oid": "6a696280ba5ba5a662e13494"
-  },
-  "user": {
-    "$oid": "6a68a9324fb50f72fc0ccf4c"
-  },
-  "nursery": {
-    "$oid": "6a68a9324fb50f72fc0ccf50"
-  },
-  "nurseryStoreTabs": {
-    "$oid": "6a693f1f53f654d8aa298b67"
-  },
-  "index": 4,
-  "templateName": "completeSection",
-  "__v": 0
-}]
+  {
+    "_id": {
+      "$oid": "6a696280ba5ba5a662e13494"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "index": 4,
+    "templateName": "completeSection",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]

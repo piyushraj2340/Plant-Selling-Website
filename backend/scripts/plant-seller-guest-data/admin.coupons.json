@@ -1,42 +1,46 @@
-[{
-  "_id": {
-    "$oid": "6a696852ba5ba5a662e13780"
-  },
-  "code": "WELCOME",
-  "description": "1. Welcome offer for new users! Get 50% OFF on orders above ₹200, up to ₹200.\n\n2. Enjoy 50% discount on your first order. Minimum order ₹200. Maximum discount ₹200.\n\n3. Exclusive welcome coupon for new customers. Save 50% up to ₹200 on orders of ₹200 or more.\n\n4. Your first order deserves a reward! Use this coupon to get 50% OFF (up to ₹200) on orders above ₹200.\n\n5. Welcome to our store! Claim 50% OFF on your first purchase with a maximum discount of ₹200.\n\n6. Special welcome discount for new users—50% OFF on eligible orders above ₹200, up to ₹200 savings.\n\n7. First-time shoppers get 50% OFF up to ₹200 on orders of ₹200 or more.\n\n8. Start shopping with savings! Get 50% OFF (maximum ₹200) on your first order above ₹200.",
-  "status": "Active",
-  "discount": {
-    "type": "Percentage",
-    "value": 50,
-    "maxDiscountAmount": 200
-  },
-  "applicability": {
-    "type": "All",
-    "categories": [],
-    "products": []
-  },
-  "rules": {
-    "minOrderAmount": 200,
-    "validUntil": {
-      "$date": "2030-12-30T18:30:00.000Z"
+[
+  {
+    "_id": {
+      "$oid": "6a696852ba5ba5a662e13780"
     },
-    "freeDelivery": false,
-    "singleUsePerUser": false,
-    "isNewUserOnly": true
-  },
-  "usage": {
-    "maxUsageCount": null,
-    "currentUsageCount": 0,
-    "usedBy": []
-  },
-  "createdBy": {
-    "$oid": "6a68a9324fb50f72fc0ccf48"
-  },
-  "createdAt": {
-    "$date": "2026-07-29T02:41:22.833Z"
-  },
-  "updatedAt": {
-    "$date": "2026-07-29T02:41:22.833Z"
-  },
-  "__v": 0
-}]
+    "code": "WELCOME",
+    "description": "1. Welcome offer for new users! Get 50% OFF on orders above ₹200, up to ₹200.\n\n2. Enjoy 50% discount on your first order. Minimum order ₹200. Maximum discount ₹200.\n\n3. Exclusive welcome coupon for new customers. Save 50% up to ₹200 on orders of ₹200 or more.\n\n4. Your first order deserves a reward! Use this coupon to get 50% OFF (up to ₹200) on orders above ₹200.\n\n5. Welcome to our store! Claim 50% OFF on your first purchase with a maximum discount of ₹200.\n\n6. Special welcome discount for new users—50% OFF on eligible orders above ₹200, up to ₹200 savings.\n\n7. First-time shoppers get 50% OFF up to ₹200 on orders of ₹200 or more.\n\n8. Start shopping with savings! Get 50% OFF (maximum ₹200) on your first order above ₹200.",
+    "status": "Active",
+    "discount": {
+      "type": "Percentage",
+      "value": 50,
+      "maxDiscountAmount": 200
+    },
+    "applicability": {
+      "type": "All",
+      "categories": [],
+      "products": []
+    },
+    "rules": {
+      "minOrderAmount": 200,
+      "validUntil": {
+        "$date": "2030-12-30T18:30:00.000Z"
+      },
+      "freeDelivery": false,
+      "singleUsePerUser": false,
+      "isNewUserOnly": true
+    },
+    "usage": {
+      "maxUsageCount": null,
+      "currentUsageCount": 0,
+      "usedBy": []
+    },
+    "createdBy": {
+      "$oid": "6a68a9324fb50f72fc0ccf48"
+    },
+    "createdAt": {
+      "$date": "2026-07-29T02:41:22.833Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-29T02:41:22.833Z"
+    },
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]
