@@ -455,17 +455,23 @@ const adminController = {
                 query.overallStatus = { $in: tags };
             }
 
+            let orderSort = sort;
+            if (orderSort && orderSort.createdAt) {
+                orderSort = { orderAt: orderSort.createdAt, _id: 1 };
+            }
+
             const total = await Order.countDocuments(query);
             const orders = await Order.find(query)
                 .populate({ path: 'user', select: 'name email phone avatar' })
                 .populate({
                     path: 'vendorOrders',
+                    strictPopulate: false,
                     populate: [
                         { path: 'nursery', select: 'nurseryName' },
-                        { path: 'orderItems', populate: { path: 'plant', select: 'plantName images stock' } }
+                        { path: 'orderItems', strictPopulate: false, populate: { path: 'plant', select: 'plantName images stock', strictPopulate: false } }
                     ]
                 })
-                .sort(sort || { orderAt: -1 })
+                .sort(orderSort || { orderAt: -1 })
                 .skip(skip)
                 .limit(limit);
             

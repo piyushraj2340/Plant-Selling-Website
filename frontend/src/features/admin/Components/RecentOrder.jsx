@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm, Row, Col, Input, Select } from 'antd';
+import { Table, Tag, Space, message, Popconfirm, Row, Col, Input, Select, Pagination } from 'antd';
 import 'antd/dist/reset.css';
 import { adminOrdersAsync, adminUpdateOrderItemStatusAsync, adminBulkUpdateOrderItemStatusAsync } from '../adminSlice';
 import { useTableParams } from '../../../hooks/useTableParams';
@@ -235,16 +235,23 @@ const RecentOrder = () => {
         loading={isLoading}
         dataSource={tableData}
         columns={columns}
-        pagination={{
-          ...tableParams.pagination,
-          total: ordersTotal,
-          showSizeChanger: true,
-          position: ['bottomCenter'],
-        }}
-        onChange={handleTableChange}
+        pagination={false}
+        onChange={(pagination, filters, sorter) => handleTableChange(tableParams.pagination, filters, sorter)}
         className='overflow-x-auto'
         scroll={{ x: 'max-content' }}
       />
+      
+      {ordersTotal > 0 && (
+        <div className="d-flex justify-content-end mt-4">
+          <Pagination
+            current={tableParams.pagination.current}
+            pageSize={tableParams.pagination.pageSize}
+            total={ordersTotal}
+            showSizeChanger
+            onChange={(page, pageSize) => handleTableChange({ current: page, pageSize })}
+          />
+        </div>
+      )}
     </div>
   )
 }
