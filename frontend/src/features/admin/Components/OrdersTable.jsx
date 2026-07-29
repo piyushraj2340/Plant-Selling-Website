@@ -8,6 +8,7 @@ import { useTableParams } from '../../../hooks/useTableParams';
 const OrdersTable = () => {
   const dispatch = useDispatch();
   const { ordersData, isLoading } = useSelector(state => state.admin);
+  const user = useSelector(state => state.auth.user);
   const ordersTotal = useSelector(state => state.admin.ordersData.total) || 0;
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -24,7 +25,8 @@ const OrdersTable = () => {
         totalAmount: `₹${order.pricing?.finalPrice || 0}`,
         orderDate: new Date(order.orderAt).toLocaleDateString(),
         status: order.overallStatus || 'Processing',
-        vendorOrders: order.vendorOrders || []
+        isGuestData: order.isGuestData,
+        vendorOrders: order.vendorOrders?.map(vo => ({ ...vo, isGuestData: order.isGuestData })) || []
       }));
       setDataSource(rows);
     } else {
@@ -89,6 +91,9 @@ const OrdersTable = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
+    getCheckboxProps: (record) => ({
+      disabled: (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData,
+    }),
   };
 
   const rootColumns = [
@@ -135,15 +140,16 @@ const OrdersTable = () => {
       key: 'action',
       render: (_, record) => {
         const action = record.status || 'Processing';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'processing' && (
               <>
-                <Popconfirm title="Approve ALL vendor orders?" onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Approved', 'Order Approved')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Approve All</button>
+                <Popconfirm title="Approve ALL vendor orders?" disabled={isGuestAndRealData} onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Approve All</button>
                 </Popconfirm>
-                <Popconfirm title="Cancel ALL vendor orders?" onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Cancelled', 'Order Cancelled')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Cancel All</button>
+                <Popconfirm title="Cancel ALL vendor orders?" disabled={isGuestAndRealData} onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Cancel All</button>
                 </Popconfirm>
               </>
             )}
@@ -162,15 +168,16 @@ const OrdersTable = () => {
       key: 'action',
       render: (_, record) => {
         const action = record.orderStatus?.status || 'Processing';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'processing' && (
               <>
-                <Popconfirm title="Approve this vendor order?" onConfirm={() => handleUpdateStatus(record._id, 'Approved', 'Order Approved')}>
-                  <button className='btn btn-sm btn-outline-success py-0 px-2' style={{ fontSize: "12px" }}>Approve</button>
+                <Popconfirm title="Approve this vendor order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record._id, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-outline-success py-0 px-2' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Approve</button>
                 </Popconfirm>
-                <Popconfirm title="Cancel this vendor order?" onConfirm={() => handleUpdateStatus(record._id, 'Cancelled', 'Order Cancelled')}>
-                  <button className='btn btn-sm btn-outline-danger py-0 px-2' style={{ fontSize: "12px" }}>Cancel</button>
+                <Popconfirm title="Cancel this vendor order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record._id, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-outline-danger py-0 px-2' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Cancel</button>
                 </Popconfirm>
               </>
             )}

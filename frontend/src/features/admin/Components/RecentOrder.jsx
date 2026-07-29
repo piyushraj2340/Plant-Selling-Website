@@ -10,6 +10,7 @@ const RecentOrder = () => {
   const [tableData, setTableData] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const { ordersData, isLoading } = useSelector((state) => state.admin);
+  const user = useSelector((state) => state.auth.user);
   const orders = ordersData?.data || [];
 
   const ordersTotal = useSelector((state) => state.admin.ordersData?.total) || 0;
@@ -25,6 +26,7 @@ const RecentOrder = () => {
           vendorOrder.orderItems?.forEach(item => {
             rows.push({
               key: `${vendorOrder._id}-${item._id}`,
+              isGuestData: vendorOrder.isGuestData,
               products: {
                 productName: item.plantName,
                 description: `Vendor Order ID: ${vendorOrder._id}`,
@@ -50,7 +52,7 @@ const RecentOrder = () => {
   const handleUpdateStatus = async (key, status, statusMessage) => {
     try {
       const [orderId, itemId] = key.split('-');
-      const res = await dispatch(adminUpdateOrderItemStatusAsync({ orderId, itemId, status, message: statusMessage })).unwrap();
+      const res = await dispatch(adminUpdateOrderItemStatusAsync({ id: orderId, orderId, itemId, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
         fetchData();
@@ -80,6 +82,9 @@ const RecentOrder = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
+    getCheckboxProps: (record) => ({
+      disabled: (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData,
+    }),
   };
 
   const columns = [
@@ -169,21 +174,22 @@ const RecentOrder = () => {
       key: 'action',
       render: (_, record) => {
         const action = record.action || 'pending';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'pending' && (
               <>
-                <Popconfirm title="Accept this order?" onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Accept</button>
+                <Popconfirm title="Accept this order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Accept</button>
                 </Popconfirm>
-                <Popconfirm title="Reject this order?" onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Reject</button>
+                <Popconfirm title="Reject this order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Reject</button>
                 </Popconfirm>
               </>
             )}
             {action.toLowerCase() === 'placed' && (
-              <Popconfirm title="Mark this order as Delivered?" onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>Deliver</button>
+              <Popconfirm title="Mark this order as Delivered?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
+                <button className='btn btn-sm btn-info py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Deliver</button>
               </Popconfirm>
             )}
           </Space>
