@@ -1,13 +1,7 @@
 {
 	"folders": [
 		{
-			"path": "backend"
-		},
-		{
-			"path": "frontend"
-		},
-		{
-			"path": "../../React.js/dashboard"
+			"path": "."
 		}
 	],
 	"settings": {}
