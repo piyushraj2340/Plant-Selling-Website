@@ -50,7 +50,7 @@ const OrdersTable = () => {
       if (!order) return;
       const vendorOrderIds = order.vendorOrders.map(vo => vo._id);
       if (vendorOrderIds.length === 0) return;
-      
+
       const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: vendorOrderIds, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(`Global Order ${status}`);
@@ -201,23 +201,23 @@ const OrdersTable = () => {
 
   const expandedVendorOrderRender = (vendorOrder) => {
     return (
-      <Table 
-        columns={orderItemColumns} 
-        dataSource={vendorOrder.orderItems?.map(item => ({...item, key: item._id})) || []} 
-        pagination={false} 
-        size="small" 
+      <Table
+        columns={orderItemColumns}
+        dataSource={vendorOrder.orderItems?.map(item => ({ ...item, key: item._id })) || []}
+        pagination={false}
+        size="small"
       />
     );
   };
 
   const expandedRootOrderRender = (order) => {
     return (
-      <Table 
-        columns={vendorOrderColumns} 
-        dataSource={order.vendorOrders?.map(vo => ({...vo, key: vo._id})) || []} 
+      <Table
+        columns={vendorOrderColumns}
+        dataSource={order.vendorOrders?.map(vo => ({ ...vo, key: vo._id })) || []}
         expandable={{ expandedRowRender: expandedVendorOrderRender }}
-        pagination={false} 
-        size="middle" 
+        pagination={false}
+        size="middle"
       />
     );
   };
@@ -253,7 +253,7 @@ const OrdersTable = () => {
           </Popconfirm>
         </div>
       )}
-      
+
       <Table
         rowSelection={rowSelection}
         loading={isLoading}

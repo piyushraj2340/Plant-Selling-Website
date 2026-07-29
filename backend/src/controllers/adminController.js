@@ -894,6 +894,9 @@ const adminController = {
                 throw error;
             }
 
+            // Extract the unique VendorOrder IDs from the keys (which may be formatted as vendorOrderId-orderItemId)
+            const vendorOrderIds = [...new Set(keys.map(k => k.toString().split('-')[0]))];
+
             if (status) {
                 status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
             }
@@ -908,7 +911,7 @@ const adminController = {
             const { syncOverallOrderStatus } = require('../utils/orderStatusSync');
 
             await VendorOrder.updateMany(
-                { _id: { $in: keys } },
+                { _id: { $in: vendorOrderIds } },
                 {
                     $set: {
                         "orderStatus.status": status,
@@ -918,14 +921,14 @@ const adminController = {
                 }
             );
 
-            const updatedVendorOrders = await VendorOrder.find({ _id: { $in: keys } }).select('order');
+            const updatedVendorOrders = await VendorOrder.find({ _id: { $in: vendorOrderIds } }).select('order');
             const parentOrderIds = [...new Set(updatedVendorOrders.map(vo => vo.order.toString()))];
             
             parentOrderIds.forEach(orderId => {
                 syncOverallOrderStatus(orderId).catch(err => console.error("Sync error:", err));
             });
 
-            res.status(200).json({ status: true, message: `Bulk updated ${keys.length} orders to ${status} successfully` });
+            res.status(200).json({ status: true, message: `Successfully updated ${vendorOrderIds.length} orders to ${status}` });
         } catch (error) {
             next(error);
         }
@@ -959,6 +962,7 @@ const adminController = {
                 .populate({ path: 'order', populate: { path: 'user' } })
                 .populate({
                     path: 'orderItems',
+                    strictPopulate: false,
                     populate: [
                         { path: 'nursery' },
                         { path: 'plant' }
@@ -986,6 +990,7 @@ const adminController = {
             const startOfYear = new Date(year, 0, 1);
             const endOfYear = new Date(year, 11, 31, 23, 59, 59);
 
+            const Order = require('../model/checkoutModel/orders');
             const revenueByMonth = await Order.aggregate([
                 { 
                     $match: { 
@@ -996,7 +1001,7 @@ const adminController = {
                 { 
                     $group: { 
                         _id: { $month: "$orderAt" }, 
-                        revenue: { $sum: "$pricing.totalPrice" } 
+                        revenue: { $sum: "$pricing.finalPrice" } 
                     } 
                 }
             ]);
