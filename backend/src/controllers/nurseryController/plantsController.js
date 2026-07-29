@@ -41,7 +41,7 @@ exports.addNewPlant = async (req, res, next) => {
 
         if (images.length > 0) {
             const resultImage = await uploadImages(images, {
-                folder: `PlantSeller/user//nursery//plants/`,
+                folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${plant._id}`,
                 width: 550,
                 height: 650,
                 crop: "fit"
@@ -193,12 +193,26 @@ exports.updatePlantById = async (req, res, next) => {
             }
         }
 
+        if (body.existingImagesUrls) {
+            try {
+                updateData.images = JSON.parse(body.existingImagesUrls);
+                updateData.imageList = updateData.images.map(img => ({ public_id: img.public_id, url: img.url }));
+            } catch (e) {
+                console.error("Failed to parse existingImagesUrls", e);
+                updateData.images = plant.images || [];
+                updateData.imageList = plant.imageList || [];
+            }
+        } else {
+            updateData.images = plant.images || [];
+            updateData.imageList = plant.imageList || [];
+        }
+
         if (files) {
             const imagesRaw = [files.image_0, files.image_1, files.image_2].filter(Boolean);
 
             if (imagesRaw.length > 0) {
                 const resultImage = await uploadImages(imagesRaw, {
-                    folder: `PlantSeller/user//nursery//plants/`,
+                    folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`,
                     width: 550,
                     height: 650,
                     crop: "fit"
@@ -209,8 +223,8 @@ exports.updatePlantById = async (req, res, next) => {
                     url: elem.secure_url
                 }));
                 
-                updateData.images = [...(plant.images || []), ...newImages];
-                updateData.imageList = [...(plant.imageList || []), ...newImages.map(img => ({ public_id: img.public_id, url: img.url }))];
+                updateData.images = [...(updateData.images || []), ...newImages];
+                updateData.imageList = [...(updateData.imageList || []), ...newImages.map(img => ({ public_id: img.public_id, url: img.url }))];
             }
         }
 
@@ -232,9 +246,6 @@ exports.updatePlantById = async (req, res, next) => {
 };
 
 exports.deletePlantById = async (req, res, next) => {
-    const session = await mongoose.startSession();
-    session.startTransaction();
-
     try {
         const { user, role, nursery } = req;
 
@@ -245,7 +256,7 @@ exports.deletePlantById = async (req, res, next) => {
         }
 
         const _id = req.params.id;
-        const result = await plantsModel.findOneAndDelete({ user, nursery, _id }, { session });
+        const result = await plantsModel.findOneAndDelete({ user, nursery, _id });
 
         if (!result) {
             const error = new Error("No Plant Found.");
@@ -253,15 +264,13 @@ exports.deletePlantById = async (req, res, next) => {
             throw error;
         }
 
-        await deleteResourcesByPrefix(`PlantSeller/user//nursery//plants/`, {
+        await deleteResourcesByPrefix(`PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`, {
             type: 'upload',
             resource_type: 'image',
             invalidate: true
         });
 
-        await deleteFolder(`PlantSeller/user//nursery//plants/`);
-
-        await session.commitTransaction();
+        await deleteFolder(`PlantSeller/user/${user}/nursery/${nursery}/plants/${_id}`);
 
         const info = {
             status: true,
@@ -270,12 +279,8 @@ exports.deletePlantById = async (req, res, next) => {
 
         res.status(200).send(info);
 
-
     } catch (error) {
-        await session.abortTransaction();
         next(error);
-    } finally {
-        await session.endSession();
     }
 };
 
@@ -299,7 +304,7 @@ exports.uploadDescriptionImage = async (req, res, next) => {
         const { uploadImage } = require('../../utils/uploadImages');
 
         const resultImage = await uploadImage(files.image, {
-            folder: `PlantSeller/user//nursery//plants//descriptions`,
+            folder: `PlantSeller/user/${user}/nursery/${nursery}/plants/${id}/description`,
             crop: "scale"
         });
 
@@ -313,6 +318,56 @@ exports.uploadDescriptionImage = async (req, res, next) => {
             status: true,
             message: "Description image uploaded successfully",
             url: resultImage.secure_url
+        });
+    } catch (error) {
+        next(error);
+    }
+};
+
+exports.removePlantImage = async (req, res, next) => {
+    try {
+        const { user, role, nursery } = req;
+        const { id } = req.params;
+        const { public_id } = req.body;
+
+        if (!nursery || !role.includes('seller')) {
+            const error = new Error("You are not allowed to access this route");
+            error.statusCode = 403;
+            throw error;
+        }
+
+        const plant = await plantsModel.findOne({ user, nursery, _id: id });
+        if (!plant) {
+            const error = new Error("No Plant Found.");
+            error.statusCode = 404;
+            throw error;
+        }
+
+        if (public_id) {
+            const cloudinary = require('cloudinary').v2;
+            
+            try {
+                await cloudinary.uploader.destroy(public_id);
+            } catch (err) {
+                console.error("Cloudinary image delete error:", err);
+            }
+
+            if (plant.images && plant.images.length > 0) {
+                plant.images = plant.images.filter(img => img.public_id !== public_id);
+            }
+            if (plant.imageList && plant.imageList.length > 0) {
+                plant.imageList = plant.imageList.filter(img => img.public_id !== public_id);
+            }
+            if (plant.descriptionImages && plant.descriptionImages.length > 0) {
+                plant.descriptionImages = plant.descriptionImages.filter(img => img.public_id !== public_id);
+            }
+
+            await plant.save();
+        }
+
+        res.status(200).send({
+            status: true,
+            message: "Image removed successfully."
         });
     } catch (error) {
         next(error);

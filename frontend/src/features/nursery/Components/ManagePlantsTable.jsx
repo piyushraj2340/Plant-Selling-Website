@@ -271,6 +271,7 @@ const ManagePlantsTable = () => {
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 onSubmit={handleFormSubmit}
+                onRefresh={fetchData}
                 initialData={selectedPlant}
                 mode={modalMode}
                 categories={categories}

@@ -4,10 +4,11 @@ function Animation() {
     const [isActiveAnimation, setIsActiveAnimation] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => {
-            setIsActiveAnimation(!isActiveAnimation);
+        const timer = setTimeout(() => {
+            setIsActiveAnimation(prev => !prev);
         }, 500);
-    });
+        return () => clearTimeout(timer);
+    }, [isActiveAnimation]);
 
     return (
         <div className='animation vh-100 w-100 position-fixed d-flex top-0 start-0 justify-content-center'>

@@ -2,7 +2,7 @@ const express = require('express');
 
 const auth = require('../../middleware/auth');
 
-const { addNewPlant, uploadDescriptionImage, getAllPlantsOfNursery, getPlantById, updatePlantById, deletePlantById } = require('../../controllers/nurseryController/plantsController');
+const { addNewPlant, uploadDescriptionImage, getAllPlantsOfNursery, getPlantById, updatePlantById, deletePlantById, removePlantImage } = require('../../controllers/nurseryController/plantsController');
 
 const router = express.Router();
 
@@ -21,6 +21,9 @@ router.route("/plants/:id")
     .get(getPlantById)
     .patch(updatePlantById)
     .delete(deletePlantById);
+
+router.route("/plants/:id/image")
+    .patch(removePlantImage);
 
 module.exports = router;
 

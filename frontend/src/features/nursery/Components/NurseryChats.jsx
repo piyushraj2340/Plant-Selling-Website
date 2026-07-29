@@ -10,10 +10,10 @@ const { Text } = Typography;
 const NurseryChats = () => {
     const dispatch = useDispatch();
     const { nurseryMessages, isLoading } = useSelector((state) => state.nursery);
-    
+
     const [localSearch, setLocalSearch] = useState('');
     const [filteredMessages, setFilteredMessages] = useState([]);
-    
+
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [replyForm] = Form.useForm();
     const [socket, setSocket] = useState(null);
@@ -33,7 +33,7 @@ const NurseryChats = () => {
                 setSelectedMessage(prev => {
                     if (prev && prev._id === selectedMessage._id) {
                         const isDuplicate = prev.replies?.some(r => r.message === reply.message && r.createdAt === reply.createdAt);
-                        if(isDuplicate) return prev;
+                        if (isDuplicate) return prev;
                         return { ...prev, replies: [...(prev.replies || []), reply] };
                     }
                     return prev;
@@ -53,14 +53,14 @@ const NurseryChats = () => {
         if (nurseryMessages) {
             // Filter: only active (open) chats that have at least one reply (i.e. started)
             let activeChats = nurseryMessages.filter(msg => msg.status === 'open' && msg.replies && msg.replies.length > 0);
-            
-            const filtered = activeChats.filter(msg => 
+
+            const filtered = activeChats.filter(msg =>
                 msg.message.toLowerCase().includes(localSearch.toLowerCase()) ||
                 msg.name.toLowerCase().includes(localSearch.toLowerCase()) ||
                 msg.email.toLowerCase().includes(localSearch.toLowerCase())
             );
             setFilteredMessages(filtered);
-            
+
             // Auto-update selected message if it gets modified
             if (selectedMessage) {
                 const updatedMsg = activeChats.find(m => m._id === selectedMessage._id);
@@ -92,18 +92,18 @@ const NurseryChats = () => {
 
     const handleReplySubmit = async (values) => {
         if (!selectedMessage) return;
-        
+
         try {
-            const response = await dispatch(replyNurseryMessageAsync({ 
-                id: selectedMessage._id, 
-                replyMessage: values.replyMessage 
+            const response = await dispatch(replyNurseryMessageAsync({
+                id: selectedMessage._id,
+                replyMessage: values.replyMessage
             })).unwrap();
 
             if (response.status) {
                 replyForm.resetFields();
                 dispatch(getNurseryMessagesAsync());
             }
-        } catch(error) {
+        } catch (error) {
             message.error(error.message || "Failed to send reply");
         }
     };
@@ -126,7 +126,7 @@ const NurseryChats = () => {
             <div className="card-header d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">Active Customer Chats</h5>
             </div>
-            
+
             <div className="card-body p-0" style={{ flex: 1, overflow: 'hidden' }}>
                 <Row style={{ height: '100%' }}>
                     {/* LEFT PANEL - THREAD LIST */}
@@ -144,7 +144,7 @@ const NurseryChats = () => {
                                 itemLayout="horizontal"
                                 dataSource={filteredMessages}
                                 renderItem={item => (
-                                    <List.Item 
+                                    <List.Item
                                         className={`px-3 py-3 cursor-pointer ${selectedMessage?._id === item._id ? 'bg-light' : ''}`}
                                         onClick={() => handleSelectChat(item)}
                                         style={{ cursor: 'pointer', transition: 'background-color 0.3s' }}
@@ -204,7 +204,7 @@ const NurseryChats = () => {
                                         <div className="d-flex justify-content-start">
                                             <div style={{ maxWidth: '75%', backgroundColor: '#fff', padding: '10px 15px', borderRadius: '10px 10px 10px 0', border: '1px solid #e8e8e8' }}>
                                                 <div className="fw-bold text-success mb-1">{selectedMessage.name} (Customer)</div>
-                                                <div>{selectedMessage.message}</div>
+                                                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', margin: 0 }}>{selectedMessage.message}</pre>
                                                 <div className="text-start mt-1" style={{ fontSize: '10px', color: '#999' }}>
                                                     {new Date(selectedMessage.createdAt).toLocaleString()}
                                                 </div>
@@ -217,10 +217,10 @@ const NurseryChats = () => {
                                         return (
                                             <div key={index} className="message mb-4">
                                                 <div className={`d-flex ${isNursery ? 'justify-content-end' : 'justify-content-start'}`}>
-                                                    <div style={{ 
-                                                        maxWidth: '75%', 
-                                                        backgroundColor: isNursery ? '#e6f7ff' : '#fff', 
-                                                        padding: '10px 15px', 
+                                                    <div style={{
+                                                        maxWidth: '75%',
+                                                        backgroundColor: isNursery ? '#e6f7ff' : '#fff',
+                                                        padding: '10px 15px',
                                                         borderRadius: isNursery ? '10px 10px 0 10px' : '10px 10px 10px 0',
                                                         border: isNursery ? '1px solid #91d5ff' : '1px solid #e8e8e8',
                                                         boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
@@ -228,7 +228,7 @@ const NurseryChats = () => {
                                                         <div className={`fw-bold mb-1 ${isNursery ? 'text-primary' : 'text-success'}`}>
                                                             {isNursery ? 'You' : selectedMessage.name}
                                                         </div>
-                                                        <div>{reply.message}</div>
+                                                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', margin: 0 }}>{reply.message}</pre>
                                                         <div className={`mt-1 ${isNursery ? 'text-end' : 'text-start'}`} style={{ fontSize: '10px', color: '#999' }}>
                                                             {new Date(reply.createdAt).toLocaleString()}
                                                         </div>
@@ -250,12 +250,12 @@ const NurseryChats = () => {
                                                     className="mb-0"
                                                     rules={[{ required: true, message: 'Please enter a message' }]}
                                                 >
-                                                    <Input.TextArea 
-                                                        rows={2} 
-                                                        placeholder="Type your reply here..." 
+                                                    <Input.TextArea
+                                                        rows={2}
+                                                        placeholder="Type your reply here..."
                                                         style={{ resize: 'none' }}
                                                         onPressEnter={(e) => {
-                                                            if(!e.shiftKey) {
+                                                            if (!e.shiftKey) {
                                                                 e.preventDefault();
                                                                 replyForm.submit();
                                                             }

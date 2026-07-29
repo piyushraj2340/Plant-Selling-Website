@@ -7,6 +7,7 @@ import { getAllCategoriesAsync } from '../../category/categorySlice';
 import { transformImageUrl } from '../../../utils/imageUtils';
 import { Pagination, Select } from 'antd';
 import ProductCard from './ProductCard';
+import Animation from '../../common/Animation';
 
 const Products = () => {
     const [viewMode, setViewMode] = useState(() => {
@@ -17,7 +18,7 @@ const Products = () => {
         localStorage.setItem('productViewMode', mode);
     };
 
-    const { products, pagination } = useSelector((state) => state.products);
+    const { products, pagination, isLoading } = useSelector((state) => state.products);
     const { categories } = useSelector((state) => state.category);
 
     const dispatch = useDispatch();
@@ -142,6 +143,7 @@ const Products = () => {
             )}
             <div className="w-100 mt-4">
                 {
+                    isLoading ? <Animation /> :
                     products.length === 0 &&
                     <div className="d-flex justify-content-center">
                         <div className=''>
