@@ -1087,7 +1087,8 @@ const adminController = {
                     maxUsageCount: data.numberOfCoupon && data.numberOfCoupon !== 'Infinity' ? parseInt(data.numberOfCoupon) : null,
                     currentUsageCount: 0
                 },
-                createdBy: req.user._id // Assuming req.user is set by auth middleware
+                createdBy: req.user,
+                isGuestData: data.isGuestData || false
             };
 
             const newCoupon = new Coupon(couponData);

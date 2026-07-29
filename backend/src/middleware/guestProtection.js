@@ -33,7 +33,17 @@ const guestProtection = async (req, res, next) => {
         }
 
         // If the request is a non-mutating request (GET), allow it.
-        if (req.method === 'GET' || (req.method === 'POST' && !req.originalUrl.includes('reply'))) {
+        if (req.method === 'GET') {
+            return next();
+        }
+
+        // If the request is a POST (creation), force the payload to be marked as guest data
+        // We skip 'reply' because replies (like contact support replies) aren't documents with isGuestData.
+        if (req.method === 'POST' && !req.originalUrl.includes('reply')) {
+            // For JSON payloads
+            if (req.body) {
+                req.body.isGuestData = true;
+            }
             return next();
         }
 
