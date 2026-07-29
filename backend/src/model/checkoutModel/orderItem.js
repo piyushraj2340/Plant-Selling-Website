@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const orderItemSchema = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     vendorOrder: {
         type: mongoose.Schema.ObjectId,
         ref: "vendorOrder",

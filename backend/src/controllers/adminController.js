@@ -24,11 +24,9 @@ const adminController = {
             const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].totalRevenue : 0;
 
             // Doughnut Graph data: Order item status
-            const doughnutAgg = await Order.aggregate([
-                { $unwind: "$orderItems" },
-                { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
-                { $unwind: "$populatedOrderItem" },
-                { $group: { _id: "$populatedOrderItem.orderStatus.status", count: { $sum: 1 } } }
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const doughnutAgg = await VendorOrder.aggregate([
+                { $group: { _id: "$orderStatus.status", count: { $sum: 1 } } }
             ]);
 
             // Format doughnut graph data
@@ -457,17 +455,23 @@ const adminController = {
                 query.overallStatus = { $in: tags };
             }
 
+            let orderSort = sort;
+            if (orderSort && orderSort.createdAt) {
+                orderSort = { orderAt: orderSort.createdAt, _id: 1 };
+            }
+
             const total = await Order.countDocuments(query);
             const orders = await Order.find(query)
                 .populate({ path: 'user', select: 'name email phone avatar' })
                 .populate({
                     path: 'vendorOrders',
+                    strictPopulate: false,
                     populate: [
                         { path: 'nursery', select: 'nurseryName' },
-                        { path: 'orderItems', populate: { path: 'plant', select: 'plantName images stock' } }
+                        { path: 'orderItems', strictPopulate: false, populate: { path: 'plant', select: 'plantName images stock', strictPopulate: false } }
                     ]
                 })
-                .sort(sort || { orderAt: -1 })
+                .sort(orderSort || { orderAt: -1 })
                 .skip(skip)
                 .limit(limit);
             
@@ -896,6 +900,9 @@ const adminController = {
                 throw error;
             }
 
+            // Extract the unique VendorOrder IDs from the keys (which may be formatted as vendorOrderId-orderItemId)
+            const vendorOrderIds = [...new Set(keys.map(k => k.toString().split('-')[0]))];
+
             if (status) {
                 status = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
             }
@@ -910,7 +917,7 @@ const adminController = {
             const { syncOverallOrderStatus } = require('../utils/orderStatusSync');
 
             await VendorOrder.updateMany(
-                { _id: { $in: keys } },
+                { _id: { $in: vendorOrderIds } },
                 {
                     $set: {
                         "orderStatus.status": status,
@@ -920,14 +927,14 @@ const adminController = {
                 }
             );
 
-            const updatedVendorOrders = await VendorOrder.find({ _id: { $in: keys } }).select('order');
+            const updatedVendorOrders = await VendorOrder.find({ _id: { $in: vendorOrderIds } }).select('order');
             const parentOrderIds = [...new Set(updatedVendorOrders.map(vo => vo.order.toString()))];
             
             parentOrderIds.forEach(orderId => {
                 syncOverallOrderStatus(orderId).catch(err => console.error("Sync error:", err));
             });
 
-            res.status(200).json({ status: true, message: `Bulk updated ${keys.length} orders to ${status} successfully` });
+            res.status(200).json({ status: true, message: `Successfully updated ${vendorOrderIds.length} orders to ${status}` });
         } catch (error) {
             next(error);
         }
@@ -936,11 +943,10 @@ const adminController = {
     // Get Income Table Data
     getIncome: async (req, res, next) => {
         try {
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
             const { page, limit, skip, search, sort } = getQueryOptions(req);
             
-            let query = {
-                "payment.status": { $ne: 'Failed' }
-            };
+            let query = {};
 
             const searchQueryStr = search || '';
             if (searchQueryStr) {
@@ -957,11 +963,12 @@ const adminController = {
                 query['orderStatus.status'] = { $in: statuses };
             }
 
-            const total = await Order.countDocuments(query);
-            const orders = await Order.find(query)
-                .populate('user')
+            const total = await VendorOrder.countDocuments(query);
+            const orders = await VendorOrder.find(query)
+                .populate({ path: 'order', populate: { path: 'user' } })
                 .populate({
                     path: 'orderItems',
+                    strictPopulate: false,
                     populate: [
                         { path: 'nursery' },
                         { path: 'plant' }
@@ -989,6 +996,7 @@ const adminController = {
             const startOfYear = new Date(year, 0, 1);
             const endOfYear = new Date(year, 11, 31, 23, 59, 59);
 
+            const Order = require('../model/checkoutModel/orders');
             const revenueByMonth = await Order.aggregate([
                 { 
                     $match: { 
@@ -999,7 +1007,7 @@ const adminController = {
                 { 
                     $group: { 
                         _id: { $month: "$orderAt" }, 
-                        revenue: { $sum: "$pricing.totalPrice" } 
+                        revenue: { $sum: "$pricing.finalPrice" } 
                     } 
                 }
             ]);
@@ -1021,11 +1029,11 @@ const adminController = {
             const startOfYear = new Date(year, 0, 1);
             const endOfYear = new Date(year, 11, 31, 23, 59, 59);
 
-            const categoryRevenueAgg = await Order.aggregate([
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const categoryRevenueAgg = await VendorOrder.aggregate([
                 { 
                     $match: { 
-                        orderAt: { $gte: startOfYear, $lte: endOfYear },
-                        "payment.status": { $ne: 'Failed' }
+                        createdAt: { $gte: startOfYear, $lte: endOfYear }
                     } 
                 },
                 { $unwind: "$orderItems" },
@@ -1087,7 +1095,8 @@ const adminController = {
                     maxUsageCount: data.numberOfCoupon && data.numberOfCoupon !== 'Infinity' ? parseInt(data.numberOfCoupon) : null,
                     currentUsageCount: 0
                 },
-                createdBy: req.user._id // Assuming req.user is set by auth middleware
+                createdBy: req.user,
+                isGuestData: data.isGuestData || false
             };
 
             const newCoupon = new Coupon(couponData);

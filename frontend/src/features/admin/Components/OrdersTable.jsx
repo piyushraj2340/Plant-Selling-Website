@@ -8,6 +8,7 @@ import { useTableParams } from '../../../hooks/useTableParams';
 const OrdersTable = () => {
   const dispatch = useDispatch();
   const { ordersData, isLoading } = useSelector(state => state.admin);
+  const user = useSelector(state => state.user.data);
   const ordersTotal = useSelector(state => state.admin.ordersData.total) || 0;
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -24,7 +25,8 @@ const OrdersTable = () => {
         totalAmount: `₹${order.pricing?.finalPrice || 0}`,
         orderDate: new Date(order.orderAt).toLocaleDateString(),
         status: order.overallStatus || 'Processing',
-        vendorOrders: order.vendorOrders || []
+        isGuestData: order.isGuestData,
+        vendorOrders: order.vendorOrders?.map(vo => ({ ...vo, isGuestData: order.isGuestData })) || []
       }));
       setDataSource(rows);
     } else {
@@ -50,7 +52,7 @@ const OrdersTable = () => {
       if (!order) return;
       const vendorOrderIds = order.vendorOrders.map(vo => vo._id);
       if (vendorOrderIds.length === 0) return;
-      
+
       const res = await dispatch(adminBulkUpdateOrderItemStatusAsync({ keys: vendorOrderIds, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(`Global Order ${status}`);
@@ -135,15 +137,16 @@ const OrdersTable = () => {
       key: 'action',
       render: (_, record) => {
         const action = record.status || 'Processing';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'processing' && (
               <>
-                <Popconfirm title="Approve ALL vendor orders?" onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Approved', 'Order Approved')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Approve All</button>
+                <Popconfirm title="Approve ALL vendor orders?" disabled={isGuestAndRealData} onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Approve All</button>
                 </Popconfirm>
-                <Popconfirm title="Cancel ALL vendor orders?" onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Cancelled', 'Order Cancelled')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Cancel All</button>
+                <Popconfirm title="Cancel ALL vendor orders?" disabled={isGuestAndRealData} onConfirm={() => handleGlobalUpdateStatus(record.orderId, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Cancel All</button>
                 </Popconfirm>
               </>
             )}
@@ -162,15 +165,16 @@ const OrdersTable = () => {
       key: 'action',
       render: (_, record) => {
         const action = record.orderStatus?.status || 'Processing';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'processing' && (
               <>
-                <Popconfirm title="Approve this vendor order?" onConfirm={() => handleUpdateStatus(record._id, 'Approved', 'Order Approved')}>
-                  <button className='btn btn-sm btn-outline-success py-0 px-2' style={{ fontSize: "12px" }}>Approve</button>
+                <Popconfirm title="Approve this vendor order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record._id, 'Approved', 'Order Approved')}>
+                  <button className='btn btn-sm btn-outline-success py-0 px-2' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Approve</button>
                 </Popconfirm>
-                <Popconfirm title="Cancel this vendor order?" onConfirm={() => handleUpdateStatus(record._id, 'Cancelled', 'Order Cancelled')}>
-                  <button className='btn btn-sm btn-outline-danger py-0 px-2' style={{ fontSize: "12px" }}>Cancel</button>
+                <Popconfirm title="Cancel this vendor order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record._id, 'Cancelled', 'Order Cancelled')}>
+                  <button className='btn btn-sm btn-outline-danger py-0 px-2' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Cancel</button>
                 </Popconfirm>
               </>
             )}
@@ -201,28 +205,33 @@ const OrdersTable = () => {
 
   const expandedVendorOrderRender = (vendorOrder) => {
     return (
-      <Table 
-        columns={orderItemColumns} 
-        dataSource={vendorOrder.orderItems?.map(item => ({...item, key: item._id})) || []} 
-        pagination={false} 
-        size="small" 
+      <Table
+        columns={orderItemColumns}
+        dataSource={vendorOrder.orderItems?.map(item => ({ ...item, key: item._id })) || []}
+        pagination={false}
+        size="small"
       />
     );
   };
 
   const expandedRootOrderRender = (order) => {
     return (
-      <Table 
-        columns={vendorOrderColumns} 
-        dataSource={order.vendorOrders?.map(vo => ({...vo, key: vo._id})) || []} 
+      <Table
+        columns={vendorOrderColumns}
+        dataSource={order.vendorOrders?.map(vo => ({ ...vo, key: vo._id })) || []}
         expandable={{ expandedRowRender: expandedVendorOrderRender }}
-        pagination={false} 
-        size="middle" 
+        pagination={false}
+        size="middle"
       />
     );
   };
 
   const hasSelected = selectedRowKeys.length > 0;
+  const isGuestAdmin = user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com";
+  const disableBulkActions = isGuestAdmin && selectedRowKeys.some(key => {
+    const row = dataSource.find(r => r.key === key);
+    return row && !row.isGuestData;
+  });
 
   return (
     <div className="w-100 p-3 bg-white rounded shadow-sm">
@@ -245,15 +254,15 @@ const OrdersTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Approve all vendor orders in ${selectedRowKeys.length} selected global orders?`} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Approve</button>
+          <Popconfirm title={`Approve all vendor orders in ${selectedRowKeys.length} selected global orders?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Approve</button>
           </Popconfirm>
-          <Popconfirm title={`Cancel all vendor orders in ${selectedRowKeys.length} selected global orders?`} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
-            <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Cancel</button>
+          <Popconfirm title={`Cancel all vendor orders in ${selectedRowKeys.length} selected global orders?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
+            <button className="btn btn-sm btn-danger py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Cancel</button>
           </Popconfirm>
         </div>
       )}
-      
+
       <Table
         rowSelection={rowSelection}
         loading={isLoading}

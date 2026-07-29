@@ -16,7 +16,7 @@ const generateObjectId = () => {
     return objectId;
 };
 
-const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categories, nurseries, loading }) => {
+const PlantFormModal = ({ isOpen, onClose, onSubmit, onRefresh, initialData, mode, categories, nurseries, loading }) => {
     const [form] = Form.useForm();
     const [fileList, setFileList] = useState([]);
     const [descFileList, setDescFileList] = useState([]);
@@ -69,17 +69,17 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
     }, [isOpen, initialData, mode, form]);
 
     const handleUploadChange = ({ fileList: newFileList }) => {
-        setFileList(newFileList);
+        setFileList(newFileList.slice(0, 3));
     };
 
     const handleDescUploadChange = ({ fileList: newFileList }) => {
-        setDescFileList(newFileList);
+        setDescFileList(newFileList.slice(0, 5));
     };
 
     const beforeUpload = (file) => {
-        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp';
+        const isJpgOrPng = file.type === 'image/jpeg' || file.type === 'image/png' || file.type === 'image/webp' || file.type === 'image/avif';
         if (!isJpgOrPng) {
-            message.error('You can only upload JPG/PNG/WEBP files!');
+            message.error('You can only upload JPG/PNG/WEBP/AVIF files!');
         }
         const isLt5M = file.size / 1024 / 1024 < 5;
         if (!isLt5M) {
@@ -115,6 +115,30 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
         } catch (error) {
             onError(error);
             message.error('Failed to upload description image.');
+        }
+    };
+
+    const handleRemoveImage = async (file) => {
+        if (!file.url) return true;
+        
+        const currentPlantId = (mode === 'edit' && initialData) ? initialData._id : tempId;
+        if (!currentPlantId) return true;
+
+        try {
+            const res = await handelDataFetch(`/api/v2/nursery/plants/${currentPlantId}/image`, 'PATCH', { public_id: file.uid });
+            if (res && res.data && res.data.status) {
+                message.success('Image deleted successfully');
+                setFileList(prev => prev.filter(f => f.uid !== file.uid));
+                setDescFileList(prev => prev.filter(f => f.uid !== file.uid));
+                if (onRefresh) onRefresh();
+                return true;
+            } else {
+                message.error('Failed to delete image');
+                return false;
+            }
+        } catch (error) {
+            message.error('Failed to delete image');
+            return false;
         }
     };
 
@@ -166,6 +190,12 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
             newFiles.forEach((file, index) => {
                 formData.append(`image_${index}`, file.originFileObj);
             });
+
+            const existingImages = fileList.filter(file => !file.originFileObj && file.url).map(f => ({
+                public_id: f.uid,
+                url: f.url
+            }));
+            formData.append('existingImagesUrls', JSON.stringify(existingImages));
 
             const descImageUrls = descFileList.filter(f => f.url).map(f => ({
                 public_id: f.uid,
@@ -308,8 +338,9 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                                 fileList={fileList}
                                 onChange={handleUploadChange}
                                 beforeUpload={beforeUpload}
+                                onRemove={handleRemoveImage}
                                 maxCount={3}
-                                accept="image/png, image/jpeg, image/webp"
+                                accept="image/png, image/jpeg, image/webp, image/avif"
                             >
                                 {fileList.length < 3 && (
                                     <div>
@@ -327,8 +358,9 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, initialData, mode, categori
                                 fileList={descFileList}
                                 onChange={handleDescUploadChange}
                                 customRequest={uploadDescImageCustomRequest}
+                                onRemove={handleRemoveImage}
                                 maxCount={5}
-                                accept="image/png, image/jpeg, image/webp"
+                                accept="image/png, image/jpeg, image/webp, image/avif"
                             >
                                 {descFileList.length < 5 && (
                                     <div>

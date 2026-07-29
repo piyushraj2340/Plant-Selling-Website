@@ -1,0 +1,20 @@
+[
+  {
+    "_id": {
+      "$oid": "6a69755f2648b33aedec14ae"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d22"
+    },
+    "addedAtPrice": 299,
+    "addedAt": {
+      "$date": "2026-07-29T03:37:03.022Z"
+    },
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]

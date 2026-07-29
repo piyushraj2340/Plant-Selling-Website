@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const subscriberEmail = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     email: {
         type: String,
         required: true,

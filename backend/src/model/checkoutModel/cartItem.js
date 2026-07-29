@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const cartItemSchema = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     cart: {
         type: mongoose.Schema.ObjectId,
         ref: "cart",

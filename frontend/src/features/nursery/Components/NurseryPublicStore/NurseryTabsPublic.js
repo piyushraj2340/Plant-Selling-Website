@@ -13,7 +13,6 @@ const NurseryTabsPublic = ({_id, isCurrentTab, setIsCurrentTab, setCurrentTabDyn
   const navigate = useNavigate();
 
   useEffect(() => {
-
     if(nurseryPublicStoreTabs && nurseryPublicStoreTabs.length > 0) {
       const activeTabIndex = nurseryPublicStoreTabs.findIndex(t => t.tabName.split(' ').join('').toLowerCase() === isCurrentTab.toLowerCase());
       
@@ -23,11 +22,15 @@ const NurseryTabsPublic = ({_id, isCurrentTab, setIsCurrentTab, setCurrentTabDyn
         setCurrentTabDynamic(nurseryPublicStoreTabs[activeTabIndex]);
       }
     }
+  }, [nurseryPublicStoreTabsAll, isCurrentTab, _id, setIsCurrentTab, setCurrentTabDynamic]);
 
-    if(!nurseryPublicStoreTabs || nurseryPublicStoreTabs.length === 0) {
+  useEffect(() => {
+    const hasTabs = nurseryPublicStoreTabsAll.some(t => t.nursery === _id);
+    if (!hasTabs) {
       dispatch(nurseryPublicStoreGetPublishTabs(_id));
     }
-  }, [nurseryPublicStoreTabsAll]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [_id, dispatch]);
 
   const handelChangeCurrentTab = (query) => {
     navigate(`/nursery/store/view/${_id}/?activeTab=${query}`);

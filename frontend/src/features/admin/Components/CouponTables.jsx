@@ -127,7 +127,7 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
                             <Space size={'small'} className='mt-2'>
                                 {disableAction(
                                     <Popconfirm title="Activate this coupon?" onConfirm={() => handleStatusUpdate(record._id, 'Active')} disabled={disabledForGuest}>
-                                        <button className='btn btn-sm btn-success py-1 px-2 text-white d-flex' style={{ fontSize: "12px", width: "75px" }} disabled={disabledForGuest}><span>Activate</span></button>
+                                        <button className='btn btn-sm btn-success py-1 px-2 d-flex' style={{ fontSize: "12px", width: "75px" }} disabled={disabledForGuest}><span>Activate</span></button>
                                     </Popconfirm>
                                 )}
                             </Space>

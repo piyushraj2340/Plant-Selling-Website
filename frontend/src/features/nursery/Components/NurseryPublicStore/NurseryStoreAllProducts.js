@@ -8,6 +8,7 @@ import NoDataFound from '../../../common/NoDataFound';
 import { transformImageUrl } from '../../../../utils/imageUtils';
 import { Pagination, Select } from 'antd';
 import ProductCard from '../../../products/Components/ProductCard';
+import Animation from '../../../common/Animation';
 
 
 const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
@@ -21,7 +22,7 @@ const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
         localStorage.setItem('productViewMode', mode);
     };
 
-    const { products, pagination } = useSelector((state) => state.products);
+    const { products, pagination, isLoading } = useSelector((state) => state.products);
     const { categories } = useSelector((state) => state.category);
     const dispatch = useDispatch();
     const location = useLocation();
@@ -153,6 +154,7 @@ const NurseryStoreAllProducts = ({ nurseryPublicStore }) => {
 
             <div className="w-100">
                 {
+                    isLoading ? <Animation /> :
                     products.length === 0 && <NoDataFound link="/products" message="No Data Found on Nursery Page" />
                 }
             </div>

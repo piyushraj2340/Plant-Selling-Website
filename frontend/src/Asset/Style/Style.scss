@@ -592,9 +592,11 @@ a:hover {
             &::after {
                 content: '';
                 position: absolute;
-                bottom: 0; left: 0; right: 0;
+                bottom: 0;
+                left: 0;
+                right: 0;
                 height: 40%;
-                background: linear-gradient(to top, rgba(0,0,0,0.4), transparent);
+                background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent);
                 pointer-events: none;
             }
 
@@ -703,7 +705,7 @@ a:hover {
                         cursor: pointer;
                         color: #444;
                         background-color: #fff;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+                        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
                         transition: all 0.2s ease;
 
                         @media screen and (min-width: $medium) {
@@ -1699,4 +1701,13 @@ a:hover {
         background-color: white !important;
         -webkit-print-color-adjust: exact;
     }
+}
+
+.product-description img {
+    width: auto;
+    max-width: 900px;
+    height: auto;
+    max-height: 400px;
+    vertical-align: middle;
+    margin: 20px auto;
 }

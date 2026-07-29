@@ -133,6 +133,16 @@ const NurseryOrders = () => {
                 const action = record.action || 'processing';
                 return (
                     <Space size={'small'}>
+                        {(action.toLowerCase() === 'processing' || action.toLowerCase() === 'pending') && (
+                            <>
+                                <Popconfirm title="Approve Order?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Approved', 'Order Approved')}>
+                                    <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>Approve</button>
+                                </Popconfirm>
+                                <Popconfirm title="Cancel Order?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Cancelled', 'Order Cancelled')}>
+                                    <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Cancel</button>
+                                </Popconfirm>
+                            </>
+                        )}
                         {action.toLowerCase() === 'approved' && (
                             <Popconfirm title="Mark as Dispatched?" onConfirm={() => handleUpdateStatus(record.vendorOrderId, 'Dispatched', 'Order Dispatched')}>
                                 <button className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Dispatch</button>

@@ -7,6 +7,7 @@ import { useTableParams } from '../../../hooks/useTableParams';
 const IncomeTable = () => {
   const dispatch = useDispatch();
   const { incomeData, isLoading } = useSelector(state => state.admin);
+  const user = useSelector(state => state.user.data);
   const incomeTotal = useSelector(state => state.admin.incomeData.total) || 0;
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -20,6 +21,7 @@ const IncomeTable = () => {
         order.orderItems.forEach(item => {
           rows.push({
             key: `${order._id}-${item._id}`,
+            isGuestData: order.isGuestData,
             products: {
               productName: item.plantName,
               description: `Order ID: ${order._id}`,
@@ -43,7 +45,8 @@ const IncomeTable = () => {
   const handleUpdateStatus = async (key, status, statusMessage) => {
     try {
       const [orderId, itemId] = key.split('-');
-      const res = await dispatch(adminUpdateOrderItemStatusAsync({ orderId, itemId, status, message: statusMessage })).unwrap();
+      // adminUpdateOrderItemStatusAsync expects 'id' to be the vendorOrderId
+      const res = await dispatch(adminUpdateOrderItemStatusAsync({ id: orderId, orderId, itemId, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
         fetchData();
@@ -100,15 +103,17 @@ const IncomeTable = () => {
       dataIndex: 'sale',
       key: 'sale',
       sorter: true,
+      render: (sale) => <span className='text-secondary'>{sale}</span>
     },
     {
       title: 'Total Revenue',
       dataIndex: 'amount',
       key: 'amount',
       sorter: true,
+      render: (amount) => <span className='text-secondary'>{amount}</span>
     },
     {
-      title: "Tag",
+      title: 'Tag',
       dataIndex: 'tag',
       key: 'tag',
       sorter: true,
@@ -119,20 +124,9 @@ const IncomeTable = () => {
         { text: 'Completed', value: 'completed' },
         { text: 'Rejected', value: 'rejected' },
       ],
-      render: (_, { tag }) => {
-        let color = 'geekblue';
-        if (tag.toLowerCase() === 'pending') {
-          color = 'volcano'
-        } else if (tag.toLowerCase() === 'placed' || tag.toLowerCase() === 'delivered' || tag.toLowerCase() === 'completed') {
-          color = 'green'
-        } else if (tag.toLowerCase() === 'rejected') {
-          color = 'red'
-        }
-        return (
-          <Tag color={color} key={tag}>
-            {tag.toUpperCase()}
-          </Tag>
-        )
+      render: (tag) => {
+        const color = tag.toLowerCase() === 'pending' ? 'orange' : tag.toLowerCase() === 'delivered' ? 'green' : tag.toLowerCase() === 'placed' ? 'blue' : 'red';
+        return <Tag color={color}>{tag.toUpperCase()}</Tag>
       }
     },
     {
@@ -140,27 +134,29 @@ const IncomeTable = () => {
       dataIndex: 'status',
       key: 'status',
       sorter: true,
+      render: (status) => <span className='text-secondary'>{status}</span>
     },
     {
       title: 'Action',
       key: 'action',
       render: (_, record) => {
         const action = record.action || 'pending';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'pending' && (
               <>
-                <Popconfirm title="Accept this order?" onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Accept</button>
+                <Popconfirm title="Accept this order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
+                  <button className='btn btn-sm btn-success py-1 px-2' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Accept</button>
                 </Popconfirm>
-                <Popconfirm title="Reject this order?" onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Reject</button>
+                <Popconfirm title="Reject this order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Reject</button>
                 </Popconfirm>
               </>
             )}
             {action.toLowerCase() === 'placed' && (
-              <Popconfirm title="Mark this order as Delivered?" onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>Deliver</button>
+              <Popconfirm title="Mark this order as Delivered?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
+                <button className='btn btn-sm btn-info py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Deliver</button>
               </Popconfirm>
             )}
           </Space>
@@ -170,36 +166,41 @@ const IncomeTable = () => {
   ];
 
   const hasSelected = selectedRowKeys.length > 0;
+  const isGuestAdmin = user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com";
+  const disableBulkActions = isGuestAdmin && selectedRowKeys.some(key => {
+    const row = dataSource.find(r => r.key === key);
+    return row && !row.isGuestData;
+  });
 
   return (
     <div className="w-100">
       <Row justify="space-between" align="middle" gutter={[16, 16]} className="mb-4">
         <Col xs={24} md={8}>
-            {/* Title can go here if needed */}
+          {/* Title can go here if needed */}
         </Col>
         <Col xs={24} md={16} style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', flexWrap: 'wrap' }}>
-            <Input
-                placeholder="Search by Order ID..."
-                allowClear
-                prefix={<span role="img" aria-label="search">🔍</span>}
-                value={localSearch}
-                onChange={handleSearchChange}
-                style={{ width: '100%', maxWidth: '300px' }}
-            />
+          <Input
+            placeholder="Search by Order ID..."
+            allowClear
+            prefix={<span role="img" aria-label="search">🔍</span>}
+            value={localSearch}
+            onChange={handleSearchChange}
+            style={{ width: '100%', maxWidth: '300px' }}
+          />
         </Col>
       </Row>
 
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Accept ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('placed', 'Orders Accepted')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Accept</button>
+          <Popconfirm title={`Approve payment for ${selectedRowKeys.length} selected items?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('placed', 'Payment Approved')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Approve</button>
           </Popconfirm>
-          <Popconfirm title={`Reject ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('rejected', 'Orders Rejected')}>
-            <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Reject</button>
+          <Popconfirm title={`Reject payment for ${selectedRowKeys.length} selected items?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('rejected', 'Payment Rejected')}>
+            <button className="btn btn-sm btn-danger py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Reject</button>
           </Popconfirm>
-          <Popconfirm title={`Mark ${selectedRowKeys.length} selected orders as Delivered?`} onConfirm={() => handleBulkUpdateStatus('delivered', 'Orders Delivered')}>
-            <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Deliver</button>
+          <Popconfirm title={`Mark payment for ${selectedRowKeys.length} selected items as Delivered?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('delivered', 'Payment Delivered')}>
+            <button className="btn btn-sm btn-info py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Deliver</button>
           </Popconfirm>
         </div>
       )}

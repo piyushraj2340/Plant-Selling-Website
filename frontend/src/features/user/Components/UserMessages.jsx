@@ -11,10 +11,10 @@ const { Text } = Typography;
 const UserMessages = () => {
     const dispatch = useDispatch();
     const { userMessages, isLoading } = useSelector((state) => state.user);
-    
+
     const [localSearch, setLocalSearch] = useState('');
     const [filteredMessages, setFilteredMessages] = useState([]);
-    
+
     const [selectedMessage, setSelectedMessage] = useState(null);
     const [replyForm] = Form.useForm();
     const [socket, setSocket] = useState(null);
@@ -34,7 +34,7 @@ const UserMessages = () => {
                 setSelectedMessage(prev => {
                     if (prev && prev._id === selectedMessage._id) {
                         const isDuplicate = prev.replies?.some(r => r.message === reply.message && r.createdAt === reply.createdAt);
-                        if(isDuplicate) return prev;
+                        if (isDuplicate) return prev;
                         return { ...prev, replies: [...(prev.replies || []), reply] };
                     }
                     return prev;
@@ -52,12 +52,12 @@ const UserMessages = () => {
 
     useEffect(() => {
         if (userMessages) {
-            const filtered = userMessages.filter(msg => 
+            const filtered = userMessages.filter(msg =>
                 msg.message.toLowerCase().includes(localSearch.toLowerCase()) ||
                 (msg.nursery && msg.nursery.nurseryName.toLowerCase().includes(localSearch.toLowerCase()))
             );
             setFilteredMessages(filtered);
-            
+
             // Auto-update selected message if it gets modified
             if (selectedMessage) {
                 const updatedMsg = userMessages.find(m => m._id === selectedMessage._id);
@@ -86,10 +86,10 @@ const UserMessages = () => {
 
     const handleReplySubmit = async (values) => {
         if (!selectedMessage) return;
-        
-        const response = await dispatch(replyUserMessageAsync({ 
-            id: selectedMessage._id, 
-            replyMessage: values.replyMessage 
+
+        const response = await dispatch(replyUserMessageAsync({
+            id: selectedMessage._id,
+            replyMessage: values.replyMessage
         })).unwrap();
 
         if (response.status) {
@@ -112,7 +112,7 @@ const UserMessages = () => {
             <div className="card-header d-flex justify-content-between align-items-center">
                 <h5 className="mb-0">My Support Chats</h5>
             </div>
-            
+
             <div className="card-body p-0" style={{ flex: 1, overflow: 'hidden' }}>
                 <Row style={{ height: '100%' }}>
                     {/* LEFT PANEL - THREAD LIST */}
@@ -130,7 +130,7 @@ const UserMessages = () => {
                                 itemLayout="horizontal"
                                 dataSource={filteredMessages}
                                 renderItem={item => (
-                                    <List.Item 
+                                    <List.Item
                                         className={`px-3 py-3 cursor-pointer ${selectedMessage?._id === item._id ? 'bg-light' : ''}`}
                                         onClick={() => handleSelectChat(item)}
                                         style={{ cursor: 'pointer', transition: 'background-color 0.3s' }}
@@ -182,7 +182,7 @@ const UserMessages = () => {
                                         <div className="d-flex justify-content-end">
                                             <div style={{ maxWidth: '75%', backgroundColor: '#e6f7ff', padding: '10px 15px', borderRadius: '10px 10px 0 10px', border: '1px solid #91d5ff' }}>
                                                 <div className="fw-bold text-primary mb-1">You (Initial Inquiry)</div>
-                                                <div>{selectedMessage.message}</div>
+                                                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', margin: 0 }}>{selectedMessage.message}</pre>
                                                 <div className="text-end mt-1" style={{ fontSize: '10px', color: '#999' }}>
                                                     {new Date(selectedMessage.createdAt).toLocaleString()}
                                                 </div>
@@ -195,10 +195,10 @@ const UserMessages = () => {
                                         return (
                                             <div key={index} className="message mb-4">
                                                 <div className={`d-flex ${isUser ? 'justify-content-end' : 'justify-content-start'}`}>
-                                                    <div style={{ 
-                                                        maxWidth: '75%', 
-                                                        backgroundColor: isUser ? '#e6f7ff' : '#fff', 
-                                                        padding: '10px 15px', 
+                                                    <div style={{
+                                                        maxWidth: '75%',
+                                                        backgroundColor: isUser ? '#e6f7ff' : '#fff',
+                                                        padding: '10px 15px',
                                                         borderRadius: isUser ? '10px 10px 0 10px' : '10px 10px 10px 0',
                                                         border: isUser ? '1px solid #91d5ff' : '1px solid #e8e8e8',
                                                         boxShadow: '0 1px 2px rgba(0,0,0,0.05)'
@@ -206,7 +206,7 @@ const UserMessages = () => {
                                                         <div className={`fw-bold mb-1 ${isUser ? 'text-primary' : 'text-success'}`}>
                                                             {isUser ? 'You' : selectedMessage.nursery?.nurseryName}
                                                         </div>
-                                                        <div>{reply.message}</div>
+                                                        <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'inherit', margin: 0 }}>{reply.message}</pre>
                                                         <div className={`mt-1 ${isUser ? 'text-end' : 'text-start'}`} style={{ fontSize: '10px', color: '#999' }}>
                                                             {new Date(reply.createdAt).toLocaleString()}
                                                         </div>
@@ -233,12 +233,12 @@ const UserMessages = () => {
                                                         className="mb-0"
                                                         rules={[{ required: true, message: 'Please enter a message' }]}
                                                     >
-                                                        <Input.TextArea 
-                                                            rows={2} 
-                                                            placeholder="Type your reply here..." 
+                                                        <Input.TextArea
+                                                            rows={2}
+                                                            placeholder="Type your reply here..."
                                                             style={{ resize: 'none' }}
                                                             onPressEnter={(e) => {
-                                                                if(!e.shiftKey) {
+                                                                if (!e.shiftKey) {
                                                                     e.preventDefault();
                                                                     replyForm.submit();
                                                                 }

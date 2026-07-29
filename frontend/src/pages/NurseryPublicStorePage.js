@@ -11,6 +11,7 @@ import Error404 from './Error404Page';
 import NurseryStoreContactUs from '../features/nursery/Components/NurseryPublicStore/NurseryStoreContactUs';
 import NurseryPublicViewMain from '../features/nursery/Components/NurseryPublicStore/NurseryPublicViewMain';
 import NoDataFound from '../features/common/NoDataFound';
+import Animation from '../features/common/Animation';
 
 const NurseryPublicStorePage = () => {
   const queryParams = new URLSearchParams(window.location.search);
@@ -21,6 +22,7 @@ const NurseryPublicStorePage = () => {
   const [currentTabDynamic, setCurrentTabDynamic] = useState(null);
 
   const nurseryPublicStoresDetails = useSelector(state => state.nurseryPublicStore.nurseryPublicStoresDetails);
+  const isLoading = useSelector(state => state.nurseryPublicStore.isLoading);
 
   const dispatch = useDispatch();
 
@@ -47,33 +49,37 @@ const NurseryPublicStorePage = () => {
     render = <NurseryStoreContactUs nurseryPublicStore={nurseryPublicStore} />
   }
   else {
-    render = currentTabDynamic ? <NurseryPublicViewMain nurseryPublicStore={nurseryPublicStore} currentTabDynamic={currentTabDynamic} isCurrentTab={isCurrentTab} /> : <NoDataFound link="/" message="No Information Found" />
+    render = currentTabDynamic ? <NurseryPublicViewMain nurseryPublicStore={nurseryPublicStore} currentTabDynamic={currentTabDynamic} isCurrentTab={isCurrentTab} /> : (isLoading ? null : <NoDataFound link="/" message="No Information Found" />)
   }
 
 
   return (
-    nurseryPublicStore ?
-      <section style={{ backgroundColor: "#eee" }}>
-        <div className="container py-3">
-          <div className="row mb-2">
-            <NurseryHeaderPublic _id={_id} />
-          </div>
-          <div className="row nursery-content-sticky">
-            <div className='nursery-main-content'>
-              <div className='p-2 p-md-3 p-lg-4 border rounded bg-light'>
-                <div className="main-content mb-4">
-                  <NurseryTabsPublic _id={_id} isCurrentTab={isCurrentTab} setIsCurrentTab={setIsCurrentTab} setCurrentTabDynamic={setCurrentTabDynamic} />
-                  <div className="content">
-                    {render}
+    <>
+      {nurseryPublicStore ?
+        <section style={{ backgroundColor: "#eee" }}>
+          <div className="container py-3">
+            <div className="row mb-2">
+              <NurseryHeaderPublic _id={_id} />
+            </div>
+            <div className="row nursery-content-sticky">
+              <div className='nursery-main-content'>
+                <div className='p-2 p-md-3 p-lg-4 border rounded bg-light'>
+                  <div className="main-content mb-4">
+                    <NurseryTabsPublic _id={_id} isCurrentTab={isCurrentTab} setIsCurrentTab={setIsCurrentTab} setCurrentTabDynamic={setCurrentTabDynamic} />
+                    <div className="content">
+                      {render}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </section>
-      :
-      <Error404 />
+        </section>
+        :
+        (isLoading ? null : <Error404 />)
+      }
+      {isLoading && <Animation />}
+    </>
   )
 }
 

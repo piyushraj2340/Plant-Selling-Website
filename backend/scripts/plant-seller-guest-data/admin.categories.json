@@ -1,0 +1,68 @@
+[
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf52"
+    },
+    "name": "Guest Indoor Plants",
+    "slug": "guest-indoor-plants",
+    "description": "Beautiful indoor plants for your home.",
+    "parentCategory": null,
+    "createdBy": {
+      "$oid": "6a68a9324fb50f72fc0ccf48"
+    },
+    "status": "Active",
+    "isGuestData": true,
+    "createdAt": {
+      "$date": "2026-07-28T13:05:54.633Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-28T17:15:20.784Z"
+    },
+    "__v": 0,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf54"
+    },
+    "name": "Guest Aquatic Plants",
+    "slug": "guest-aquatic-plants",
+    "description": "Beautiful aquatic plants for your home.",
+    "parentCategory": null,
+    "createdBy": {
+      "$oid": "6a68a9324fb50f72fc0ccf48"
+    },
+    "status": "Active",
+    "isGuestData": true,
+    "createdAt": {
+      "$date": "2026-07-28T13:05:54.695Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-28T17:15:20.888Z"
+    },
+    "__v": 0,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf56"
+    },
+    "name": "Guest Medicinal Plants",
+    "slug": "guest-medicinal-plants",
+    "description": "Beautiful medicinal plants for your home.",
+    "parentCategory": null,
+    "createdBy": {
+      "$oid": "6a68a9324fb50f72fc0ccf48"
+    },
+    "status": "Active",
+    "isGuestData": true,
+    "createdAt": {
+      "$date": "2026-07-28T13:05:54.766Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-28T17:15:20.978Z"
+    },
+    "__v": 0,
+    "isSeedData": true
+  }
+]

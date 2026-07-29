@@ -1,0 +1,24 @@
+[
+  {
+    "_id": {
+      "$oid": "6a68a9324fb50f72fc0ccf48"
+    },
+    "name": "Guest Admin",
+    "email": "guest-admin@plantseller.com",
+    "phone": "9999999991",
+    "password": "$2a$12$e.A1t93guh6n/.yQ9NXbzes/QvVwJkvhosm9YBFV6SE5fW5.gLiWO",
+    "role": [
+      "user",
+      "admin"
+    ],
+    "isUserVerified": true,
+    "isTwoFactorAuthEnabled": false,
+    "isBlocked": false,
+    "isGuestData": true,
+    "gender": "",
+    "age": 30,
+    "avatarList": [],
+    "__v": 0,
+    "isSeedData": true
+  }
+]

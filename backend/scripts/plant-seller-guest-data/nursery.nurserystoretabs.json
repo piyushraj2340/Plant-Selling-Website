@@ -1,0 +1,19 @@
+[
+  {
+    "_id": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "tabName": "Indoor Plants",
+    "status": "publish",
+    "index": 0,
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]

@@ -1,0 +1,338 @@
+[
+  {
+    "_id": {
+      "$oid": "6a695753ba5ba5a662e12dba"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6956c7ba5ba5a662e12d24"
+    },
+    "index": 0,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6956c7ba5ba5a662e12d24/ei9f1pwifhiveq0c7t0s",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785288530/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6956c7ba5ba5a662e12d24/ei9f1pwifhiveq0c7t0s.png"
+    },
+    "isProduct": false,
+    "url": "/nursery/store/view/6a68a9324fb50f72fc0ccf50?activeTab=products&page=1&category=6a68a9324fb50f72fc0ccf52",
+    "title": "Indoor Plant Poster",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695873ba5ba5a662e12e61"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a69584dba5ba5a662e12e38"
+    },
+    "index": 0,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a69584dba5ba5a662e12e38/kteifbtfdkw4lpg0dcxj",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785288818/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a69584dba5ba5a662e12e38/kteifbtfdkw4lpg0dcxj.png"
+    },
+    "isProduct": false,
+    "url": "/nursery/store/view/6a68a9324fb50f72fc0ccf50?activeTab=products&page=1&category=6a68a9324fb50f72fc0ccf52",
+    "title": "Indoor Plants Flyer",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695982ba5ba5a662e12f18"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6958a5ba5ba5a662e12e69"
+    },
+    "index": 0,
+    "image": {
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785289644/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6958a5ba5ba5a662e12e69/y9sqay5b8guvo7x4zsis.png",
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6958a5ba5ba5a662e12e69/y9sqay5b8guvo7x4zsis"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d24",
+    "title": "Peace Lily Infographic",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695be9ba5ba5a662e12feb"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6958a5ba5ba5a662e12e69"
+    },
+    "index": 1,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6958a5ba5ba5a662e12e69/gvijaljcp5l5bjhmbhwh",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785289704/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6958a5ba5ba5a662e12e69/gvijaljcp5l5bjhmbhwh.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d24",
+    "title": "Peace Lily Post",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695cd7ba5ba5a662e1301a"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6958a5ba5ba5a662e12e69"
+    },
+    "index": 2,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6958a5ba5ba5a662e12e69/kfgt82dexqwpnx2ikvap",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785289942/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6958a5ba5ba5a662e12e69/kfgt82dexqwpnx2ikvap.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d24",
+    "title": "Peace Lily Advertisement",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695e85ba5ba5a662e13130"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a695d1bba5ba5a662e13064"
+    },
+    "index": 2,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a695d1bba5ba5a662e13064/be0suvwatummktsdh1q8",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785290372/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a695d1bba5ba5a662e13064/be0suvwatummktsdh1q8.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d23",
+    "title": "Fiddle Leaf Fig_Infographic",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695f7dba5ba5a662e131db"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a695d1bba5ba5a662e13064"
+    },
+    "index": 0,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a695d1bba5ba5a662e13064/u1kc4tlwzmntkgo7jfpd",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785290619/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a695d1bba5ba5a662e13064/u1kc4tlwzmntkgo7jfpd.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d23",
+    "title": "Fiddle Leaf Fig Post",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a695fc9ba5ba5a662e13204"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a695d1bba5ba5a662e13064"
+    },
+    "index": 1,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a695d1bba5ba5a662e13064/iqbgtzmunbtjc5js8vkg",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785290697/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a695d1bba5ba5a662e13064/iqbgtzmunbtjc5js8vkg.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d23",
+    "title": "Fiddle Leaf Fig Advertisement",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a6960f8ba5ba5a662e132e3"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6960d1ba5ba5a662e132ba"
+    },
+    "index": 0,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6960d1ba5ba5a662e132ba/yshkxoiu3zs5rdbrjhv2",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785290999/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6960d1ba5ba5a662e132ba/yshkxoiu3zs5rdbrjhv2.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d21",
+    "title": "Monstera Deliciosa Infographic",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a69618cba5ba5a662e133cf"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6960d1ba5ba5a662e132ba"
+    },
+    "index": 1,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6960d1ba5ba5a662e132ba/lkrcxthki3c06eowlebb",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785291148/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6960d1ba5ba5a662e132ba/lkrcxthki3c06eowlebb.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d21",
+    "title": "Monstera Deliciosa Post",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a6961faba5ba5a662e133f8"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a6960d1ba5ba5a662e132ba"
+    },
+    "index": 2,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6960d1ba5ba5a662e132ba/athbdwrknyujexcfjmvr",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785291257/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a6960d1ba5ba5a662e132ba/athbdwrknyujexcfjmvr.png"
+    },
+    "isProduct": false,
+    "url": "/product/650a2b4f9d8c7e6a5b4c3d21",
+    "title": "Monstera Deliciosa Advertisement",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a69630fba5ba5a662e135d3"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4c"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryStoreTabs": {
+      "$oid": "6a693f1f53f654d8aa298b67"
+    },
+    "nurseryStoreTemplates": {
+      "$oid": "6a696280ba5ba5a662e13494"
+    },
+    "index": 0,
+    "image": {
+      "public_id": "PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a696280ba5ba5a662e13494/zgzvulichxo79tu5u8qt",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785291535/PlantSeller/user/6a68a9324fb50f72fc0ccf4c/nursery/6a68a9324fb50f72fc0ccf50/store/6a693f1f53f654d8aa298b67/6a696280ba5ba5a662e13494/zgzvulichxo79tu5u8qt.png"
+    },
+    "isProduct": false,
+    "url": "/nursery/store/view/6a68a9324fb50f72fc0ccf50?activeTab=products&page=1&category=6a68a9324fb50f72fc0ccf52",
+    "title": "Indoor Plant Footer Poster",
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]

@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const nurseryStoreContactSchema = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     nursery: {
         type: mongoose.Schema.ObjectId,
         ref: "nursery",

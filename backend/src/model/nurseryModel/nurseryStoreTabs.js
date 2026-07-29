@@ -1,6 +1,8 @@
 const mongoose = require('mongoose');
 
 const nurseryStoreTabSchema = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     user: {
         type: mongoose.Schema.ObjectId,
         ref: "user",
@@ -15,8 +17,7 @@ const nurseryStoreTabSchema = new mongoose.Schema({
     },
     tabName: {
         type: String,
-        required: [true, "Tab Name is required."],
-        unique: [true, "Tab Name is unique"]
+        required: [true, "Tab Name is required."]
     },
     status: {
         type: String,
@@ -28,6 +29,8 @@ const nurseryStoreTabSchema = new mongoose.Schema({
         required: [true, "Order of Tabs is required."],
     },
 });
+
+nurseryStoreTabSchema.index({ user: 1, nursery: 1, tabName: 1 }, { unique: true });
 
 const nurseryStoresTab = new mongoose.model('nurseryStoreTab', nurseryStoreTabSchema);
 

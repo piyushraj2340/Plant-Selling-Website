@@ -3,6 +3,8 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 
 const deliverySchema = new mongoose.Schema({
+    isGuestData: { type: Boolean, default: false },
+    isSeedData: { type: Boolean, default: false },
     user: {
         type: mongoose.Schema.ObjectId,
         ref: "user",

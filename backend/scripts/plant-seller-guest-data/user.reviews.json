@@ -1,0 +1,30 @@
+[
+  {
+    "_id": {
+      "$oid": "6a696c87ba5ba5a662e13879"
+    },
+    "user": {
+      "$oid": "6a68a9324fb50f72fc0ccf4a"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d25"
+    },
+    "rating": 5,
+    "review": "I've had a great experience with this Aloe Vera plant. It arrived healthy with vibrant, thick green leaves and has been incredibly easy to care for. It only needs occasional watering and does well in a bright spot, making it perfect for beginners or anyone with a busy lifestyle.\n\nThe plant not only adds a fresh, natural touch to my home but is also useful for its soothing gel, which comes in handy for minor skin irritation and skincare routines. It's growing well and looks beautiful on my windowsill.\n\nOverall, this is a hardy, low-maintenance plant that combines beauty with practical benefits. I would definitely recommend it to anyone looking for an attractive indoor plant with added wellness value.",
+    "upVote": 0,
+    "status": "Approved",
+    "isBuyer": false,
+    "isGuestData": true,
+    "isSeedData": true,
+    "createdAt": {
+      "$date": "2026-07-29T02:59:19.568Z"
+    },
+    "updatedAt": {
+      "$date": "2026-07-29T03:03:29.931Z"
+    },
+    "__v": 0
+  }
+]

@@ -1,0 +1,80 @@
+[
+  {
+    "_id": {
+      "$oid": "6a691d0ba9f4584c2389e2f8"
+    },
+    "vendorOrder": {
+      "$oid": "6a691d0ba9f4584c2389e2f6"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d25"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryName": "Evergreen Botanicals (Demo)",
+    "plantName": "Aloe Vera",
+    "images": {
+      "public_id": "demo_av_1",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241376/PlantSeller/UI%20Images/guest-data/Aloe_Vera_02_nz1dhl.avif"
+    },
+    "price": 199,
+    "discount": 0,
+    "quantity": 1,
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a691d0ba9f4584c2389e2fa"
+    },
+    "vendorOrder": {
+      "$oid": "6a691d0ba9f4584c2389e2f6"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d24"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryName": "Evergreen Botanicals (Demo)",
+    "plantName": "Peace Lily",
+    "images": {
+      "public_id": "demo_pl_1",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241226/PlantSeller/UI%20Images/guest-data/Peace_Lily_01_vfzgdt.avif"
+    },
+    "price": 349,
+    "discount": 0,
+    "quantity": 1,
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  },
+  {
+    "_id": {
+      "$oid": "6a691d0ba9f4584c2389e2fc"
+    },
+    "vendorOrder": {
+      "$oid": "6a691d0ba9f4584c2389e2f6"
+    },
+    "plant": {
+      "$oid": "650a2b4f9d8c7e6a5b4c3d23"
+    },
+    "nursery": {
+      "$oid": "6a68a9324fb50f72fc0ccf50"
+    },
+    "nurseryName": "Evergreen Botanicals (Demo)",
+    "plantName": "Fiddle Leaf Fig",
+    "images": {
+      "public_id": "demo_flf_1",
+      "url": "https://res.cloudinary.com/dcd6y2awx/image/upload/v1785241001/PlantSeller/UI%20Images/guest-data/Fiddle_Leaf_Fig_01_zvoavp.avif"
+    },
+    "price": 899,
+    "discount": 15,
+    "quantity": 1,
+    "__v": 0,
+    "isGuestData": true,
+    "isSeedData": true
+  }
+]

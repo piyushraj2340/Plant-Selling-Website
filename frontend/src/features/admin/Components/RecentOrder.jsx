@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Table, Tag, Space, message, Popconfirm, Row, Col, Input, Select } from 'antd';
+import { Table, Tag, Space, message, Popconfirm, Row, Col, Input, Select, Pagination } from 'antd';
 import 'antd/dist/reset.css';
 import { adminOrdersAsync, adminUpdateOrderItemStatusAsync, adminBulkUpdateOrderItemStatusAsync } from '../adminSlice';
 import { useTableParams } from '../../../hooks/useTableParams';
@@ -10,6 +10,7 @@ const RecentOrder = () => {
   const [tableData, setTableData] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const { ordersData, isLoading } = useSelector((state) => state.admin);
+  const user = useSelector((state) => state.user.data);
   const orders = ordersData?.data || [];
 
   const ordersTotal = useSelector((state) => state.admin.ordersData?.total) || 0;
@@ -25,6 +26,7 @@ const RecentOrder = () => {
           vendorOrder.orderItems?.forEach(item => {
             rows.push({
               key: `${vendorOrder._id}-${item._id}`,
+              isGuestData: vendorOrder.isGuestData,
               products: {
                 productName: item.plantName,
                 description: `Vendor Order ID: ${vendorOrder._id}`,
@@ -50,7 +52,7 @@ const RecentOrder = () => {
   const handleUpdateStatus = async (key, status, statusMessage) => {
     try {
       const [orderId, itemId] = key.split('-');
-      const res = await dispatch(adminUpdateOrderItemStatusAsync({ orderId, itemId, status, message: statusMessage })).unwrap();
+      const res = await dispatch(adminUpdateOrderItemStatusAsync({ id: orderId, orderId, itemId, status, message: statusMessage })).unwrap();
       if (res.status) {
         message.success(res.message);
         fetchData();
@@ -169,21 +171,22 @@ const RecentOrder = () => {
       key: 'action',
       render: (_, record) => {
         const action = record.action || 'pending';
+        const isGuestAndRealData = (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData;
         return (
           <Space size={'small'}>
             {action.toLowerCase() === 'pending' && (
               <>
-                <Popconfirm title="Accept this order?" onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
-                  <button className='btn btn-sm btn-success py-1 px-2 text-white' style={{ fontSize: "12px" }}>Accept</button>
+                <Popconfirm title="Accept this order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'placed', 'Order Accepted')}>
+                  <button className='btn btn-sm btn-success py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Accept</button>
                 </Popconfirm>
-                <Popconfirm title="Reject this order?" onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
-                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Reject</button>
+                <Popconfirm title="Reject this order?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'rejected', 'Order Rejected')}>
+                  <button className='btn btn-sm btn-danger py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Reject</button>
                 </Popconfirm>
               </>
             )}
             {action.toLowerCase() === 'placed' && (
-              <Popconfirm title="Mark this order as Delivered?" onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
-                <button className='btn btn-sm btn-info py-1 px-2 text-white' style={{ fontSize: "12px" }}>Deliver</button>
+              <Popconfirm title="Mark this order as Delivered?" disabled={isGuestAndRealData} onConfirm={() => handleUpdateStatus(record.key, 'delivered', 'Order Delivered')}>
+                <button className='btn btn-sm btn-info py-1 px-2 text-white' disabled={isGuestAndRealData} style={{ fontSize: "12px" }}>Deliver</button>
               </Popconfirm>
             )}
           </Space>
@@ -193,6 +196,11 @@ const RecentOrder = () => {
   ];
 
   const hasSelected = selectedRowKeys.length > 0;
+  const isGuestAdmin = user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com";
+  const disableBulkActions = isGuestAdmin && selectedRowKeys.some(key => {
+    const row = tableData.find(r => r.key === key);
+    return row && !row.isGuestData;
+  });
 
   return (
     <div className="w-100">
@@ -211,14 +219,14 @@ const RecentOrder = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Accept ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('placed', 'Orders Accepted')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Accept</button>
+          <Popconfirm title={`Accept ${selectedRowKeys.length} selected orders?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('placed', 'Orders Accepted')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Accept</button>
           </Popconfirm>
-          <Popconfirm title={`Reject ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('rejected', 'Orders Rejected')}>
-            <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Reject</button>
+          <Popconfirm title={`Reject ${selectedRowKeys.length} selected orders?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('rejected', 'Orders Rejected')}>
+            <button className="btn btn-sm btn-danger py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Reject</button>
           </Popconfirm>
-          <Popconfirm title={`Mark ${selectedRowKeys.length} selected orders as Delivered?`} onConfirm={() => handleBulkUpdateStatus('delivered', 'Orders Delivered')}>
-            <button className="btn btn-sm btn-info py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Deliver</button>
+          <Popconfirm title={`Mark ${selectedRowKeys.length} selected orders as Delivered?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('delivered', 'Orders Delivered')}>
+            <button className="btn btn-sm btn-info py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Deliver</button>
           </Popconfirm>
         </div>
       )}
@@ -227,16 +235,23 @@ const RecentOrder = () => {
         loading={isLoading}
         dataSource={tableData}
         columns={columns}
-        pagination={{
-          ...tableParams.pagination,
-          total: ordersTotal,
-          showSizeChanger: true,
-          position: ['bottomCenter'],
-        }}
-        onChange={handleTableChange}
+        pagination={false}
+        onChange={(pagination, filters, sorter) => handleTableChange(tableParams.pagination, filters, sorter)}
         className='overflow-x-auto'
         scroll={{ x: 'max-content' }}
       />
+      
+      {ordersTotal > 0 && (
+        <div className="d-flex justify-content-end mt-4">
+          <Pagination
+            current={tableParams.pagination.current}
+            pageSize={tableParams.pagination.pageSize}
+            total={ordersTotal}
+            showSizeChanger
+            onChange={(page, pageSize) => handleTableChange({ current: page, pageSize })}
+          />
+        </div>
+      )}
     </div>
   )
 }
