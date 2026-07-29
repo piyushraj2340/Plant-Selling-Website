@@ -24,11 +24,9 @@ const adminController = {
             const totalRevenue = revenueAgg.length > 0 ? revenueAgg[0].totalRevenue : 0;
 
             // Doughnut Graph data: Order item status
-            const doughnutAgg = await Order.aggregate([
-                { $unwind: "$orderItems" },
-                { $lookup: { from: "orderitems", localField: "orderItems", foreignField: "_id", as: "populatedOrderItem" } },
-                { $unwind: "$populatedOrderItem" },
-                { $group: { _id: "$populatedOrderItem.orderStatus.status", count: { $sum: 1 } } }
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const doughnutAgg = await VendorOrder.aggregate([
+                { $group: { _id: "$orderStatus.status", count: { $sum: 1 } } }
             ]);
 
             // Format doughnut graph data
@@ -936,11 +934,10 @@ const adminController = {
     // Get Income Table Data
     getIncome: async (req, res, next) => {
         try {
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
             const { page, limit, skip, search, sort } = getQueryOptions(req);
             
-            let query = {
-                "payment.status": { $ne: 'Failed' }
-            };
+            let query = {};
 
             const searchQueryStr = search || '';
             if (searchQueryStr) {
@@ -957,9 +954,9 @@ const adminController = {
                 query['orderStatus.status'] = { $in: statuses };
             }
 
-            const total = await Order.countDocuments(query);
-            const orders = await Order.find(query)
-                .populate('user')
+            const total = await VendorOrder.countDocuments(query);
+            const orders = await VendorOrder.find(query)
+                .populate({ path: 'order', populate: { path: 'user' } })
                 .populate({
                     path: 'orderItems',
                     populate: [
@@ -1021,11 +1018,11 @@ const adminController = {
             const startOfYear = new Date(year, 0, 1);
             const endOfYear = new Date(year, 11, 31, 23, 59, 59);
 
-            const categoryRevenueAgg = await Order.aggregate([
+            const VendorOrder = require('../model/checkoutModel/vendorOrder');
+            const categoryRevenueAgg = await VendorOrder.aggregate([
                 { 
                     $match: { 
-                        orderAt: { $gte: startOfYear, $lte: endOfYear },
-                        "payment.status": { $ne: 'Failed' }
+                        createdAt: { $gte: startOfYear, $lte: endOfYear }
                     } 
                 },
                 { $unwind: "$orderItems" },

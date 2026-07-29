@@ -1,0 +1,32 @@
+[{
+  "_id": {
+    "$oid": "6a691df3a9f4584c2389e671"
+  },
+  "user": {
+    "$oid": "6a68a9324fb50f72fc0ccf4c"
+  },
+  "plant": {
+    "$oid": "650a2b4f9d8c7e6a5b4c3d23"
+  },
+  "addedAtPrice": 899,
+  "addedAt": {
+    "$date": "2026-07-28T21:24:03.563Z"
+  },
+  "__v": 0
+},
+{
+  "_id": {
+    "$oid": "6a691df9a9f4584c2389e69c"
+  },
+  "user": {
+    "$oid": "6a68a9324fb50f72fc0ccf4c"
+  },
+  "plant": {
+    "$oid": "650a2b4f9d8c7e6a5b4c3d25"
+  },
+  "addedAtPrice": 199,
+  "addedAt": {
+    "$date": "2026-07-28T21:24:09.938Z"
+  },
+  "__v": 0
+}]

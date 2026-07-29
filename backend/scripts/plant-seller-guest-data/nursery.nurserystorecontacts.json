@@ -1,0 +1,33 @@
+[{
+  "_id": {
+    "$oid": "6a691a86a9f4584c2389dfa2"
+  },
+  "nursery": {
+    "$oid": "6a68a9324fb50f72fc0ccf50"
+  },
+  "user": {
+    "$oid": "6a68a9324fb50f72fc0ccf4a"
+  },
+  "name": "Guest User",
+  "email": "guest-user@plantseller.com",
+  "category": "General Inquiry",
+  "message": "I would like to inquire about the availability of a specific plant.",
+  "isMessageViewed": true,
+  "status": "open",
+  "replies": [
+    {
+      "sender": "Nursery",
+      "message": "Thank you for your inquiry. I'd be happy to help.\n\nCould you please let me know the name of the plant you're looking for? Once I have that information, I'll check its availability and get back to you as soon as possible.",
+      "createdAt": {
+        "$date": "2026-07-28T21:11:23.370Z"
+      },
+      "_id": {
+        "$oid": "6a691afba9f4584c2389e026"
+      }
+    }
+  ],
+  "createdAt": {
+    "$date": "2026-07-28T21:09:26.767Z"
+  },
+  "__v": 0
+}]

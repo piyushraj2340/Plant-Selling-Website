@@ -1,0 +1,45 @@
+[{
+  "_id": {
+    "$oid": "6a691d0ba9f4584c2389e2f6"
+  },
+  "order": {
+    "$oid": "6a691d0ba9f4584c2389e2f4"
+  },
+  "nursery": {
+    "$oid": "6a68a9324fb50f72fc0ccf50"
+  },
+  "orderItems": [
+    {
+      "$oid": "6a691d0ba9f4584c2389e2f8"
+    },
+    {
+      "$oid": "6a691d0ba9f4584c2389e2fa"
+    },
+    {
+      "$oid": "6a691d0ba9f4584c2389e2fc"
+    }
+  ],
+  "orderStatus": {
+    "status": "Delivered",
+    "message": "Order Delivered",
+    "statusAt": {
+      "$date": "2026-07-28T21:23:35.262Z"
+    }
+  },
+  "pricing": {
+    "subTotal": 1312,
+    "shippingFee": 0,
+    "nurseryDiscount": 0,
+    "netAmountOwed": 1312
+  },
+  "settlement": {
+    "isSettled": false
+  },
+  "createdAt": {
+    "$date": "2026-07-28T21:20:11.080Z"
+  },
+  "updatedAt": {
+    "$date": "2026-07-28T21:23:35.262Z"
+  },
+  "__v": 1
+}]
