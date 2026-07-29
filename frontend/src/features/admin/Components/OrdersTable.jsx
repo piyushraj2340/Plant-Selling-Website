@@ -91,9 +91,6 @@ const OrdersTable = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
-    getCheckboxProps: (record) => ({
-      disabled: (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData,
-    }),
   };
 
   const rootColumns = [
@@ -230,6 +227,11 @@ const OrdersTable = () => {
   };
 
   const hasSelected = selectedRowKeys.length > 0;
+  const isGuestAdmin = user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com";
+  const disableBulkActions = isGuestAdmin && selectedRowKeys.some(key => {
+    const row = dataSource.find(r => r.key === key);
+    return row && !row.isGuestData;
+  });
 
   return (
     <div className="w-100 p-3 bg-white rounded shadow-sm">
@@ -252,11 +254,11 @@ const OrdersTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Approve all vendor orders in ${selectedRowKeys.length} selected global orders?`} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
-            <button className="btn btn-sm btn-success py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Approve</button>
+          <Popconfirm title={`Approve all vendor orders in ${selectedRowKeys.length} selected global orders?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('Approved', 'Orders Approved')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Approve</button>
           </Popconfirm>
-          <Popconfirm title={`Cancel all vendor orders in ${selectedRowKeys.length} selected global orders?`} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
-            <button className="btn btn-sm btn-danger py-1 px-2 text-white" style={{ fontSize: "12px" }}>Bulk Cancel</button>
+          <Popconfirm title={`Cancel all vendor orders in ${selectedRowKeys.length} selected global orders?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('Cancelled', 'Orders Cancelled')}>
+            <button className="btn btn-sm btn-danger py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Cancel</button>
           </Popconfirm>
         </div>
       )}

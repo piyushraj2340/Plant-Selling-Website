@@ -76,9 +76,6 @@ const IncomeTable = () => {
   const rowSelection = {
     selectedRowKeys,
     onChange: onSelectChange,
-    getCheckboxProps: (record) => ({
-      disabled: (user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com") && !record.isGuestData,
-    }),
   };
 
   const columns = [
@@ -169,6 +166,11 @@ const IncomeTable = () => {
   ];
 
   const hasSelected = selectedRowKeys.length > 0;
+  const isGuestAdmin = user?.email === "guest-admin@plantseller.com" || user?.email === "guest-seller@plantseller.com";
+  const disableBulkActions = isGuestAdmin && selectedRowKeys.some(key => {
+    const row = dataSource.find(r => r.key === key);
+    return row && !row.isGuestData;
+  });
 
   return (
     <div className="w-100">
@@ -191,14 +193,14 @@ const IncomeTable = () => {
       {hasSelected && (
         <div className="d-flex align-items-center mb-3 p-3 bg-light border rounded gap-2">
           <span className="fw-bold me-2">{selectedRowKeys.length} items selected:</span>
-          <Popconfirm title={`Accept ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('placed', 'Orders Accepted')}>
-            <button className="btn btn-sm btn-success py-1 px-2" style={{ fontSize: "12px" }}>Bulk Accept</button>
+          <Popconfirm title={`Approve payment for ${selectedRowKeys.length} selected items?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('placed', 'Payment Approved')}>
+            <button className="btn btn-sm btn-success py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Approve</button>
           </Popconfirm>
-          <Popconfirm title={`Reject ${selectedRowKeys.length} selected orders?`} onConfirm={() => handleBulkUpdateStatus('rejected', 'Orders Rejected')}>
-            <button className="btn btn-sm btn-danger py-1 px-2" style={{ fontSize: "12px" }}>Bulk Reject</button>
+          <Popconfirm title={`Reject payment for ${selectedRowKeys.length} selected items?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('rejected', 'Payment Rejected')}>
+            <button className="btn btn-sm btn-danger py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Reject</button>
           </Popconfirm>
-          <Popconfirm title={`Mark ${selectedRowKeys.length} selected orders as Delivered?`} onConfirm={() => handleBulkUpdateStatus('delivered', 'Orders Delivered')}>
-            <button className="btn btn-sm btn-info py-1 px-2" style={{ fontSize: "12px" }}>Bulk Deliver</button>
+          <Popconfirm title={`Mark payment for ${selectedRowKeys.length} selected items as Delivered?`} disabled={disableBulkActions} onConfirm={() => handleBulkUpdateStatus('delivered', 'Payment Delivered')}>
+            <button className="btn btn-sm btn-info py-1 px-2 text-white" disabled={disableBulkActions} style={{ fontSize: "12px" }}>Bulk Deliver</button>
           </Popconfirm>
         </div>
       )}
