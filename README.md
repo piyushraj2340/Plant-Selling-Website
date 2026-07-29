@@ -167,8 +167,10 @@ SMTP_PORT=465
 SMTP_GOOGLE_MAIL_ADDRESS=your_email@gmail.com
 SMTP_GOOGLE_APP_PASSWORD=your_google_app_password
 
-# Redis Prefix (Optional)
+# Redis Prefix (Optional) (Currently deprecated)
 REDIS_VERCEL_KV_DB=development
+
+REDIS_URL=your_redis_url
 
 # Guest Account & Admin Defaults (Optional)
 ADMIN_EMAIL=admin@plantseller.com
