@@ -7,7 +7,7 @@ import { useTableParams } from '../../../hooks/useTableParams';
 const IncomeTable = () => {
   const dispatch = useDispatch();
   const { incomeData, isLoading } = useSelector(state => state.admin);
-  const user = useSelector(state => state.auth.user);
+  const user = useSelector(state => state.user.data);
   const incomeTotal = useSelector(state => state.admin.incomeData.total) || 0;
   const [dataSource, setDataSource] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);

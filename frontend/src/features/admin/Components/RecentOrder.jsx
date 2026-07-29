@@ -10,7 +10,7 @@ const RecentOrder = () => {
   const [tableData, setTableData] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const { ordersData, isLoading } = useSelector((state) => state.admin);
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.user.data);
   const orders = ordersData?.data || [];
 
   const ordersTotal = useSelector((state) => state.admin.ordersData?.total) || 0;
