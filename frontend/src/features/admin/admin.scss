@@ -49,10 +49,12 @@
     }
   }
 
-  @media screen and (min-width: 992px) {
+  @media screen and (min-width: 768px) {
     .slider-close, .slider-open {
-      position: relative;
-      display: block!important;
+      position: relative !important;
+      display: block !important;
+      animation: none !important;
+      transform: none !important;
     }
   }
 
