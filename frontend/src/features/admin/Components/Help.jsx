@@ -34,11 +34,11 @@ const Help = () => {
 
   const handleReplySubmit = async (values) => {
     if (!selectedContact) return;
-    
+
     try {
-      const response = await dispatch(adminReplyToContactAsync({ 
-        id: selectedContact._id, 
-        replyMessage: values.replyMessage 
+      const response = await dispatch(adminReplyToContactAsync({
+        id: selectedContact._id,
+        replyMessage: values.replyMessage
       })).unwrap();
 
       if (response.status) {
@@ -65,12 +65,14 @@ const Help = () => {
       dataIndex: 'name',
       key: 'name',
       sorter: true,
+      width: 150
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
       sorter: true,
+      width: 250
     },
     {
       title: 'Category',
@@ -84,6 +86,7 @@ const Help = () => {
         { text: 'Partnership', value: 'Partnership' },
         { text: 'Other', value: 'Other' },
       ],
+      width: 150,
       render: (cat) => <Tag color="blue">{cat}</Tag>
     },
     {
@@ -92,12 +95,14 @@ const Help = () => {
       key: 'message',
       ellipsis: true,
       sorter: true,
+      width: 250
     },
     {
       title: "Date",
       dataIndex: 'createdAt',
       key: 'createdAt',
       sorter: true,
+      width: 150,
       render: (date) => new Date(date).toLocaleString()
     },
     {
@@ -105,6 +110,7 @@ const Help = () => {
       dataIndex: 'isReplied',
       key: 'isReplied',
       sorter: true,
+      width: 150,
       filters: [
         { text: 'REPLIED', value: 'true' },
         { text: 'PENDING', value: 'false' },
@@ -118,50 +124,51 @@ const Help = () => {
     {
       title: 'Action',
       key: 'action',
+      width: 150,
       render: (_, record) => {
         const disabledForGuest = isGuestAdmin && !record.isGuestData;
-        
+
         const disableAction = (content) => {
-            if (disabledForGuest) {
-                return (
-                    <Tooltip title="Action restricted for guest accounts">
-                        <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
-                            {React.cloneElement(content, { style: { ...content.props?.style, pointerEvents: 'none' } })}
-                        </span>
-                    </Tooltip>
-                );
-            }
-            return content;
+          if (disabledForGuest) {
+            return (
+              <Tooltip title="Action restricted for guest accounts">
+                <span style={{ display: 'inline-block', cursor: 'not-allowed' }}>
+                  {React.cloneElement(content, { style: { ...content.props?.style, pointerEvents: 'none' } })}
+                </span>
+              </Tooltip>
+            );
+          }
+          return content;
         };
 
         return (
-            <Space size="middle">
-              {disableAction(
-                  <button 
-                    className="btn btn-sm btn-primary" 
-                    onClick={() => showReplyModal(record)}
-                    disabled={record.isReplied || disabledForGuest}
-                  >
-                    {record.isReplied ? 'Replied' : 'Reply'}
-                  </button>
-              )}
-              
-              {disableAction(
-                  <Popconfirm
-                    title="Delete this message?"
-                    description="Are you sure to delete this message? This action cannot be undone."
-                    onConfirm={() => handleDelete(record._id)}
-                    okText="Yes, Delete"
-                    cancelText="No"
-                    okButtonProps={{ danger: true }}
-                    disabled={disabledForGuest}
-                  >
-                    <button className="btn btn-sm btn-danger" disabled={disabledForGuest}>
-                      <i className="fas fa-trash"></i>
-                    </button>
-                  </Popconfirm>
-              )}
-            </Space>
+          <Space size="middle">
+            {disableAction(
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => showReplyModal(record)}
+                disabled={record.isReplied || disabledForGuest}
+              >
+                {record.isReplied ? 'Replied' : 'Reply'}
+              </button>
+            )}
+
+            {disableAction(
+              <Popconfirm
+                title="Delete this message?"
+                description="Are you sure to delete this message? This action cannot be undone."
+                onConfirm={() => handleDelete(record._id)}
+                okText="Yes, Delete"
+                cancelText="No"
+                okButtonProps={{ danger: true }}
+                disabled={disabledForGuest}
+              >
+                <button className="btn btn-sm btn-danger" disabled={disabledForGuest}>
+                  <i className="fas fa-trash"></i>
+                </button>
+              </Popconfirm>
+            )}
+          </Space>
         )
       },
     },
@@ -188,18 +195,19 @@ const Help = () => {
         </Col>
       </Row>
 
-      <Table 
-        dataSource={contacts} 
-        columns={columns} 
-        rowKey="_id" 
+      <Table
+        dataSource={contacts}
+        columns={columns}
+        rowKey="_id"
         loading={isLoading}
         pagination={{
-            ...tableParams.pagination,
-            total: contactsTotal,
-            showSizeChanger: true,
-            position: ['bottomCenter']
+          ...tableParams.pagination,
+          total: contactsTotal,
+          showSizeChanger: true,
+          position: ['bottomCenter']
         }}
         onChange={handleTableChange}
+           scroll={{ x: 'max-content' }}
       />
 
       <Modal
@@ -221,7 +229,7 @@ const Help = () => {
           >
             <Input.TextArea rows={6} placeholder="Type your response here. It will be emailed directly to the customer." />
           </Form.Item>
-          
+
           <Form.Item className="mb-0 text-end">
             <button type="button" className="btn btn-secondary me-2" onClick={handleReplyCancel}>Cancel</button>
             <button type="submit" className="btn btn-success" disabled={isLoading}>

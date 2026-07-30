@@ -132,6 +132,7 @@ const HelpTables = () => {
                     pageSize: 20,
                 }}
                 className='overflow-x-auto'
+                scroll={{ x: 'max-content' }}
             />
         </>
     )
