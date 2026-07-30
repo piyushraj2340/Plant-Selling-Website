@@ -83,10 +83,10 @@ const Products = () => {
         <div className="container product-container mb-4 mb-md-5">
             <div className="p-2 d-flex justify-content-between align-items-center flex-wrap">
                 <h1 className='text-center p-0 md:p-2 mb-2 md:mb-0'>Available Plants for Sell</h1>
-                <div className="d-flex justify-content-between align-items-center">
-                    <div>
+                <div className="d-flex justify-content-between align-items-center flex-wrap gap-2 w-100 mt-2 mt-md-0">
+                    <div className="d-flex align-items-center">
                         <span className="me-2 fw-bold">Sort By:</span>
-                        <Select value={sort} onChange={handleSortChange} style={{ width: 160 }} className="me-3">
+                        <Select value={sort} onChange={handleSortChange} style={{ width: 140 }}>
                             <Select.Option value="recommended">Recommended</Select.Option>
                             <Select.Option value="price_asc">Price: Low to High</Select.Option>
                             <Select.Option value="price_desc">Price: High to Low</Select.Option>

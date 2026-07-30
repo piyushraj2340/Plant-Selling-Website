@@ -692,3 +692,13 @@ button.ant-btn {
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
 }
+
+/* Ant Design Tour Responsive Fix */
+.ant-tour {
+    max-width: calc(100vw - 32px) !important;
+}
+
+.ant-tour .ant-tour-inner {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+}
