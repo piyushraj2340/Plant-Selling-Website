@@ -7,7 +7,7 @@ const MainLayout = () => {
   return (
     <>
       <Navigation />
-      <div style={{ marginTop: '110px', minHeight: 'calc(70vh)' }}>
+      <div style={{ marginTop: '80px', minHeight: 'calc(70vh)' }}>
         <Outlet />
       </div>
       <Footer />
