@@ -98,49 +98,59 @@ const ProductCard = ({ product }) => {
                     <img src={transformImageUrl(product.images[0].url)} alt={product.plantName} />
                 </div>
                 <div className="card-body-content">
-                    <div className="mb-2">
-                        <span className="badge bg-light text-secondary border px-2 py-1 product-badge" >
-                            <i className="fas fa-tag me-1"></i>
-                            {product.category ? (product.category.name || "N/A") : "N/A"}
-                        </span>
+                    <div className='mb-2'>
+                        <div className="mb-2">
+                            <span className="badge bg-light text-secondary border px-2 py-1 product-badge" >
+                                <i className="fas fa-tag me-1"></i>
+                                {product.category ? (product.category.name || "N/A") : "N/A"}
+                            </span>
+                        </div>
+                        <h4 className="plant-name">{product.plantName}</h4>
+
+                        <p className="text-muted line-clamp-2" style={{ fontSize: "0.85rem", marginBottom: "12px", minHeight: "36px" }}>
+                            {cleanDescription}
+                        </p>
+
+                        <div className="price-container">
+                            <div className="d-flex flex-column">
+                                <p className="plant-price mb-0">
+                                    ₹ {Math.round(product.price - (product.discount / 100 * product.price))}
+                                </p>
+                                {product.discount > 0 && (
+                                    <div className="d-flex align-items-center gap-2 mt-1">
+                                        <span className="text-muted text-decoration-line-through" style={{ fontSize: '0.85rem' }}>
+                                            ₹ {product.price}
+                                        </span>
+                                        <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
+                                            {product.discount}% OFF
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="ratings-container">
+                                <Rating
+                                    initialValue={product.ratings || 0}
+                                    readonly={true}
+                                    size={18}
+                                    allowFraction={true}
+                                />
+                                <span className="text-muted" style={{ fontSize: '0.85rem', fontWeight: '500' }}>({product.numOfReviews || 0})</span>
+                            </div>
+                        </div>
                     </div>
-                    <h4 className="plant-name">{product.plantName}</h4>
-
-                    <p className="text-muted line-clamp-2" style={{ fontSize: "0.85rem", marginBottom: "12px", minHeight: "36px" }}>
-                        {cleanDescription}
-                    </p>
-
-                    <div className="price-container">
-                        <div className="d-flex flex-column">
-                            <p className="plant-price mb-0">
-                                ₹ {Math.round(product.price - (product.discount / 100 * product.price))}
-                            </p>
-                            {product.discount > 0 && (
-                                <div className="d-flex align-items-center gap-2 mt-1">
-                                    <span className="text-muted text-decoration-line-through" style={{ fontSize: '0.85rem' }}>
-                                        ₹ {product.price}
-                                    </span>
-                                    <span className="badge bg-success bg-opacity-10 text-success border border-success border-opacity-25">
-                                        {product.discount}% OFF
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-
-                        <div className="ratings-container">
-                            <Rating
-                                initialValue={product.ratings || 0}
-                                readonly={true}
-                                size={18}
-                                allowFraction={true}
-                            />
-                            <span className="text-muted" style={{ fontSize: '0.85rem', fontWeight: '500' }}>({product.numOfReviews || 0})</span>
-                        </div>
+                    <div className="card-hover-actions d-flex flex-column d-md-none">
+                        <button className="btn-action btn-add-cart" onClick={handleAddToCart} title="Add to Cart">
+                            <i className="fas fa-shopping-cart"></i> Add
+                        </button>
+                        <button className="btn-action btn-buy-now" onClick={handleBuyNow} title="Buy Now">
+                            <i className="fas fa-bolt"></i> Buy
+                        </button>
                     </div>
                 </div>
 
                 {/* Hover Actions */}
-                <div className="card-hover-actions">
+                <div className="card-hover-actions d-none d-md-flex">
                     <button className="btn-action btn-add-cart" onClick={handleAddToCart} title="Add to Cart">
                         <i className="fas fa-shopping-cart"></i> Add
                     </button>
