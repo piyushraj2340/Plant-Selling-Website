@@ -89,7 +89,7 @@ const RecentOrder = () => {
       title: 'Product Name',
       dataIndex: 'products',
       key: 'products',
-      fixed: "left",
+      width: "25%",
       render: ({ productName, description, imgLink, link }) => {
         return (
           <a href={link} className='d-flex text-decoration-none hover-product-name'>
@@ -240,7 +240,7 @@ const RecentOrder = () => {
         className='overflow-x-auto'
         scroll={{ x: 'max-content' }}
       />
-      
+
       {ordersTotal > 0 && (
         <div className="d-flex justify-content-end mt-4">
           <Pagination

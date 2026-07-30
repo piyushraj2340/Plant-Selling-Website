@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import FullScreenImageView from '../../common/FullScreenImageView';
 import useUserData from '../../../hooks/useUserData';
 
@@ -55,6 +56,37 @@ const ProfileAvatar = () => {
                 {/* User Details */}
                 <h5 className="my-3">{user.name}</h5>
                 <p className="text-muted mb-1">{user.email}</p>
+                
+                <div className="dropdown d-lg-none mt-3">
+                    <button type='button' id='profileMoreMenu' className="btn btn-sm btn-light border-dark dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Menu</button>
+                    <div className="dropdown-menu text-start py-0 shadow-sm" aria-labelledby="profileMoreMenu">
+                        <div className="p-2 border-bottom">
+                            <Link to="/orders/history" className="d-flex align-items-center text-decoration-none text-dark"><i className="fas fa-truck text-warning me-2" style={{width: '20px', textAlign: 'center'}}></i> Track Your Orders</Link>
+                        </div>
+                        <div className="p-2 border-bottom">
+                            <Link to="/address" className="d-flex align-items-center text-decoration-none text-dark"><i className="fas fa-address-card text-warning me-2" style={{width: '20px', textAlign: 'center'}}></i> Manage Your Address</Link>
+                        </div>
+                        <div className="p-2 border-bottom">
+                            <Link to="/profile/messages" className="d-flex align-items-center text-decoration-none text-dark"><i className="fas fa-comments text-warning me-2" style={{width: '20px', textAlign: 'center'}}></i> My Messages</Link>
+                        </div>
+                        <div className="p-2 border-bottom">
+                            <Link to={user.role.includes("seller") ? "/nursery" : "/nursery/create"} className="d-flex align-items-center text-decoration-none text-dark">
+                                <i className="material-symbols-outlined text-warning me-2" style={{width: '20px', textAlign: 'center'}}>compost</i> {user.role.includes("seller") ? "Manage Your Nursery" : "Add Your Nursery"}
+                            </Link>
+                        </div>
+                        {user.role.includes("admin") && (
+                            <div className="p-2 border-bottom">
+                                <Link to="/dashboard" className="d-flex align-items-center text-decoration-none text-dark"><i className="fas fa-chart-line text-warning me-2" style={{width: '20px', textAlign: 'center'}}></i> Admin Dashboard</Link>
+                            </div>
+                        )}
+                        <div className="p-2 border-bottom">
+                            <Link to="/profile/settings" className="d-flex align-items-center text-decoration-none text-dark"><i className="fa fa-gear text-warning me-2" style={{width: '20px', textAlign: 'center'}}></i> Settings</Link>
+                        </div>
+                        <div className="p-2">
+                            <Link to="/logout" className="d-flex align-items-center text-decoration-none text-dark"><i className="fa fa-sign-out text-warning me-2" style={{width: '20px', textAlign: 'center'}}></i> Logout</Link>
+                        </div>
+                    </div>
+                </div>
             </div>
             {/* Fullscreen View */}
             <FullScreenImageView img={user?.avatar?.url || "https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-chat/ava3.webp"} id="profile-img-full-size" />

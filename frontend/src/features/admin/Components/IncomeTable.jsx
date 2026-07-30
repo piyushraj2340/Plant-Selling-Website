@@ -83,7 +83,7 @@ const IncomeTable = () => {
       title: 'Product Name',
       dataIndex: 'products',
       key: 'products',
-      fixed: "left",
+      width: "25%",
       render: ({ productName, description, imgLink, link }) => {
         return (
           <a href={link} className='d-flex text-decoration-none hover-product-name'>

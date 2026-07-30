@@ -2,6 +2,7 @@ import React from 'react'
 import { Link } from 'react-router-dom'
 
 const PrivacyPolicyPage = () => {
+    document.title = "Privacy Policy - Plant Seller";
     return (
         <section className="bg-light py-5">
         <div className="container py-4 px-3 rounded bg-white">

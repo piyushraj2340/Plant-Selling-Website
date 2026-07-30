@@ -226,16 +226,24 @@ button.ant-btn {
     }
 }
 
-/* Workflow Action Bar */
 .workflow-action-bar {
     background: #ffffff;
     border: 1px solid #eaeaea;
-    border-radius: 50px;
+    border-radius: 20px;
     padding: 8px 16px;
-    display: inline-flex;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-items: center;
     gap: 12px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+@media (min-width: 768px) {
+    .workflow-action-bar {
+        border-radius: 50px;
+        display: inline-flex;
+    }
 }
 
 .workflow-status-badge {
@@ -503,18 +511,44 @@ button.ant-btn {
 }
 
 @media (max-width: 768px) {
+    .product-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .product-list-layout {
+        gap: 12px;
+    }
+
     .product-list-layout .modern-product-card {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
         height: auto;
+        min-height: 140px;
     }
 
     .product-list-layout .modern-product-card .card-img-wrapper {
-        width: 100%;
-        height: 200px;
+        width: 130px;
+        min-width: 130px;
+        height: auto;
     }
 
     .product-list-layout .modern-product-card .card-body-content {
-        width: 100%;
+        width: calc(100% - 130px);
+        padding: 10px;
+    }
+
+    .product-list-layout .modern-product-card .price-container {
+        gap: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .product-list-layout .card-hover-actions .btn-action {
+        min-width: auto;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        flex: 1;
     }
 
     .product-grid-layout {
@@ -532,6 +566,20 @@ button.ant-btn {
 
     .modern-product-card .card-img-wrapper {
         height: 160px;
+    }
+
+    .modern-product-card .card-hover-actions {
+        position: static !important;
+        width: 100%;
+        margin-top: auto;
+        background: transparent;
+        padding: 10px;
+        justify-content: center;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .modern-product-card .card-body-content {
+        padding-bottom: 12px !important;
     }
 }
 
@@ -618,25 +666,7 @@ button.ant-btn {
     background: #218838;
 }
 
-/* List Mode Overrides for Actions */
-.product-list-layout .modern-product-card .card-hover-actions {
-    position: static;
-    background: transparent;
-    border-top: none;
-    padding: 0;
-    margin-top: 0;
-    justify-content: flex-start;
-}
 
-.product-list-layout .modern-product-card:hover .card-body-content {
-    padding-bottom: 24px;
-    /* Reset padding override for list view */
-}
-
-.product-list-layout .card-hover-actions .btn-action {
-    flex: 0 0 auto;
-    min-width: 120px;
-}
 
 /* ========================================================================= */
 /* Custom Scrollbar Styles for the Entire Website */
@@ -669,4 +699,14 @@ button.ant-btn {
 * {
     scrollbar-width: thin;
     scrollbar-color: #c1c1c1 #f1f1f1;
+}
+
+/* Ant Design Tour Responsive Fix */
+.ant-tour {
+    max-width: calc(100vw - 32px) !important;
+}
+
+.ant-tour .ant-tour-inner {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
 }

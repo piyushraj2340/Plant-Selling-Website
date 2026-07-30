@@ -9,7 +9,7 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
     const dispatch = useDispatch();
     const { couponsData, isLoading } = useSelector(state => state.admin);
     const couponsTotal = useSelector(state => state.admin.couponsData?.total) || 0;
-    
+
     const { userData } = useUserData();
     const isGuestAdmin = userData?.isGuestData;
 
@@ -59,10 +59,30 @@ const CouponTables = ({ showTermsModalOpen, onEditCoupon }) => {
             render: (description) => {
                 return (
                     <>
-                        <p>{description.overview}. <b className='link-primary' style={{ cursor: 'pointer' }} onClick={() => showTermsModalOpen(description.termsAndConditions)}>T&C applied.</b></p>
+                        <p
+                            style={{
+                                width: "250px",
+                                display: "-webkit-box",
+                                WebkitLineClamp: 3,
+                                WebkitBoxOrient: "vertical",
+                                overflow: "hidden",
+                                textOverflow: "ellipsis",
+                                whiteSpace: "normal",
+                                wordBreak: "break-word",
+                            }}
+                        >
+                            {description.overview}.{" "}
+                            <b
+                                className="link-primary"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => showTermsModalOpen(description.termsAndConditions)}
+                            >
+                                T&C applied.
+                            </b>
+                        </p>
                     </>
                 )
-            }
+            },
         },
         {
             title: 'Discount',
