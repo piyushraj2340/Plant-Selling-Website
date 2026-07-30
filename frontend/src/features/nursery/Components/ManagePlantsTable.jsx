@@ -16,7 +16,7 @@ const ManagePlantsTable = () => {
     const isLoading = useSelector(state => state.nursery.isLoading);
     const { categories } = useSelector(state => state.category);
     const nursery = useSelector(state => state.nursery.nursery);
-    
+
     const location = useLocation();
 
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -128,7 +128,6 @@ const ManagePlantsTable = () => {
             title: 'Plant Name',
             dataIndex: 'products',
             key: 'products',
-            fixed: "left",
             width: "25%",
             render: ({ productName, description, imgLink, link }) => {
                 return (
@@ -214,9 +213,9 @@ const ManagePlantsTable = () => {
                                 <button className='btn btn-sm btn-secondary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Draft</button>
                             </Popconfirm>
                         }
-                        
+
                         <button onClick={() => handleOpenModal('edit', plants.find(p => p._id === record.key))} className='btn btn-sm btn-primary py-1 px-2 text-white' style={{ fontSize: "12px" }}>Edit</button>
-                        
+
                         <Popconfirm title="Delete this plant?" onConfirm={() => handleDeletePlant(record.key)}>
                             <button className='btn btn-sm btn-danger py-1 px-2 text-white' style={{ fontSize: "12px" }}>Delete</button>
                         </Popconfirm>
@@ -234,7 +233,7 @@ const ManagePlantsTable = () => {
                 <Col>
                     <div className="head d-flex align-items-center gap-3">
                         <h5 className='h5 fw-bolder m-0'>Manage Your Plants</h5>
-                        <Button type="primary" style={{minWidth: "120px"}} icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
+                        <Button type="primary" style={{ minWidth: "120px" }} icon={<PlusOutlined />} onClick={() => handleOpenModal('add')}>
                             Add Plant
                         </Button>
                     </div>
@@ -267,7 +266,7 @@ const ManagePlantsTable = () => {
                 />
             </div>
 
-            <PlantFormModal 
+            <PlantFormModal
                 isOpen={isModalOpen}
                 onClose={handleCloseModal}
                 onSubmit={handleFormSubmit}

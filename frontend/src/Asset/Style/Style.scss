@@ -647,6 +647,7 @@ a:hover {
 
     .nursery-info {
         height: auto;
+        width: 100%;
 
         @media screen and (min-width: $medium) {
             height: 90px;
@@ -1703,13 +1704,70 @@ a:hover {
     }
 }
 
-.product-description img {
-    width: auto;
-    max-width: 900px;
-    height: auto;
-    max-height: 400px;
-    vertical-align: middle;
-    margin: 20px auto;
+.product-description {
+    line-height: 1.6;
+
+    img {
+        width: 100%;
+        height: auto;
+        vertical-align: middle;
+        margin: 20px auto;
+
+        @media screen and (min-width: $small) {
+            max-width: $small;
+        }
+
+        @media screen and (min-width: $large) {
+            max-width: $large;
+        }
+    }
+
+    /* Rich text table styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+        border: 1px solid #dee2e6;
+        background-color: #ffffff;
+        
+        th, td {
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            vertical-align: top;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+        }
+        
+        /* Alternating row colors for better readability */
+        tbody tr:nth-of-type(odd) {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+    }
+
+    /* Rich text lists styling */
+    ul, ol {
+        padding-left: 2rem;
+        margin-bottom: 1.5rem;
+        
+        li {
+            margin-bottom: 0.25rem;
+        }
+    }
+
+    /* Rich text typography */
+    p {
+        margin-bottom: 1.5rem;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        color: #343a40;
+    }
 }
 
 .product-badge {

@@ -7,7 +7,7 @@ const ProfileSideNav = () => {
     const { userData: user } = useUserData();
 
     return (
-        <div className="card mb-4 mb-lg-0">
+        <div className="card mb-4 mb-lg-0 d-none d-lg-block">
             <div className="card-body p-0">
                 <ul className="list-group list-group-flush rounded-3">
                     <Link to="/orders/history">

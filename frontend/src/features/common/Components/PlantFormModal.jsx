@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Modal, Form, Input, InputNumber, Select, Upload, Button, message, Space, Card, Row, Col } from 'antd';
 import { UploadOutlined, PictureOutlined } from '@ant-design/icons';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import JoditEditor from 'jodit-react';
 import handelDataFetch from '../../../utils/handelDataFetch';
 
 const { Option } = Select;
@@ -142,26 +141,25 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, onRefresh, initialData, mod
         }
     };
 
-    const modules = useMemo(() => ({
-        toolbar: {
-            container: [
-                [{ 'header': [1, 2, false] }],
-                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
-                ['link'],
-                ['clean']
-            ]
-        }
+    const config = useMemo(() => ({
+        readonly: false,
+        placeholder: 'Enter description...',
+        height: 300,
+        toolbarSticky: false,
+        buttons: [
+            'bold', 'italic', 'underline', 'strikethrough', 'eraser', '|',
+            'ul', 'ol', '|',
+            'font', 'fontsize', 'paragraph', '|',
+            'table', 'link', '|',
+            'align', 'undo', 'redo', '|',
+            'hr', 'fullsize'
+        ]
     }), []);
 
     const insertImageIntoEditor = (url) => {
-        const quill = quillRef.current?.getEditor();
-        if (quill) {
-            const range = quill.getSelection(true); // true focuses the editor
-            const index = range ? range.index : quill.getLength();
-            quill.insertEmbed(index, 'image', url);
-            setIsGalleryOpen(false);
-        }
+        const currentDesc = form.getFieldValue('description') || '';
+        form.setFieldsValue({ description: currentDesc + `<p><img src="${url}"/></p>` });
+        setIsGalleryOpen(false);
     };
 
     const handleOk = async () => {
@@ -327,7 +325,7 @@ const PlantFormModal = ({ isOpen, onClose, onSubmit, onRefresh, initialData, mod
                     rules={[{ required: true, message: 'Please enter plant description' }]}
                     getValueFromEvent={(content) => content}
                 >
-                    <ReactQuill ref={quillRef} modules={modules} theme="snow" placeholder="Enter description..." style={{ height: '200px', marginBottom: '40px' }} />
+                    <JoditEditor config={config} tabIndex={1} />
                 </Form.Item>
 
                 <div className="row">

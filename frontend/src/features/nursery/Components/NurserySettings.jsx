@@ -107,6 +107,13 @@ const NurserySettings = () => {
             message.error(error.message || "Failed to delete nursery");
         }
     };
+    const [tabPosition, setTabPosition] = useState(window.innerWidth < 768 ? 'top' : 'left');
+
+    useEffect(() => {
+        const handleResize = () => setTabPosition(window.innerWidth < 768 ? 'top' : 'left');
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
     if (!nursery) return <div>Loading...</div>;
 
@@ -114,14 +121,14 @@ const NurserySettings = () => {
     const defaultAvatarUrl = "https://res.cloudinary.com/dcd6y2awx/image/upload/f_auto,q_auto/v1/PlantSeller/UI%20Images/nursery-avatar-header";
 
     return (
-        <div className="row g-2 my-2 bg-white border rounded p-3 mx-2" style={{ minHeight: '80vh' }}>
+        <div className="row g-2 my-2 bg-white border rounded p-2 p-md-3 mx-1 mx-md-2" style={{ minHeight: '80vh' }}>
             <h4 className='h4 fw-bolder mb-1'>Nursery Settings</h4>
             <p className="text-muted small m-0 mb-4">Manage your nursery's global configurations, branding, and details.</p>
             
             <Tabs 
                 activeKey={activeTab} 
                 onChange={(key) => navigate(`?tab=${key}`)} 
-                tabPosition="left"
+                tabPosition={tabPosition}
             >
                 {/* 1. GENERAL PROFILE */}
                 <TabPane tab="General Profile" key="general-profile">
