@@ -5,6 +5,7 @@ const { Panel } = Collapse;
 const { Title } = Typography;
 
 const FAQPage = () => {
+    document.title = "FAQ - Plant Seller";
     // Define your FAQs data
     const faqs = [
         {
