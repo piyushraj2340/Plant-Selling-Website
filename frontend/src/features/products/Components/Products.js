@@ -36,7 +36,7 @@ const Products = () => {
 
     useEffect(() => {
         dispatch(getAllCategoriesAsync({ status: 'Active' }));
-        
+
         const query = {};
         if (searchKeyword) query.search = searchKeyword;
         if (category) query.category = category;
@@ -58,7 +58,7 @@ const Products = () => {
     };
 
     const handelSearchProductsByCategory = (catId) => {
-        if(catId === 'all') {
+        if (catId === 'all') {
             updateUrlParams('category', 'all');
         } else {
             let newCatList;
@@ -82,27 +82,30 @@ const Products = () => {
     return (
         <div className="container product-container mb-4 mb-md-5">
             <div className="p-2 d-flex justify-content-between align-items-center flex-wrap">
-                <h1 className='text-center p-2 mb-0'>Available Plants for Sell</h1>
-                <div className="d-flex align-items-center">
-                    <span className="me-2 fw-bold">Sort By:</span>
-                    <Select value={sort} onChange={handleSortChange} style={{ width: 160 }} className="me-3">
-                        <Select.Option value="recommended">Recommended</Select.Option>
-                        <Select.Option value="price_asc">Price: Low to High</Select.Option>
-                        <Select.Option value="price_desc">Price: High to Low</Select.Option>
-                        <Select.Option value="name_asc">Name: A to Z</Select.Option>
-                        <Select.Option value="name_desc">Name: Z to A</Select.Option>
-                        <Select.Option value="newest">Newest Arrivals</Select.Option>
-                    </Select>
+                <h1 className='text-center p-0 md:p-2 mb-2 md:mb-0'>Available Plants for Sell</h1>
+                <div className="d-flex justify-content-between align-items-center">
+                    <div>
+                        <span className="me-2 fw-bold">Sort By:</span>
+                        <Select value={sort} onChange={handleSortChange} style={{ width: 160 }} className="me-3">
+                            <Select.Option value="recommended">Recommended</Select.Option>
+                            <Select.Option value="price_asc">Price: Low to High</Select.Option>
+                            <Select.Option value="price_desc">Price: High to Low</Select.Option>
+                            <Select.Option value="name_asc">Name: A to Z</Select.Option>
+                            <Select.Option value="name_desc">Name: Z to A</Select.Option>
+                            <Select.Option value="newest">Newest Arrivals</Select.Option>
+                        </Select>
+                    </div>
+
 
                     <div className="view-toggle-group">
-                        <button 
+                        <button
                             className={`view-toggle-btn ${viewMode === 'grid' ? 'active' : ''}`}
                             onClick={() => handleViewModeChange('grid')}
                             title="Grid View"
                         >
                             <span className="material-symbols-outlined">grid_view</span>
                         </button>
-                        <button 
+                        <button
                             className={`view-toggle-btn ${viewMode === 'list' ? 'active' : ''}`}
                             onClick={() => handleViewModeChange('list')}
                             title="List View"
@@ -144,22 +147,22 @@ const Products = () => {
             <div className="w-100 mt-4">
                 {
                     isLoading ? <Animation /> :
-                    products.length === 0 &&
-                    <div className="d-flex justify-content-center">
-                        <div className=''>
-                            <div className="row">
-                                <div className="img d-flex justify-content-center">
-                                    <img src={noPlantsImage} style={{ maxHeight: "60vh" }} alt="no plants data found" className='img-fluid' />
+                        products.length === 0 &&
+                        <div className="d-flex justify-content-center">
+                            <div className=''>
+                                <div className="row">
+                                    <div className="img d-flex justify-content-center">
+                                        <img src={noPlantsImage} style={{ maxHeight: "60vh" }} alt="no plants data found" className='img-fluid' />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="row">
-                                <div className="d-flex d-flex flex-column align-items-center">
-                                    <h3 className="h3" style={{ fontFamily: "cursive" }}>No Product Found</h3>
-                                    <Link onClick={() => window.location.reload()}><i className="fa fa-refresh"></i> Refresh Your Page</Link>
+                                <div className="row">
+                                    <div className="d-flex d-flex flex-column align-items-center">
+                                        <h3 className="h3" style={{ fontFamily: "cursive" }}>No Product Found</h3>
+                                        <Link onClick={() => window.location.reload()}><i className="fa fa-refresh"></i> Refresh Your Page</Link>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
                 }
             </div>
         </div>

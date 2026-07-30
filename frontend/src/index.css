@@ -503,18 +503,43 @@ button.ant-btn {
 }
 
 @media (max-width: 768px) {
+    .product-container {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .product-list-layout {
+        gap: 12px;
+    }
+
     .product-list-layout .modern-product-card {
-        flex-direction: column;
+        flex-direction: row;
         height: auto;
+        min-height: 140px;
     }
 
     .product-list-layout .modern-product-card .card-img-wrapper {
-        width: 100%;
-        height: 200px;
+        width: 130px;
+        min-width: 130px;
+        height: auto;
     }
 
     .product-list-layout .modern-product-card .card-body-content {
-        width: 100%;
+        width: calc(100% - 130px);
+        padding: 10px;
+    }
+
+    .product-list-layout .modern-product-card .price-container {
+        gap: 10px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .product-list-layout .card-hover-actions .btn-action {
+        min-width: auto;
+        padding: 5px 10px;
+        font-size: 0.8rem;
+        flex: 1;
     }
 
     .product-grid-layout {

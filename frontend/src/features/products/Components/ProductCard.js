@@ -99,7 +99,7 @@ const ProductCard = ({ product }) => {
                 </div>
                 <div className="card-body-content">
                     <div className="mb-2">
-                        <span className="badge bg-light text-secondary border px-2 py-1" style={{ fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                        <span className="badge bg-light text-secondary border px-2 py-1 product-badge" >
                             <i className="fas fa-tag me-1"></i>
                             {product.category ? (product.category.name || "N/A") : "N/A"}
                         </span>

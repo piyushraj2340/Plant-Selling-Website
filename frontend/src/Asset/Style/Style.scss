@@ -1711,3 +1711,13 @@ a:hover {
     vertical-align: middle;
     margin: 20px auto;
 }
+
+.product-badge {
+    font-size: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+
+    @media screen and (min-width: $small) {
+        font-size: 0.72rem;
+    }
+}
